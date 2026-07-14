@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build
+.next/
+out/
+
+# Environment
+.env.local
+.env.*.local
+
+# Testing
+coverage/
+
+# Vercel
+.vercel/
+
+# Misc
+*.tsbuildinfo

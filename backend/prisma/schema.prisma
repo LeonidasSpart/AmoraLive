@@ -1,0 +1,789 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==================== USER MODULE ====================
+
+model Account {
+  id                String    @id @default(cuid())
+  email             String    @unique
+  emailVerified     Boolean   @default(false)
+  emailVerifiedAt   DateTime?
+  phone             String?   @unique
+  phoneVerified     Boolean   @default(false)
+  phoneVerifiedAt   DateTime?
+  passwordHash      String?
+  passwordChangedAt DateTime?
+
+  // Social Auth
+  googleId          String?   @unique
+  appleId           String?   @unique
+  facebookId        String?   @unique
+
+  // 2FA
+  twoFactorEnabled  Boolean   @default(false)
+  twoFactorSecret   String?
+
+  // Status
+  status            AccountStatus @default(ACTIVE)
+  role              UserRole      @default(USER)
+
+  // Security
+  lastLoginAt       DateTime?
+  lastLoginIp       String?
+  loginAttempts     Int       @default(0)
+  lockedUntil       DateTime?
+
+  // Timestamps
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
+
+  // Relations
+  profile           Profile?
+  preferences       Preferences?
+  photos            Photo[]
+  verification      Verification?
+
+  likesSent         Like[]    @relation("LikesSent")
+  likesReceived     Like[]    @relation("LikesReceived")
+  matchesAsUser1    Match[]   @relation("MatchUser1")
+  matchesAsUser2    Match[]   @relation("MatchUser2")
+
+  conversations     ConversationParticipant[]
+  messages          Message[]
+
+  reportsMade       Report[]  @relation("ReportsMade")
+  reportsReceived   Report[]  @relation("ReportsReceived")
+  blocksMade        Block[]   @relation("BlocksMade")
+  blocksReceived    Block[]   @relation("BlocksReceived")
+
+  subscription      Subscription?
+  payments          Payment[]
+  transactions      Transaction[]
+
+  compatibilityScores CompatibilityScore[] @relation("CompatibilityUser1")
+  compatibilityScores2 CompatibilityScore[] @relation("CompatibilityUser2")
+
+  recommendations   Recommendation[]
+
+  refreshTokens     RefreshToken[]
+  devices           Device[]
+
+  @@index([email])
+  @@index([status])
+  @@index([createdAt])
+  @@map("accounts")
+}
+
+model Profile {
+  id                String    @id @default(cuid())
+  accountId         String    @unique
+  account           Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  // Basic Info
+  firstName         String
+  lastName          String
+  displayName       String?
+  bio               String?   @db.Text
+  headline          String?
+
+  // Demographics
+  dateOfBirth       DateTime?
+  gender            Gender?
+  genderIdentity    String?
+
+  // Location
+  latitude          Float?
+  longitude         Float?
+  city              String?
+  country           String?
+  timezone          String?
+
+  // Physical
+  height            Int?      // cm
+  bodyType          String?
+  ethnicity         String?
+
+  // Lifestyle
+  occupation        String?
+  education         String?
+  religion          String?
+  politicalViews    String?
+  smoking           String?
+  drinking          String?
+  cannabis          String?
+
+  // Personality
+  personalityType   String?
+  loveLanguage      String?
+  zodiacSign        String?
+
+  // Dating Intent
+  relationshipGoal  RelationshipGoal?
+  lookingFor        String?
+
+  // Stats
+  profileComplete   Float     @default(0)
+  profileViews      Int       @default(0)
+
+  // Visibility
+  isVisible         Boolean   @default(true)
+  isBoosted         Boolean   @default(false)
+  boostExpiresAt    DateTime?
+
+  // Timestamps
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([accountId])
+  @@index([latitude, longitude])
+  @@index([gender])
+  @@index([relationshipGoal])
+  @@map("profiles")
+}
+
+model Preferences {
+  id                    String    @id @default(cuid())
+  accountId             String    @unique
+  account               Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  // Discovery
+  discoverable          Boolean   @default(true)
+  showMeTo              Gender[]
+  showMe                Gender[]
+
+  // Age Range
+  minAge                Int       @default(18)
+  maxAge                Int       @default(99)
+
+  // Distance
+  maxDistance           Int       @default(50) // km
+  distanceUnit          String    @default("km")
+
+  // Filters
+  relationshipGoals     RelationshipGoal[]
+  bodyTypes             String[]
+  educationLevels       String[]
+  religions             String[]
+  smokingPreferences    String[]
+  drinkingPreferences   String[]
+  cannabisPreferences   String[]
+
+  // Advanced
+  languages             String[]
+  interests             String[]
+  dealBreakers          String[]
+
+  // Privacy
+  hideAge             Boolean   @default(false)
+  hideDistance        Boolean   @default(false)
+  incognitoMode       Boolean   @default(false)
+
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  @@index([accountId])
+  @@map("preferences")
+}
+
+model Photo {
+  id          String    @id @default(cuid())
+  accountId   String
+  account     Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  url         String
+  thumbnail   String?
+  blurHash    String?
+
+  metadata    Json?     // width, height, format, size
+
+  order       Int       @default(0)
+  isPrimary   Boolean   @default(false)
+  isVerified  Boolean   @default(false)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([accountId])
+  @@index([isPrimary])
+  @@map("photos")
+}
+
+model Verification {
+  id              String    @id @default(cuid())
+  accountId       String    @unique
+  account         Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  // Photo Verification
+  photoVerified   Boolean   @default(false)
+  photoVerifiedAt DateTime?
+  photoMethod     String?   // selfie, video, document
+
+  // Identity
+  identityVerified    Boolean   @default(false)
+  identityVerifiedAt  DateTime?
+  identityDocument    String?
+
+  // Social
+  socialVerified      Boolean   @default(false)
+  socialVerifiedAt    DateTime?
+
+  // Premium
+  premiumVerified     Boolean   @default(false)
+  premiumVerifiedAt   DateTime?
+
+  // Background Check
+  backgroundChecked   Boolean   @default(false)
+  backgroundCheckedAt DateTime?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([accountId])
+  @@map("verifications")
+}
+
+// ==================== DATING SYSTEM ====================
+
+model Like {
+  id          String    @id @default(cuid())
+  senderId    String
+  sender      Account   @relation("LikesSent", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId  String
+  receiver    Account   @relation("LikesReceived", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  type        LikeType  @default(LIKE)
+  message     String?   @db.VarChar(140)
+
+  isRead      Boolean   @default(false)
+  readAt      DateTime?
+
+  createdAt   DateTime  @default(now())
+
+  @@unique([senderId, receiverId])
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([createdAt])
+  @@map("likes")
+}
+
+model Match {
+  id          String    @id @default(cuid())
+  user1Id     String
+  user1       Account   @relation("MatchUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2Id     String
+  user2       Account   @relation("MatchUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+
+  compatibilityScore  Float?
+
+  isActive    Boolean   @default(true)
+  unmatchedAt DateTime?
+  unmatchedBy String?
+
+  lastMessageAt DateTime?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([user1Id, user2Id])
+  @@index([user1Id])
+  @@index([user2Id])
+  @@index([lastMessageAt])
+  @@map("matches")
+}
+
+model CompatibilityScore {
+  id          String    @id @default(cuid())
+  user1Id     String
+  user1       Account   @relation("CompatibilityUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2Id     String
+  user2       Account   @relation("CompatibilityUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+
+  overallScore      Float
+  personalityScore  Float?
+  interestScore     Float?
+  lifestyleScore    Float?
+  valuesScore       Float?
+
+  factors           Json?     // detailed breakdown
+
+  calculatedAt      DateTime  @default(now())
+
+  @@unique([user1Id, user2Id])
+  @@index([user1Id])
+  @@index([user2Id])
+  @@index([overallScore])
+  @@map("compatibility_scores")
+}
+
+model Recommendation {
+  id          String    @id @default(cuid())
+  userId      String
+  user        Account   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  recommendedUserId   String
+
+  score       Float
+  reason      String?
+  aiGenerated Boolean   @default(false)
+
+  isShown     Boolean   @default(false)
+  shownAt     DateTime?
+  isLiked     Boolean?
+
+  createdAt   DateTime  @default(now())
+  expiresAt   DateTime?
+
+  @@index([userId])
+  @@index([score])
+  @@index([createdAt])
+  @@map("recommendations")
+}
+
+// ==================== MESSAGING ====================
+
+model Conversation {
+  id          String    @id @default(cuid())
+  matchId     String?   @unique
+
+  isGroup     Boolean   @default(false)
+  groupName   String?
+  groupAvatar String?
+
+  lastMessageId   String?
+  lastMessageAt   DateTime?
+
+  messageCount    Int       @default(0)
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  participants  ConversationParticipant[]
+  messages      Message[]
+
+  @@index([lastMessageAt])
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  id              String        @id @default(cuid())
+  conversationId  String
+  conversation    Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId          String
+  user            Account       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  joinedAt        DateTime      @default(now())
+  leftAt          DateTime?
+
+  lastReadMessageId   String?
+  lastReadAt          DateTime?
+
+  isMuted         Boolean       @default(false)
+  isPinned        Boolean       @default(false)
+
+  @@unique([conversationId, userId])
+  @@index([conversationId])
+  @@index([userId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id              String        @id @default(cuid())
+  conversationId  String
+  conversation    Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId        String
+  sender          Account       @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  type            MessageType   @default(TEXT)
+  content         String        @db.Text
+
+  // Media
+  attachments     Attachment[]
+
+  // Status
+  isEdited        Boolean       @default(false)
+  editedAt        DateTime?
+
+  isDeleted       Boolean       @default(false)
+  deletedAt       DateTime?
+  deletedBy       String?
+
+  // Reactions
+  reactions       Json?         // { userId: emoji }
+
+  // Read receipts
+  readBy          Json?         // { userId: timestamp }
+
+  // Reply
+  replyToId       String?
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([createdAt])
+  @@map("messages")
+}
+
+model Attachment {
+  id          String    @id @default(cuid())
+  messageId   String
+  message     Message   @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  type        String    // image, video, voice, file
+  url         String
+  thumbnail   String?
+
+  metadata    Json?     // size, duration, format
+
+  createdAt   DateTime  @default(now())
+
+  @@index([messageId])
+  @@map("attachments")
+}
+
+// ==================== BUSINESS ====================
+
+model Subscription {
+  id              String    @id @default(cuid())
+  accountId       String    @unique
+  account         Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  tier            SubscriptionTier
+  status          SubscriptionStatus @default(ACTIVE)
+
+  // Period
+  currentPeriodStart  DateTime
+  currentPeriodEnd    DateTime
+
+  // Trial
+  isTrial         Boolean   @default(false)
+  trialEndsAt     DateTime?
+
+  // Cancellation
+  cancelAtPeriodEnd   Boolean   @default(false)
+  canceledAt          DateTime?
+
+  // Payment Provider
+  provider        String    // apple, google, paypal, crypto
+  providerSubscriptionId  String?
+
+  // Features
+  features      Json?     // enabled features
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([accountId])
+  @@index([status])
+  @@map("subscriptions")
+}
+
+model Payment {
+  id              String    @id @default(cuid())
+  accountId       String
+  account         Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  amount          Decimal   @db.Decimal(10, 2)
+  currency        String    @default("USD")
+
+  provider        String    // apple, google, paypal, crypto
+  providerPaymentId   String?
+
+  status          PaymentStatus @default(PENDING)
+
+  type            String    // subscription, boost, superlike, gift
+  description     String?
+
+  metadata        Json?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([accountId])
+  @@index([status])
+  @@map("payments")
+}
+
+model Transaction {
+  id              String    @id @default(cuid())
+  accountId       String
+  account         Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  type            TransactionType
+  amount          Decimal   @db.Decimal(10, 2)
+  currency        String    @default("USD")
+
+  description     String?
+
+  // Crypto specific
+  cryptoCurrency  String?
+  cryptoAmount    Decimal?  @db.Decimal(20, 8)
+  walletAddress   String?
+  txHash          String?
+
+  status          TransactionStatus @default(PENDING)
+
+  metadata        Json?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([accountId])
+  @@index([status])
+  @@map("transactions")
+}
+
+// ==================== SECURITY ====================
+
+model Report {
+  id          String    @id @default(cuid())
+  reporterId  String
+  reporter    Account   @relation("ReportsMade", fields: [reporterId], references: [id], onDelete: Cascade)
+  reportedId  String
+  reported    Account   @relation("ReportsReceived", fields: [reportedId], references: [id], onDelete: Cascade)
+
+  type        ReportType
+  reason      String    @db.Text
+  evidence    Json?     // screenshots, messages
+
+  status      ReportStatus  @default(PENDING)
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  resolution  String?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([reporterId])
+  @@index([reportedId])
+  @@index([status])
+  @@map("reports")
+}
+
+model Block {
+  id          String    @id @default(cuid())
+  blockerId   String
+  blocker     Account   @relation("BlocksMade", fields: [blockerId], references: [id], onDelete: Cascade)
+  blockedId   String
+  blocked     Account   @relation("BlocksReceived", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  reason      String?
+
+  createdAt   DateTime  @default(now())
+
+  @@unique([blockerId, blockedId])
+  @@index([blockerId])
+  @@index([blockedId])
+  @@map("blocks")
+}
+
+model ModerationLog {
+  id          String    @id @default(cuid())
+
+  type        String    // ban, warn, content_removal, etc.
+  targetType  String    // user, message, photo
+  targetId    String
+
+  action      String
+  reason      String    @db.Text
+
+  performedBy String?
+  performedAt DateTime  @default(now())
+
+  metadata    Json?
+
+  @@index([targetType, targetId])
+  @@index([performedAt])
+  @@map("moderation_logs")
+}
+
+// ==================== AUTH ====================
+
+model RefreshToken {
+  id          String    @id @default(cuid())
+  accountId   String
+  account     Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  token       String    @unique
+  expiresAt   DateTime
+
+  isRevoked   Boolean   @default(false)
+  revokedAt   DateTime?
+
+  deviceInfo  Json?
+  ipAddress   String?
+
+  createdAt   DateTime  @default(now())
+
+  @@index([accountId])
+  @@index([token])
+  @@map("refresh_tokens")
+}
+
+model Device {
+  id          String    @id @default(cuid())
+  accountId   String
+  account     Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  deviceId    String    @unique
+  deviceType  String    // ios, android, web
+  deviceName  String?
+
+  pushToken   String?
+
+  lastActiveAt    DateTime  @default(now())
+
+  createdAt   DateTime  @default(now())
+
+  @@index([accountId])
+  @@index([deviceId])
+  @@map("devices")
+}
+
+// ==================== ADMIN ====================
+
+model AdminAction {
+  id          String    @id @default(cuid())
+
+  adminId     String
+  action      String
+  targetType  String
+  targetId    String
+
+  details     Json?
+
+  createdAt   DateTime  @default(now())
+
+  @@index([adminId])
+  @@index([targetType, targetId])
+  @@map("admin_actions")
+}
+
+model AnalyticsEvent {
+  id          String    @id @default(cuid())
+
+  eventType   String
+  userId      String?
+
+  properties  Json?
+
+  timestamp   DateTime  @default(now())
+
+  @@index([eventType])
+  @@index([userId])
+  @@index([timestamp])
+  @@map("analytics_events")
+}
+
+// ==================== ENUMS ====================
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  BANNED
+  DELETED
+}
+
+enum UserRole {
+  USER
+  PREMIUM
+  MODERATOR
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NON_BINARY
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum RelationshipGoal {
+  CASUAL
+  SERIOUS
+  MARRIAGE
+  FRIENDSHIP
+  NETWORKING
+  NOT_SURE
+}
+
+enum LikeType {
+  LIKE
+  SUPERLIKE
+  BOOST
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  VOICE
+  LOCATION
+  SYSTEM
+}
+
+enum SubscriptionTier {
+  FREE
+  PLUS
+  PREMIUM
+  VIP
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+  TRIALING
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+  DISPUTED
+}
+
+enum TransactionType {
+  SUBSCRIPTION
+  BOOST
+  SUPERLIKE
+  GIFT
+  REFUND
+  PAYOUT
+}
+
+enum TransactionStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+  CANCELLED
+}
+
+enum ReportType {
+  INAPPROPRIATE_CONTENT
+  HARASSMENT
+  FAKE_PROFILE
+  SCAM
+  UNDERAGE
+  OTHER
+}
+
+enum ReportStatus {
+  PENDING
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+}
