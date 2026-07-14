@@ -10,7 +10,7 @@ Thank you for your interest in contributing to Amora! This document provides gui
 
 ## Development Workflow
 
-### Branch Naming
+### Branch Naming 
 
 - `feature/description` — New features
 - `bugfix/description` — Bug fixes
