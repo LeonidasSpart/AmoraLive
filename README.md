@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-UNLICENSED-red.svg)](LICENSE)
 
 > Amora is a premium dating platform delivering a more professional, luxurious, and advanced experience than traditional dating apps. Built with Next.js, NestJS, PostgreSQL, and AI-powered matching.
-
+ 
 ## Architecture
 
 ```
