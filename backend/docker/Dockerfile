@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Install Python + build tools (required for node-gyp)
+RUN apk add --no-cache python3 make g++
+
 # Copy package files
 COPY package*.json ./
 COPY prisma ./prisma/
@@ -23,6 +26,9 @@ RUN npm run build
 FROM node:20-alpine AS production
 
 WORKDIR /app
+
+# Install Python + build tools for production (in case native modules need rebuilding)
+RUN apk add --no-cache python3 make g++
 
 # Install production dependencies only
 COPY package*.json ./
