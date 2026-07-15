@@ -41,7 +41,7 @@ export default function LandingPage() {
   const testimonials = [
     {
       name: 'Sarah & Michael',
-      text: 'We matched on Amora and knew instantly. The compatibility score was 94%! We're getting married next spring.',
+      text: "We matched on Amora and knew instantly. The compatibility score was 94%! We're getting married next spring.",
       location: 'New York, NY',
     },
     {
