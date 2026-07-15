@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    appDir: true,
+    // appDir: true,  // ❌ removed – no longer needed (App Router is stable)
   },
   images: {
     domains: ['images.unsplash.com', 'cdn.amora.app', 'storage.googleapis.com', 'res.cloudinary.com'],
