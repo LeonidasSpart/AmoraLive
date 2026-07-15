@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import Providers from './providers';
+import CookieBanner from '@/components/CookieBanner';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
@@ -33,7 +34,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
-        <Providers>{children}</Providers>
+        <Providers>
+          {children}
+          <CookieBanner />
+        </Providers>
       </body>
     </html>
   );
