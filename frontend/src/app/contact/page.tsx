@@ -31,7 +31,7 @@ export default function ContactPage() {
     >
       <div className="space-y-4 not-prose">
         {channels.map((c) => (
-          
+          <a
             key={c.title}
             href={`mailto:${c.email}`}
             className="glass-card p-6 rounded-2xl flex items-start gap-4 hover:border-amora-500/40 border border-transparent transition-colors"
