@@ -15,7 +15,7 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const features = [ 
+  const features = [
     {
       icon: Sparkles,
       title: 'AI-Powered Matching',
