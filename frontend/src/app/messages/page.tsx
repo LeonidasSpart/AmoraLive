@@ -78,7 +78,7 @@ const mockConversations: Conversation[] = [
 const mockMessages: Message[] = [
   { id: '1', senderId: 'them', content: 'Hey! I saw we matched 😊', type: 'text', timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000), status: 'read' },
   { id: '2', senderId: 'me', content: 'Hi Sophia! Yes, your profile really caught my eye', type: 'text', timestamp: new Date(Date.now() - 23 * 60 * 60 * 1000), status: 'read' },
-  { id: '3', senderId: 'them', content: 'Aww thank you! I love that you're into photography too', type: 'text', timestamp: new Date(Date.now() - 22 * 60 * 60 * 1000), status: 'read' },
+  { id: '3', senderId: 'them', content: "Aww thank you! I love that you're into photography too", type: 'text', timestamp: new Date(Date.now() - 22 * 60 * 60 * 1000), status: 'read' },
   { id: '4', senderId: 'me', content: 'Absolutely! What kind do you prefer? Portraits or landscapes?', type: 'text', timestamp: new Date(Date.now() - 21 * 60 * 60 * 1000), status: 'read' },
   { id: '5', senderId: 'them', content: 'Portraits mostly! I love capturing emotions', type: 'text', timestamp: new Date(Date.now() - 20 * 60 * 60 * 1000), status: 'read' },
   { id: '6', senderId: 'me', content: 'Same here. We should go on a photo walk sometime!', type: 'text', timestamp: new Date(Date.now() - 19 * 60 * 60 * 1000), status: 'read' },
@@ -127,7 +127,7 @@ export default function MessagesPage() {
       const reply: Message = {
         id: (Date.now() + 1).toString(),
         senderId: 'them',
-        content: 'That sounds perfect! I'm free this weekend 🎉',
+        content: "That sounds perfect! I'm free this weekend 🎉",
         type: 'text',
         timestamp: new Date(),
         status: 'delivered',
