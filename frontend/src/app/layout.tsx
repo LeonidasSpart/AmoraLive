@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   authors: [{ name: 'Amora' }],
   openGraph: {
     title: 'Amora - Meaningful Connections',
-    description: 'Find your perfect match with Amora's AI-powered dating platform',
+    description: "Find your perfect match with Amora's AI-powered dating platform",
     type: 'website',
     locale: 'en_US',
   },
