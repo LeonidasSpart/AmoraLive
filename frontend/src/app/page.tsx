@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Sparkles, Shield, MessageCircle, Star, ChevronRight, Menu, X } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function LandingPage() {
   const [scrolled, setScrolled] = useState(false);
@@ -65,10 +66,14 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 lg:h-20">
             <Link href="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-amora-gradient rounded-lg flex items-center justify-center">
-                <Heart className="w-5 h-5 text-white fill-white" />
-              </div>
-              <span className="text-xl font-bold tracking-tight">Amora</span>
+              <Image
+                src="/logo.png"
+                alt="Amora"
+                width={120}
+                height={40}
+                className="h-10 w-auto"
+                priority
+              />
             </Link>
 
             <div className="hidden md:flex items-center gap-8">
@@ -397,8 +402,13 @@ export default function LandingPage() {
           </div>
           <div className="border-t border-midnight-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-2">
-              <Heart className="w-5 h-5 text-amora-500 fill-amora-500" />
-              <span className="font-semibold">Amora</span>
+              <Image
+                src="/logo.png"
+                alt="Amora"
+                width={100}
+                height={32}
+                className="h-8 w-auto"
+              />
             </div>
             <p className="text-sm text-midnight-500">
               &copy; 2026 Amora. All rights reserved. Made with love.
