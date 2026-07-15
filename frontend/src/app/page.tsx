@@ -151,7 +151,7 @@ export default function LandingPage() {
           >
             <div className="inline-flex items-center gap-2 bg-amora-500/10 border border-amora-500/20 rounded-full px-4 py-2 mb-8">
               <Sparkles className="w-4 h-4 text-amora-400" />
-              <span className="text-sm text-amora-300">AI-Powered Dating Reimagined</span>
+              <span className="text-sm text-amora-300">AI Powered Dating Reimagined</span>
             </div>
 
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
@@ -162,7 +162,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="text-lg sm:text-xl text-midnight-300 max-w-2xl mx-auto mb-10 leading-relaxed">
-              Amora uses advanced AI to understand who you truly are and connect you with people who complement your soul. No more endless swiping — just meaningful connections.
+              Amora uses advanced AI to understand who you truly are and connect you with people who complement your soul. No more endless swiping just meaningful connections.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
