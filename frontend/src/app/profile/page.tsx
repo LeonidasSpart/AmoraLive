@@ -36,7 +36,7 @@ export default function ProfilePage() {
     location: 'New York, NY',
     occupation: 'Art Curator',
     education: "Master's in Art History",
-    height: '5'7"',
+    height: "5'7\"",   // ✅ Fixed: escaped double quote
     bodyType: 'Athletic',
     religion: 'Spiritual',
     politics: 'Liberal',
