@@ -114,6 +114,7 @@ const config: Config = {
         'swipe-left': 'swipeLeft 0.5s ease-out forwards',
         'swipe-right': 'swipeRight 0.5s ease-out forwards',
         'swipe-up': 'swipeUp 0.5s ease-out forwards',
+        'gradient': 'gradient 8s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -162,6 +163,11 @@ const config: Config = {
         swipeUp: {
           '0%': { transform: 'translateY(0)', opacity: '1' },
           '100%': { transform: 'translateY(-150%)', opacity: '0' },
+        },
+        gradient: {
+          '0%': { backgroundPosition: '0% 50%' },
+          '50%': { backgroundPosition: '100% 50%' },
+          '100%': { backgroundPosition: '0% 50%' },
         },
       },
       backgroundImage: {
