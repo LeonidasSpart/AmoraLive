@@ -13,7 +13,7 @@ import {
   X,
   Zap,
   Lock,
-  Infinity,
+  Infinity as InfinityIcon,
   Video,
   Eye,
   Plane,
@@ -173,7 +173,7 @@ export default function LandingPage() {
       period: "per month",
       description: "For those ready to dive deeper",
       features: [
-        { text: "Unlimited likes", icon: Infinity },
+        { text: "Unlimited likes", icon: InfinityIcon },
         { text: "See who liked you", icon: Eye },
         { text: "Advanced filters", icon: Zap },
         { text: "Read receipts", icon: CheckCircle2 },
