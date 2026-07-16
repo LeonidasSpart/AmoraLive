@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import Providers from './providers';
-import Navbar from '@/components/Navbar';          // <-- added
+import Navbar from '@/components/Navbar';
 import CookieBanner from '@/components/CookieBanner';
 import './globals.css';
 
@@ -18,6 +18,20 @@ export const metadata: Metadata = {
     description: "Find your perfect match with Amora's AI-powered dating platform",
     type: 'website',
     locale: 'en_US',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Amora - Meaningful Connections',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Amora - Meaningful Connections',
+    description: "Find your perfect match with Amora's AI-powered dating platform",
+    images: ['/og-image.png'],
   },
   icons: {
     icon: '/favicon.ico',
@@ -36,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${playfair.variable} font-sans antialiased`}>
         <Providers>
-          <Navbar />          {/* <-- added */}
+          <Navbar />
           {children}
           <CookieBanner />
         </Providers>
