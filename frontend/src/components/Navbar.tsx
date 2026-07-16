@@ -26,17 +26,17 @@ export default function Navbar() {
             <Image
               src="/logo.png"
               alt="Amora"
-              width={120}
-              height={40}
-              className="h-10 w-auto"
+              width={150}
+              height={48}
+              className="h-12 w-auto"
               priority
             />
           </Link>
 
           <div className="hidden md:flex items-center gap-8">
-            <Link href="/#features" className="text-sm text-midnight-300 hover:text-white transition-colors">Features</Link>
-            <Link href="/#testimonials" className="text-sm text-midnight-300 hover:text-white transition-colors">Stories</Link>
-            <Link href="/#premium" className="text-sm text-midnight-300 hover:text-white transition-colors">Premium</Link>
+            <Link href="#features" className="text-sm text-midnight-300 hover:text-white transition-colors">Features</Link>
+            <Link href="#testimonials" className="text-sm text-midnight-300 hover:text-white transition-colors">Stories</Link>
+            <Link href="#premium" className="text-sm text-midnight-300 hover:text-white transition-colors">Premium</Link>
             <Link href="/auth/login" className="text-sm text-midnight-300 hover:text-white transition-colors">Sign In</Link>
             <Link href="/auth/register" className="amora-button text-sm py-2 px-5">
               Get Started
@@ -61,9 +61,9 @@ export default function Navbar() {
             className="md:hidden bg-midnight-900 border-b border-midnight-800"
           >
             <div className="px-4 py-4 space-y-3">
-              <Link href="/#features" className="block text-midnight-300 py-2">Features</Link>
-              <Link href="/#testimonials" className="block text-midnight-300 py-2">Stories</Link>
-              <Link href="/#premium" className="block text-midnight-300 py-2">Premium</Link>
+              <Link href="#features" className="block text-midnight-300 py-2">Features</Link>
+              <Link href="#testimonials" className="block text-midnight-300 py-2">Stories</Link>
+              <Link href="#premium" className="block text-midnight-300 py-2">Premium</Link>
               <Link href="/auth/login" className="block text-midnight-300 py-2">Sign In</Link>
               <Link href="/auth/register" className="block amora-button text-center py-3">Get Started</Link>
             </div>
