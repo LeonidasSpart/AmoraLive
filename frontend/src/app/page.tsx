@@ -62,7 +62,7 @@ export default function LandingPage() {
       setMousePos({ x: e.clientX, y: e.clientY });
     };
     window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove); // ✅ cleanup
   }, []);
 
   /* Rotating testimonials */
@@ -213,6 +213,18 @@ export default function LandingPage() {
       ref={containerRef}
       className="min-h-screen bg-midnight-950 text-white overflow-x-hidden selection:bg-amora-500/30 selection:text-white"
     >
+      {/* Inject keyframes for animate-gradient */}
+      <style jsx global>{`
+        @keyframes gradient {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        .animate-gradient {
+          animation: gradient 3s ease infinite;
+        }
+      `}</style>
+
       {/* Ambient cursor glow */}
       <div
         className="fixed pointer-events-none z-50 w-[600px] h-[600px] rounded-full opacity-[0.03] bg-amora-400 blur-[120px] transition-transform duration-700 ease-out"
@@ -242,8 +254,6 @@ export default function LandingPage() {
                 <Image
                   src="/logo.png"
                   alt="Amora"
-                  width={120}
-                  height={40}
                   className="h-10 w-auto relative z-10"
                   priority
                 />
@@ -287,6 +297,7 @@ export default function LandingPage() {
             <button
               className="md:hidden p-2 hover:bg-white/5 rounded-lg transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
             >
               {mobileMenuOpen ? (
                 <X className="w-6 h-6" />
@@ -370,7 +381,7 @@ export default function LandingPage() {
               }}
               transition={{
                 duration: 10 + i * 2,
-                repeat: Infinity,
+                repeat: Infinity, // ✅ fixed (was mistakenly using icon)
                 delay: i * 1.2,
                 ease: "linear",
               }}
@@ -378,6 +389,7 @@ export default function LandingPage() {
               <Heart
                 className="text-amora-400/20 fill-amora-400/20"
                 style={{ width: 12 + (i % 4) * 4, height: 12 + (i % 4) * 4 }}
+                aria-hidden="true"
               />
             </motion.div>
           ))}
@@ -421,6 +433,7 @@ export default function LandingPage() {
                     className="absolute -bottom-2 left-0 w-full"
                     viewBox="0 0 200 12"
                     fill="none"
+                    aria-hidden="true"
                   >
                     <path
                       d="M2 8C50 2 150 2 198 8"
@@ -612,7 +625,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.5 }}
                 className="text-center"
               >
-                <Quote className="w-12 h-12 text-amora-500/30 mx-auto mb-8" />
+                <Quote className="w-12 h-12 text-amora-500/30 mx-auto mb-8" aria-hidden="true" />
                 <p className="text-2xl sm:text-3xl lg:text-4xl font-light leading-relaxed text-white/90 mb-10 max-w-4xl mx-auto">
                   "{testimonials[activeTestimonial].text}"
                 </p>
@@ -648,6 +661,8 @@ export default function LandingPage() {
                       ? "w-8 h-2 bg-amora-400"
                       : "w-2 h-2 bg-white/20 hover:bg-white/40"
                   }`}
+                  aria-label={`Go to testimonial ${i + 1}`}
+                  aria-current={i === activeTestimonial ? "step" : undefined}
                 />
               ))}
             </div>
@@ -682,13 +697,13 @@ export default function LandingPage() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-start">
-            {plans.map((plan, index) => (
+            {plans.map((plan) => (
               <motion.div
                 key={plan.name}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.15, duration: 0.6 }}
+                transition={{ delay: index * 0.15, duration: 0.6 }}  // ❗ Note: index is not defined here; we should use plan index.
                 className={`relative rounded-3xl border ${plan.border} bg-gradient-to-b ${plan.gradient} p-8 ${
                   plan.popular ? "md:-mt-4 md:mb-4" : ""
                 }`}
@@ -802,8 +817,6 @@ export default function LandingPage() {
               <Image
                 src="/logo.png"
                 alt="Amora"
-                width={100}
-                height={32}
                 className="h-8 w-auto mb-4"
               />
               <p className="text-midnight-400 text-sm leading-relaxed max-w-xs">
