@@ -1,4 +1,3 @@
-import { MarketingHeader } from './MarketingHeader';
 import { MarketingFooter } from './MarketingFooter';
 
 export function StaticPage({
@@ -14,7 +13,6 @@ export function StaticPage({
 }) {
   return (
     <div className="min-h-screen bg-midnight-950 text-white">
-      <MarketingHeader />
       <main className="pt-32 pb-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto">
           {eyebrow && (
