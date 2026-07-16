@@ -1,5 +1,5 @@
-import { Heart } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export function MarketingFooter() {
   return (
@@ -41,8 +41,13 @@ export function MarketingFooter() {
         </div>
         <div className="border-t border-midnight-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <Heart className="w-5 h-5 text-amora-500 fill-amora-500" />
-            <span className="font-semibold">Amora</span>
+            <Image
+              src="/logo.png"
+              alt="Amora"
+              width={100}
+              height={32}
+              className="h-8 w-auto"
+            />
           </div>
           <p className="text-sm text-midnight-500">
             &copy; 2026 Amora. All rights reserved. Made with love.
