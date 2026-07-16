@@ -62,7 +62,7 @@ export default function LandingPage() {
       setMousePos({ x: e.clientX, y: e.clientY });
     };
     window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove); // ✅ cleanup
+    return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
   /* Rotating testimonials */
@@ -381,7 +381,7 @@ export default function LandingPage() {
               }}
               transition={{
                 duration: 10 + i * 2,
-                repeat: Infinity, // ✅ fixed (was mistakenly using icon)
+                repeat: Infinity,
                 delay: i * 1.2,
                 ease: "linear",
               }}
@@ -697,13 +697,13 @@ export default function LandingPage() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-start">
-            {plans.map((plan) => (
+            {plans.map((plan, index) => (
               <motion.div
                 key={plan.name}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: index * 0.15, duration: 0.6 }}  // ❗ Note: index is not defined here; we should use plan index.
+                transition={{ delay: index * 0.15, duration: 0.6 }}
                 className={`relative rounded-3xl border ${plan.border} bg-gradient-to-b ${plan.gradient} p-8 ${
                   plan.popular ? "md:-mt-4 md:mb-4" : ""
                 }`}
