@@ -292,23 +292,6 @@ export default function LandingPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: "easeOut" }}
           >
-            {/* ✅ Logo added here */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="flex justify-center mb-8"
-            >
-              <Image
-                src="/logo.png"
-                alt="Amora"
-                width={180}
-                height={56}
-                className="h-16 w-auto"
-                priority
-              />
-            </motion.div>
-
             {/* Badge */}
             <motion.div
               className="inline-flex items-center gap-2.5 bg-white/5 border border-white/10 rounded-full px-5 py-2.5 mb-10 backdrop-blur-sm"
