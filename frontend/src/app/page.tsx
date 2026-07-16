@@ -863,4 +863,4 @@ export default function LandingPage() {
       </footer>
     </div>
   );
-}use client";
+}
