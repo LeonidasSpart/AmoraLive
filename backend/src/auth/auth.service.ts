@@ -58,8 +58,17 @@ export class AuthService {
 
     const verificationCode = this.generateVerificationCode();
     await this.redisService.set(`email_verification:${account.id}`, verificationCode, 3600);
-    await this.emailService.sendVerificationEmail(account.email, verificationCode);
-    await this.emailService.sendWelcomeEmail(account.email, dto.firstName);
+
+    // Email delivery is best-effort: a misconfigured or unreachable SMTP server
+    // must never fail account creation, since the account (and its data) is
+    // already committed by this point. Errors are swallowed here rather than
+    // propagated, so registration always succeeds once the account exists.
+    Promise.all([
+      this.emailService.sendVerificationEmail(account.email, verificationCode),
+      this.emailService.sendWelcomeEmail(account.email, dto.firstName),
+    ]).catch((err) => {
+      console.error(`Registration email delivery failed for ${account.email}:`, err.message);
+    });
 
     const tokens = await this.generateTokens(account.id);
 
@@ -205,7 +214,12 @@ export class AuthService {
 
     const resetCode = this.generateVerificationCode();
     await this.redisService.set(`password_reset:${account.id}`, resetCode, 3600);
-    await this.emailService.sendPasswordResetEmail(account.email, resetCode);
+
+    // Same reasoning as registration: don't let a broken SMTP config turn into
+    // a 500 for the user. The reset code is already stored in Redis regardless.
+    this.emailService.sendPasswordResetEmail(account.email, resetCode).catch((err) => {
+      console.error(`Password reset email failed for ${account.email}:`, err.message);
+    });
 
     return { message: 'If an account exists, a reset link has been sent' };
   }
@@ -291,7 +305,11 @@ export class AuthService {
 
     const code = this.generateVerificationCode();
     await this.redisService.set(`phone_verification:${userId}`, code, 600);
-    await this.smsService.sendVerificationSMS(account.phone, code);
+
+    // SMS delivery is also best-effort for the same reason as email above.
+    this.smsService.sendVerificationSMS(account.phone, code).catch((err) => {
+      console.error(`SMS verification send failed for user ${userId}:`, err.message);
+    });
 
     return { message: 'Verification code sent' };
   }
