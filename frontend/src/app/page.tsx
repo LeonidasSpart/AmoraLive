@@ -376,7 +376,7 @@ export default function LandingPage() {
               }}
             >
               <Heart
-                className={`w-${3 + (i % 3)} h-${3 + (i % 3)} text-amora-400/20 fill-amora-400/20`}
+                className="text-amora-400/20 fill-amora-400/20"
                 style={{ width: 12 + (i % 4) * 4, height: 12 + (i % 4) * 4 }}
               />
             </motion.div>
