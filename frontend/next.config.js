@@ -1,10 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    // appDir: true,  // ❌ removed – no longer needed (App Router is stable)
-  },
   images: {
-    domains: ['images.unsplash.com', 'cdn.amora.app', 'storage.googleapis.com', 'res.cloudinary.com'],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      { protocol: 'https', hostname: 'cdn.amora.app' },
+      { protocol: 'https', hostname: 'storage.googleapis.com' },
+      { protocol: 'https', hostname: 'res.cloudinary.com' },
+    ],
     formats: ['image/avif', 'image/webp'],
   },
   async headers() {
