@@ -53,11 +53,12 @@
   }
 
   * {
-    @apply border-border;
+    border-color: hsl(var(--border));
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
     font-family: var(--font-inter);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -80,80 +81,129 @@
 }
 
 @layer components {
+  /* Glass card - frosted effect for dark theme */
   .glass-card {
-    @apply bg-white/80 backdrop-blur-xl border border-white/20 shadow-lg;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
   }
 
-  .dark .glass-card {
-    @apply bg-midnight-800/80 border-midnight-700/50;
-  }
-
+  /* Premium card - enhanced for dark theme */
   .premium-card {
-    @apply bg-gradient-to-br from-white to-rose-50 border border-rose-100/50 shadow-premium;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.5rem;
   }
 
-  .dark .premium-card {
-    @apply from-midnight-800 to-midnight-900 border-midnight-700/50;
-  }
-
+  /* Amora primary button */
   .amora-button {
-    @apply relative overflow-hidden bg-amora-500 text-white font-semibold px-6 py-3 rounded-full
-           transition-all duration-300 ease-out hover:bg-amora-600 hover:shadow-amora
-           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #ec4899 0%, #db2777 50%, #be185d 100%);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    transition: all 0.3s ease-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
 
+  .amora-button:hover {
+    box-shadow: 0 4px 14px 0 rgba(236, 72, 153, 0.39);
+    transform: scale(1.02);
+  }
+
+  .amora-button:active {
+    transform: scale(0.98);
+  }
+
+  /* Amora outlined button */
   .amora-button-outline {
-    @apply relative overflow-hidden bg-transparent border-2 border-amora-500 text-amora-500 font-semibold 
-           px-6 py-3 rounded-full transition-all duration-300 ease-out
-           hover:bg-amora-500 hover:text-white active:scale-95;
+    position: relative;
+    overflow: hidden;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    transition: all 0.3s ease-out;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
   }
 
+  .amora-button-outline:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Gold button */
   .gold-button {
-    @apply relative overflow-hidden bg-gold-500 text-white font-semibold px-6 py-3 rounded-full
-           transition-all duration-300 ease-out hover:bg-gold-600 hover:shadow-gold
-           active:scale-95;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 9999px;
+    transition: all 0.3s ease-out;
   }
 
+  .gold-button:hover {
+    box-shadow: 0 4px 14px 0 rgba(251, 191, 36, 0.39);
+    transform: scale(1.02);
+  }
+
+  /* Gradient text utilities */
+  .gradient-text {
+    background: linear-gradient(135deg, #f472b6 0%, #fb7185 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .gold-gradient-text {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Swipe card for dating interface */
   .swipe-card {
-    @apply absolute w-full h-full rounded-3xl overflow-hidden shadow-2xl transition-transform duration-300;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transition: transform 0.3s;
     touch-action: none;
     user-select: none;
   }
 
-  .gradient-text {
-    @apply bg-clip-text text-transparent bg-amora-gradient;
-  }
-
-  .gold-gradient-text {
-    @apply bg-clip-text text-transparent bg-gold-gradient;
-  }
-
+  /* Shimmer loading effect */
   .shimmer {
     background: linear-gradient(
       90deg,
       rgba(255, 255, 255, 0) 0%,
-      rgba(255, 255, 255, 0.4) 50%,
+      rgba(255, 255, 255, 0.1) 50%,
       rgba(255, 255, 255, 0) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 2s linear infinite;
   }
-
-  .hide-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .hide-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-
-  .text-balance {
-    text-wrap: balance;
-  }
 }
 
 @layer utilities {
+  /* Animation delays */
   .animation-delay-200 {
     animation-delay: 200ms;
   }
@@ -170,6 +220,7 @@
     animation-delay: 800ms;
   }
 
+  /* 3D transforms */
   .perspective-1000 {
     perspective: 1000px;
   }
@@ -182,8 +233,18 @@
     backface-visibility: hidden;
   }
 
-  /* ✅ Fix for border-border class used in @apply */
-  .border-border {
-    border-color: hsl(var(--border));
+  /* Scrollbar hiding */
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Text balance for better typography */
+  .text-balance {
+    text-wrap: balance;
   }
 }
