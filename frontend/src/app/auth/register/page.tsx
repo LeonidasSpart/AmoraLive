@@ -1,23 +1,43 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Heart, Eye, EyeOff, Mail, Lock, User, Phone, ArrowRight, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
+import { useAuthStore } from '../../../store/auth-store';
 
 export default function RegisterPage() {
+  const router = useRouter();
+  const register = useAuthStore((s) => s.register);
   const [step, setStep] = useState(1);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', phone: '', password: '', dateOfBirth: '', gender: '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (step < 3) { setStep(step + 1); return; }
+    setFormError(null);
+
+    if (step < 3) {
+      setStep(step + 1);
+      return;
+    }
+
     setIsLoading(true);
-    setTimeout(() => setIsLoading(false), 1500);
+    try {
+      await register(formData);
+      router.push('/discover');
+    } catch (err: any) {
+      setFormError(
+        err.response?.data?.message ||
+          'Could not create your account. Please check your details and try again.',
+      );
+      setIsLoading(false);
+    }
   };
 
   const updateField = (field: string, value: string) => {
@@ -148,6 +168,12 @@ export default function RegisterPage() {
                   </div>
                 </div>
               </div>
+            )}
+
+            {formError && (
+              <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                {formError}
+              </p>
             )}
 
             <div className="flex gap-3">
