@@ -21,14 +21,14 @@ export default function Navbar() {
       scrolled ? 'bg-midnight-950/90 backdrop-blur-xl border-b border-midnight-800' : 'bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
+        <div className="flex items-center justify-between h-20 lg:h-24"> {/* Increased height */}
           <Link href="/" className="flex items-center gap-2">
             <Image
               src="/logo.png"
               alt="Amora"
-              width={150}
-              height={48}
-              className="h-12 w-auto"
+              width={180}
+              height={56}
+              className="h-14 w-auto" // Bigger logo
               priority
             />
           </Link>
