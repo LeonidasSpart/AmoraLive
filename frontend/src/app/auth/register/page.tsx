@@ -33,10 +33,10 @@ export default function RegisterPage() {
       router.push('/discover');
     } catch (err: any) {
       setFormError(
-        err.response?.data?.message ||
-          'Could not create your account. Please check your details and try again.',
+        `DEBUG: ${err?.message} | data: ${JSON.stringify(err?.response?.data)} | code: ${err?.code} | name: ${err?.name}`,
       );
       setIsLoading(false);
+      console.error('Registration error (full):', err);
     }
   };
 
