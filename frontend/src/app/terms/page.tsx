@@ -1,3 +1,6 @@
+'use client';
+
+import { motion } from 'framer-motion';
 import { StaticPage } from '../../components/StaticPage';
 import { FileText, Shield, AlertTriangle, CreditCard, Image, HeartCrack, Ban, Scale, RefreshCw, CheckCircle2, Lock, Globe, Gavel } from 'lucide-react';
 import Link from 'next/link';
