@@ -48,13 +48,19 @@ export default function LoginScreen() {
       const data = await response.json();
 
       if (response.ok) {
-        showAlert('Success', 'Logged in!');
-        // ✅ Navigate to home – use root path for web
+        // ✅ Store tokens in localStorage (web) or AsyncStorage (native)
         if (typeof window !== 'undefined') {
-          window.location.href = '/'; // 👈 change to root
-        } else {
-          router.replace('/(tabs)');
+          localStorage.setItem('amora_access_token', data.accessToken);
+          localStorage.setItem('amora_refresh_token', data.refreshToken);
+          localStorage.setItem('amora_user', JSON.stringify(data.user));
         }
+        // For native, we'd use AsyncStorage – but we're on web
+
+        showAlert('Success', 'Logged in!');
+
+        // ✅ Redirect to home – use router.replace for client‑side navigation
+        // This works on both web and native
+        router.replace('/(tabs)');
       } else {
         showAlert('Login Failed', data?.message || 'Invalid credentials');
       }
