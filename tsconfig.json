@@ -1,21 +1,30 @@
 {
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "target": "ES2023",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
     "strict": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "outDir": "dist",
-    "rootDir": "src",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "noEmit": true
   },
   "include": [
-    "src/**/*.ts"
+    "app/**/*",
+    "hooks/**/*",
+    "constants/**/*",
+    "components/**/*",
+    "services/**/*",
+    "types/**/*",
+    "utils/**/*"
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "backend",
+    "dist",
+    ".expo"
   ]
 }
