@@ -49,8 +49,9 @@ export default function LoginScreen() {
 
       if (response.ok) {
         showAlert('Success', 'Logged in!');
+        // ✅ Navigate to home – use root path for web
         if (typeof window !== 'undefined') {
-          window.location.href = '/tabs';
+          window.location.href = '/'; // 👈 change to root
         } else {
           router.replace('/(tabs)');
         }
