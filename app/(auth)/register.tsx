@@ -43,32 +43,18 @@ export default function RegisterScreen() {
       return;
     }
 
-    if (!cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+    if (!cleanEmail.includes('@')) {
       Alert.alert('Error', 'Please enter a valid email address');
       return;
     }
 
     if (cleanUsername.length < 3) {
-      Alert.alert(
-        'Error',
-        'Username must be at least 3 characters'
-      );
-      return;
-    }
-
-    if (cleanDisplayName.length < 2) {
-      Alert.alert(
-        'Error',
-        'Display name must be at least 2 characters'
-      );
+      Alert.alert('Error', 'Username must be at least 3 characters');
       return;
     }
 
     if (cleanPassword.length < 6) {
-      Alert.alert(
-        'Error',
-        'Password must be at least 6 characters'
-      );
+      Alert.alert('Error', 'Password must be at least 6 characters');
       return;
     }
 
@@ -87,12 +73,13 @@ export default function RegisterScreen() {
     if (success) {
       Alert.alert(
         'Welcome!',
-        'Your account has been created successfully.'
-      );
-    } else {
-      Alert.alert(
-        'Registration Failed',
-        'We could not create your account. The email or username may already exist.'
+        'Your account has been created successfully.',
+        [
+          {
+            text: 'Continue',
+            onPress: () => router.replace('/'),
+          },
+        ]
       );
     }
   };
@@ -118,12 +105,12 @@ export default function RegisterScreen() {
         </TouchableOpacity>
 
         <Text style={styles.title}>Create Account</Text>
-
         <Text style={styles.subtitle}>
           Join our community of creators
         </Text>
 
         <View style={styles.form}>
+
           {/* Email */}
           <View style={styles.inputContainer}>
             <Ionicons
@@ -134,15 +121,13 @@ export default function RegisterScreen() {
 
             <TextInput
               style={styles.input}
-              placeholder="Email"
+              placeholder="Email Address"
               placeholderTextColor={Colors.textMuted}
               value={email}
               onChangeText={setEmail}
+              keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
-              keyboardType="email-address"
-              textContentType="emailAddress"
-              autoComplete="email"
             />
           </View>
 
@@ -162,8 +147,6 @@ export default function RegisterScreen() {
               onChangeText={setUsername}
               autoCapitalize="none"
               autoCorrect={false}
-              textContentType="username"
-              autoComplete="username"
             />
           </View>
 
@@ -181,8 +164,6 @@ export default function RegisterScreen() {
               placeholderTextColor={Colors.textMuted}
               value={displayName}
               onChangeText={setDisplayName}
-              autoCapitalize="words"
-              textContentType="name"
             />
           </View>
 
@@ -201,14 +182,11 @@ export default function RegisterScreen() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
-              textContentType="newPassword"
-              autoComplete="new-password"
+              autoCapitalize="none"
             />
 
             <TouchableOpacity
-              onPress={() =>
-                setShowPassword(!showPassword)
-              }
+              onPress={() => setShowPassword(!showPassword)}
             >
               <Ionicons
                 name={
@@ -237,8 +215,7 @@ export default function RegisterScreen() {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry={!showPassword}
-              textContentType="newPassword"
-              autoComplete="new-password"
+              autoCapitalize="none"
             />
           </View>
 
@@ -246,8 +223,7 @@ export default function RegisterScreen() {
           <TouchableOpacity
             style={[
               styles.registerButton,
-              isLoading &&
-                styles.registerButtonDisabled,
+              isLoading && styles.registerButtonDisabled,
             ]}
             onPress={handleRegister}
             disabled={isLoading}
