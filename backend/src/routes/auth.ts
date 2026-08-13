@@ -16,8 +16,16 @@ const registerSchema = z.object({
 const loginSchema = z.object({ account: z.string().min(1), password: z.string().min(1) });
 
 const generateTokens = (userId: string) => ({
-  accessToken: jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: process.env.JWT_ACCESS_EXPIRATION || '15m' }),
-  refreshToken: jwt.sign({ userId }, process.env.JWT_SECRET!, { expiresIn: process.env.JWT_REFRESH_EXPIRATION || '30d' }),
+  accessToken: jwt.sign(
+    { userId },
+    process.env.JWT_SECRET!,
+    { expiresIn: process.env.JWT_ACCESS_EXPIRATION || '15m' } as jwt.SignOptions
+  ),
+  refreshToken: jwt.sign(
+    { userId },
+    process.env.JWT_SECRET!,
+    { expiresIn: process.env.JWT_REFRESH_EXPIRATION || '30d' } as jwt.SignOptions
+  ),
 });
 
 router.post('/register', async (req, res) => {
