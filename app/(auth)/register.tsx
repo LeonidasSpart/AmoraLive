@@ -20,17 +20,7 @@ const showAlert = (title: string, message?: string) => {
   if (typeof window !== 'undefined') {
     window.alert(title + (message ? '\n' + message : ''));
   } else {
-    // For native (fallback)
     Alert.alert(title, message);
-  }
-};
-
-// Web‑safe navigation
-const navigateTo = (path: string) => {
-  if (typeof window !== 'undefined') {
-    window.location.href = path;
-  } else {
-    // For native, we'll use router.replace inside the component
   }
 };
 
@@ -88,10 +78,20 @@ export default function RegisterScreen() {
       const data = await response.json();
 
       if (response.ok) {
-        showAlert('Welcome!', 'Account created successfully.');
-        // Navigate to home
+        // ✅ Save tokens to localStorage (web) or AsyncStorage (native)
         if (typeof window !== 'undefined') {
-          window.location.href = '/tabs'; // or '/'
+          localStorage.setItem('amora_access_token', data.accessToken);
+          localStorage.setItem('amora_refresh_token', data.refreshToken);
+          localStorage.setItem('amora_user', JSON.stringify(data.user));
+        } else {
+          // For native, you'd use AsyncStorage – but we're primarily on web
+        }
+
+        showAlert('Welcome!', 'Account created successfully.');
+
+        // ✅ Redirect by reloading the page (works on web)
+        if (typeof window !== 'undefined') {
+          window.location.href = '/'; // Reload to root – root layout will detect token
         } else {
           router.replace('/(tabs)');
         }
