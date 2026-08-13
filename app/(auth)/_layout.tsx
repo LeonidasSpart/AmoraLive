@@ -1,5 +1,5 @@
-import { Stack, useRouter, useSegments } from 'expo-router';
 import { useEffect } from 'react';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import { StatusBar } from 'expo-status-bar';
 
@@ -9,20 +9,12 @@ export default function RootLayout() {
   const router = useRouter();
 
   useEffect(() => {
-    // On web, also check localStorage directly
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('amora_access_token');
-      if (token && !isAuthenticated) {
-        // Force a full page reload to trigger the app to re‑initialize
-        window.location.href = '/(tabs)';
-        return;
-      }
-    }
-
     const inAuthGroup = segments[0] === '(auth)';
     if (!isAuthenticated && !inAuthGroup) {
+      // Not logged in, but trying to access protected screens
       router.replace('/(auth)/login');
     } else if (isAuthenticated && inAuthGroup) {
+      // Logged in, but on auth screens – redirect to home
       router.replace('/(tabs)');
     }
   }, [isAuthenticated, segments]);
