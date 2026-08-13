@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
-import { prisma } from '../prisma';
-import { authenticate, AuthRequest } from '../middleware/auth';
+import { prisma } from '../prisma.js';
+import { authenticate, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -18,7 +18,7 @@ router.get('/discover', authenticate, async (req: AuthRequest, res) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
-  // Get user's preferences to filter
+
   const prefs = await prisma.preference.findUnique({ where: { userId: req.user.id } });
   const users = await prisma.user.findMany({
     where: {
@@ -40,16 +40,16 @@ router.get('/discover', authenticate, async (req: AuthRequest, res) => {
 
 router.get('/:id', authenticate, async (req, res) => {
   const user = await prisma.user.findUnique({
-    where: { id: parseInt(req.params.id) },
+    where: { id: req.params.id },
     include: { photos: true, preferences: true },
   });
-  if (!user) return res.status(404).json({ error: 'User not found' });
+  if (!user) return res.status(404).json({ message: 'User not found' });
   res.json(user);
 });
 
 router.patch('/me', authenticate, async (req: AuthRequest, res) => {
   const parsed = updateSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.errors });
+  if (!parsed.success) return res.status(400).json({ message: 'Invalid data', errors: parsed.error.issues });
   const updated = await prisma.user.update({
     where: { id: req.user.id },
     data: parsed.data,
