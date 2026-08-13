@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -6,99 +7,52 @@ import {
   Image,
   TouchableOpacity,
   Dimensions,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
+import api from '@/services/api';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - 36) / 2;
 
 interface Streamer {
   id: string;
-  name: string;
+  userId: string;
   title: string;
-  viewers: number;
-  thumbnail: string;
-  avatar: string;
-  country: string;
+  viewerCount: number;
+  thumbnail?: string;
+  user: {
+    id: string;
+    displayName: string;
+    avatar: string;
+    country?: string;
+  };
+  startedAt: string;
   isLive: boolean;
 }
 
-const MOCK_STREAMERS: Streamer[] = [
-  {
-    id: '1',
-    name: 'Sheila',
-    title: 'Music & Chill vibes tonight',
-    viewers: 104577,
-    thumbnail: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=600&fit=crop',
-    avatar: 'https://i.pravatar.cc/150?u=1',
-    country: 'CO',
-    isLive: true,
-  },
-  {
-    id: '2',
-    name: 'Maria',
-    title: 'Gaming session - Join me!',
-    viewers: 70181,
-    thumbnail: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=600&fit=crop',
-    avatar: 'https://i.pravatar.cc/150?u=2',
-    country: 'VE',
-    isLive: true,
-  },
-  {
-    id: '3',
-    name: 'Valora',
-    title: 'Cooking stream - Italian food',
-    viewers: 39133,
-    thumbnail: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400&h=600&fit=crop',
-    avatar: 'https://i.pravatar.cc/150?u=3',
-    country: 'US',
-    isLive: true,
-  },
-  {
-    id: '4',
-    name: 'Kati',
-    title: 'Art & Drawing - Requests open',
-    viewers: 30618,
-    thumbnail: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=600&fit=crop',
-    avatar: 'https://i.pravatar.cc/150?u=4',
-    country: 'TH',
-    isLive: true,
-  },
-  {
-    id: '5',
-    name: 'Luna',
-    title: 'Dance practice - K-pop covers',
-    viewers: 27472,
-    thumbnail: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=600&fit=crop',
-    avatar: 'https://i.pravatar.cc/150?u=5',
-    country: 'KR',
-    isLive: true,
-  },
-  {
-    id: '6',
-    name: 'Sophie',
-    title: 'Study with me - Focus session',
-    viewers: 19903,
-    thumbnail: 'https://images.unsplash.com/photo-1488426862026-3ee34a7d66df?w=400&h=600&fit=crop',
-    avatar: 'https://i.pravatar.cc/150?u=6',
-    country: 'FR',
-    isLive: true,
-  },
-];
-
 function formatViewers(num: number): string {
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'k';
-  }
+  if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
   return num.toString();
 }
 
 function LiveCard({ streamer }: { streamer: Streamer }) {
+  const router = useRouter();
+  const defaultThumbnail = 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=600&fit=crop';
+  const thumbnail = streamer.thumbnail || defaultThumbnail;
+  const avatar = streamer.user?.avatar || 'https://i.pravatar.cc/150?u=' + streamer.userId;
+
   return (
-    <TouchableOpacity style={styles.card} activeOpacity={0.9}>
-      <Image source={{ uri: streamer.thumbnail }} style={styles.thumbnail} />
+    <TouchableOpacity
+      style={styles.card}
+      activeOpacity={0.9}
+      onPress={() => router.push(`/live/${streamer.id}`)}
+    >
+      <Image source={{ uri: thumbnail }} style={styles.thumbnail} />
       <View style={styles.overlay}>
         <View style={styles.liveBadge}>
           <View style={styles.liveDot} />
@@ -106,24 +60,58 @@ function LiveCard({ streamer }: { streamer: Streamer }) {
         </View>
         <View style={styles.viewerBadge}>
           <Ionicons name="flame" size={12} color="#fff" />
-          <Text style={styles.viewerText}>{formatViewers(streamer.viewers)}</Text>
+          <Text style={styles.viewerText}>{formatViewers(streamer.viewerCount || 0)}</Text>
         </View>
       </View>
       <View style={styles.cardFooter}>
-        <Text style={styles.streamerName} numberOfLines={1}>
-          {streamer.title}
-        </Text>
+        <Text style={styles.streamerName} numberOfLines={1}>{streamer.title}</Text>
         <View style={styles.streamerInfo}>
-          <Image source={{ uri: streamer.avatar }} style={styles.avatar} />
-          <Text style={styles.nameText}>{streamer.name}</Text>
-          <Text style={styles.countryText}>{streamer.country}</Text>
+          <Image source={{ uri: avatar }} style={styles.avatar} />
+          <Text style={styles.nameText}>{streamer.user?.displayName || 'Unknown'}</Text>
+          <Text style={styles.countryText}>{streamer.user?.country || ''}</Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 }
 
-export default function LiveScreen() {
+export default function HomeScreen() {
+  const [streams, setStreams] = useState<Streamer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const router = useRouter();
+
+  const loadStreams = useCallback(async () => {
+    try {
+      const response = await api.get('/live/active');
+      setStreams(response.data || []);
+    } catch {
+      setStreams([]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => { loadStreams(); }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    loadStreams();
+  };
+
+  const goToCreate = () => {
+    router.push('/live/create');
+  };
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.center} edges={['top']}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.header}>
@@ -131,30 +119,40 @@ export default function LiveScreen() {
           <Text style={styles.headerTitle}>Party Room</Text>
           <View style={styles.headerUnderline} />
         </View>
-        <TouchableOpacity style={styles.freeBadge}>
-          <Ionicons name="gift" size={16} color={Colors.accent} />
-          <Text style={styles.freeText}>FREE</Text>
+        <TouchableOpacity style={styles.goLiveButton} onPress={goToCreate}>
+          <Ionicons name="radio" size={16} color="#fff" />
+          <Text style={styles.goLiveText}>GO LIVE</Text>
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={MOCK_STREAMERS}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        contentContainerStyle={styles.list}
-        columnWrapperStyle={styles.columnWrapper}
-        showsVerticalScrollIndicator={false}
-        renderItem={({ item }) => <LiveCard streamer={item} />}
-      />
+      {streams.length === 0 ? (
+        <View style={styles.emptyState}>
+          <Ionicons name="radio-outline" size={64} color={Colors.textSecondary} />
+          <Text style={styles.emptyTitle}>No live streams</Text>
+          <Text style={styles.emptySubtitle}>Be the first to start streaming!</Text>
+          <TouchableOpacity style={styles.emptyButton} onPress={goToCreate}>
+            <Text style={styles.emptyButtonText}>Start a Stream</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <FlatList
+          data={streams}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          contentContainerStyle={styles.list}
+          columnWrapperStyle={styles.columnWrapper}
+          showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
+          renderItem={({ item }) => <LiveCard streamer={item} />}
+        />
+      )}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
+  container: { flex: 1, backgroundColor: Colors.background },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: Colors.background },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -165,40 +163,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: Colors.text,
-  },
-  headerUnderline: {
-    width: 32,
-    height: 4,
-    backgroundColor: Colors.primary,
-    borderRadius: 2,
-    marginTop: 4,
-  },
-  freeBadge: {
+  headerTitle: { fontSize: 24, fontWeight: '800', color: Colors.text },
+  headerUnderline: { width: 32, height: 4, backgroundColor: Colors.primary, borderRadius: 2, marginTop: 4 },
+  goLiveButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.vipBg,
+    backgroundColor: Colors.primary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
     gap: 4,
   },
-  freeText: {
-    fontSize: 12,
-    fontWeight: '800',
-    color: Colors.accent,
-  },
-  list: {
-    padding: 12,
-    paddingBottom: 24,
-  },
-  columnWrapper: {
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
+  goLiveText: { color: '#fff', fontSize: 12, fontWeight: '800' },
+  list: { padding: 12, paddingBottom: 24 },
+  columnWrapper: { justifyContent: 'space-between', marginBottom: 12 },
   card: {
     width: CARD_WIDTH,
     backgroundColor: '#fff',
@@ -210,39 +188,19 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 3,
   },
-  thumbnail: {
-    width: CARD_WIDTH,
-    height: CARD_WIDTH * 1.25,
-    resizeMode: 'cover',
-  },
-  overlay: {
-    position: 'absolute',
-    top: 8,
-    left: 8,
-    right: 8,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
+  thumbnail: { width: CARD_WIDTH, height: CARD_WIDTH * 1.25, resizeMode: 'cover' },
+  overlay: { position: 'absolute', top: 8, left: 8, right: 8, flexDirection: 'row', justifyContent: 'space-between' },
   liveBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.live,
+    backgroundColor: '#ff4d4d',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
     gap: 4,
   },
-  liveDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#fff',
-  },
-  liveText: {
-    color: '#fff',
-    fontSize: 10,
-    fontWeight: '800',
-  },
+  liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#fff' },
+  liveText: { color: '#fff', fontSize: 10, fontWeight: '800' },
   viewerBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -252,37 +210,16 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     gap: 4,
   },
-  viewerText: {
-    color: '#fff',
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  cardFooter: {
-    padding: 10,
-  },
-  streamerName: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 6,
-  },
-  streamerInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  avatar: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-  },
-  nameText: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    fontWeight: '500',
-  },
-  countryText: {
-    fontSize: 11,
-    color: Colors.textMuted,
-  },
+  viewerText: { color: '#fff', fontSize: 11, fontWeight: '700' },
+  cardFooter: { padding: 10 },
+  streamerName: { fontSize: 13, fontWeight: '600', color: Colors.text, marginBottom: 6 },
+  streamerInfo: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  avatar: { width: 20, height: 20, borderRadius: 10 },
+  nameText: { fontSize: 12, color: Colors.textSecondary, fontWeight: '500' },
+  countryText: { fontSize: 11, color: Colors.textMuted },
+  emptyState: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 },
+  emptyTitle: { fontSize: 20, fontWeight: 'bold', color: Colors.text, marginTop: 16 },
+  emptySubtitle: { fontSize: 16, color: Colors.textSecondary, marginTop: 8, textAlign: 'center' },
+  emptyButton: { marginTop: 24, backgroundColor: Colors.primary, paddingHorizontal: 24, paddingVertical: 12, borderRadius: 24 },
+  emptyButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
 });
