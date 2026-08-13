@@ -41,7 +41,6 @@ interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-
   login: (account: string, password: string) => Promise<boolean>;
   register: (data: RegisterData) => Promise<boolean>;
   logout: () => void | Promise<void>;
@@ -67,7 +66,7 @@ const normalizeUser = (user: any): User => ({
   goal: user.goal,
 });
 
-// ✅ Web‑safe storage adapter – works on both web and native
+// Web-safe storage adapter
 const webSafeStorage = {
   getItem: async (key: string): Promise<string | null> => {
     if (typeof window !== 'undefined') {
@@ -113,7 +112,12 @@ export const useAuthStore = create<AuthState>()(
             throw new Error("Login response did not contain authentication tokens");
           }
           const user = normalizeUser(data.user);
-          // ✅ Store tokens in the store's state – persist middleware will save them via the adapter
+          // Also write to localStorage directly as a backup
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('amora_access_token', data.accessToken);
+            localStorage.setItem('amora_refresh_token', data.refreshToken);
+            localStorage.setItem('amora_user', JSON.stringify(user));
+          }
           set({ user, isAuthenticated: true, isLoading: false });
           return true;
         } catch (error: any) {
@@ -152,8 +156,12 @@ export const useAuthStore = create<AuthState>()(
           if (!result?.accessToken || !result?.refreshToken) {
             throw new Error("Registration response did not contain authentication tokens");
           }
-
           const user = normalizeUser(result.user);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('amora_access_token', result.accessToken);
+            localStorage.setItem('amora_refresh_token', result.refreshToken);
+            localStorage.setItem('amora_user', JSON.stringify(user));
+          }
           set({ user, isAuthenticated: true, isLoading: false });
           return true;
         } catch (error: any) {
@@ -166,10 +174,14 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         try {
-          // Optionally call the logout endpoint – but we can just clear local state
-          // The persist middleware will remove the stored data.
+          // Optionally call the logout endpoint – we just clear local state
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('amora_access_token');
+            localStorage.removeItem('amora_refresh_token');
+            localStorage.removeItem('amora_user');
+          }
           set({ user: null, isAuthenticated: false, isLoading: false });
-          // Also clear the storage explicitly
+          // Also clear the storage from persist
           await webSafeStorage.removeItem('auth-storage');
         } catch (error) {
           console.error("AMORA logout error:", error);
@@ -179,13 +191,22 @@ export const useAuthStore = create<AuthState>()(
       updateUser: (updates) => {
         const { user } = get();
         if (!user) return;
-        set({ user: { ...user, ...updates } });
+        const updatedUser = { ...user, ...updates };
+        set({ user: updatedUser });
+        // Update localStorage backup
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('amora_user', JSON.stringify(updatedUser));
+        }
       },
 
       addCoins: (amount) => {
         const { user } = get();
         if (!user) return;
-        set({ user: { ...user, coins: user.coins + amount } });
+        const updatedUser = { ...user, coins: user.coins + amount };
+        set({ user: updatedUser });
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('amora_user', JSON.stringify(updatedUser));
+        }
       },
     }),
     {
