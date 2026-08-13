@@ -28,8 +28,8 @@ export default function RegisterScreen() {
   const router = useRouter();
 
   const handleRegister = async () => {
-    // 🔥 ALERT 1: Button pressed
-    Alert.alert('Step 1', 'Button pressed!');
+    // 🔥 TEST ALERT – confirm the button works
+    Alert.alert('Test', 'Button pressed!');
 
     const cleanEmail = email.trim().toLowerCase();
     const cleanUsername = username.trim();
@@ -57,9 +57,6 @@ export default function RegisterScreen() {
       return;
     }
 
-    // 🔥 ALERT 2: Validation passed
-    Alert.alert('Step 2', 'Validation passed. Sending request...');
-
     setLoading(true);
     try {
       const response = await fetch(`${API_URL}/api/auth/register`, {
@@ -74,13 +71,12 @@ export default function RegisterScreen() {
       });
       const data = await response.json();
 
-      // 🔥 ALERT 3: Response received
-      Alert.alert('Step 3', `Response status: ${response.status}`);
-
       if (response.ok) {
         Alert.alert('Welcome!', 'Account created successfully.', [
           { text: 'Continue', onPress: () => router.replace('/(tabs)') },
         ]);
+      } else if (response.status === 409) {
+        Alert.alert('Account Exists', 'This email or username is already taken. Please use a different one.');
       } else {
         Alert.alert('Registration Failed', data?.message || 'Something went wrong');
       }
@@ -182,7 +178,7 @@ export default function RegisterScreen() {
           <TouchableOpacity
             style={[styles.registerButton, loading && styles.registerButtonDisabled]}
             onPress={handleRegister}
-            // disabled={loading} // Always enabled for test
+            disabled={loading}
           >
             {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.registerButtonText}>Create Account</Text>}
           </TouchableOpacity>
