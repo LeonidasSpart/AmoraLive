@@ -7,7 +7,7 @@ export default function RootLayout() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check localStorage for token (works on web)
+    // Read token directly from localStorage (web only)
     let token = null;
     if (typeof window !== 'undefined') {
       token = localStorage.getItem('amora_access_token');
@@ -16,10 +16,10 @@ export default function RootLayout() {
     const inAuthGroup = segments[0] === '(auth)';
 
     if (!token && !inAuthGroup) {
-      // Not logged in, but trying to access protected screens
+      // Not logged in → go to login
       router.replace('/(auth)/login');
     } else if (token && inAuthGroup) {
-      // Logged in, but on auth screens – redirect to tabs
+      // Logged in → go to tabs
       router.replace('/(tabs)');
     }
   }, [segments]);
