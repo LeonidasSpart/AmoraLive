@@ -28,6 +28,10 @@ export default function RegisterScreen() {
   const router = useRouter();
 
   const handleRegister = async () => {
+    // 🔥 TEST ALERT – WILL SHOW IMMEDIATELY
+    Alert.alert('🔥 Test', 'Button was pressed!');
+
+    // Validation
     const cleanEmail = email.trim().toLowerCase();
     const cleanUsername = username.trim();
     const cleanDisplayName = displayName.trim();
@@ -170,10 +174,11 @@ export default function RegisterScreen() {
             />
           </View>
 
+          {/* 👇 BUTTON – DISABLED REMOVED FOR TEST */}
           <TouchableOpacity
             style={[styles.registerButton, loading && styles.registerButtonDisabled]}
             onPress={handleRegister}
-            disabled={loading}
+            // disabled={loading}  // COMMENTED OUT – ALWAYS ENABLED
           >
             {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.registerButtonText}>Create Account</Text>}
           </TouchableOpacity>
