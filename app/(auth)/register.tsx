@@ -83,8 +83,9 @@ export default function RegisterScreen() {
           localStorage.setItem('amora_user', JSON.stringify(data.user));
         }
         showAlert('Welcome!', 'Account created successfully.');
+        // FORCE a full page reload to the tabs
         if (typeof window !== 'undefined') {
-          window.location.href = '/';
+          window.location.href = '/(tabs)';
         } else {
           router.replace('/(tabs)');
         }
