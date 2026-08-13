@@ -63,10 +63,143 @@ export default function RegisterScreen() {
 
     if (success) {
       Alert.alert('Welcome!', 'Account created successfully.');
-      // ✅ Direct navigation – no reload
+      // ✅ Direct navigation to tabs – no page reload
       router.replace('/(tabs)');
     }
   };
 
-  // ... rest of the component (JSX unchanged)
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={Colors.text} />
+        </TouchableOpacity>
+
+        <Text style={styles.title}>Create Account</Text>
+        <Text style={styles.subtitle}>Join our community of creators</Text>
+
+        <View style={styles.form}>
+          <View style={styles.inputContainer}>
+            <Ionicons name="mail-outline" size={20} color={Colors.textSecondary} />
+            <TextInput
+              style={styles.input}
+              placeholder="Email Address"
+              placeholderTextColor={Colors.textMuted}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Ionicons name="person-outline" size={20} color={Colors.textSecondary} />
+            <TextInput
+              style={styles.input}
+              placeholder="Username"
+              placeholderTextColor={Colors.textMuted}
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Ionicons name="happy-outline" size={20} color={Colors.textSecondary} />
+            <TextInput
+              style={styles.input}
+              placeholder="Display Name"
+              placeholderTextColor={Colors.textMuted}
+              value={displayName}
+              onChangeText={setDisplayName}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Ionicons name="lock-closed-outline" size={20} color={Colors.textSecondary} />
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor={Colors.textMuted}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Ionicons
+                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={20}
+                color={Colors.textSecondary}
+              />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <Ionicons name="shield-checkmark-outline" size={20} color={Colors.textSecondary} />
+            <TextInput
+              style={styles.input}
+              placeholder="Confirm Password"
+              placeholderTextColor={Colors.textMuted}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+            />
+          </View>
+
+          <TouchableOpacity
+            style={[styles.registerButton, isLoading && styles.registerButtonDisabled]}
+            onPress={handleRegister}
+            disabled={isLoading}
+          >
+            {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.registerButtonText}>Create Account</Text>}
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: Colors.card },
+  scrollContent: { flexGrow: 1, paddingHorizontal: 28, paddingTop: 60, paddingBottom: 24 },
+  backButton: { marginBottom: 24, width: 40, height: 40, justifyContent: 'center' },
+  title: { fontSize: 32, fontWeight: '800', color: Colors.text, letterSpacing: -0.5 },
+  subtitle: { fontSize: 16, color: Colors.textSecondary, marginTop: 4, marginBottom: 32 },
+  form: { gap: 16 },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Colors.background,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    height: 56,
+    borderWidth: 1,
+    borderColor: Colors.border,
+  },
+  input: { flex: 1, marginLeft: 12, fontSize: 16, color: Colors.text },
+  registerButton: {
+    backgroundColor: Colors.primary,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  registerButtonDisabled: { opacity: 0.7 },
+  registerButtonText: { color: '#fff', fontSize: 17, fontWeight: '700' },
+});
