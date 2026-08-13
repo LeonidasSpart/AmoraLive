@@ -8,7 +8,7 @@ export default function RootLayout() {
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('amora_access_token');
       if (token) {
-        // Already logged in → go to main tabs
+        // Already logged in – redirect to tabs
         router.replace('/(tabs)');
       }
     }
