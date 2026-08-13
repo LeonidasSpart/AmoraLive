@@ -1,4 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+// Import from the generated client (custom output path)
+import { PrismaClient } from './generated/prisma/client.js';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
