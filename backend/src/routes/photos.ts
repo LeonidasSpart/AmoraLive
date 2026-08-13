@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import multer from 'multer';
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { prisma } from '../prisma';
-import { authenticate, AuthRequest } from '../middleware/auth';
+import { prisma } from '../prisma.js';
+import { authenticate, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -14,7 +14,7 @@ const s3 = new S3Client({
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } });
 
 router.post('/upload', authenticate, upload.single('photo'), async (req: AuthRequest, res) => {
-  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
   const key = `users/${req.user.id}/${Date.now()}_${req.file.originalname}`;
   await s3.send(new PutObjectCommand({
     Bucket: process.env.AWS_S3_BUCKET!,
@@ -36,8 +36,8 @@ router.get('/', authenticate, async (req: AuthRequest, res) => {
 });
 
 router.delete('/:id', authenticate, async (req: AuthRequest, res) => {
-  const photo = await prisma.photo.findUnique({ where: { id: parseInt(req.params.id) } });
-  if (!photo || photo.userId !== req.user.id) return res.status(404).json({ error: 'Not found' });
+  const photo = await prisma.photo.findUnique({ where: { id: req.params.id } });
+  if (!photo || photo.userId !== req.user.id) return res.status(404).json({ message: 'Not found' });
   if (photo.publicId) {
     await s3.send(new DeleteObjectCommand({ Bucket: process.env.AWS_S3_BUCKET!, Key: photo.publicId }));
   }
@@ -46,8 +46,8 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res) => {
 });
 
 router.patch('/:id/primary', authenticate, async (req: AuthRequest, res) => {
-  const photo = await prisma.photo.findUnique({ where: { id: parseInt(req.params.id) } });
-  if (!photo || photo.userId !== req.user.id) return res.status(404).json({ error: 'Not found' });
+  const photo = await prisma.photo.findUnique({ where: { id: req.params.id } });
+  if (!photo || photo.userId !== req.user.id) return res.status(404).json({ message: 'Not found' });
   await prisma.photo.updateMany({ where: { userId: req.user.id }, data: { isPrimary: false } });
   await prisma.photo.update({ where: { id: photo.id }, data: { isPrimary: true } });
   res.json({ success: true });
