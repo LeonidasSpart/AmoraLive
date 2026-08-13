@@ -1,16 +1,14 @@
 import { Router } from 'express';
-import { prisma } from '../prisma';
-import { authenticate, AuthRequest } from '../middleware/auth';
+import { authenticate } from '../middleware/auth.js';
 
 const router = Router();
 
-router.post('/create', authenticate, async (req: AuthRequest, res) => {
-  // Create a live stream record, return ingest URL
+router.post('/create', authenticate, async (req, res) => {
+  // Integrate with Agora/Mux here
   res.json({ streamId: 'dummy', ingestUrl: 'rtmp://...', playbackUrl: 'https://...' });
 });
 
 router.get('/active', authenticate, async (req, res) => {
-  // List active streams
   res.json([]);
 });
 
