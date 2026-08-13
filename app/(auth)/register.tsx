@@ -9,14 +9,13 @@ import {
   Platform,
   ActivityIndicator,
   ScrollView,
-  Alert, // 👈 ADDED
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { API_URL } from '@/constants/api';
 
-// Web‑safe alert
 const showAlert = (title: string, message?: string) => {
   if (typeof window !== 'undefined') {
     window.alert(title + (message ? '\n' + message : ''));
@@ -42,7 +41,6 @@ export default function RegisterScreen() {
     const cleanDisplayName = displayName.trim();
     const cleanPassword = password.trim();
 
-    // Validation
     if (!cleanEmail || !cleanUsername || !cleanDisplayName || !cleanPassword) {
       showAlert('Error', 'Please fill in all fields');
       return;
@@ -79,21 +77,19 @@ export default function RegisterScreen() {
       const data = await response.json();
 
       if (response.ok) {
-        // ✅ Store tokens in localStorage (web) or AsyncStorage (native)
         if (typeof window !== 'undefined') {
           localStorage.setItem('amora_access_token', data.accessToken);
           localStorage.setItem('amora_refresh_token', data.refreshToken);
           localStorage.setItem('amora_user', JSON.stringify(data.user));
         }
         showAlert('Welcome!', 'Account created successfully.');
-        // ✅ Redirect to root – root layout will detect token
         if (typeof window !== 'undefined') {
           window.location.href = '/';
         } else {
           router.replace('/(tabs)');
         }
       } else if (response.status === 409) {
-        showAlert('Account Exists', 'This email or username is already taken. Please use a different one.');
+        showAlert('Account Exists', 'This email or username is already taken.');
       } else {
         showAlert('Registration Failed', data?.message || 'Something went wrong');
       }
