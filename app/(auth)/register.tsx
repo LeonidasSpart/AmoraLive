@@ -28,10 +28,9 @@ export default function RegisterScreen() {
   const router = useRouter();
 
   const handleRegister = async () => {
-    // 🔥 TEST ALERT – WILL SHOW IMMEDIATELY
-    Alert.alert('🔥 Test', 'Button was pressed!');
+    // 🔥 ALERT 1: Button pressed
+    Alert.alert('Step 1', 'Button pressed!');
 
-    // Validation
     const cleanEmail = email.trim().toLowerCase();
     const cleanUsername = username.trim();
     const cleanDisplayName = displayName.trim();
@@ -58,6 +57,9 @@ export default function RegisterScreen() {
       return;
     }
 
+    // 🔥 ALERT 2: Validation passed
+    Alert.alert('Step 2', 'Validation passed. Sending request...');
+
     setLoading(true);
     try {
       const response = await fetch(`${API_URL}/api/auth/register`, {
@@ -71,6 +73,9 @@ export default function RegisterScreen() {
         }),
       });
       const data = await response.json();
+
+      // 🔥 ALERT 3: Response received
+      Alert.alert('Step 3', `Response status: ${response.status}`);
 
       if (response.ok) {
         Alert.alert('Welcome!', 'Account created successfully.', [
@@ -174,11 +179,10 @@ export default function RegisterScreen() {
             />
           </View>
 
-          {/* 👇 BUTTON – DISABLED REMOVED FOR TEST */}
           <TouchableOpacity
             style={[styles.registerButton, loading && styles.registerButtonDisabled]}
             onPress={handleRegister}
-            // disabled={loading}  // COMMENTED OUT – ALWAYS ENABLED
+            // disabled={loading} // Always enabled for test
           >
             {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.registerButtonText}>Create Account</Text>}
           </TouchableOpacity>
