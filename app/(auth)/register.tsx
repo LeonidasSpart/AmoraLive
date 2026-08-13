@@ -12,7 +12,6 @@ import {
   ScrollView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useAuthStore } from '@/hooks/useAuthStore';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { API_URL } from '@/constants/api';
@@ -24,22 +23,17 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const { register, isLoading } = useAuthStore();
   const router = useRouter();
 
-  // --------------------------------------------------------------------
-  // DEBUG: Button press test
-  // --------------------------------------------------------------------
   const handleRegister = async () => {
-    // ✅ 1. Immediately show an alert to confirm the button works
-    Alert.alert('Debug', 'Button pressed! Now checking validation...');
-
     const cleanEmail = email.trim().toLowerCase();
     const cleanUsername = username.trim();
     const cleanDisplayName = displayName.trim();
     const cleanPassword = password.trim();
 
+    // Validation
     if (!cleanEmail || !cleanUsername || !cleanDisplayName || !cleanPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -61,9 +55,7 @@ export default function RegisterScreen() {
       return;
     }
 
-    // ✅ 2. Validation passed – try a direct fetch first (bypass the store)
-    Alert.alert('Debug', 'Validation passed. Trying direct fetch...');
-    console.log('🔵 Direct fetch to:', `${API_URL}/api/auth/register`);
+    setLoading(true);
 
     try {
       const response = await fetch(`${API_URL}/api/auth/register`, {
@@ -76,41 +68,23 @@ export default function RegisterScreen() {
           password: cleanPassword,
         }),
       });
+
       const data = await response.json();
-      console.log('🔵 Direct fetch response:', data);
 
       if (response.ok) {
-        Alert.alert('Success', 'Account created via direct fetch!');
-        // If this works, the store might be the problem.
-      } else {
-        Alert.alert('Direct fetch failed', data?.message || 'Unknown error');
-      }
-    } catch (error: any) {
-      console.error('🔵 Direct fetch error:', error);
-      Alert.alert('Network Error', error.message || 'Could not reach the server');
-    }
-
-    // ------------------------------------------------------------------
-    // 3. Also try the store method (commented out for now)
-    // ------------------------------------------------------------------
-    /*
-    try {
-      const success = await register({
-        email: cleanEmail,
-        username: cleanUsername,
-        displayName: cleanDisplayName,
-        password: cleanPassword,
-      });
-      if (success) {
-        Alert.alert('Welcome!', 'Your account has been created successfully.', [
+        // Success!
+        Alert.alert('Welcome!', 'Your account has been created.', [
           { text: 'Continue', onPress: () => router.replace('/') },
         ]);
+      } else {
+        // Show the error message from the backend
+        Alert.alert('Registration Failed', data?.message || 'Something went wrong');
       }
-    } catch (error) {
-      console.error('Store registration error:', error);
-      Alert.alert('Error', 'Store registration failed');
+    } catch (error: any) {
+      Alert.alert('Network Error', error.message || 'Could not reach the server');
+    } finally {
+      setLoading(false);
     }
-    */
   };
 
   return (
@@ -202,11 +176,11 @@ export default function RegisterScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.registerButton, isLoading && styles.registerButtonDisabled]}
+            style={[styles.registerButton, loading && styles.registerButtonDisabled]}
             onPress={handleRegister}
-            disabled={isLoading}
+            disabled={loading}
           >
-            {isLoading ? (
+            {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.registerButtonText}>Create Account</Text>
