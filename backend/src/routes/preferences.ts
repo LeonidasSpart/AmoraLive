@@ -4,6 +4,7 @@ import { prisma } from '../prisma.js';
 import { authenticate, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
+
 const prefsSchema = z.object({
   minAge: z.number().int().optional(),
   maxAge: z.number().int().optional(),
@@ -13,13 +14,20 @@ const prefsSchema = z.object({
 });
 
 router.get('/', authenticate, async (req: AuthRequest, res) => {
-  const prefs = await prisma.preference.findUnique({ where: { userId: req.user.id } });
+  const prefs = await prisma.preference.findUnique({
+    where: { userId: req.user.id },
+  });
   res.json(prefs || {});
 });
 
 router.put('/', authenticate, async (req: AuthRequest, res) => {
   const parsed = prefsSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ message: 'Invalid data', errors: parsed.error.issues });
+  if (!parsed.success) {
+    return res.status(400).json({
+      message: 'Invalid data',
+      errors: parsed.error.issues,
+    });
+  }
   const prefs = await prisma.preference.upsert({
     where: { userId: req.user.id },
     create: { userId: req.user.id, ...parsed.data },
