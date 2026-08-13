@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   View,
   Text,
@@ -6,12 +7,16 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  TextInput,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
+import { PhotoUploader } from '@/components/PhotoUploader';
+import { updateProfile } from '@/services/api';
 
 interface MenuItemProps {
   icon: string;
@@ -23,41 +28,171 @@ interface MenuItemProps {
   danger?: boolean;
 }
 
-function MenuItem({ icon, iconColor, title, subtitle, value, onPress, danger }: MenuItemProps) {
+function MenuItem({
+  icon,
+  iconColor,
+  title,
+  subtitle,
+  value,
+  onPress,
+  danger,
+}: MenuItemProps) {
   return (
-    <TouchableOpacity style={styles.menuItem} onPress={onPress} activeOpacity={0.7}>
-      <View style={[styles.menuIcon, { backgroundColor: (iconColor || Colors.primary) + '15' }]}>
-        <Ionicons name={icon as any} size={20} color={danger ? Colors.danger : (iconColor || Colors.primary)} />
+    <TouchableOpacity
+      style={styles.menuItem}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <View
+        style={[
+          styles.menuIcon,
+          {
+            backgroundColor:
+              (iconColor || Colors.primary) + '15',
+          },
+        ]}
+      >
+        <Ionicons
+          name={icon as any}
+          size={20}
+          color={
+            danger
+              ? Colors.danger
+              : iconColor || Colors.primary
+          }
+        />
       </View>
+
       <View style={styles.menuTextContainer}>
-        <Text style={[styles.menuTitle, danger && { color: Colors.danger }]}>{title}</Text>
-        {subtitle && <Text style={styles.menuSubtitle}>{subtitle}</Text>}
+        <Text
+          style={[
+            styles.menuTitle,
+            danger && { color: Colors.danger },
+          ]}
+        >
+          {title}
+        </Text>
+
+        {subtitle && (
+          <Text style={styles.menuSubtitle}>
+            {subtitle}
+          </Text>
+        )}
       </View>
-      {value && <Text style={styles.menuValue}>{value}</Text>}
-      <Ionicons name="chevron-forward" size={18} color={Colors.textMuted} />
+
+      {value && (
+        <Text style={styles.menuValue}>
+          {value}
+        </Text>
+      )}
+
+      <Ionicons
+        name="chevron-forward"
+        size={18}
+        color={Colors.textMuted}
+      />
     </TouchableOpacity>
   );
 }
 
 export default function ProfileScreen() {
-  const { user, logout } = useAuthStore();
+  const { user, logout, updateUser } = useAuthStore();
   const router = useRouter();
 
-  const handleLogout = () => {
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', style: 'destructive', onPress: logout },
-    ]);
+  const [editVisible, setEditVisible] = useState(false);
+  const [editDisplayName, setEditDisplayName] = useState('');
+  const [editBio, setEditBio] = useState('');
+  const [editAvatar, setEditAvatar] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const openEditProfile = () => {
+    if (!user) return;
+    setEditDisplayName(user.displayName || '');
+    setEditBio(user.bio || '');
+    setEditAvatar(user.avatar || '');
+    setEditVisible(true);
   };
 
-  if (!user) return null;
+  const saveProfile = async () => {
+    if (!user) return;
+    if (!editDisplayName.trim()) {
+      Alert.alert('Error', 'Display name cannot be empty.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      // Call API to update profile
+      const updated = await updateProfile({
+        displayName: editDisplayName.trim(),
+        bio: editBio.trim(),
+        avatar: editAvatar.trim() || user.avatar,
+      });
+
+      // Update local store
+      updateUser({
+        displayName: updated.displayName,
+        bio: updated.bio,
+        avatar: updated.avatar,
+      });
+
+      setEditVisible(false);
+      Alert.alert('Profile Updated', 'Your profile has been updated successfully.');
+    } catch (error) {
+      Alert.alert('Error', 'Unable to update profile. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Logout', style: 'destructive', onPress: logout },
+      ]
+    );
+  };
+
+  const handlePhotoUploaded = (photo: any) => {
+    // Update avatar to the new photo URL
+    setEditAvatar(photo.url);
+    // Optionally update the user store immediately
+    if (user) {
+      updateUser({ avatar: photo.url });
+    }
+    Alert.alert('Success', 'Photo uploaded!');
+  };
+
+  if (!user) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.emptyContainer}>
+          <Ionicons name="person-circle-outline" size={72} color={Colors.textMuted} />
+          <Text style={styles.emptyTitle}>Not signed in</Text>
+          <Text style={styles.emptySubtitle}>Please sign in to view your profile.</Text>
+          <TouchableOpacity
+            style={styles.signInButton}
+            onPress={() => router.replace('/(auth)/login')}
+          >
+            <Text style={styles.signInButtonText}>Sign In</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity style={styles.vipButton} onPress={() => router.push('/settings')}>
+          <TouchableOpacity
+            style={styles.vipButton}
+            onPress={() => router.push('/subscriptions')}
+          >
             <Ionicons name="diamond" size={14} color={Colors.vip} />
             <Text style={styles.vipText}>VIP Privileges</Text>
             <Ionicons name="chevron-forward" size={14} color={Colors.textMuted} />
@@ -67,8 +202,14 @@ export default function ProfileScreen() {
         {/* Profile Card */}
         <View style={styles.profileCard}>
           <View style={styles.profileHeader}>
-            <Image source={{ uri: user.avatar }} style={styles.avatar} />
-            <TouchableOpacity style={styles.editButton}>
+            {user.avatar ? (
+              <Image source={{ uri: user.avatar }} style={styles.avatar} />
+            ) : (
+              <View style={styles.avatarPlaceholder}>
+                <Ionicons name="person" size={34} color={Colors.textMuted} />
+              </View>
+            )}
+            <TouchableOpacity style={styles.editButton} onPress={openEditProfile}>
               <Ionicons name="create-outline" size={16} color={Colors.textSecondary} />
               <Text style={styles.editText}>Edit</Text>
             </TouchableOpacity>
@@ -77,8 +218,8 @@ export default function ProfileScreen() {
           <View style={styles.nameRow}>
             <Text style={styles.displayName}>{user.displayName}</Text>
             <View style={styles.genderBadge}>
-              <Ionicons name="male" size={12} color="#fff" />
-              <Text style={styles.genderText}>01</Text>
+              <Ionicons name="person" size={12} color="#fff" />
+              <Text style={styles.genderText}>AMORA</Text>
             </View>
             {user.vip && (
               <View style={styles.vipBadge}>
@@ -87,6 +228,8 @@ export default function ProfileScreen() {
               </View>
             )}
           </View>
+
+          <Text style={styles.bioText}>{user.bio || 'No bio added yet.'}</Text>
 
           <View style={styles.idRow}>
             <View style={styles.idBadge}>
@@ -103,14 +246,14 @@ export default function ProfileScreen() {
             <Ionicons name="diamond" size={28} color={Colors.accent} />
             <Text style={styles.coinsText}>{user.coins}</Text>
           </View>
-          <TouchableOpacity style={styles.rechargeButton}>
+          <TouchableOpacity style={styles.rechargeButton} onPress={() => router.push('/coins')}>
             <Text style={styles.rechargeText}>Recharge</Text>
           </TouchableOpacity>
         </View>
 
         {/* Quick Actions */}
         <View style={styles.quickActions}>
-          <TouchableOpacity style={styles.actionCard}>
+          <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/subscriptions')}>
             <View style={[styles.actionIcon, { backgroundColor: '#A7F3D0' }]}>
               <Ionicons name="bag" size={24} color={Colors.success} />
             </View>
@@ -120,7 +263,7 @@ export default function ProfileScreen() {
             </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.actionCard}>
+          <TouchableOpacity style={styles.actionCard} onPress={() => router.push('/rewards')}>
             <View style={[styles.actionIcon, { backgroundColor: '#FDE68A' }]}>
               <Ionicons name="calendar" size={24} color={Colors.accent} />
             </View>
@@ -138,39 +281,53 @@ export default function ProfileScreen() {
             iconColor={Colors.accent}
             title="Coin Store"
             value="0 >"
+            onPress={() => router.push('/coins')}
           />
+
           <MenuItem
             icon="gift"
             iconColor={Colors.danger}
             title="Claim Your Reward"
             subtitle="Complete tasks to earn coins"
+            onPress={() => router.push('/rewards')}
           />
+
           <MenuItem
             icon="images"
             iconColor="#EC4899"
             title="Unlocked Photos"
+            onPress={() => router.push('/profile/photos')}
           />
+
           <MenuItem
             icon="people"
             iconColor="#8B5CF6"
             title="Invite Friends"
+            onPress={() => router.push('/invite')}
           />
+
           <MenuItem
             icon="trophy"
             iconColor={Colors.accent}
             title="My Level"
-            value={`Lv.${user.level} >`}
+            value={`Lv.${user.level}`}
+            onPress={() => router.push('/profile/level')}
           />
+
           <MenuItem
             icon="headset"
             iconColor="#3B82F6"
             title="Customer Service"
+            onPress={() => router.push('/support')}
           />
+
           <MenuItem
             icon="receipt"
             iconColor="#F97316"
             title="Billing Details"
+            onPress={() => router.push('/billing')}
           />
+
           <MenuItem
             icon="settings"
             iconColor="#6B7280"
@@ -179,12 +336,80 @@ export default function ProfileScreen() {
           />
         </View>
 
+        {/* Logout */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
 
         <View style={{ height: 32 }} />
       </ScrollView>
+
+      {/* Edit Profile Modal */}
+      <Modal
+        visible={editVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setEditVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Profile</Text>
+              <TouchableOpacity onPress={() => setEditVisible(false)}>
+                <Ionicons name="close" size={24} color={Colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <Text style={styles.fieldLabel}>Display Name</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={editDisplayName}
+              onChangeText={setEditDisplayName}
+              placeholder="Display name"
+              placeholderTextColor={Colors.textMuted}
+              maxLength={50}
+            />
+
+            <Text style={styles.fieldLabel}>Bio</Text>
+            <TextInput
+              style={[styles.modalInput, styles.bioInput]}
+              value={editBio}
+              onChangeText={setEditBio}
+              placeholder="Tell people about yourself"
+              placeholderTextColor={Colors.textMuted}
+              multiline
+              maxLength={160}
+            />
+
+            <Text style={styles.fieldLabel}>Avatar URL</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={editAvatar}
+              onChangeText={setEditAvatar}
+              placeholder="https://..."
+              placeholderTextColor={Colors.textMuted}
+              autoCapitalize="none"
+              keyboardType="url"
+            />
+
+            {/* Photo Upload */}
+            <View style={styles.uploadContainer}>
+              <Text style={styles.fieldLabel}>Upload Photo</Text>
+              <PhotoUploader onUploadSuccess={handlePhotoUploaded} />
+            </View>
+
+            <TouchableOpacity
+              style={[styles.saveButton, saving && styles.disabledButton]}
+              onPress={saveProfile}
+              disabled={saving}
+            >
+              <Text style={styles.saveButtonText}>
+                {saving ? 'Saving...' : 'Save Changes'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -193,6 +418,36 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  emptyTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: Colors.text,
+    marginTop: 16,
+  },
+  emptySubtitle: {
+    fontSize: 15,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  signInButton: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 32,
+    paddingVertical: 14,
+    borderRadius: 16,
+    marginTop: 24,
+  },
+  signInButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
   },
   header: {
     flexDirection: 'row',
@@ -238,6 +493,16 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: Colors.primaryLight,
   },
+  avatarPlaceholder: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 3,
+    borderColor: Colors.primaryLight,
+    backgroundColor: Colors.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   editButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -252,6 +517,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     marginBottom: 8,
+    flexWrap: 'wrap',
   },
   displayName: {
     fontSize: 22,
@@ -269,7 +535,7 @@ const styles = StyleSheet.create({
   },
   genderText: {
     color: '#fff',
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
   },
   vipBadge: {
@@ -285,6 +551,12 @@ const styles = StyleSheet.create({
     color: Colors.vip,
     fontSize: 10,
     fontWeight: '700',
+  },
+  bioText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    marginBottom: 12,
+    lineHeight: 20,
   },
   idRow: {
     flexDirection: 'row',
@@ -449,5 +721,70 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: Colors.danger,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.45)',
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 36,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: Colors.text,
+  },
+  fieldLabel: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.text,
+    marginBottom: 8,
+    marginTop: 12,
+  },
+  modalInput: {
+    height: 52,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    fontSize: 16,
+    color: Colors.text,
+    backgroundColor: Colors.background,
+  },
+  bioInput: {
+    height: 100,
+    paddingTop: 14,
+    textAlignVertical: 'top',
+  },
+  uploadContainer: {
+    marginTop: 12,
+  },
+  saveButton: {
+    height: 54,
+    borderRadius: 16,
+    backgroundColor: Colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 24,
+  },
+  disabledButton: {
+    opacity: 0.6,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
   },
 });

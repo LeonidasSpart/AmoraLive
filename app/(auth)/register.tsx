@@ -17,36 +17,65 @@ import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function RegisterScreen() {
+  const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
   const { register, isLoading } = useAuthStore();
   const router = useRouter();
 
   const handleRegister = async () => {
-    if (!username.trim() || !password.trim() || !displayName.trim()) {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanUsername = username.trim();
+    const cleanDisplayName = displayName.trim();
+    const cleanPassword = password.trim();
+
+    if (!cleanEmail || !cleanUsername || !cleanDisplayName || !cleanPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-    if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+
+    if (!cleanEmail.includes('@')) {
+      Alert.alert('Error', 'Please enter a valid email address');
       return;
     }
-    if (password.length < 6) {
+
+    if (cleanUsername.length < 3) {
+      Alert.alert('Error', 'Username must be at least 3 characters');
+      return;
+    }
+
+    if (cleanPassword.length < 6) {
       Alert.alert('Error', 'Password must be at least 6 characters');
       return;
     }
 
-    const success = await register({
-      username: username.trim(),
-      displayName: displayName.trim(),
-      password: password.trim(),
-    });
+    if (cleanPassword !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
 
-    if (success) {
-      Alert.alert('Welcome!', 'Your account has been created successfully.');
+    try {
+      const success = await register({
+        email: cleanEmail,
+        username: cleanUsername,
+        displayName: cleanDisplayName,
+        password: cleanPassword,
+      });
+
+      if (success) {
+        Alert.alert(
+          'Welcome!',
+          'Your account has been created successfully.',
+          [{ text: 'Continue', onPress: () => router.replace('/') }]
+        );
+      }
+    } catch (error) {
+      console.error('Registration screen error:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     }
   };
 
@@ -55,7 +84,10 @@ export default function RegisterScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={24} color={Colors.text} />
         </TouchableOpacity>
@@ -65,6 +97,20 @@ export default function RegisterScreen() {
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
+            <Ionicons name="mail-outline" size={20} color={Colors.textSecondary} />
+            <TextInput
+              style={styles.input}
+              placeholder="Email Address"
+              placeholderTextColor={Colors.textMuted}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+          </View>
+
+          <View style={styles.inputContainer}>
             <Ionicons name="person-outline" size={20} color={Colors.textSecondary} />
             <TextInput
               style={styles.input}
@@ -73,6 +119,7 @@ export default function RegisterScreen() {
               value={username}
               onChangeText={setUsername}
               autoCapitalize="none"
+              autoCorrect={false}
             />
           </View>
 
@@ -96,6 +143,7 @@ export default function RegisterScreen() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
+              autoCapitalize="none"
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
               <Ionicons
@@ -115,6 +163,7 @@ export default function RegisterScreen() {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry={!showPassword}
+              autoCapitalize="none"
             />
           </View>
 
@@ -136,37 +185,12 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.card,
-  },
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 28,
-    paddingTop: 60,
-    paddingBottom: 24,
-  },
-  backButton: {
-    marginBottom: 24,
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: Colors.text,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    marginTop: 4,
-    marginBottom: 32,
-  },
-  form: {
-    gap: 16,
-  },
+  container: { flex: 1, backgroundColor: Colors.card },
+  scrollContent: { flexGrow: 1, paddingHorizontal: 28, paddingTop: 60, paddingBottom: 24 },
+  backButton: { marginBottom: 24, width: 40, height: 40, justifyContent: 'center' },
+  title: { fontSize: 32, fontWeight: '800', color: Colors.text, letterSpacing: -0.5 },
+  subtitle: { fontSize: 16, color: Colors.textSecondary, marginTop: 4, marginBottom: 32 },
+  form: { gap: 16 },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -177,12 +201,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  input: {
-    flex: 1,
-    marginLeft: 12,
-    fontSize: 16,
-    color: Colors.text,
-  },
+  input: { flex: 1, marginLeft: 12, fontSize: 16, color: Colors.text },
   registerButton: {
     backgroundColor: Colors.primary,
     height: 56,
@@ -196,12 +215,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
   },
-  registerButtonDisabled: {
-    opacity: 0.7,
-  },
-  registerButtonText: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '700',
-  },
+  registerButtonDisabled: { opacity: 0.7 },
+  registerButtonText: { color: '#fff', fontSize: 17, fontWeight: '700' },
 });
