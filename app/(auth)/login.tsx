@@ -19,86 +19,174 @@ export default function LoginScreen() {
   const [account, setAccount] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+
   const { login, isLoading } = useAuthStore();
 
   const handleLogin = async () => {
-    if (!account.trim() || !password.trim()) {
+    const cleanAccount = account.trim();
+    const cleanPassword = password.trim();
+
+    if (!cleanAccount || !cleanPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-    const success = await login(account.trim(), password.trim());
+
+    const success = await login(
+      cleanAccount,
+      cleanPassword
+    );
+
     if (!success) {
-      Alert.alert('Error', 'Invalid credentials');
+      Alert.alert(
+        'Login Failed',
+        'Invalid email/username or password.'
+      );
     }
   };
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={
+        Platform.OS === 'ios'
+          ? 'padding'
+          : 'height'
+      }
       style={styles.container}
     >
       <View style={styles.content}>
         <View style={styles.logoContainer}>
           <View style={styles.logoCircle}>
-            <Ionicons name="videocam" size={48} color="#fff" />
+            <Ionicons
+              name="videocam"
+              size={48}
+              color="#fff"
+            />
           </View>
-          <Text style={styles.title}>LiveConnect</Text>
-          <Text style={styles.subtitle}>Stream. Connect. Earn.</Text>
+
+          <Text style={styles.title}>
+            LiveConnect
+          </Text>
+
+          <Text style={styles.subtitle}>
+            Stream. Connect. Earn.
+          </Text>
         </View>
 
         <View style={styles.form}>
+          {/* Account */}
           <View style={styles.inputContainer}>
-            <Ionicons name="person-outline" size={20} color={Colors.textSecondary} />
+            <Ionicons
+              name="person-outline"
+              size={20}
+              color={Colors.textSecondary}
+            />
+
             <TextInput
               style={styles.input}
-              placeholder="Account ID or Username"
-              placeholderTextColor={Colors.textMuted}
+              placeholder="Email or Username"
+              placeholderTextColor={
+                Colors.textMuted
+              }
               value={account}
               onChangeText={setAccount}
               autoCapitalize="none"
+              autoCorrect={false}
+              keyboardType="email-address"
+              textContentType="username"
+              autoComplete="username"
+              editable={!isLoading}
             />
           </View>
 
+          {/* Password */}
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color={Colors.textSecondary} />
+            <Ionicons
+              name="lock-closed-outline"
+              size={20}
+              color={Colors.textSecondary}
+            />
+
             <TextInput
               style={styles.input}
               placeholder="Password"
-              placeholderTextColor={Colors.textMuted}
+              placeholderTextColor={
+                Colors.textMuted
+              }
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
+              textContentType="password"
+              autoComplete="password"
+              editable={!isLoading}
             />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+
+            <TouchableOpacity
+              onPress={() =>
+                setShowPassword(
+                  !showPassword
+                )
+              }
+              disabled={isLoading}
+            >
               <Ionicons
-                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                name={
+                  showPassword
+                    ? 'eye-off-outline'
+                    : 'eye-outline'
+                }
                 size={20}
-                color={Colors.textSecondary}
+                color={
+                  Colors.textSecondary
+                }
               />
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.forgotButton}>
-            <Text style={styles.forgotText}>Forgot password?</Text>
+          {/* Forgot Password */}
+          <TouchableOpacity
+            style={styles.forgotButton}
+            disabled={isLoading}
+          >
+            <Text style={styles.forgotText}>
+              Forgot password?
+            </Text>
           </TouchableOpacity>
 
+          {/* Login */}
           <TouchableOpacity
-            style={[styles.loginButton, isLoading && styles.loginButtonDisabled]}
+            style={[
+              styles.loginButton,
+              isLoading &&
+                styles.loginButtonDisabled,
+            ]}
             onPress={handleLogin}
             disabled={isLoading}
           >
             {isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.loginButtonText}>Sign In</Text>
+              <Text style={styles.loginButtonText}>
+                Sign In
+              </Text>
             )}
           </TouchableOpacity>
 
+          {/* Register */}
           <View style={styles.registerContainer}>
-            <Text style={styles.registerText}>Don't have an account? </Text>
-            <Link href="/(auth)/register" asChild>
-              <TouchableOpacity>
-                <Text style={styles.registerLink}>Sign Up</Text>
+            <Text style={styles.registerText}>
+              Don't have an account?{' '}
+            </Text>
+
+            <Link
+              href="/(auth)/register"
+              asChild
+            >
+              <TouchableOpacity
+                disabled={isLoading}
+              >
+                <Text style={styles.registerLink}>
+                  Sign Up
+                </Text>
               </TouchableOpacity>
             </Link>
           </View>
@@ -113,15 +201,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.card,
   },
+
   content: {
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 28,
   },
+
   logoContainer: {
     alignItems: 'center',
     marginBottom: 48,
   },
+
   logoCircle: {
     width: 96,
     height: 96,
@@ -131,25 +222,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
     shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
     shadowOpacity: 0.3,
     shadowRadius: 16,
     elevation: 8,
   },
+
   title: {
     fontSize: 32,
     fontWeight: '800',
     color: Colors.text,
     letterSpacing: -0.5,
   },
+
   subtitle: {
     fontSize: 16,
     color: Colors.textSecondary,
     marginTop: 4,
   },
+
   form: {
     gap: 16,
   },
+
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -160,20 +258,24 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
+
   input: {
     flex: 1,
     marginLeft: 12,
     fontSize: 16,
     color: Colors.text,
   },
+
   forgotButton: {
     alignSelf: 'flex-end',
   },
+
   forgotText: {
     color: Colors.primary,
     fontSize: 14,
     fontWeight: '600',
   },
+
   loginButton: {
     backgroundColor: Colors.primary,
     height: 56,
@@ -181,28 +283,36 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
   },
+
   loginButtonDisabled: {
     opacity: 0.7,
   },
+
   loginButtonText: {
     color: '#fff',
     fontSize: 17,
     fontWeight: '700',
   },
+
   registerContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 8,
   },
+
   registerText: {
     color: Colors.textSecondary,
     fontSize: 15,
   },
+
   registerLink: {
     color: Colors.primary,
     fontSize: 15,
