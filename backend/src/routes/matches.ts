@@ -20,11 +20,15 @@ router.get('/', authenticate, async (req: AuthRequest, res) => {
 });
 
 router.delete('/:id', authenticate, async (req: AuthRequest, res) => {
-  const match = await prisma.match.findUnique({ where: { id: req.params.id } });
+  const matchId = String(req.params.id);
+  const match = await prisma.match.findUnique({ where: { id: matchId } });
   if (!match || (match.userAId !== req.user.id && match.userBId !== req.user.id)) {
     return res.status(404).json({ message: 'Match not found' });
   }
-  await prisma.match.update({ where: { id: match.id }, data: { status: 'UNMATCHED' } });
+  await prisma.match.update({
+    where: { id: matchId },
+    data: { status: 'UNMATCHED' },
+  });
   res.json({ success: true });
 });
 
