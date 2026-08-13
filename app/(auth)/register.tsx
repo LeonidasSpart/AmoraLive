@@ -33,7 +33,6 @@ export default function RegisterScreen() {
     const cleanDisplayName = displayName.trim();
     const cleanPassword = password.trim();
 
-    // Validation
     if (!cleanEmail || !cleanUsername || !cleanDisplayName || !cleanPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
@@ -56,7 +55,6 @@ export default function RegisterScreen() {
     }
 
     setLoading(true);
-
     try {
       const response = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
@@ -68,16 +66,13 @@ export default function RegisterScreen() {
           password: cleanPassword,
         }),
       });
-
       const data = await response.json();
 
       if (response.ok) {
-        // Success!
-        Alert.alert('Welcome!', 'Your account has been created.', [
-          { text: 'Continue', onPress: () => router.replace('/') },
+        Alert.alert('Welcome!', 'Account created successfully.', [
+          { text: 'Continue', onPress: () => router.replace('/(tabs)') },
         ]);
       } else {
-        // Show the error message from the backend
         Alert.alert('Registration Failed', data?.message || 'Something went wrong');
       }
     } catch (error: any) {
@@ -180,11 +175,7 @@ export default function RegisterScreen() {
             onPress={handleRegister}
             disabled={loading}
           >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.registerButtonText}>Create Account</Text>
-            )}
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.registerButtonText}>Create Account</Text>}
           </TouchableOpacity>
         </View>
       </ScrollView>
