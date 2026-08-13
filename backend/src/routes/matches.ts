@@ -1,24 +1,28 @@
 import { Router } from 'express';
-import { prisma } from '../prisma';
-import { authenticate, AuthRequest } from '../middleware/auth';
+import { prisma } from '../prisma.js';
+import { authenticate, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
 
 router.get('/', authenticate, async (req: AuthRequest, res) => {
   const matches = await prisma.match.findMany({
-    where: { OR: [{ user1Id: req.user.id }, { user2Id: req.user.id }], status: 'ACTIVE' },
-    include: {
-      user1: { include: { photos: true } },
-      user2: { include: { photos: true } },
+    where: {
+      status: 'ACTIVE',
+      OR: [{ userAId: req.user.id }, { userBId: req.user.id }],
     },
+    include: {
+      userA: { include: { photos: true } },
+      userB: { include: { photos: true } },
+    },
+    orderBy: { updatedAt: 'desc' },
   });
   res.json(matches);
 });
 
 router.delete('/:id', authenticate, async (req: AuthRequest, res) => {
-  const match = await prisma.match.findUnique({ where: { id: parseInt(req.params.id) } });
-  if (!match || (match.user1Id !== req.user.id && match.user2Id !== req.user.id)) {
-    return res.status(404).json({ error: 'Match not found' });
+  const match = await prisma.match.findUnique({ where: { id: req.params.id } });
+  if (!match || (match.userAId !== req.user.id && match.userBId !== req.user.id)) {
+    return res.status(404).json({ message: 'Match not found' });
   }
   await prisma.match.update({ where: { id: match.id }, data: { status: 'UNMATCHED' } });
   res.json({ success: true });
