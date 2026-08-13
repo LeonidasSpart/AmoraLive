@@ -4,20 +4,17 @@ import { authenticate, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
 
-// In-memory store for active streams (replace with DB later)
 const activeStreams = new Map<string, any>();
 
 const createStreamSchema = z.object({
   title: z.string().min(1).max(100),
 });
 
-// GET /api/live/active – list all active streams
 router.get('/active', authenticate, async (req: AuthRequest, res) => {
   const streams = Array.from(activeStreams.values());
   res.json(streams);
 });
 
-// POST /api/live/create – start a new stream
 router.post('/create', authenticate, async (req: AuthRequest, res) => {
   const parsed = createStreamSchema.safeParse(req.body);
   if (!parsed.success) {
@@ -30,7 +27,6 @@ router.post('/create', authenticate, async (req: AuthRequest, res) => {
   const { title } = parsed.data;
   const streamId = `stream_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
-  // Mock ingest and playback URLs – replace with Agora/Mux later
   const ingestUrl = `rtmp://ingest.example.com/live/${streamId}`;
   const playbackUrl = `https://playback.example.com/live/${streamId}.m3u8`;
 
@@ -51,12 +47,10 @@ router.post('/create', authenticate, async (req: AuthRequest, res) => {
 
   activeStreams.set(streamId, streamData);
 
-  // FIXED: streamData already contains id, ingestUrl, playbackUrl
-  // No need to duplicate them before spreading
+  // FIXED: streamData already has id, ingestUrl, playbackUrl
   res.status(201).json(streamData);
 });
 
-// POST /api/live/end/:streamId – end a stream
 router.post('/end/:streamId', authenticate, async (req: AuthRequest, res) => {
   const streamId = String(req.params.streamId);
   const stream = activeStreams.get(streamId);
