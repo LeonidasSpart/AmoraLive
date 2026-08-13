@@ -160,7 +160,7 @@ async function authenticate(
       message: "Invalid or expired authentication token",
     });
   }
-});
+}
 
 app.get("/", (_req, res) => {
   res.json({
