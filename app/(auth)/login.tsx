@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Alert, // 👈 ADDED
 } from 'react-native';
 import { Link } from 'expo-router';
 import { Colors } from '@/constants/Colors';
@@ -58,8 +59,6 @@ export default function LoginScreen() {
         // ✅ RELOAD the app to root – the root layout will see the tokens
         if (typeof window !== 'undefined') {
           window.location.href = '/';
-        } else {
-          // For native, we'd use router.replace – but we're on web
         }
       } else {
         showAlert('Login Failed', data?.message || 'Invalid credentials');
