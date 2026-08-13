@@ -24,11 +24,9 @@ const api: AxiosInstance = axios.create({
 api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const token = await AsyncStorage.getItem(ACCESS_TOKEN_KEY);
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
   },
   (error) => Promise.reject(error)
@@ -36,22 +34,9 @@ api.interceptors.request.use(
 
 /**
  * Handle expired access tokens.
- *
- * Important:
- * Your current backend must expose:
- *
- * POST /api/auth/refresh
- *
- * with:
- *
- * { refreshToken }
- *
- * If your backend does not have refresh-token support yet,
- * this interceptor will simply log the user out when the
- * access token expires.
+ * Expects POST /auth/refresh with { refreshToken }
  */
 let isRefreshing = false;
-
 let failedQueue: Array<{
   resolve: (token: string) => void;
   reject: (error: unknown) => void;
@@ -65,13 +50,11 @@ const processQueue = (error: unknown, token: string | null = null) => {
       promise.resolve(token);
     }
   });
-
   failedQueue = [];
 };
 
 api.interceptors.response.use(
   (response) => response,
-
   async (error: AxiosError) => {
     const originalRequest = error.config as
       | (InternalAxiosRequestConfig & { _retry?: boolean })
@@ -86,7 +69,6 @@ api.interceptors.response.use(
     }
 
     const refreshToken = await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
-
     if (!refreshToken) {
       await clearTokens();
       return Promise.reject(error);
@@ -107,44 +89,27 @@ api.interceptors.response.use(
     try {
       const response = await axios.post(
         `${API_BASE_URL}/auth/refresh`,
-        {
-          refreshToken,
-        }
+        { refreshToken }
       );
 
-      const newAccessToken =
-        response.data?.accessToken ||
-        response.data?.token;
-
-      const newRefreshToken =
-        response.data?.refreshToken;
+      const newAccessToken = response.data?.accessToken || response.data?.token;
+      const newRefreshToken = response.data?.refreshToken;
 
       if (!newAccessToken) {
         throw new Error("No access token returned from refresh endpoint");
       }
 
-      await AsyncStorage.setItem(
-        ACCESS_TOKEN_KEY,
-        newAccessToken
-      );
-
+      await AsyncStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
       if (newRefreshToken) {
-        await AsyncStorage.setItem(
-          REFRESH_TOKEN_KEY,
-          newRefreshToken
-        );
+        await AsyncStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken);
       }
 
       processQueue(null, newAccessToken);
-
-      originalRequest.headers.Authorization =
-        `Bearer ${newAccessToken}`;
-
+      originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
       return api(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError, null);
       await clearTokens();
-
       return Promise.reject(refreshError);
     } finally {
       isRefreshing = false;
@@ -156,20 +121,10 @@ api.interceptors.response.use(
 /* Token helpers                                                               */
 /* -------------------------------------------------------------------------- */
 
-export const saveTokens = async (
-  accessToken: string,
-  refreshToken?: string
-) => {
-  await AsyncStorage.setItem(
-    ACCESS_TOKEN_KEY,
-    accessToken
-  );
-
+export const saveTokens = async (accessToken: string, refreshToken?: string) => {
+  await AsyncStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
   if (refreshToken) {
-    await AsyncStorage.setItem(
-      REFRESH_TOKEN_KEY,
-      refreshToken
-    );
+    await AsyncStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
   }
 };
 
@@ -182,10 +137,7 @@ export const getRefreshToken = async () => {
 };
 
 export const clearTokens = async () => {
-  await AsyncStorage.multiRemove([
-    ACCESS_TOKEN_KEY,
-    REFRESH_TOKEN_KEY,
-  ]);
+  await AsyncStorage.multiRemove([ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY]);
 };
 
 /* -------------------------------------------------------------------------- */
@@ -199,46 +151,26 @@ export const register = async (data: {
   displayName: string;
 }) => {
   const response = await api.post("/auth/register", data);
-
   if (response.data?.accessToken) {
-    await saveTokens(
-      response.data.accessToken,
-      response.data.refreshToken
-    );
+    await saveTokens(response.data.accessToken, response.data.refreshToken);
   }
-
   return response.data;
 };
 
-export const login = async (
-  email: string,
-  password: string
-) => {
-  const response = await api.post("/auth/login", {
-    email,
-    password,
-  });
-
+export const login = async (email: string, password: string) => {
+  const response = await api.post("/auth/login", { email, password });
   if (response.data?.accessToken) {
-    await saveTokens(
-      response.data.accessToken,
-      response.data.refreshToken
-    );
+    await saveTokens(response.data.accessToken, response.data.refreshToken);
   }
-
   return response.data;
 };
 
 export const logout = async () => {
   try {
-    const refreshToken =
-      await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
-
-    await api.post("/auth/logout", {
-      refreshToken,
-    });
+    const refreshToken = await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
+    await api.post("/auth/logout", { refreshToken });
   } catch {
-    // We still clear local authentication.
+    // Ignore
   } finally {
     await clearTokens();
   }
@@ -271,16 +203,8 @@ export const updateProfile = async (data: {
   return response.data;
 };
 
-export const getDiscoverUsers = async (
-  params?: {
-    page?: number;
-    limit?: number;
-  }
-) => {
-  const response = await api.get("/users/discover", {
-    params,
-  });
-
+export const getDiscoverUsers = async (params?: { page?: number; limit?: number }) => {
+  const response = await api.get("/users/discover", { params });
   return response.data;
 };
 
@@ -298,21 +222,14 @@ export const updatePreferences = async (data: {
   maxAge?: number;
   preferredGender?: "MALE" | "FEMALE" | "OTHER";
   maxDistanceKm?: number;
-  relationshipGoal?:
-    | "LIFE_PARTNER"
-    | "MARRIAGE"
-    | "LONG_TERM";
+  relationshipGoal?: "LIFE_PARTNER" | "MARRIAGE" | "LONG_TERM";
 }) => {
-  const response = await api.put(
-    "/preferences",
-    data
-  );
-
+  const response = await api.put("/preferences", data);
   return response.data;
 };
 
 /* -------------------------------------------------------------------------- */
-/* Photos                                                                      */
+/* Photos (URL-based)                                                         */
 /* -------------------------------------------------------------------------- */
 
 export const getMyPhotos = async () => {
@@ -321,28 +238,30 @@ export const getMyPhotos = async () => {
 };
 
 export const addPhoto = async (url: string) => {
-  const response = await api.post("/photos", {
-    url,
-  });
-
+  const response = await api.post("/photos", { url });
   return response.data;
 };
 
 export const deletePhoto = async (photoId: string) => {
-  const response = await api.delete(
-    `/photos/${photoId}`
-  );
-
+  const response = await api.delete(`/photos/${photoId}`);
   return response.data;
 };
 
-export const setPrimaryPhoto = async (
-  photoId: string
-) => {
-  const response = await api.patch(
-    `/photos/${photoId}/primary`
-  );
+export const setPrimaryPhoto = async (photoId: string) => {
+  const response = await api.patch(`/photos/${photoId}/primary`);
+  return response.data;
+};
 
+/* -------------------------------------------------------------------------- */
+/* Photo Upload (multipart/form-data) – NEW                                   */
+/* -------------------------------------------------------------------------- */
+
+export const uploadPhoto = async (file: { uri: string; name: string; type: string }) => {
+  const formData = new FormData();
+  formData.append('photo', file as any);
+  const response = await api.post('/photos/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
   return response.data;
 };
 
@@ -351,18 +270,12 @@ export const setPrimaryPhoto = async (
 /* -------------------------------------------------------------------------- */
 
 export const likeUser = async (userId: string) => {
-  const response = await api.post("/likes", {
-    receiverId: userId,
-  });
-
+  const response = await api.post("/likes", { receiverId: userId });
   return response.data;
 };
 
 export const unlikeUser = async (userId: string) => {
-  const response = await api.delete(
-    `/likes/${userId}`
-  );
-
+  const response = await api.delete(`/likes/${userId}`);
   return response.data;
 };
 
@@ -386,18 +299,12 @@ export const getMatches = async () => {
 };
 
 export const getMatch = async (matchId: string) => {
-  const response = await api.get(
-    `/matches/${matchId}`
-  );
-
+  const response = await api.get(`/matches/${matchId}`);
   return response.data;
 };
 
 export const unmatch = async (matchId: string) => {
-  const response = await api.patch(
-    `/matches/${matchId}/unmatch`
-  );
-
+  const response = await api.patch(`/matches/${matchId}/unmatch`);
   return response.data;
 };
 
@@ -405,49 +312,18 @@ export const unmatch = async (matchId: string) => {
 /* Messages                                                                    */
 /* -------------------------------------------------------------------------- */
 
-export const getMessages = async (
-  matchId: string,
-  params?: {
-    page?: number;
-    limit?: number;
-  }
-) => {
-  const response = await api.get(
-    `/matches/${matchId}/messages`,
-    {
-      params,
-    }
-  );
-
+export const getMessages = async (matchId: string, params?: { page?: number; limit?: number }) => {
+  const response = await api.get(`/matches/${matchId}/messages`, { params });
   return response.data;
 };
 
-export const sendMessage = async (
-  matchId: string,
-  content: string,
-  type:
-    | "TEXT"
-    | "IMAGE"
-    | "SYSTEM" = "TEXT"
-) => {
-  const response = await api.post(
-    `/matches/${matchId}/messages`,
-    {
-      content,
-      type,
-    }
-  );
-
+export const sendMessage = async (matchId: string, content: string, type: "TEXT" | "IMAGE" | "SYSTEM" = "TEXT") => {
+  const response = await api.post(`/matches/${matchId}/messages`, { content, type });
   return response.data;
 };
 
-export const markMessageRead = async (
-  messageId: string
-) => {
-  const response = await api.patch(
-    `/messages/${messageId}/read`
-  );
-
+export const markMessageRead = async (messageId: string) => {
+  const response = await api.patch(`/messages/${messageId}/read`);
   return response.data;
 };
 
@@ -456,53 +332,31 @@ export const markMessageRead = async (
 /* -------------------------------------------------------------------------- */
 
 export const getNotifications = async () => {
-  const response = await api.get(
-    "/notifications"
-  );
-
+  const response = await api.get("/notifications");
   return response.data;
 };
 
-export const markNotificationRead = async (
-  notificationId: string
-) => {
-  const response = await api.patch(
-    `/notifications/${notificationId}/read`
-  );
-
+export const markNotificationRead = async (notificationId: string) => {
+  const response = await api.patch(`/notifications/${notificationId}/read`);
   return response.data;
 };
 
-export const markAllNotificationsRead =
-  async () => {
-    const response = await api.patch(
-      "/notifications/read-all"
-    );
-
-    return response.data;
-  };
+export const markAllNotificationsRead = async () => {
+  const response = await api.patch("/notifications/read-all");
+  return response.data;
+};
 
 /* -------------------------------------------------------------------------- */
 /* Blocks                                                                      */
 /* -------------------------------------------------------------------------- */
 
-export const blockUser = async (
-  userId: string
-) => {
-  const response = await api.post("/blocks", {
-    blockedId: userId,
-  });
-
+export const blockUser = async (userId: string) => {
+  const response = await api.post("/blocks", { blockedId: userId });
   return response.data;
 };
 
-export const unblockUser = async (
-  userId: string
-) => {
-  const response = await api.delete(
-    `/blocks/${userId}`
-  );
-
+export const unblockUser = async (userId: string) => {
+  const response = await api.delete(`/blocks/${userId}`);
   return response.data;
 };
 
@@ -515,17 +369,8 @@ export const getBlockedUsers = async () => {
 /* Reports                                                                     */
 /* -------------------------------------------------------------------------- */
 
-export const reportUser = async (
-  userId: string,
-  reason: string,
-  details?: string
-) => {
-  const response = await api.post("/reports", {
-    reportedId: userId,
-    reason,
-    details,
-  });
-
+export const reportUser = async (userId: string, reason: string, details?: string) => {
+  const response = await api.post("/reports", { reportedId: userId, reason, details });
   return response.data;
 };
 
@@ -534,18 +379,12 @@ export const reportUser = async (
 /* -------------------------------------------------------------------------- */
 
 export const getSubscription = async () => {
-  const response = await api.get(
-    "/subscriptions/me"
-  );
-
+  const response = await api.get("/subscriptions/me");
   return response.data;
 };
 
 export const getSubscriptions = async () => {
-  const response = await api.get(
-    "/subscriptions"
-  );
-
+  const response = await api.get("/subscriptions");
   return response.data;
 };
 
