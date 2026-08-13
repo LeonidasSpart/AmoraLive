@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { prisma } from '../prisma';
-import { authenticate, AuthRequest } from '../middleware/auth';
+import { prisma } from '../prisma.js';
+import { authenticate, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -11,7 +11,7 @@ router.get('/', authenticate, async (req: AuthRequest, res) => {
 
 router.get('/active', authenticate, async (req: AuthRequest, res) => {
   const sub = await prisma.subscription.findFirst({
-    where: { userId: req.user.id, status: 'ACTIVE', endDate: { gt: new Date() } },
+    where: { userId: req.user.id, status: 'ACTIVE', expiresAt: { gt: new Date() } },
   });
   res.json(sub);
 });
