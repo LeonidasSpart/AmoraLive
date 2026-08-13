@@ -51,12 +51,9 @@ router.post('/create', authenticate, async (req: AuthRequest, res) => {
 
   activeStreams.set(streamId, streamData);
 
-  res.status(201).json({
-    id: streamId,
-    ingestUrl,
-    playbackUrl,
-    ...streamData,
-  });
+  // FIXED: streamData already contains id, ingestUrl, playbackUrl
+  // No need to duplicate them before spreading
+  res.status(201).json(streamData);
 });
 
 // POST /api/live/end/:streamId – end a stream
