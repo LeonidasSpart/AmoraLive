@@ -67,6 +67,30 @@ const normalizeUser = (user: any): User => ({
   goal: user.goal,
 });
 
+// ✅ Web‑safe storage adapter – works on both web and native
+const webSafeStorage = {
+  getItem: async (key: string): Promise<string | null> => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem(key);
+    }
+    return AsyncStorage.getItem(key);
+  },
+  setItem: async (key: string, value: string): Promise<void> => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(key, value);
+    } else {
+      await AsyncStorage.setItem(key, value);
+    }
+  },
+  removeItem: async (key: string): Promise<void> => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(key);
+    } else {
+      await AsyncStorage.removeItem(key);
+    }
+  },
+};
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -89,8 +113,7 @@ export const useAuthStore = create<AuthState>()(
             throw new Error("Login response did not contain authentication tokens");
           }
           const user = normalizeUser(data.user);
-          await AsyncStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken);
-          await AsyncStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
+          // ✅ Store tokens in the store's state – persist middleware will save them via the adapter
           set({ user, isAuthenticated: true, isLoading: false });
           return true;
         } catch (error: any) {
@@ -102,7 +125,6 @@ export const useAuthStore = create<AuthState>()(
       },
 
       register: async (data) => {
-        console.log("🔵 Store register called with:", data);
         set({ isLoading: true });
         try {
           const response = await fetch(`${API_URL}/api/auth/register`, {
@@ -121,8 +143,6 @@ export const useAuthStore = create<AuthState>()(
             }),
           });
           const result = await response.json();
-          console.log("🔵 Registration response:", result);
-
           if (!response.ok) {
             throw new Error(result?.message || "Registration failed");
           }
@@ -134,9 +154,6 @@ export const useAuthStore = create<AuthState>()(
           }
 
           const user = normalizeUser(result.user);
-          await AsyncStorage.setItem(ACCESS_TOKEN_KEY, result.accessToken);
-          await AsyncStorage.setItem(REFRESH_TOKEN_KEY, result.refreshToken);
-
           set({ user, isAuthenticated: true, isLoading: false });
           return true;
         } catch (error: any) {
@@ -149,19 +166,13 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         try {
-          const refreshToken = await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
-          if (refreshToken) {
-            await fetch(`${API_URL}/api/auth/logout`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ refreshToken }),
-            });
-          }
+          // Optionally call the logout endpoint – but we can just clear local state
+          // The persist middleware will remove the stored data.
+          set({ user: null, isAuthenticated: false, isLoading: false });
+          // Also clear the storage explicitly
+          await webSafeStorage.removeItem('auth-storage');
         } catch (error) {
           console.error("AMORA logout error:", error);
-        } finally {
-          await AsyncStorage.multiRemove([ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY]);
-          set({ user: null, isAuthenticated: false, isLoading: false });
         }
       },
 
@@ -179,7 +190,7 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: "auth-storage",
-      storage: createJSONStorage(() => AsyncStorage),
+      storage: createJSONStorage(() => webSafeStorage),
     }
   )
 );
