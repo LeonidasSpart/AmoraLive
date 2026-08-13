@@ -28,6 +28,7 @@ export default function RegisterScreen() {
   const router = useRouter();
 
   const handleRegister = async () => {
+    console.log('🔵 Register button pressed');
     const cleanEmail = email.trim().toLowerCase();
     const cleanUsername = username.trim();
     const cleanDisplayName = displayName.trim();
@@ -58,6 +59,7 @@ export default function RegisterScreen() {
       return;
     }
 
+    console.log('🔵 Calling register with:', { email: cleanEmail, username: cleanUsername, displayName: cleanDisplayName });
     try {
       const success = await register({
         email: cleanEmail,
@@ -65,7 +67,7 @@ export default function RegisterScreen() {
         displayName: cleanDisplayName,
         password: cleanPassword,
       });
-
+      console.log('🔵 Register result:', success);
       if (success) {
         Alert.alert(
           'Welcome!',
@@ -74,7 +76,7 @@ export default function RegisterScreen() {
         );
       }
     } catch (error) {
-      console.error('Registration screen error:', error);
+      console.error('🔵 Registration screen error:', error);
       Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     }
   };
