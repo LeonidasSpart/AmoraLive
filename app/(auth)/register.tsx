@@ -12,17 +12,9 @@ import {
   Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useAuthStore } from '@/hooks/useAuthStore';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
-import { API_URL } from '@/constants/api';
-
-const showAlert = (title: string, message?: string) => {
-  if (typeof window !== 'undefined') {
-    window.alert(title + (message ? '\n' + message : ''));
-  } else {
-    Alert.alert(title, message);
-  }
-};
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
@@ -31,8 +23,8 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
 
+  const { register, isLoading } = useAuthStore();
   const router = useRouter();
 
   const handleRegister = async () => {
@@ -42,62 +34,41 @@ export default function RegisterScreen() {
     const cleanPassword = password.trim();
 
     if (!cleanEmail || !cleanUsername || !cleanDisplayName || !cleanPassword) {
-      showAlert('Error', 'Please fill in all fields');
+      Alert.alert('Error', 'Please fill in all fields');
       return;
     }
     if (!cleanEmail.includes('@')) {
-      showAlert('Error', 'Please enter a valid email address');
+      Alert.alert('Error', 'Please enter a valid email address');
       return;
     }
     if (cleanUsername.length < 3) {
-      showAlert('Error', 'Username must be at least 3 characters');
+      Alert.alert('Error', 'Username must be at least 3 characters');
       return;
     }
     if (cleanPassword.length < 6) {
-      showAlert('Error', 'Password must be at least 6 characters');
+      Alert.alert('Error', 'Password must be at least 6 characters');
       return;
     }
     if (cleanPassword !== confirmPassword) {
-      showAlert('Error', 'Passwords do not match');
+      Alert.alert('Error', 'Passwords do not match');
       return;
     }
 
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_URL}/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: cleanEmail,
-          username: cleanUsername,
-          displayName: cleanDisplayName,
-          password: cleanPassword,
-        }),
-      });
-      const data = await response.json();
+    const success = await register({
+      email: cleanEmail,
+      username: cleanUsername,
+      displayName: cleanDisplayName,
+      password: cleanPassword,
+    });
 
-      if (response.ok) {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('amora_access_token', data.accessToken);
-          localStorage.setItem('amora_refresh_token', data.refreshToken);
-          localStorage.setItem('amora_user', JSON.stringify(data.user));
-        }
-        showAlert('Welcome!', 'Account created successfully.');
-        // FORCE a full page reload to the tabs
-        if (typeof window !== 'undefined') {
-          window.location.href = '/(tabs)';
-        } else {
-          router.replace('/(tabs)');
-        }
-      } else if (response.status === 409) {
-        showAlert('Account Exists', 'This email or username is already taken.');
+    if (success) {
+      Alert.alert('Welcome!', 'Account created successfully.');
+      // Force reload to pick up auth state
+      if (typeof window !== 'undefined') {
+        window.location.reload();
       } else {
-        showAlert('Registration Failed', data?.message || 'Something went wrong');
+        router.replace('/(tabs)');
       }
-    } catch (error: any) {
-      showAlert('Network Error', error.message || 'Could not reach the server');
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -190,11 +161,11 @@ export default function RegisterScreen() {
           </View>
 
           <TouchableOpacity
-            style={[styles.registerButton, loading && styles.registerButtonDisabled]}
+            style={[styles.registerButton, isLoading && styles.registerButtonDisabled]}
             onPress={handleRegister}
-            disabled={loading}
+            disabled={isLoading}
           >
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.registerButtonText}>Create Account</Text>}
+            {isLoading ? <ActivityIndicator color="#fff" /> : <Text style={styles.registerButtonText}>Create Account</Text>}
           </TouchableOpacity>
         </View>
       </ScrollView>
