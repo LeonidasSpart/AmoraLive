@@ -32,10 +32,8 @@ export default function LoginScreen() {
 
     const success = await login(cleanAccount, cleanPassword);
     if (success) {
-      // The store's isAuthenticated will be true, and the layout will redirect.
-      // On web, we can force a reload to re-run the root layout check.
+      // Force a full page reload so the layout reads the token
       if (typeof window !== 'undefined') {
-        // Force a full page reload to ensure the layout picks up the new auth state
         window.location.reload();
       }
     }
