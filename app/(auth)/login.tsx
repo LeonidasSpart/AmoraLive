@@ -48,7 +48,7 @@ export default function LoginScreen() {
       const data = await response.json();
 
       if (response.ok) {
-        // Save tokens
+        // Save tokens to localStorage (web) and AsyncStorage (native)
         if (typeof window !== 'undefined') {
           localStorage.setItem('amora_access_token', data.accessToken);
           localStorage.setItem('amora_refresh_token', data.refreshToken);
@@ -56,9 +56,9 @@ export default function LoginScreen() {
         }
         showAlert('Success', 'Logged in!');
 
-        // ✅ Redirect to root – the root layout will detect the token
+        // FORCE a full page reload to the tabs
         if (typeof window !== 'undefined') {
-          window.location.href = '/';
+          window.location.href = '/(tabs)';
         }
       } else {
         showAlert('Login Failed', data?.message || 'Invalid credentials');
