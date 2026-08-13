@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useRouter } from 'expo-router';
+import { useRouter } from 'expo-router'; // ✅ Use expo-router, not react-router
 
 export default function Index() {
   const router = useRouter();
@@ -17,5 +17,5 @@ export default function Index() {
     }
   }, []);
 
-  return null; // This screen does not render anything
+  return null;
 }
