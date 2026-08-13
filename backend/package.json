@@ -6,7 +6,7 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc",
+    "build": "prisma generate && tsc",
     "start": "node dist/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
@@ -15,27 +15,27 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1109.0",
     "@prisma/adapter-pg": "^7.9.1",
-    "@prisma/client": "latest",
+    "@prisma/client": "^7.9.1",
     "bcryptjs": "^3.0.3",
-    "cors": "latest",
-    "dotenv": "latest",
-    "express": "latest",
-    "helmet": "latest",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.3",
-    "multer": "^2.2.0",
+    "multer": "^1.4.5-lts.1",
     "pg": "^8.23.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/cors": "latest",
-    "@types/express": "latest",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/multer": "^2.2.0",
-    "@types/node": "latest",
+    "@types/multer": "^1.4.12",
+    "@types/node": "^22.0.0",
     "@types/pg": "^8.21.0",
-    "prisma": "latest",
-    "tsx": "latest",
-    "typescript": "latest"
+    "prisma": "^7.9.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
   },
   "type": "module"
 }
