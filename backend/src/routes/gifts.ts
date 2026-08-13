@@ -1,11 +1,9 @@
 import { Router } from 'express';
-import { prisma } from '../prisma';
-import { authenticate, AuthRequest } from '../middleware/auth';
+import { authenticate, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
 
 router.get('/catalog', authenticate, async (req, res) => {
-  // Hardcoded or from DB
   const gifts = [
     { id: 'g1', name: 'Rose', cost: 10 },
     { id: 'g2', name: 'Teddy', cost: 25 },
@@ -15,8 +13,7 @@ router.get('/catalog', authenticate, async (req, res) => {
 });
 
 router.post('/send', authenticate, async (req: AuthRequest, res) => {
-  const { giftId, receiverId } = req.body;
-  // Validate, deduct coins, create transaction
+  // Implement gift sending logic with coin deduction
   res.json({ success: true });
 });
 
