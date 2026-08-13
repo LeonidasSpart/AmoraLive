@@ -33,12 +33,7 @@ export default function RegisterScreen() {
     const cleanDisplayName = displayName.trim();
     const cleanPassword = password.trim();
 
-    if (
-      !cleanEmail ||
-      !cleanUsername ||
-      !cleanDisplayName ||
-      !cleanPassword
-    ) {
+    if (!cleanEmail || !cleanUsername || !cleanDisplayName || !cleanPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
@@ -63,24 +58,24 @@ export default function RegisterScreen() {
       return;
     }
 
-    const success = await register({
-      email: cleanEmail,
-      username: cleanUsername,
-      displayName: cleanDisplayName,
-      password: cleanPassword,
-    });
+    try {
+      const success = await register({
+        email: cleanEmail,
+        username: cleanUsername,
+        displayName: cleanDisplayName,
+        password: cleanPassword,
+      });
 
-    if (success) {
-      Alert.alert(
-        'Welcome!',
-        'Your account has been created successfully.',
-        [
-          {
-            text: 'Continue',
-            onPress: () => router.replace('/'),
-          },
-        ]
-      );
+      if (success) {
+        Alert.alert(
+          'Welcome!',
+          'Your account has been created successfully.',
+          [{ text: 'Continue', onPress: () => router.replace('/') }]
+        );
+      }
+    } catch (error) {
+      console.error('Registration screen error:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
     }
   };
 
@@ -93,32 +88,16 @@ export default function RegisterScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <TouchableOpacity
-          style={styles.backButton}
-          onPress={() => router.back()}
-        >
-          <Ionicons
-            name="arrow-back"
-            size={24}
-            color={Colors.text}
-          />
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="arrow-back" size={24} color={Colors.text} />
         </TouchableOpacity>
 
         <Text style={styles.title}>Create Account</Text>
-        <Text style={styles.subtitle}>
-          Join our community of creators
-        </Text>
+        <Text style={styles.subtitle}>Join our community of creators</Text>
 
         <View style={styles.form}>
-
-          {/* Email */}
           <View style={styles.inputContainer}>
-            <Ionicons
-              name="mail-outline"
-              size={20}
-              color={Colors.textSecondary}
-            />
-
+            <Ionicons name="mail-outline" size={20} color={Colors.textSecondary} />
             <TextInput
               style={styles.input}
               placeholder="Email Address"
@@ -131,14 +110,8 @@ export default function RegisterScreen() {
             />
           </View>
 
-          {/* Username */}
           <View style={styles.inputContainer}>
-            <Ionicons
-              name="person-outline"
-              size={20}
-              color={Colors.textSecondary}
-            />
-
+            <Ionicons name="person-outline" size={20} color={Colors.textSecondary} />
             <TextInput
               style={styles.input}
               placeholder="Username"
@@ -150,14 +123,8 @@ export default function RegisterScreen() {
             />
           </View>
 
-          {/* Display Name */}
           <View style={styles.inputContainer}>
-            <Ionicons
-              name="happy-outline"
-              size={20}
-              color={Colors.textSecondary}
-            />
-
+            <Ionicons name="happy-outline" size={20} color={Colors.textSecondary} />
             <TextInput
               style={styles.input}
               placeholder="Display Name"
@@ -167,14 +134,8 @@ export default function RegisterScreen() {
             />
           </View>
 
-          {/* Password */}
           <View style={styles.inputContainer}>
-            <Ionicons
-              name="lock-closed-outline"
-              size={20}
-              color={Colors.textSecondary}
-            />
-
+            <Ionicons name="lock-closed-outline" size={20} color={Colors.textSecondary} />
             <TextInput
               style={styles.input}
               placeholder="Password"
@@ -184,30 +145,17 @@ export default function RegisterScreen() {
               secureTextEntry={!showPassword}
               autoCapitalize="none"
             />
-
-            <TouchableOpacity
-              onPress={() => setShowPassword(!showPassword)}
-            >
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
               <Ionicons
-                name={
-                  showPassword
-                    ? 'eye-off-outline'
-                    : 'eye-outline'
-                }
+                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                 size={20}
                 color={Colors.textSecondary}
               />
             </TouchableOpacity>
           </View>
 
-          {/* Confirm Password */}
           <View style={styles.inputContainer}>
-            <Ionicons
-              name="shield-checkmark-outline"
-              size={20}
-              color={Colors.textSecondary}
-            />
-
+            <Ionicons name="shield-checkmark-outline" size={20} color={Colors.textSecondary} />
             <TextInput
               style={styles.input}
               placeholder="Confirm Password"
@@ -219,21 +167,15 @@ export default function RegisterScreen() {
             />
           </View>
 
-          {/* Register */}
           <TouchableOpacity
-            style={[
-              styles.registerButton,
-              isLoading && styles.registerButtonDisabled,
-            ]}
+            style={[styles.registerButton, isLoading && styles.registerButtonDisabled]}
             onPress={handleRegister}
             disabled={isLoading}
           >
             {isLoading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.registerButtonText}>
-                Create Account
-              </Text>
+              <Text style={styles.registerButtonText}>Create Account</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -243,43 +185,12 @@ export default function RegisterScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: Colors.card,
-  },
-
-  scrollContent: {
-    flexGrow: 1,
-    paddingHorizontal: 28,
-    paddingTop: 60,
-    paddingBottom: 24,
-  },
-
-  backButton: {
-    marginBottom: 24,
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-  },
-
-  title: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: Colors.text,
-    letterSpacing: -0.5,
-  },
-
-  subtitle: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    marginTop: 4,
-    marginBottom: 32,
-  },
-
-  form: {
-    gap: 16,
-  },
-
+  container: { flex: 1, backgroundColor: Colors.card },
+  scrollContent: { flexGrow: 1, paddingHorizontal: 28, paddingTop: 60, paddingBottom: 24 },
+  backButton: { marginBottom: 24, width: 40, height: 40, justifyContent: 'center' },
+  title: { fontSize: 32, fontWeight: '800', color: Colors.text, letterSpacing: -0.5 },
+  subtitle: { fontSize: 16, color: Colors.textSecondary, marginTop: 4, marginBottom: 32 },
+  form: { gap: 16 },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -290,14 +201,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-
-  input: {
-    flex: 1,
-    marginLeft: 12,
-    fontSize: 16,
-    color: Colors.text,
-  },
-
+  input: { flex: 1, marginLeft: 12, fontSize: 16, color: Colors.text },
   registerButton: {
     backgroundColor: Colors.primary,
     height: 56,
@@ -306,22 +210,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 8,
     shadowColor: Colors.primary,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 4,
   },
-
-  registerButtonDisabled: {
-    opacity: 0.7,
-  },
-
-  registerButtonText: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '700',
-  },
+  registerButtonDisabled: { opacity: 0.7 },
+  registerButtonText: { color: '#fff', fontSize: 17, fontWeight: '700' },
 });
