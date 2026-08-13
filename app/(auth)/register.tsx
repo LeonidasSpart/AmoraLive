@@ -63,7 +63,6 @@ export default function RegisterScreen() {
 
     if (success) {
       Alert.alert('Welcome!', 'Account created successfully.');
-      // Force reload to pick up auth state
       if (typeof window !== 'undefined') {
         window.location.reload();
       } else {
