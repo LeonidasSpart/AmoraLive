@@ -1,42 +1,28 @@
 import { useEffect } from 'react';
 import { Stack, useRouter, useSegments } from 'expo-router';
-import { useAuthStore } from '@/hooks/useAuthStore';
 import { StatusBar } from 'expo-status-bar';
 
 export default function RootLayout() {
-  const { isAuthenticated, user, setAuth } = useAuthStore(); // we'll add setAuth later
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
-    // On web, check localStorage directly to ensure we catch the token
+    // Check localStorage for token (works on web)
+    let token = null;
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('amora_access_token');
-      const userData = localStorage.getItem('amora_user');
-      if (token && !isAuthenticated) {
-        // If we have a token but the store says not authenticated, fix it
-        if (userData) {
-          try {
-            const user = JSON.parse(userData);
-            // We need to update the store – but we can't use setAuth if not defined yet
-            // Instead, we can use the store's set method directly (but it's private)
-            // Quick fix: reload again? That might loop.
-            // Better: we'll add a setAuth action in the store.
-          } catch {}
-        }
-        // Fallback: force redirect to tabs
-        router.replace('/(tabs)');
-        return;
-      }
+      token = localStorage.getItem('amora_access_token');
     }
 
     const inAuthGroup = segments[0] === '(auth)';
-    if (!isAuthenticated && !inAuthGroup) {
+
+    if (!token && !inAuthGroup) {
+      // Not logged in, but trying to access protected screens
       router.replace('/(auth)/login');
-    } else if (isAuthenticated && inAuthGroup) {
+    } else if (token && inAuthGroup) {
+      // Logged in, but on auth screens – redirect to tabs
       router.replace('/(tabs)');
     }
-  }, [isAuthenticated, segments]);
+  }, [segments]);
 
   return (
     <>
