@@ -2,6 +2,7 @@
   "name": "amora-live-backend",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "description": "AMORA Live backend API",
   "main": "dist/server.js",
   "scripts": {
