@@ -15,6 +15,7 @@ import { useRouter } from 'expo-router';
 import { useAuthStore } from '@/hooks/useAuthStore';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
+import { API_URL } from '@/constants/api';
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
@@ -27,8 +28,13 @@ export default function RegisterScreen() {
   const { register, isLoading } = useAuthStore();
   const router = useRouter();
 
+  // --------------------------------------------------------------------
+  // DEBUG: Button press test
+  // --------------------------------------------------------------------
   const handleRegister = async () => {
-    console.log('🔵 Register button pressed');
+    // ✅ 1. Immediately show an alert to confirm the button works
+    Alert.alert('Debug', 'Button pressed! Now checking validation...');
+
     const cleanEmail = email.trim().toLowerCase();
     const cleanUsername = username.trim();
     const cleanDisplayName = displayName.trim();
@@ -38,28 +44,56 @@ export default function RegisterScreen() {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
-
     if (!cleanEmail.includes('@')) {
       Alert.alert('Error', 'Please enter a valid email address');
       return;
     }
-
     if (cleanUsername.length < 3) {
       Alert.alert('Error', 'Username must be at least 3 characters');
       return;
     }
-
     if (cleanPassword.length < 6) {
       Alert.alert('Error', 'Password must be at least 6 characters');
       return;
     }
-
     if (cleanPassword !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
     }
 
-    console.log('🔵 Calling register with:', { email: cleanEmail, username: cleanUsername, displayName: cleanDisplayName });
+    // ✅ 2. Validation passed – try a direct fetch first (bypass the store)
+    Alert.alert('Debug', 'Validation passed. Trying direct fetch...');
+    console.log('🔵 Direct fetch to:', `${API_URL}/api/auth/register`);
+
+    try {
+      const response = await fetch(`${API_URL}/api/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: cleanEmail,
+          username: cleanUsername,
+          displayName: cleanDisplayName,
+          password: cleanPassword,
+        }),
+      });
+      const data = await response.json();
+      console.log('🔵 Direct fetch response:', data);
+
+      if (response.ok) {
+        Alert.alert('Success', 'Account created via direct fetch!');
+        // If this works, the store might be the problem.
+      } else {
+        Alert.alert('Direct fetch failed', data?.message || 'Unknown error');
+      }
+    } catch (error: any) {
+      console.error('🔵 Direct fetch error:', error);
+      Alert.alert('Network Error', error.message || 'Could not reach the server');
+    }
+
+    // ------------------------------------------------------------------
+    // 3. Also try the store method (commented out for now)
+    // ------------------------------------------------------------------
+    /*
     try {
       const success = await register({
         email: cleanEmail,
@@ -67,18 +101,16 @@ export default function RegisterScreen() {
         displayName: cleanDisplayName,
         password: cleanPassword,
       });
-      console.log('🔵 Register result:', success);
       if (success) {
-        Alert.alert(
-          'Welcome!',
-          'Your account has been created successfully.',
-          [{ text: 'Continue', onPress: () => router.replace('/') }]
-        );
+        Alert.alert('Welcome!', 'Your account has been created successfully.', [
+          { text: 'Continue', onPress: () => router.replace('/') },
+        ]);
       }
     } catch (error) {
-      console.error('🔵 Registration screen error:', error);
-      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+      console.error('Store registration error:', error);
+      Alert.alert('Error', 'Store registration failed');
     }
+    */
   };
 
   return (
