@@ -7,13 +7,20 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { API_URL } from '@/constants/api';
+
+const showAlert = (title: string, message?: string) => {
+  if (typeof window !== 'undefined') {
+    window.alert(title + (message ? '\n' + message : ''));
+  } else {
+    Alert.alert(title, message);
+  }
+};
 
 export default function LoginScreen() {
   const [account, setAccount] = useState('');
@@ -27,7 +34,7 @@ export default function LoginScreen() {
     const cleanPassword = password.trim();
 
     if (!cleanAccount || !cleanPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+      showAlert('Error', 'Please fill in all fields');
       return;
     }
 
@@ -41,14 +48,17 @@ export default function LoginScreen() {
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert('Success', 'Logged in!', [
-          { text: 'Continue', onPress: () => router.replace('/(tabs)') },
-        ]);
+        showAlert('Success', 'Logged in!');
+        if (typeof window !== 'undefined') {
+          window.location.href = '/tabs';
+        } else {
+          router.replace('/(tabs)');
+        }
       } else {
-        Alert.alert('Login Failed', data?.message || 'Invalid credentials');
+        showAlert('Login Failed', data?.message || 'Invalid credentials');
       }
     } catch (error: any) {
-      Alert.alert('Network Error', error.message || 'Could not reach the server');
+      showAlert('Network Error', error.message || 'Could not reach the server');
     } finally {
       setLoading(false);
     }
@@ -89,7 +99,11 @@ export default function LoginScreen() {
               autoCapitalize="none"
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              <Ionicons name={showPassword ? 'eye-off-outline' : 'eye-outline'} size={20} color={Colors.textSecondary} />
+              <Ionicons
+                name={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                size={20}
+                color={Colors.textSecondary}
+              />
             </TouchableOpacity>
           </View>
 
