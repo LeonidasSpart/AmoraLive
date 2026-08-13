@@ -3,6 +3,9 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_URL } from "../constants/api";
 
+const ACCESS_TOKEN_KEY = "amora_access_token";
+const REFRESH_TOKEN_KEY = "amora_refresh_token";
+
 export interface User {
   id: string;
   email?: string;
@@ -47,7 +50,7 @@ interface AuthState {
     data: RegisterData
   ) => Promise<boolean>;
 
-  logout: () => void;
+  logout: () => void | Promise<void>;
 
   updateUser: (
     updates: Partial<User>
@@ -83,6 +86,10 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
 
+      /* =====================================================
+         LOGIN
+      ===================================================== */
+
       login: async (account, password) => {
         set({ isLoading: true });
 
@@ -115,7 +122,26 @@ export const useAuthStore = create<AuthState>()(
             );
           }
 
+          if (
+            !data?.accessToken ||
+            !data?.refreshToken
+          ) {
+            throw new Error(
+              "Login response did not contain authentication tokens"
+            );
+          }
+
           const user = normalizeUser(data.user);
+
+          await AsyncStorage.setItem(
+            ACCESS_TOKEN_KEY,
+            data.accessToken
+          );
+
+          await AsyncStorage.setItem(
+            REFRESH_TOKEN_KEY,
+            data.refreshToken
+          );
 
           set({
             user,
@@ -125,7 +151,10 @@ export const useAuthStore = create<AuthState>()(
 
           return true;
         } catch (error) {
-          console.error("AMORA login error:", error);
+          console.error(
+            "AMORA login error:",
+            error
+          );
 
           set({
             isLoading: false,
@@ -135,6 +164,10 @@ export const useAuthStore = create<AuthState>()(
           return false;
         }
       },
+
+      /* =====================================================
+         REGISTER
+      ===================================================== */
 
       register: async (data) => {
         set({ isLoading: true });
@@ -148,24 +181,44 @@ export const useAuthStore = create<AuthState>()(
                 "Content-Type": "application/json",
               },
               body: JSON.stringify({
-                email: data.email.trim().toLowerCase(),
-                username: data.username.trim(),
-                password: data.password,
-                displayName: data.displayName.trim(),
-                avatar: data.avatar || null,
-                bio: data.bio || null,
-                dateOfBirth: data.dateOfBirth || null,
-                gender: data.gender || null,
-                goal: data.goal || null,
+                email: data.email
+                  .trim()
+                  .toLowerCase(),
+
+                username:
+                  data.username.trim(),
+
+                password:
+                  data.password,
+
+                displayName:
+                  data.displayName.trim(),
+
+                avatar:
+                  data.avatar || null,
+
+                bio:
+                  data.bio || null,
+
+                dateOfBirth:
+                  data.dateOfBirth || null,
+
+                gender:
+                  data.gender || null,
+
+                goal:
+                  data.goal || null,
               }),
             }
           );
 
-          const result = await response.json();
+          const result =
+            await response.json();
 
           if (!response.ok) {
             throw new Error(
-              result?.message || "Registration failed"
+              result?.message ||
+                "Registration failed"
             );
           }
 
@@ -175,7 +228,27 @@ export const useAuthStore = create<AuthState>()(
             );
           }
 
-          const user = normalizeUser(result.user);
+          if (
+            !result?.accessToken ||
+            !result?.refreshToken
+          ) {
+            throw new Error(
+              "Registration response did not contain authentication tokens"
+            );
+          }
+
+          const user =
+            normalizeUser(result.user);
+
+          await AsyncStorage.setItem(
+            ACCESS_TOKEN_KEY,
+            result.accessToken
+          );
+
+          await AsyncStorage.setItem(
+            REFRESH_TOKEN_KEY,
+            result.refreshToken
+          );
 
           set({
             user,
@@ -199,13 +272,54 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      logout: () => {
-        set({
-          user: null,
-          isAuthenticated: false,
-          isLoading: false,
-        });
+      /* =====================================================
+         LOGOUT
+      ===================================================== */
+
+      logout: async () => {
+        try {
+          const refreshToken =
+            await AsyncStorage.getItem(
+              REFRESH_TOKEN_KEY
+            );
+
+          if (refreshToken) {
+            await fetch(
+              `${API_URL}/api/auth/logout`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type":
+                    "application/json",
+                },
+                body: JSON.stringify({
+                  refreshToken,
+                }),
+              }
+            );
+          }
+        } catch (error) {
+          console.error(
+            "AMORA logout error:",
+            error
+          );
+        } finally {
+          await AsyncStorage.multiRemove([
+            ACCESS_TOKEN_KEY,
+            REFRESH_TOKEN_KEY,
+          ]);
+
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+        }
       },
+
+      /* =====================================================
+         UPDATE USER
+      ===================================================== */
 
       updateUser: (updates) => {
         const { user } = get();
@@ -222,6 +336,10 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
+      /* =====================================================
+         ADD COINS
+      ===================================================== */
+
       addCoins: (amount) => {
         const { user } = get();
 
@@ -232,13 +350,15 @@ export const useAuthStore = create<AuthState>()(
         set({
           user: {
             ...user,
-            coins: user.coins + amount,
+            coins:
+              user.coins + amount,
           },
         });
       },
     }),
     {
       name: "auth-storage",
+
       storage: createJSONStorage(
         () => AsyncStorage
       ),
