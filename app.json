@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "LiveConnect",
-    "slug": "liveconnect",
+    "name": "AMORA Live",
+    "slug": "amora-live",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -11,14 +11,16 @@
       "resizeMode": "contain",
       "backgroundColor": "#7C3AED"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.yourcompany.liveconnect",
+      "bundleIdentifier": "com.amora.live",
       "buildNumber": "1.0.0",
       "infoPlist": {
-        "NSCameraUsageDescription": "LiveConnect needs camera access for live streaming",
-        "NSMicrophoneUsageDescription": "LiveConnect needs microphone access for live audio"
+        "NSCameraUsageDescription": "AMORA Live needs camera access for live streaming",
+        "NSMicrophoneUsageDescription": "AMORA Live needs microphone access for live audio"
       }
     },
     "android": {
@@ -26,7 +28,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#7C3AED"
       },
-      "package": "com.yourcompany.liveconnect",
+      "package": "com.amora.live",
       "versionCode": 1,
       "permissions": [
         "CAMERA",
@@ -39,7 +41,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-font"
     ]
   }
 }

@@ -1,4 +1,4 @@
-# LiveConnect - Social Live Streaming App
+# AMORA Live - Social Live Streaming App
 
 A full-stack ready React Native live streaming social platform built with Expo. Features authentication, live streamer grid, virtual currency system, VIP tiers, and profile management.
 
@@ -88,7 +88,7 @@ a
    ```json
    {
      "ios": {
-       "bundleIdentifier": "com.yourcompany.liveconnect",
+       "bundleIdentifier": "com.amora.live",
        "buildNumber": "1.0.0"
      }
    }
@@ -124,7 +124,7 @@ a
    ```json
    {
      "android": {
-       "package": "com.yourcompany.liveconnect",
+       "package": "com.amora.live",
        "versionCode": 1
      }
    }
@@ -154,7 +154,7 @@ The app uses a mock auth system. To connect to a real backend:
 
 1. Replace `hooks/useAuthStore.ts` login/register with API calls:
 ```typescript
-const response = await fetch('https://your-api.com/auth/login', {
+const response = await fetch('https://api.amoramatch.one/auth/login', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({ username, password }),
@@ -166,7 +166,7 @@ const data = await response.json();
 2. Add API base URL to environment:
 ```bash
 # .env
-EXPO_PUBLIC_API_URL=https://your-api.com
+EXPO_PUBLIC_API_URL=https://api.amoramatch.one
 ```
 
 3. Recommended backend stack:

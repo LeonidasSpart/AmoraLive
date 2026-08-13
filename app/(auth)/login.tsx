@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   View,
+  Image,
   Text,
   TextInput,
   TouchableOpacity,
@@ -39,10 +40,12 @@ export default function LoginScreen() {
     >
       <View style={styles.content}>
         <View style={styles.logoContainer}>
-          <View style={styles.logoCircle}>
-            <Ionicons name="videocam" size={48} color="#fff" />
-          </View>
-          <Text style={styles.title}>LiveConnect</Text>
+  <Image
+    source={require("../../assets/icon.png")}
+    style={{ width: 180, height: 180, resizeMode: "contain" }}
+  />
+</View>
+          <Text style={styles.title}>AMORA Live</Text>
           <Text style={styles.subtitle}>Stream. Connect. Earn.</Text>
         </View>
 
@@ -103,7 +106,6 @@ export default function LoginScreen() {
             </Link>
           </View>
         </View>
-      </View>
     </KeyboardAvoidingView>
   );
 }

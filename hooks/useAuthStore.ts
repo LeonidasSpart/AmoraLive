@@ -2,8 +2,11 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+const API_URL = 'https://api.amoramatch.one';
+
 export interface User {
   id: string;
+  email?: string;
   username: string;
   displayName: string;
   avatar: string;
@@ -13,20 +16,34 @@ export interface User {
   coins: number;
   followers: number;
   following: number;
+  isVerified?: boolean;
+  isVip?: boolean;
+}
+
+export interface RegisterData {
+  email: string;
+  username: string;
+  password: string;
+  displayName: string;
+  avatar?: string;
+  bio?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  goal?: string;
 }
 
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+
   login: (account: string, password: string) => Promise<boolean>;
-  register: (data: Partial<User> & { password: string }) => Promise<boolean>;
+  register: (data: RegisterData) => Promise<boolean>;
+
   logout: () => void;
   updateUser: (updates: Partial<User>) => void;
   addCoins: (amount: number) => void;
 }
-
-const MOCK_USERS: Record<string, { user: User; password: string }> = {};
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -35,75 +52,176 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: false,
 
-      login: async (account: string, password: string) => {
-        // Simulate API call
-        await new Promise((res) => setTimeout(res, 800));
+      login: async (account, password) => {
+        set({ isLoading: true });
 
-        const found = MOCK_USERS[account];
-        if (found && found.password === password) {
-          set({ user: found.user, isAuthenticated: true });
+        try {
+          const response = await fetch(`${API_URL}/api/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              account: account.trim(),
+              password,
+            }),
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            console.error('Login failed:', data);
+            set({ isLoading: false });
+            return false;
+          }
+
+          if (!data.user) {
+            console.error('Login response did not contain a user');
+            set({ isLoading: false });
+            return false;
+          }
+
+          const user: User = {
+            id: String(data.user.id),
+            email: data.user.email,
+            username: data.user.username,
+            displayName: data.user.displayName,
+            avatar: data.user.avatar || '',
+            bio: data.user.bio || '',
+            level: data.user.level ?? 1,
+            vip: data.user.isVip ?? data.user.vip ?? false,
+            coins: data.user.coins ?? 0,
+            followers: data.user.followers ?? 0,
+            following: data.user.following ?? 0,
+            isVerified: data.user.isVerified ?? false,
+            isVip: data.user.isVip ?? data.user.vip ?? false,
+          };
+
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+
           return true;
+        } catch (error) {
+          console.error('Login network error:', error);
+          set({
+            isLoading: false,
+          });
+          return false;
         }
-
-        // Auto-create demo account for testing
-        const demoUser: User = {
-          id: account,
-          username: `user_${account}`,
-          displayName: 'Leonidas',
-          avatar: 'https://i.pravatar.cc/150?u=' + account,
-          bio: 'Live streamer & content creator',
-          level: 1,
-          vip: true,
-          coins: 200,
-          followers: 1240,
-          following: 85,
-        };
-
-        MOCK_USERS[account] = { user: demoUser, password };
-        set({ user: demoUser, isAuthenticated: true });
-        return true;
       },
 
       register: async (data) => {
-        await new Promise((res) => setTimeout(res, 1000));
-        const newUser: User = {
-          id: Math.random().toString(36).substr(2, 9),
-          username: data.username || 'newuser',
-          displayName: data.displayName || 'New User',
-          avatar: data.avatar || `https://i.pravatar.cc/150?u=${Date.now()}`,
-          bio: '',
-          level: 1,
-          vip: false,
-          coins: 200,
-          followers: 0,
-          following: 0,
-        };
-        MOCK_USERS[data.username || ''] = { user: newUser, password: data.password };
-        set({ user: newUser, isAuthenticated: true });
-        return true;
+        set({ isLoading: true });
+
+        try {
+          const response = await fetch(`${API_URL}/api/auth/register`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: data.email.trim().toLowerCase(),
+              username: data.username.trim(),
+              password: data.password,
+              displayName: data.displayName.trim(),
+              avatar: data.avatar || null,
+              bio: data.bio || null,
+              dateOfBirth: data.dateOfBirth || null,
+              gender: data.gender || null,
+              goal: data.goal || null,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            console.error('Registration failed:', result);
+            set({ isLoading: false });
+            return false;
+          }
+
+          if (!result.user) {
+            console.error('Registration response did not contain a user');
+            set({ isLoading: false });
+            return false;
+          }
+
+          const user: User = {
+            id: String(result.user.id),
+            email: result.user.email,
+            username: result.user.username,
+            displayName: result.user.displayName,
+            avatar: result.user.avatar || '',
+            bio: result.user.bio || '',
+            level: result.user.level ?? 1,
+            vip: result.user.isVip ?? result.user.vip ?? false,
+            coins: result.user.coins ?? 0,
+            followers: result.user.followers ?? 0,
+            following: result.user.following ?? 0,
+            isVerified: result.user.isVerified ?? false,
+            isVip: result.user.isVip ?? result.user.vip ?? false,
+          };
+
+          set({
+            user,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+
+          return true;
+        } catch (error) {
+          console.error('Registration network error:', error);
+          set({
+            isLoading: false,
+          });
+          return false;
+        }
       },
 
       logout: () => {
-        set({ user: null, isAuthenticated: false });
+        set({
+          user: null,
+          isAuthenticated: false,
+          isLoading: false,
+        });
       },
 
       updateUser: (updates) => {
         const { user } = get();
+
         if (user) {
-          set({ user: { ...user, ...updates } });
+          set({
+            user: {
+              ...user,
+              ...updates,
+            },
+          });
         }
       },
 
       addCoins: (amount) => {
         const { user } = get();
+
         if (user) {
-          set({ user: { ...user, coins: user.coins + amount } });
+          set({
+            user: {
+              ...user,
+              coins: user.coins + amount,
+            },
+          });
         }
       },
     }),
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => AsyncStorage),
+      partialize: (state) => ({
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 );
