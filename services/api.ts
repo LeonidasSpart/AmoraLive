@@ -18,9 +18,6 @@ const api: AxiosInstance = axios.create({
   },
 });
 
-/**
- * Attach access token to requests.
- */
 api.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const token = await AsyncStorage.getItem(ACCESS_TOKEN_KEY);
@@ -32,10 +29,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-/**
- * Handle expired access tokens.
- * Expects POST /auth/refresh with { refreshToken }
- */
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (token: string) => void;
@@ -117,10 +110,6 @@ api.interceptors.response.use(
   }
 );
 
-/* -------------------------------------------------------------------------- */
-/* Token helpers                                                               */
-/* -------------------------------------------------------------------------- */
-
 export const saveTokens = async (accessToken: string, refreshToken?: string) => {
   await AsyncStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
   if (refreshToken) {
@@ -140,10 +129,6 @@ export const clearTokens = async () => {
   await AsyncStorage.multiRemove([ACCESS_TOKEN_KEY, REFRESH_TOKEN_KEY]);
 };
 
-/* -------------------------------------------------------------------------- */
-/* Authentication                                                              */
-/* -------------------------------------------------------------------------- */
-
 export const register = async (data: {
   email: string;
   username: string;
@@ -157,8 +142,9 @@ export const register = async (data: {
   return response.data;
 };
 
-export const login = async (email: string, password: string) => {
-  const response = await api.post("/auth/login", { email, password });
+// FIXED: Send 'account' instead of 'email' to match backend
+export const login = async (account: string, password: string) => {
+  const response = await api.post("/auth/login", { account, password });
   if (response.data?.accessToken) {
     await saveTokens(response.data.accessToken, response.data.refreshToken);
   }
@@ -180,10 +166,6 @@ export const getMe = async () => {
   const response = await api.get("/auth/me");
   return response.data;
 };
-
-/* -------------------------------------------------------------------------- */
-/* Users / profiles                                                            */
-/* -------------------------------------------------------------------------- */
 
 export const getProfile = async (userId: string) => {
   const response = await api.get(`/users/${userId}`);
@@ -208,10 +190,6 @@ export const getDiscoverUsers = async (params?: { page?: number; limit?: number 
   return response.data;
 };
 
-/* -------------------------------------------------------------------------- */
-/* Preferences                                                                 */
-/* -------------------------------------------------------------------------- */
-
 export const getPreferences = async () => {
   const response = await api.get("/preferences");
   return response.data;
@@ -227,10 +205,6 @@ export const updatePreferences = async (data: {
   const response = await api.put("/preferences", data);
   return response.data;
 };
-
-/* -------------------------------------------------------------------------- */
-/* Photos (URL-based)                                                         */
-/* -------------------------------------------------------------------------- */
 
 export const getMyPhotos = async () => {
   const response = await api.get("/photos");
@@ -252,10 +226,6 @@ export const setPrimaryPhoto = async (photoId: string) => {
   return response.data;
 };
 
-/* -------------------------------------------------------------------------- */
-/* Photo Upload (multipart/form-data) – NEW                                   */
-/* -------------------------------------------------------------------------- */
-
 export const uploadPhoto = async (file: { uri: string; name: string; type: string }) => {
   const formData = new FormData();
   formData.append('photo', file as any);
@@ -264,10 +234,6 @@ export const uploadPhoto = async (file: { uri: string; name: string; type: strin
   });
   return response.data;
 };
-
-/* -------------------------------------------------------------------------- */
-/* Likes                                                                       */
-/* -------------------------------------------------------------------------- */
 
 export const likeUser = async (userId: string) => {
   const response = await api.post("/likes", { receiverId: userId });
@@ -289,10 +255,6 @@ export const getSentLikes = async () => {
   return response.data;
 };
 
-/* -------------------------------------------------------------------------- */
-/* Matches                                                                     */
-/* -------------------------------------------------------------------------- */
-
 export const getMatches = async () => {
   const response = await api.get("/matches");
   return response.data;
@@ -307,10 +269,6 @@ export const unmatch = async (matchId: string) => {
   const response = await api.patch(`/matches/${matchId}/unmatch`);
   return response.data;
 };
-
-/* -------------------------------------------------------------------------- */
-/* Messages                                                                    */
-/* -------------------------------------------------------------------------- */
 
 export const getMessages = async (matchId: string, params?: { page?: number; limit?: number }) => {
   const response = await api.get(`/matches/${matchId}/messages`, { params });
@@ -327,74 +285,5 @@ export const markMessageRead = async (messageId: string) => {
   return response.data;
 };
 
-/* -------------------------------------------------------------------------- */
-/* Notifications                                                               */
-/* -------------------------------------------------------------------------- */
-
 export const getNotifications = async () => {
-  const response = await api.get("/notifications");
-  return response.data;
-};
-
-export const markNotificationRead = async (notificationId: string) => {
-  const response = await api.patch(`/notifications/${notificationId}/read`);
-  return response.data;
-};
-
-export const markAllNotificationsRead = async () => {
-  const response = await api.patch("/notifications/read-all");
-  return response.data;
-};
-
-/* -------------------------------------------------------------------------- */
-/* Blocks                                                                      */
-/* -------------------------------------------------------------------------- */
-
-export const blockUser = async (userId: string) => {
-  const response = await api.post("/blocks", { blockedId: userId });
-  return response.data;
-};
-
-export const unblockUser = async (userId: string) => {
-  const response = await api.delete(`/blocks/${userId}`);
-  return response.data;
-};
-
-export const getBlockedUsers = async () => {
-  const response = await api.get("/blocks");
-  return response.data;
-};
-
-/* -------------------------------------------------------------------------- */
-/* Reports                                                                     */
-/* -------------------------------------------------------------------------- */
-
-export const reportUser = async (userId: string, reason: string, details?: string) => {
-  const response = await api.post("/reports", { reportedId: userId, reason, details });
-  return response.data;
-};
-
-/* -------------------------------------------------------------------------- */
-/* Subscriptions                                                               */
-/* -------------------------------------------------------------------------- */
-
-export const getSubscription = async () => {
-  const response = await api.get("/subscriptions/me");
-  return response.data;
-};
-
-export const getSubscriptions = async () => {
-  const response = await api.get("/subscriptions");
-  return response.data;
-};
-
-/* -------------------------------------------------------------------------- */
-/* Health                                                                      */
-/* -------------------------------------------------------------------------- */
-
-export const healthCheck = async () => {
-  const response = await api.get("/health");
-  return response.data;
-};
-
-export default api;
+  const response = await api.get
