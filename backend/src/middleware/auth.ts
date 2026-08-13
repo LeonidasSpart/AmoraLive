@@ -4,6 +4,7 @@ import { prisma } from '../prisma.js';
 
 export interface AuthRequest extends Request {
   user?: any;
+  file?: Express.Multer.File; // Add this for multer support
 }
 
 export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction) => {
