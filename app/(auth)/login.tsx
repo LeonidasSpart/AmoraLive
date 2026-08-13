@@ -10,7 +10,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { Link } from 'expo-router';
+import { Link, useRouter } from 'expo-router'; // 👈 import useRouter
 import { useAuthStore } from '@/hooks/useAuthStore';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
@@ -20,6 +20,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading } = useAuthStore();
+  const router = useRouter(); // 👈 get router
 
   const handleLogin = async () => {
     const cleanAccount = account.trim();
@@ -32,10 +33,8 @@ export default function LoginScreen() {
 
     const success = await login(cleanAccount, cleanPassword);
     if (success) {
-      // Force a full page reload so the layout reads the token
-      if (typeof window !== 'undefined') {
-        window.location.reload();
-      }
+      // ✅ Directly navigate to the tabs – no reload needed
+      router.replace('/(tabs)');
     }
   };
 
