@@ -7,7 +7,6 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   ActivityIndicator,
   ScrollView,
 } from 'react-native';
@@ -15,6 +14,25 @@ import { useRouter } from 'expo-router';
 import { Colors } from '@/constants/Colors';
 import { Ionicons } from '@expo/vector-icons';
 import { API_URL } from '@/constants/api';
+
+// Web‑safe alert
+const showAlert = (title: string, message?: string) => {
+  if (typeof window !== 'undefined') {
+    window.alert(title + (message ? '\n' + message : ''));
+  } else {
+    // For native (fallback)
+    Alert.alert(title, message);
+  }
+};
+
+// Web‑safe navigation
+const navigateTo = (path: string) => {
+  if (typeof window !== 'undefined') {
+    window.location.href = path;
+  } else {
+    // For native, we'll use router.replace inside the component
+  }
+};
 
 export default function RegisterScreen() {
   const [email, setEmail] = useState('');
@@ -28,32 +46,30 @@ export default function RegisterScreen() {
   const router = useRouter();
 
   const handleRegister = async () => {
-    // 🔥 TEST ALERT – confirm the button works
-    Alert.alert('Test', 'Button pressed!');
-
     const cleanEmail = email.trim().toLowerCase();
     const cleanUsername = username.trim();
     const cleanDisplayName = displayName.trim();
     const cleanPassword = password.trim();
 
+    // Validation
     if (!cleanEmail || !cleanUsername || !cleanDisplayName || !cleanPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+      showAlert('Error', 'Please fill in all fields');
       return;
     }
     if (!cleanEmail.includes('@')) {
-      Alert.alert('Error', 'Please enter a valid email address');
+      showAlert('Error', 'Please enter a valid email address');
       return;
     }
     if (cleanUsername.length < 3) {
-      Alert.alert('Error', 'Username must be at least 3 characters');
+      showAlert('Error', 'Username must be at least 3 characters');
       return;
     }
     if (cleanPassword.length < 6) {
-      Alert.alert('Error', 'Password must be at least 6 characters');
+      showAlert('Error', 'Password must be at least 6 characters');
       return;
     }
     if (cleanPassword !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      showAlert('Error', 'Passwords do not match');
       return;
     }
 
@@ -72,16 +88,20 @@ export default function RegisterScreen() {
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert('Welcome!', 'Account created successfully.', [
-          { text: 'Continue', onPress: () => router.replace('/(tabs)') },
-        ]);
+        showAlert('Welcome!', 'Account created successfully.');
+        // Navigate to home
+        if (typeof window !== 'undefined') {
+          window.location.href = '/tabs'; // or '/'
+        } else {
+          router.replace('/(tabs)');
+        }
       } else if (response.status === 409) {
-        Alert.alert('Account Exists', 'This email or username is already taken. Please use a different one.');
+        showAlert('Account Exists', 'This email or username is already taken. Please use a different one.');
       } else {
-        Alert.alert('Registration Failed', data?.message || 'Something went wrong');
+        showAlert('Registration Failed', data?.message || 'Something went wrong');
       }
     } catch (error: any) {
-      Alert.alert('Network Error', error.message || 'Could not reach the server');
+      showAlert('Network Error', error.message || 'Could not reach the server');
     } finally {
       setLoading(false);
     }
