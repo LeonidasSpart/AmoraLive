@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useRouter } from 'expo-router'; // ✅ Use expo-router, not react-router
+import { useRouter } from 'expo-router';
 
 export default function Index() {
   const router = useRouter();
