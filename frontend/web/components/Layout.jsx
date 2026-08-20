@@ -12,21 +12,18 @@ export default function Layout({ children }) {
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
     if (!token) {
-      // If on a protected page, redirect to login
       const publicPaths = ['/', '/login', '/register'];
       if (!publicPaths.includes(router.pathname)) {
         router.push('/login');
       }
       return;
     }
-    // Fetch user data
     fetchUserData();
   }, []);
 
   const fetchUserData = async () => {
     const token = localStorage.getItem('accessToken');
     try {
-      // Fetch user profile
       const userRes = await fetch('https://api.amoramatch.one/users/me', {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -34,8 +31,6 @@ export default function Layout({ children }) {
         const userData = await userRes.json();
         setUser(userData);
       }
-
-      // Fetch wallet balance
       const walletRes = await fetch('https://api.amoramatch.one/wallet/me', {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -43,8 +38,6 @@ export default function Layout({ children }) {
         const wallet = await walletRes.json();
         setBalance(wallet.balance || 0);
       }
-
-      // Fetch unread notifications
       const notifRes = await fetch('https://api.amoramatch.one/notifications/unread-count', {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -57,7 +50,6 @@ export default function Layout({ children }) {
     }
   };
 
-  // Logout
   const logout = async () => {
     const token = localStorage.getItem('refreshToken');
     try {
@@ -71,14 +63,12 @@ export default function Layout({ children }) {
     router.push('/login');
   };
 
-  // Navigation items (top header)
   const navItems = [
     { href: '/discover', label: 'Discover', icon: '📺' },
     { href: '/video-match', label: 'Match', icon: '❤️' },
     { href: '/chat', label: 'Chat', icon: '💬' },
   ];
 
-  // Check if current page is admin
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
 
   return React.createElement('div', {
@@ -86,10 +76,12 @@ export default function Layout({ children }) {
       minHeight: '100vh',
       background: '#0f0f1a',
       color: '#fff',
-      fontFamily: 'sans-serif'
+      fontFamily: 'sans-serif',
+      display: 'flex',
+      flexDirection: 'column'
     }
   }, [
-    // Top Header
+    // Header
     React.createElement('header', {
       key: 'header',
       style: {
@@ -104,14 +96,11 @@ export default function Layout({ children }) {
         zIndex: 100
       }
     }, [
-      // Logo
       React.createElement(Link, {
         key: 'logo',
         href: '/discover',
         style: { color: '#FF6B9D', fontSize: '24px', fontWeight: 'bold', textDecoration: 'none' }
       }, 'AmoraLive'),
-
-      // Center navigation (desktop)
       React.createElement('nav', {
         key: 'nav',
         style: { display: 'flex', gap: '20px', alignItems: 'center' }
@@ -130,19 +119,15 @@ export default function Layout({ children }) {
           }
         }, [item.icon, item.label])
       )),
-
-      // Right side: notifications, wallet, profile
       React.createElement('div', {
         key: 'right',
         style: { display: 'flex', alignItems: 'center', gap: '16px' }
       }, [
-        // Store link
         React.createElement(Link, {
           key: 'store',
           href: '/store',
           style: { color: '#aaa', textDecoration: 'none', fontSize: '20px' }
         }, '🛍️'),
-        // Notifications
         React.createElement(Link, {
           key: 'notifications',
           href: '/notifications',
@@ -170,7 +155,6 @@ export default function Layout({ children }) {
             }
           }, unreadCount > 9 ? '9+' : unreadCount)
         ]),
-        // Wallet
         React.createElement(Link, {
           key: 'wallet',
           href: '/wallet',
@@ -183,7 +167,6 @@ export default function Layout({ children }) {
             gap: '4px'
           }
         }, [`🪙 ${balance}`]),
-        // Profile
         React.createElement(Link, {
           key: 'profile',
           href: '/profile',
@@ -201,7 +184,6 @@ export default function Layout({ children }) {
             fontSize: '14px'
           }
         }, '👤'),
-        // Admin link (if admin)
         isAdmin && React.createElement(Link, {
           key: 'admin',
           href: '/admin',
@@ -212,7 +194,6 @@ export default function Layout({ children }) {
             fontWeight: 'bold'
           }
         }, 'Admin'),
-        // Logout button (hidden on login/register pages)
         !['/login', '/register'].includes(router.pathname) && React.createElement('button', {
           key: 'logout',
           onClick: logout,
@@ -230,7 +211,49 @@ export default function Layout({ children }) {
     // Main content
     React.createElement('main', {
       key: 'main',
-      style: { padding: '20px' }
-    }, children)
+      style: { padding: '20px', flex: 1 }
+    }, children),
+
+    // Footer
+    React.createElement('footer', {
+      key: 'footer',
+      style: {
+        borderTop: '1px solid #222',
+        padding: '20px',
+        textAlign: 'center',
+        color: '#666',
+        fontSize: '13px',
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '24px',
+        flexWrap: 'wrap',
+        background: '#1a1a2e'
+      }
+    }, [
+      React.createElement(Link, {
+        key: 'terms',
+        href: '/legal/terms',
+        style: { color: '#666', textDecoration: 'none' }
+      }, 'Terms of Service'),
+      React.createElement(Link, {
+        key: 'privacy',
+        href: '/legal/privacy',
+        style: { color: '#666', textDecoration: 'none' }
+      }, 'Privacy Policy'),
+      React.createElement(Link, {
+        key: 'guidelines',
+        href: '/legal/guidelines',
+        style: { color: '#666', textDecoration: 'none' }
+      }, 'Community Guidelines'),
+      React.createElement(Link, {
+        key: 'cookies',
+        href: '/legal/cookies',
+        style: { color: '#666', textDecoration: 'none' }
+      }, 'Cookie Policy'),
+      React.createElement('span', {
+        key: 'copyright',
+        style: { color: '#444' }
+      }, `© ${new Date().getFullYear()} AmoraLive. All rights reserved.`)
+    ])
   ]);
 }
