@@ -13,19 +13,31 @@ export default function Login() {
     setError('');
     setLoading(true);
     try {
+      console.log('Sending request to:', 'https://api.amoramatch.one/auth/login');
       const res = await fetch('https://api.amoramatch.one/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ identifier, password })
       });
+      console.log('Response status:', res.status);
       const data = await res.json();
+      console.log('Response data:', data);
       if (!res.ok) throw new Error(data.error || 'Login failed');
       localStorage.setItem('accessToken', data.accessToken);
       localStorage.setItem('refreshToken', data.refreshToken);
       localStorage.setItem('userId', data.user.id);
-      window.location.href = '/discover';
+      // If admin, redirect to admin dashboard
+      if (data.user?.role === 'admin' || data.user?.role === 'superadmin') {
+        window.location.href = '/admin';
+      } else {
+        window.location.href = '/discover';
+      }
     } catch (err) {
-      setError(err.message);
+      console.error('Login error:', err);
+      setError(err.message || 'Failed to connect to server');
     } finally {
       setLoading(false);
     }
@@ -59,7 +71,15 @@ export default function Login() {
       }, 'Login to AmoraLive'),
       error && React.createElement('p', {
         key: 'error',
-        style: { color: '#ff4444', marginBottom: '15px', textAlign: 'center' }
+        style: { 
+          color: '#ff4444', 
+          marginBottom: '15px', 
+          textAlign: 'center',
+          background: '#2a1a1a',
+          padding: '8px',
+          borderRadius: '4px',
+          wordBreak: 'break-word'
+        }
       }, error),
       React.createElement('input', {
         key: 'identifier',
