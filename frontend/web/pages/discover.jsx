@@ -1,14 +1,13 @@
 // pages/discover.jsx
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Layout from '../components/Layout';
 
 export default function Discover() {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('recommended');
   const [error, setError] = useState('');
-  const [balance, setBalance] = useState(0);
-  const [unreadCount, setUnreadCount] = useState(0);
 
   const tabs = [
     { key: 'recommended', label: 'Recommended' },
@@ -19,40 +18,6 @@ export default function Discover() {
   ];
 
   const categories = ['Chat', 'Music', 'Entertainment', 'Gaming', 'Lifestyle', 'Travel', 'Q&A', 'Dating'];
-
-  // Fetch wallet balance
-  const fetchBalance = async () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return;
-    try {
-      const res = await fetch('https://api.amoramatch.one/wallet/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setBalance(data.balance || 0);
-      }
-    } catch (e) {
-      console.error('Failed to fetch balance', e);
-    }
-  };
-
-  // Fetch unread notification count
-  const fetchUnreadCount = async () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return;
-    try {
-      const res = await fetch('https://api.amoramatch.one/notifications/unread-count', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUnreadCount(data.count || 0);
-      }
-    } catch (e) {
-      console.error('Failed to fetch unread count', e);
-    }
-  };
 
   const fetchRooms = async () => {
     const token = localStorage.getItem('accessToken');
@@ -114,8 +79,6 @@ export default function Discover() {
 
   useEffect(() => {
     fetchRooms();
-    fetchBalance();
-    fetchUnreadCount();
   }, [activeTab]);
 
   const timeSince = (date) => {
@@ -127,353 +90,248 @@ export default function Discover() {
     return `${Math.floor(hours / 24)}d ago`;
   };
 
-  return React.createElement('div', {
-    style: {
-      minHeight: '100vh',
-      background: '#0f0f1a',
-      color: '#fff',
-      fontFamily: 'sans-serif',
-      padding: '20px'
-    }
-  }, [
-    // Header with all navigation
-    React.createElement('header', {
-      key: 'header',
-      style: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '10px 0 20px 0',
-        borderBottom: '1px solid #222',
-        marginBottom: '20px'
-      }
-    }, [
-      // Logo
-      React.createElement('div', { key: 'logo', style: { display: 'flex', alignItems: 'center', gap: '10px' } }, [
-        React.createElement('h1', { key: 'title', style: { color: '#FF6B9D', fontSize: '24px', margin: 0 } }, 'AmoraLive'),
-        React.createElement('span', {
-          key: 'badge',
+  return React.createElement(Layout, null,
+    React.createElement('div', null, [
+      // Tabs
+      React.createElement('nav', {
+        key: 'tabs',
+        style: {
+          display: 'flex',
+          gap: '8px',
+          overflowX: 'auto',
+          paddingBottom: '15px',
+          marginBottom: '20px',
+          borderBottom: '1px solid #1a1a2e'
+        }
+      }, tabs.map(tab =>
+        React.createElement('button', {
+          key: tab.key,
+          onClick: () => setActiveTab(tab.key),
           style: {
+            padding: '8px 20px',
+            borderRadius: '20px',
+            border: 'none',
+            background: activeTab === tab.key ? '#FF6B9D' : 'transparent',
+            color: activeTab === tab.key ? '#fff' : '#888',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: activeTab === tab.key ? 'bold' : 'normal',
+            transition: 'all 0.2s',
+            whiteSpace: 'nowrap',
+            border: activeTab === tab.key ? 'none' : '1px solid #333'
+          }
+        }, tab.label)
+      )),
+
+      // Categories sub‑tabs
+      activeTab === 'categories' && React.createElement('div', {
+        key: 'category-grid',
+        style: {
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '12px',
+          marginBottom: '20px',
+          padding: '10px 0'
+        }
+      }, categories.map(cat =>
+        React.createElement('button', {
+          key: cat,
+          style: {
+            padding: '8px 20px',
+            borderRadius: '20px',
+            border: '1px solid #333',
+            background: '#1a1a2e',
+            color: '#fff',
+            cursor: 'pointer',
+            fontSize: '14px',
+            transition: '0.2s'
+          },
+          onMouseEnter: (e) => e.target.style.background = '#2a2a3e',
+          onMouseLeave: (e) => e.target.style.background = '#1a1a2e'
+        }, cat)
+      )),
+
+      // Loading / Error / Grid
+      loading && React.createElement('div', {
+        key: 'loading',
+        style: { textAlign: 'center', padding: '60px 0', color: '#666' }
+      }, 'Loading live streams...'),
+
+      error && React.createElement('div', {
+        key: 'error',
+        style: { textAlign: 'center', padding: '40px 0', color: '#ff6b6b' }
+      }, [
+        React.createElement('p', { key: 'msg' }, `Error: ${error}`),
+        React.createElement('button', {
+          key: 'retry',
+          onClick: fetchRooms,
+          style: {
+            marginTop: '10px',
+            padding: '8px 24px',
+            borderRadius: '6px',
+            border: 'none',
             background: '#FF6B9D',
             color: '#fff',
-            fontSize: '10px',
-            padding: '2px 8px',
-            borderRadius: '12px',
-            fontWeight: 'bold'
+            cursor: 'pointer'
           }
-        }, 'LIVE')
+        }, 'Retry')
       ]),
-      // Navigation links
-      React.createElement('div', {
-        key: 'nav',
-        style: { display: 'flex', alignItems: 'center', gap: '16px' }
-      }, [
-        // Store
-        React.createElement(Link, {
-          key: 'store',
-          href: '/store',
-          style: { color: '#aaa', textDecoration: 'none', fontSize: '20px' }
-        }, '🛍️'),
-        // Notifications with badge
-        React.createElement(Link, {
-          key: 'notifications',
-          href: '/notifications',
-          style: {
-            color: '#aaa',
-            textDecoration: 'none',
-            fontSize: '20px',
-            position: 'relative',
-            display: 'inline-flex'
-          }
-        }, [
-          '🔔',
-          unreadCount > 0 && React.createElement('span', {
-            key: 'badge',
-            style: {
-              position: 'absolute',
-              top: '-6px',
-              right: '-8px',
-              background: '#FF6B9D',
-              color: '#fff',
-              fontSize: '10px',
-              padding: '2px 6px',
-              borderRadius: '10px',
-              fontWeight: 'bold'
-            }
-          }, unreadCount > 9 ? '9+' : unreadCount)
-        ]),
-        // Wallet (coins)
-        React.createElement(Link, {
-          key: 'wallet',
-          href: '/wallet',
-          style: {
-            color: '#FFD700',
-            fontSize: '16px',
-            textDecoration: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '4px'
-          }
-        }, [`🪙 ${balance}`]),
-        // Profile
-        React.createElement(Link, {
-          key: 'profile',
-          href: '/profile',
-          style: {
-            width: '36px',
-            height: '36px',
-            borderRadius: '50%',
-            background: '#2a2a3e',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            textDecoration: 'none',
-            border: '2px solid #FF6B9D'
-          }
-        }, '👤')
-      ])
-    ]),
 
-    // Tabs (unchanged)
-    React.createElement('nav', {
-      key: 'tabs',
-      style: {
-        display: 'flex',
-        gap: '8px',
-        overflowX: 'auto',
-        paddingBottom: '15px',
-        marginBottom: '20px',
-        borderBottom: '1px solid #1a1a2e'
-      }
-    }, tabs.map(tab =>
-      React.createElement('button', {
-        key: tab.key,
-        onClick: () => setActiveTab(tab.key),
+      !loading && !error && React.createElement('div', {
+        key: 'grid',
         style: {
-          padding: '8px 20px',
-          borderRadius: '20px',
-          border: 'none',
-          background: activeTab === tab.key ? '#FF6B9D' : 'transparent',
-          color: activeTab === tab.key ? '#fff' : '#888',
-          cursor: 'pointer',
-          fontSize: '14px',
-          fontWeight: activeTab === tab.key ? 'bold' : 'normal',
-          transition: 'all 0.2s',
-          whiteSpace: 'nowrap',
-          border: activeTab === tab.key ? 'none' : '1px solid #333'
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+          gap: '20px',
+          marginTop: '10px'
         }
-      }, tab.label)
-    )),
-
-    // Categories (unchanged)
-    activeTab === 'categories' && React.createElement('div', {
-      key: 'category-grid',
-      style: {
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: '12px',
-        marginBottom: '20px',
-        padding: '10px 0'
-      }
-    }, categories.map(cat =>
-      React.createElement('button', {
-        key: cat,
-        style: {
-          padding: '8px 20px',
-          borderRadius: '20px',
-          border: '1px solid #333',
-          background: '#1a1a2e',
-          color: '#fff',
-          cursor: 'pointer',
-          fontSize: '14px',
-          transition: '0.2s'
-        },
-        onMouseEnter: (e) => e.target.style.background = '#2a2a3e',
-        onMouseLeave: (e) => e.target.style.background = '#1a1a2e'
-      }, cat)
-    )),
-
-    // Loading / Error / Grid (unchanged)
-    loading && React.createElement('div', {
-      key: 'loading',
-      style: { textAlign: 'center', padding: '60px 0', color: '#666' }
-    }, 'Loading live streams...'),
-
-    error && React.createElement('div', {
-      key: 'error',
-      style: { textAlign: 'center', padding: '40px 0', color: '#ff6b6b' }
-    }, [
-      React.createElement('p', { key: 'msg' }, `Error: ${error}`),
-      React.createElement('button', {
-        key: 'retry',
-        onClick: fetchRooms,
-        style: {
-          marginTop: '10px',
-          padding: '8px 24px',
-          borderRadius: '6px',
-          border: 'none',
-          background: '#FF6B9D',
-          color: '#fff',
-          cursor: 'pointer'
-        }
-      }, 'Retry')
-    ]),
-
-    !loading && !error && React.createElement('div', {
-      key: 'grid',
-      style: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-        gap: '20px',
-        marginTop: '10px'
-      }
-    }, rooms.length === 0 ? [
-      React.createElement('div', {
-        key: 'empty',
-        style: {
-          gridColumn: '1 / -1',
-          textAlign: 'center',
-          padding: '60px 0',
-          color: '#666'
-        }
-      }, [
-        React.createElement('p', { key: 'msg', style: { fontSize: '18px' } }, 'No live streams right now'),
-        React.createElement('p', { key: 'sub', style: { fontSize: '14px' } }, 'Check back later or start your own!')
-      ])
-    ] : rooms.map(room =>
-      React.createElement(Link, {
-        key: room.id,
-        href: `/live/${room.id}`,
-        style: { textDecoration: 'none' }
-      }, [
+      }, rooms.length === 0 ? [
         React.createElement('div', {
+          key: 'empty',
           style: {
-            background: '#1a1a2e',
-            borderRadius: '12px',
-            overflow: 'hidden',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            cursor: 'pointer',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
-          },
-          onMouseEnter: (e) => {
-            e.currentTarget.style.transform = 'translateY(-4px)';
-            e.currentTarget.style.boxShadow = '0 6px 20px rgba(255,107,157,0.15)';
-          },
-          onMouseLeave: (e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
+            gridColumn: '1 / -1',
+            textAlign: 'center',
+            padding: '60px 0',
+            color: '#666'
           }
         }, [
-          // Thumbnail
+          React.createElement('p', { key: 'msg', style: { fontSize: '18px' } }, 'No live streams right now'),
+          React.createElement('p', { key: 'sub', style: { fontSize: '14px' } }, 'Check back later or start your own!')
+        ])
+      ] : rooms.map(room =>
+        React.createElement(Link, {
+          key: room.id,
+          href: `/live/${room.id}`,
+          style: { textDecoration: 'none' }
+        }, [
           React.createElement('div', {
             style: {
-              position: 'relative',
-              height: '140px',
-              background: '#2a2a3e',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              overflow: 'hidden'
+              background: '#1a1a2e',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              cursor: 'pointer',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
+            },
+            onMouseEnter: (e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(255,107,157,0.15)';
+            },
+            onMouseLeave: (e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
             }
           }, [
-            !room.thumbnail_url && React.createElement('div', {
-              key: 'placeholder',
-              style: { color: '#444', fontSize: '40px' }
-            }, '📺'),
-            room.thumbnail_url && React.createElement('img', {
-              key: 'thumb',
-              src: room.thumbnail_url,
-              alt: room.title,
-              style: { width: '100%', height: '100%', objectFit: 'cover' }
-            }),
-            React.createElement('span', {
-              key: 'live-badge',
+            // Thumbnail
+            React.createElement('div', {
               style: {
-                position: 'absolute',
-                top: '8px',
-                left: '8px',
-                background: '#ff0000',
-                color: '#fff',
-                fontSize: '10px',
-                padding: '2px 8px',
-                borderRadius: '4px',
-                fontWeight: 'bold',
-                textTransform: 'uppercase'
-              }
-            }, 'LIVE'),
-            React.createElement('span', {
-              key: 'viewers',
-              style: {
-                position: 'absolute',
-                bottom: '8px',
-                right: '8px',
-                background: 'rgba(0,0,0,0.7)',
-                color: '#fff',
-                fontSize: '12px',
-                padding: '4px 10px',
-                borderRadius: '12px',
+                position: 'relative',
+                height: '140px',
+                background: '#2a2a3e',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '4px'
+                justifyContent: 'center',
+                overflow: 'hidden'
               }
-            }, ['👁️', ` ${room.viewer_count || 0}`])
-          ]),
-          // Info
-          React.createElement('div', {
-            style: { padding: '12px 14px' }
-          }, [
-            React.createElement('div', {
-              key: 'host',
-              style: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }
             }, [
-              React.createElement('div', {
+              !room.thumbnail_url && React.createElement('div', {
+                key: 'placeholder',
+                style: { color: '#444', fontSize: '40px' }
+              }, '📺'),
+              room.thumbnail_url && React.createElement('img', {
+                key: 'thumb',
+                src: room.thumbnail_url,
+                alt: room.title,
+                style: { width: '100%', height: '100%', objectFit: 'cover' }
+              }),
+              React.createElement('span', {
+                key: 'live-badge',
                 style: {
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '50%',
-                  background: '#2a2a3e',
+                  position: 'absolute',
+                  top: '8px',
+                  left: '8px',
+                  background: '#ff0000',
+                  color: '#fff',
+                  fontSize: '10px',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase'
+                }
+              }, 'LIVE'),
+              React.createElement('span', {
+                key: 'viewers',
+                style: {
+                  position: 'absolute',
+                  bottom: '8px',
+                  right: '8px',
+                  background: 'rgba(0,0,0,0.7)',
+                  color: '#fff',
+                  fontSize: '12px',
+                  padding: '4px 10px',
+                  borderRadius: '12px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden',
-                  fontSize: '14px'
+                  gap: '4px'
                 }
-              }, room.host?.profile_photo
-                ? React.createElement('img', {
-                    src: room.host.profile_photo,
-                    alt: room.host.display_name || room.host.username,
-                    style: { width: '100%', height: '100%', objectFit: 'cover' }
-                  })
-                : '👤'
-              ),
-              React.createElement('span', {
-                style: { color: '#fff', fontSize: '13px', fontWeight: '500' }
-              }, room.host?.display_name || room.host?.username || 'Unknown')
+              }, ['👁️', ` ${room.viewer_count || 0}`])
             ]),
-            React.createElement('h3', {
-              style: {
-                color: '#fff',
-                fontSize: '15px',
-                margin: '4px 0 2px 0',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-              }
-            }, room.title || 'Untitled'),
+            // Info
             React.createElement('div', {
-              style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }
+              style: { padding: '12px 14px' }
             }, [
-              React.createElement('span', {
-                style: { color: '#888', fontSize: '11px' }
-              }, `#${room.category || 'General'}`),
-              React.createElement('span', {
-                style: { color: '#666', fontSize: '11px' }
-              }, timeSince(room.created_at))
+              React.createElement('div', {
+                key: 'host',
+                style: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }
+              }, [
+                React.createElement('div', {
+                  style: {
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    background: '#2a2a3e',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'hidden',
+                    fontSize: '14px'
+                  }
+                }, room.host?.profile_photo
+                  ? React.createElement('img', {
+                      src: room.host.profile_photo,
+                      alt: room.host.display_name || room.host.username,
+                      style: { width: '100%', height: '100%', objectFit: 'cover' }
+                    })
+                  : '👤'
+                ),
+                React.createElement('span', {
+                  style: { color: '#fff', fontSize: '13px', fontWeight: '500' }
+                }, room.host?.display_name || room.host?.username || 'Unknown')
+              ]),
+              React.createElement('h3', {
+                style: {
+                  color: '#fff',
+                  fontSize: '15px',
+                  margin: '4px 0 2px 0',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }
+              }, room.title || 'Untitled'),
+              React.createElement('div', {
+                style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }
+              }, [
+                React.createElement('span', {
+                  style: { color: '#888', fontSize: '11px' }
+                }, `#${room.category || 'General'}`),
+                React.createElement('span', {
+                  style: { color: '#666', fontSize: '11px' }
+                }, timeSince(room.created_at))
+              ])
             ])
           ])
         ])
-      ])
-    ))
-  ]);
+      ))
+    ])
+  );
 }
