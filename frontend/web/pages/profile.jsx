@@ -10,7 +10,7 @@ export default function Profile() {
   const [error, setError] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({});
-  const [activeTab, setActiveTab] = useState('profile'); // profile, photos, privacy, settings
+  const [activeTab, setActiveTab] = useState('profile');
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
   const [showBlockList, setShowBlockList] = useState(false);
@@ -18,7 +18,6 @@ export default function Profile() {
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
 
-  // Fetch user profile
   const fetchProfile = async () => {
     const token = localStorage.getItem('accessToken');
     if (!token) {
@@ -49,7 +48,6 @@ export default function Profile() {
     }
   };
 
-  // Fetch followers/following
   const fetchFollows = async () => {
     const token = localStorage.getItem('accessToken');
     try {
@@ -74,7 +72,6 @@ export default function Profile() {
     }
   };
 
-  // Fetch blocked users
   const fetchBlocked = async () => {
     const token = localStorage.getItem('accessToken');
     try {
@@ -96,7 +93,6 @@ export default function Profile() {
     fetchBlocked();
   }, []);
 
-  // Update profile
   const updateProfile = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('accessToken');
@@ -118,7 +114,6 @@ export default function Profile() {
     }
   };
 
-  // Upload profile photo
   const uploadPhoto = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -142,7 +137,6 @@ export default function Profile() {
     }
   };
 
-  // Delete account
   const deleteAccount = async () => {
     if (!confirm('Are you sure? This action is permanent.')) return;
     const token = localStorage.getItem('accessToken');
@@ -160,7 +154,6 @@ export default function Profile() {
     }
   };
 
-  // Logout
   const logout = async () => {
     const token = localStorage.getItem('refreshToken');
     try {
@@ -272,7 +265,7 @@ export default function Profile() {
         margin: '0 auto'
       }
     }, [
-      // Sidebar with profile card
+      // Sidebar
       React.createElement('div', {
         key: 'sidebar',
         style: {
@@ -606,7 +599,6 @@ export default function Profile() {
 
         // Profile view (when not editing)
         !isEditing && React.createElement('div', { key: 'view' }, [
-          // Bio
           user.bio && React.createElement('div', {
             key: 'bio',
             style: {
@@ -619,8 +611,6 @@ export default function Profile() {
             React.createElement('h4', { key: 'title', style: { color: '#aaa', fontSize: '13px', marginBottom: '8px' } }, 'Bio'),
             React.createElement('p', { key: 'text', style: { color: '#fff', lineHeight: '1.6' } }, user.bio)
           ]),
-
-          // Details grid
           React.createElement('div', {
             key: 'details',
             style: {
@@ -649,8 +639,6 @@ export default function Profile() {
               React.createElement('div', { key: 'value', style: { color: '#fff', fontSize: '14px', marginTop: '4px' } }, value)
             ])
           ]),
-
-          // Badges
           user.badges && user.badges.length > 0 && React.createElement('div', {
             key: 'badges',
             style: {
