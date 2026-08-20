@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  images: {
-    domains: ['api.amoramatch.one', 'amoramatch.one'],
-  },
+  pageExtensions: ['jsx', 'js', 'tsx', 'ts'],
 };
 module.exports = nextConfig;
