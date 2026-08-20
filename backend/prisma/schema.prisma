@@ -53,6 +53,10 @@ model User {
   following        Follow[]        @relation("following")
   matches          Match[]         @relation("user1")
   matched          Match[]         @relation("user2")
+  purchases        Purchase[]
+  memberships      Membership[]
+  roomParticipants RoomParticipant[]
+  liveChatMessages LiveChatMessage[]
 }
 
 model Session {
@@ -89,6 +93,8 @@ model GiftCatalog {
   available_from DateTime?
   available_to   DateTime?
   created_at  DateTime @default(now())
+
+  giftTransactions GiftTransaction[]
 }
 
 model GiftTransaction {
@@ -121,6 +127,8 @@ model CoinPackage {
   platform    String
   stripe_price_id String?
   created_at  DateTime @default(now())
+
+  purchases   Purchase[]
 }
 
 model Purchase {
