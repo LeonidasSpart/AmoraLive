@@ -10,8 +10,7 @@ export default function Home() {
     }
   }, []);
 
-  // If you want a landing page for non‑logged‑in users, keep the existing UI.
-  // Otherwise, just render the login/register buttons.
+  // Keep the existing landing UI for non‑logged‑in users
   return React.createElement('div', {
     style: {
       minHeight: '100vh',
