@@ -1,4 +1,6 @@
+// pages/index.jsx
 import React from 'react';
+import Link from 'next/link';
 
 export default function Home() {
   return React.createElement('div', {
@@ -10,10 +12,46 @@ export default function Home() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      fontFamily: 'sans-serif'
+      fontFamily: 'sans-serif',
+      padding: '20px'
     }
   }, [
-    React.createElement('h1', { style: { color: '#FF6B9D' } }, 'AmoraLive'),
-    React.createElement('p', { style: { color: '#aaa' } }, 'Web frontend is live with Next.js 15')
+    React.createElement('h1', {
+      key: 'title',
+      style: { fontSize: '48px', color: '#FF6B9D', marginBottom: '10px' }
+    }, 'AmoraLive'),
+    React.createElement('p', {
+      key: 'subtitle',
+      style: { fontSize: '20px', color: '#aaa', marginBottom: '40px' }
+    }, 'Live social dating – connect, chat, and share moments'),
+    React.createElement('div', {
+      key: 'buttons',
+      style: { display: 'flex', gap: '20px' }
+    }, [
+      React.createElement(Link, {
+        key: 'login',
+        href: '/login',
+        style: {
+          padding: '12px 30px',
+          borderRadius: '8px',
+          background: '#FF6B9D',
+          color: '#fff',
+          textDecoration: 'none',
+          fontWeight: 'bold'
+        }
+      }, 'Login'),
+      React.createElement(Link, {
+        key: 'register',
+        href: '/register',
+        style: {
+          padding: '12px 30px',
+          borderRadius: '8px',
+          border: '2px solid #FF6B9D',
+          color: '#FF6B9D',
+          textDecoration: 'none',
+          fontWeight: 'bold'
+        }
+      }, 'Register')
+    ])
   ]);
 }
