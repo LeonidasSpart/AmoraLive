@@ -81,6 +81,7 @@ const membershipRoutes = require('./routes/membership')(prisma);
 const storeRoutes = require('./routes/store')(prisma);
 const eventRoutes = require('./routes/events')(prisma, io);
 const adminRoutes = require('./routes/admin')(prisma);
+const matchRoutes = require('./routes/matches')(prisma);  // <-- NEW
 
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
@@ -91,6 +92,7 @@ app.use('/membership', membershipRoutes);
 app.use('/store', storeRoutes);
 app.use('/events', eventRoutes);
 app.use('/admin', adminRoutes);
+app.use('/matches', matchRoutes);                         // <-- NEW
 
 // ---------- Root endpoint ----------
 app.get('/', (req, res) => {
@@ -100,7 +102,7 @@ app.get('/', (req, res) => {
     status: 'running',
     endpoints: [
       '/auth', '/users', '/live', '/gifts', '/wallet',
-      '/membership', '/store', '/events', '/admin', '/health'
+      '/membership', '/store', '/events', '/admin', '/health', '/matches'
     ]
   });
 });
