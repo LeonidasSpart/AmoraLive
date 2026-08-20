@@ -7,6 +7,8 @@ export default function Discover() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('recommended');
   const [error, setError] = useState('');
+  const [balance, setBalance] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const tabs = [
     { key: 'recommended', label: 'Recommended' },
@@ -17,6 +19,40 @@ export default function Discover() {
   ];
 
   const categories = ['Chat', 'Music', 'Entertainment', 'Gaming', 'Lifestyle', 'Travel', 'Q&A', 'Dating'];
+
+  // Fetch wallet balance
+  const fetchBalance = async () => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+    try {
+      const res = await fetch('https://api.amoramatch.one/wallet/me', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setBalance(data.balance || 0);
+      }
+    } catch (e) {
+      console.error('Failed to fetch balance', e);
+    }
+  };
+
+  // Fetch unread notification count
+  const fetchUnreadCount = async () => {
+    const token = localStorage.getItem('accessToken');
+    if (!token) return;
+    try {
+      const res = await fetch('https://api.amoramatch.one/notifications/unread-count', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUnreadCount(data.count || 0);
+      }
+    } catch (e) {
+      console.error('Failed to fetch unread count', e);
+    }
+  };
 
   const fetchRooms = async () => {
     const token = localStorage.getItem('accessToken');
@@ -78,6 +114,8 @@ export default function Discover() {
 
   useEffect(() => {
     fetchRooms();
+    fetchBalance();
+    fetchUnreadCount();
   }, [activeTab]);
 
   const timeSince = (date) => {
@@ -98,7 +136,7 @@ export default function Discover() {
       padding: '20px'
     }
   }, [
-    // Header with wallet link
+    // Header with all navigation
     React.createElement('header', {
       key: 'header',
       style: {
@@ -110,6 +148,7 @@ export default function Discover() {
         marginBottom: '20px'
       }
     }, [
+      // Logo
       React.createElement('div', { key: 'logo', style: { display: 'flex', alignItems: 'center', gap: '10px' } }, [
         React.createElement('h1', { key: 'title', style: { color: '#FF6B9D', fontSize: '24px', margin: 0 } }, 'AmoraLive'),
         React.createElement('span', {
@@ -124,21 +163,59 @@ export default function Discover() {
           }
         }, 'LIVE')
       ]),
-      React.createElement('div', { key: 'user', style: { display: 'flex', alignItems: 'center', gap: '15px' } }, [
-        // Wallet link (coins)
+      // Navigation links
+      React.createElement('div', {
+        key: 'nav',
+        style: { display: 'flex', alignItems: 'center', gap: '16px' }
+      }, [
+        // Store
+        React.createElement(Link, {
+          key: 'store',
+          href: '/store',
+          style: { color: '#aaa', textDecoration: 'none', fontSize: '20px' }
+        }, '🛍️'),
+        // Notifications with badge
+        React.createElement(Link, {
+          key: 'notifications',
+          href: '/notifications',
+          style: {
+            color: '#aaa',
+            textDecoration: 'none',
+            fontSize: '20px',
+            position: 'relative',
+            display: 'inline-flex'
+          }
+        }, [
+          '🔔',
+          unreadCount > 0 && React.createElement('span', {
+            key: 'badge',
+            style: {
+              position: 'absolute',
+              top: '-6px',
+              right: '-8px',
+              background: '#FF6B9D',
+              color: '#fff',
+              fontSize: '10px',
+              padding: '2px 6px',
+              borderRadius: '10px',
+              fontWeight: 'bold'
+            }
+          }, unreadCount > 9 ? '9+' : unreadCount)
+        ]),
+        // Wallet (coins)
         React.createElement(Link, {
           key: 'wallet',
           href: '/wallet',
           style: {
             color: '#FFD700',
-            fontSize: '14px',
+            fontSize: '16px',
             textDecoration: 'none',
             display: 'flex',
             alignItems: 'center',
             gap: '4px'
           }
-        }, '🪙 1,250'),
-        // Profile link
+        }, [`🪙 ${balance}`]),
+        // Profile
         React.createElement(Link, {
           key: 'profile',
           href: '/profile',
