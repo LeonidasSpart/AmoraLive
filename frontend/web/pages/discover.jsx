@@ -16,7 +16,6 @@ export default function Discover() {
     { key: 'categories', label: 'Categories' }
   ];
 
-  // Mock categories for the categories tab
   const categories = ['Chat', 'Music', 'Entertainment', 'Gaming', 'Lifestyle', 'Travel', 'Q&A', 'Dating'];
 
   const fetchRooms = async () => {
@@ -28,7 +27,6 @@ export default function Discover() {
     setLoading(true);
     setError('');
     try {
-      // Build query params based on active tab
       let url = 'https://api.amoramatch.one/live?limit=30';
       if (activeTab === 'trending') url += '&sort=viewer_count';
       if (activeTab === 'new') url += '&sort=newest';
@@ -39,18 +37,15 @@ export default function Discover() {
       });
       if (!res.ok) throw new Error('Failed to fetch live rooms');
       const data = await res.json();
-      // If the API returns an array directly, use that. If it returns { rooms, total }, adjust.
       setRooms(Array.isArray(data) ? data : data.rooms || []);
     } catch (err) {
       setError(err.message);
-      // Fallback mock data for demonstration
       setRooms(generateMockRooms());
     } finally {
       setLoading(false);
     }
   };
 
-  // Mock data generator (will be replaced by real API)
   const generateMockRooms = () => {
     const hosts = ['Lucia★', 'Jemima', 'Capybara', 'Edward', 'Gizem', 'Osa23', 'Caramelo', 'Wigo'];
     const titles = [
@@ -85,7 +80,6 @@ export default function Discover() {
     fetchRooms();
   }, [activeTab]);
 
-  // Time since start
   const timeSince = (date) => {
     const diff = Math.floor((Date.now() - new Date(date).getTime()) / 60000);
     if (diff < 1) return 'Just now';
@@ -104,7 +98,7 @@ export default function Discover() {
       padding: '20px'
     }
   }, [
-    // Header
+    // Header with wallet link
     React.createElement('header', {
       key: 'header',
       style: {
@@ -131,10 +125,20 @@ export default function Discover() {
         }, 'LIVE')
       ]),
       React.createElement('div', { key: 'user', style: { display: 'flex', alignItems: 'center', gap: '15px' } }, [
-        React.createElement('span', {
-          key: 'coins',
-          style: { color: '#FFD700', fontSize: '14px' }
+        // Wallet link (coins)
+        React.createElement(Link, {
+          key: 'wallet',
+          href: '/wallet',
+          style: {
+            color: '#FFD700',
+            fontSize: '14px',
+            textDecoration: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
+          }
         }, '🪙 1,250'),
+        // Profile link
         React.createElement(Link, {
           key: 'profile',
           href: '/profile',
@@ -154,7 +158,7 @@ export default function Discover() {
       ])
     ]),
 
-    // Tabs
+    // Tabs (unchanged)
     React.createElement('nav', {
       key: 'tabs',
       style: {
@@ -185,7 +189,7 @@ export default function Discover() {
       }, tab.label)
     )),
 
-    // Categories sub‑tabs (if active tab is categories)
+    // Categories (unchanged)
     activeTab === 'categories' && React.createElement('div', {
       key: 'category-grid',
       style: {
@@ -213,13 +217,12 @@ export default function Discover() {
       }, cat)
     )),
 
-    // Loading state
+    // Loading / Error / Grid (unchanged)
     loading && React.createElement('div', {
       key: 'loading',
       style: { textAlign: 'center', padding: '60px 0', color: '#666' }
     }, 'Loading live streams...'),
 
-    // Error state
     error && React.createElement('div', {
       key: 'error',
       style: { textAlign: 'center', padding: '40px 0', color: '#ff6b6b' }
@@ -240,7 +243,6 @@ export default function Discover() {
       }, 'Retry')
     ]),
 
-    // Room grid
     !loading && !error && React.createElement('div', {
       key: 'grid',
       style: {
@@ -308,7 +310,6 @@ export default function Discover() {
               alt: room.title,
               style: { width: '100%', height: '100%', objectFit: 'cover' }
             }),
-            // LIVE badge
             React.createElement('span', {
               key: 'live-badge',
               style: {
@@ -324,7 +325,6 @@ export default function Discover() {
                 textTransform: 'uppercase'
               }
             }, 'LIVE'),
-            // Viewer count
             React.createElement('span', {
               key: 'viewers',
               style: {
