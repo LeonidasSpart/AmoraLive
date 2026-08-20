@@ -81,7 +81,8 @@ const membershipRoutes = require('./routes/membership')(prisma);
 const storeRoutes = require('./routes/store')(prisma);
 const eventRoutes = require('./routes/events')(prisma, io);
 const adminRoutes = require('./routes/admin')(prisma);
-const matchRoutes = require('./routes/matches')(prisma);  // <-- NEW
+const matchRoutes = require('./routes/matches')(prisma);
+const messageRoutes = require('./routes/messages')(prisma, io);
 
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
@@ -92,7 +93,8 @@ app.use('/membership', membershipRoutes);
 app.use('/store', storeRoutes);
 app.use('/events', eventRoutes);
 app.use('/admin', adminRoutes);
-app.use('/matches', matchRoutes);                         // <-- NEW
+app.use('/matches', matchRoutes);
+app.use('/messages', messageRoutes);
 
 // ---------- Root endpoint ----------
 app.get('/', (req, res) => {
@@ -102,7 +104,8 @@ app.get('/', (req, res) => {
     status: 'running',
     endpoints: [
       '/auth', '/users', '/live', '/gifts', '/wallet',
-      '/membership', '/store', '/events', '/admin', '/health', '/matches'
+      '/membership', '/store', '/events', '/admin', '/health',
+      '/matches', '/messages'
     ]
   });
 });
@@ -114,6 +117,14 @@ app.get('/health', (req, res) => res.send('AmoraLive API running'));
 io.on('connection', (socket) => {
   console.log('User connected:', socket.id);
 
+  // Authenticate socket (store userId)
+  socket.on('authenticate', (userId) => {
+    socket.userId = userId;
+    socket.join(`user-${userId}`);
+    console.log(`User ${userId} authenticated on socket ${socket.id}`);
+  });
+
+  // Live room events
   socket.on('join-live', (roomId) => {
     socket.join(`live-${roomId}`);
     io.to(`live-${roomId}`).emit('viewer-joined', socket.id);
@@ -142,6 +153,60 @@ io.on('connection', (socket) => {
 
   socket.on('video-match-signal', (data) => {
     io.to(data.targetId).emit('video-signal', data);
+  });
+
+  // Private chat events
+  socket.on('private-message', async (data) => {
+    const { receiverId, content, type = 'text', media_urls = [] } = data;
+    const senderId = socket.userId;
+    if (!senderId) {
+      console.warn('private-message: sender not authenticated');
+      return;
+    }
+    try {
+      const message = await prisma.message.create({
+        data: {
+          sender_id: senderId,
+          receiver_id: receiverId,
+          content,
+          type,
+          media_urls
+        },
+        include: {
+          sender: {
+            select: { id: true, username: true, display_name: true, profile_photo: true }
+          }
+        }
+      });
+      io.to(`user-${receiverId}`).emit('private-message', message);
+      socket.emit('private-message-sent', message);
+    } catch (err) {
+      console.error('Socket private message error:', err);
+    }
+  });
+
+  socket.on('typing', ({ receiverId, isTyping }) => {
+    const senderId = socket.userId;
+    if (!senderId) return;
+    io.to(`user-${receiverId}`).emit('typing', { from: senderId, isTyping });
+  });
+
+  socket.on('mark-read', async ({ senderId }) => {
+    const userId = socket.userId;
+    if (!userId) return;
+    try {
+      await prisma.message.updateMany({
+        where: {
+          sender_id: senderId,
+          receiver_id: userId,
+          read_at: null
+        },
+        data: { read_at: new Date() }
+      });
+      io.to(`user-${senderId}`).emit('read-receipt', { from: userId });
+    } catch (err) {
+      console.error('Mark read error:', err);
+    }
   });
 
   socket.on('disconnect', () => {
