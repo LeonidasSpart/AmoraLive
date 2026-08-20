@@ -1,8 +1,17 @@
 // pages/index.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import Link from 'next/link';
 
 export default function Home() {
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      window.location.href = '/discover';
+    }
+  }, []);
+
+  // If you want a landing page for non‑logged‑in users, keep the existing UI.
+  // Otherwise, just render the login/register buttons.
   return React.createElement('div', {
     style: {
       minHeight: '100vh',
