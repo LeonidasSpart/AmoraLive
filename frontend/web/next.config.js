@@ -5,5 +5,4 @@ const nextConfig = {
     domains: ['api.amoramatch.one', 'amoramatch.one'],
   },
 };
-
 module.exports = nextConfig;
