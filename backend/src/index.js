@@ -83,6 +83,7 @@ const eventRoutes = require('./routes/events')(prisma, io);
 const adminRoutes = require('./routes/admin')(prisma);
 const matchRoutes = require('./routes/matches')(prisma);
 const messageRoutes = require('./routes/messages')(prisma, io);
+const notificationRoutes = require('./routes/notifications')(prisma, io); // <-- NEW
 
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
@@ -95,6 +96,7 @@ app.use('/events', eventRoutes);
 app.use('/admin', adminRoutes);
 app.use('/matches', matchRoutes);
 app.use('/messages', messageRoutes);
+app.use('/notifications', notificationRoutes); // <-- NEW
 
 // ---------- Root endpoint ----------
 app.get('/', (req, res) => {
@@ -105,7 +107,7 @@ app.get('/', (req, res) => {
     endpoints: [
       '/auth', '/users', '/live', '/gifts', '/wallet',
       '/membership', '/store', '/events', '/admin', '/health',
-      '/matches', '/messages'
+      '/matches', '/messages', '/notifications' // <-- added
     ]
   });
 });
