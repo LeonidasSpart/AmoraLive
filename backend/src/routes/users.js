@@ -2,8 +2,9 @@
 const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
+const bcrypt = require('bcrypt');
 
-// Configure multer for memory storage (or disk storage if preferred)
+// Configure multer for memory storage
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
@@ -32,7 +33,6 @@ module.exports = (prisma) => {
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
-      // Remove sensitive fields before sending
       const { password_hash, ...safeUser } = user;
       res.json(safeUser);
     } catch (e) {
@@ -62,6 +62,69 @@ module.exports = (prisma) => {
     }
   });
 
+  // ---------- POST /users/me/change-password ----------
+  router.post('/me/change-password', auth, async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Current and new password required' });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    }
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: { password_hash: true }
+      });
+      const match = await bcrypt.compare(currentPassword, user.password_hash);
+      if (!match) {
+        return res.status(401).json({ error: 'Current password is incorrect' });
+      }
+      const hashed = await bcrypt.hash(newPassword, 12);
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { password_hash: hashed }
+      });
+      res.json({ success: true, message: 'Password updated successfully' });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ---------- GET /users/me/privacy ----------
+  router.get('/me/privacy', auth, async (req, res) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: { privacy_settings: true }
+      });
+      res.json(user?.privacy_settings || {});
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ---------- PATCH /users/me/privacy ----------
+  router.patch('/me/privacy', auth, async (req, res) => {
+    const { online_status_visible, profile_visible, show_age, show_location } = req.body;
+    try {
+      const updated = await prisma.user.update({
+        where: { id: req.user.id },
+        data: {
+          privacy_settings: {
+            online_status_visible: online_status_visible ?? true,
+            profile_visible: profile_visible ?? true,
+            show_age: show_age ?? true,
+            show_location: show_location ?? true
+          }
+        }
+      });
+      res.json({ success: true, privacy_settings: updated.privacy_settings });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ---------- POST /users/block ----------
   router.post('/block', auth, async (req, res) => {
     const { userId } = req.body;
@@ -69,11 +132,9 @@ module.exports = (prisma) => {
       return res.status(400).json({ error: 'userId is required' });
     }
     try {
-      // Prevent blocking self
       if (userId === req.user.id) {
         return res.status(400).json({ error: 'You cannot block yourself' });
       }
-      // Check if already blocked
       const existing = await prisma.block.findUnique({
         where: {
           blocker_id_blocked_id: { blocker_id: req.user.id, blocked_id: userId }
@@ -227,8 +288,7 @@ module.exports = (prisma) => {
       // TODO: Replace with actual file upload logic (e.g., AWS S3, Cloudinary, etc.)
       const mockUrl = `https://storage.amoramatch.one/users/${req.user.id}/profile_${Date.now()}.jpg`;
       
-      // Update user's profile_photo field
-      const updated = await prisma.user.update({
+      await prisma.user.update({
         where: { id: req.user.id },
         data: { profile_photo: mockUrl }
       });
