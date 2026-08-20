@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import Layout from '../components/Layout';
 
 export default function Profile() {
   const router = useRouter();
@@ -155,62 +156,54 @@ export default function Profile() {
     }
   };
 
-  const logout = async () => {
-    const token = localStorage.getItem('refreshToken');
-    try {
-      await fetch('https://api.amoramatch.one/auth/logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: token })
-      });
-    } catch (e) {}
-    localStorage.clear();
-    router.push('/login');
+  // Go to settings
+  const goToSettings = () => {
+    router.push('/settings');
   };
 
   // --- Loading / Error states ---
   if (loading) {
-    return React.createElement('div', {
-      style: {
-        minHeight: '100vh',
-        background: '#0f0f1a',
-        color: '#fff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'sans-serif'
-      }
-    }, 'Loading profile...');
+    return React.createElement(Layout, null,
+      React.createElement('div', {
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: 'calc(100vh - 80px)',
+          color: '#fff'
+        }
+      }, 'Loading profile...')
+    );
   }
 
   if (error || !user) {
-    return React.createElement('div', {
-      style: {
-        minHeight: '100vh',
-        background: '#0f0f1a',
-        color: '#fff',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'sans-serif'
-      }
-    }, [
-      React.createElement('p', { key: 'msg', style: { color: '#ff6b6b' } }, `Error: ${error || 'User not found'}`),
-      React.createElement('button', {
-        key: 'retry',
-        onClick: fetchProfile,
+    return React.createElement(Layout, null,
+      React.createElement('div', {
         style: {
-          marginTop: '20px',
-          padding: '8px 24px',
-          borderRadius: '6px',
-          border: 'none',
-          background: '#FF6B9D',
-          color: '#fff',
-          cursor: 'pointer'
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          height: 'calc(100vh - 80px)',
+          color: '#fff'
         }
-      }, 'Retry')
-    ]);
+      }, [
+        React.createElement('p', { key: 'msg', style: { color: '#ff6b6b' } }, `Error: ${error || 'User not found'}`),
+        React.createElement('button', {
+          key: 'retry',
+          onClick: fetchProfile,
+          style: {
+            marginTop: '20px',
+            padding: '8px 24px',
+            borderRadius: '6px',
+            border: 'none',
+            background: '#FF6B9D',
+            color: '#fff',
+            cursor: 'pointer'
+          }
+        }, 'Retry')
+      ])
+    );
   }
 
   // --- Helper: stats array ---
@@ -379,7 +372,7 @@ export default function Profile() {
   actionChildren.push(
     React.createElement('button', {
       key: 'settings',
-      onClick: () => setActiveTab('settings'),
+      onClick: goToSettings,
       style: {
         padding: '10px',
         borderRadius: '8px',
@@ -704,52 +697,9 @@ export default function Profile() {
     style: { flex: 1 }
   }, contentChildren);
 
-  // --- Full page layout ---
-  const headerChildren = [
-    React.createElement('div', { key: 'left', style: { display: 'flex', alignItems: 'center', gap: '16px' } }, [
-      React.createElement(Link, {
-        key: 'back',
-        href: '/discover',
-        style: { color: '#888', textDecoration: 'none', fontSize: '20px' }
-      }, '←'),
-      React.createElement('h1', { key: 'title', style: { color: '#fff', fontSize: '20px', margin: 0 } }, 'Profile')
-    ]),
-    React.createElement('div', { key: 'right', style: { display: 'flex', gap: '12px' } }, [
-      React.createElement('button', {
-        key: 'logout',
-        onClick: logout,
-        style: {
-          padding: '6px 16px',
-          borderRadius: '6px',
-          border: '1px solid #333',
-          background: 'transparent',
-          color: '#888',
-          cursor: 'pointer'
-        }
-      }, 'Logout')
-    ])
-  ];
-
-  return React.createElement('div', {
-    style: {
-      minHeight: '100vh',
-      background: '#0f0f1a',
-      color: '#fff',
-      fontFamily: 'sans-serif'
-    }
-  }, [
-    React.createElement('header', {
-      key: 'header',
-      style: {
-        padding: '20px 30px',
-        borderBottom: '1px solid #222',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }
-    }, headerChildren),
+  // --- Wrap everything in Layout ---
+  return React.createElement(Layout, null,
     React.createElement('div', {
-      key: 'main',
       style: {
         display: 'flex',
         gap: '30px',
@@ -758,5 +708,5 @@ export default function Profile() {
         margin: '0 auto'
       }
     }, [sidebar, mainContent])
-  ]);
+  );
 }
