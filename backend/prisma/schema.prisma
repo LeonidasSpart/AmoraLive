@@ -353,4 +353,3 @@ model AuditLog {
   ip          String?
   timestamp   DateTime @default(now())
 }
-EOF
