@@ -121,10 +121,15 @@ module.exports = (prisma) => {
   // a short-lived completion token because DOB/username are required by Amora.
   // The flow uses a signed state value bound to a short-lived HttpOnly cookie to
   // protect the redirect flow against CSRF.
+  // `platform=mobile` lets the native app opt into a deep-link redirect
+  // (amora://auth-callback) instead of the web app's /auth/google-complete
+  // page once the OAuth round-trip finishes. The choice is bound into the
+  // signed state token so it can't be tampered with client-side.
   router.get('/google/start', (req, res) => {
     if (!process.env.GOOGLE_CLIENT_ID) return res.status(503).send('Google authentication is not configured');
+    const platform = req.query.platform === 'mobile' ? 'mobile' : 'web';
     const state = crypto.randomBytes(32).toString('hex');
-    const stateToken = jwt.sign({ purpose: 'google_oauth_state', state }, process.env.JWT_SECRET, { expiresIn: '10m' });
+    const stateToken = jwt.sign({ purpose: 'google_oauth_state', state, platform }, process.env.JWT_SECRET, { expiresIn: '10m' });
     res.cookie('amora_google_state', stateToken, {
       httpOnly: true,
       secure: true,
@@ -157,6 +162,9 @@ module.exports = (prisma) => {
         throw new Error('Invalid Google OAuth state');
       }
       res.setHeader('Set-Cookie', 'amora_google_state=; Max-Age=0; Path=/auth/google; Secure; HttpOnly; SameSite=Lax');
+      const isMobile = state.platform === 'mobile';
+      const failureRedirect = isMobile ? 'amora://auth-callback?error=google_auth_failed' : `${appUrl()}/login?error=google_auth_failed`;
+
       const tokenRes = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ code: String(req.query.code), client_id: process.env.GOOGLE_CLIENT_ID, client_secret: process.env.GOOGLE_CLIENT_SECRET, redirect_uri: googleRedirectUri(), grant_type: 'authorization_code' }) });
       const tokens = await tokenRes.json();
       if (!tokenRes.ok) throw new Error(tokens.error_description || 'Google token exchange failed');
@@ -166,16 +174,23 @@ module.exports = (prisma) => {
 
       const existing = await prisma.user.findUnique({ where: { email: profile.email.toLowerCase() } });
       if (existing) {
-        if (!existing.is_active) return res.redirect(`${appUrl()}/login?error=account_suspended`);
+        if (!existing.is_active) {
+          return res.redirect(isMobile ? 'amora://auth-callback?error=account_suspended' : `${appUrl()}/login?error=account_suspended`);
+        }
         const session = await createSession(existing);
         const params = new URLSearchParams({ accessToken: session.accessToken, refreshToken: session.refreshToken, userId: existing.id, role: existing.role });
-        return res.redirect(`${appUrl()}/auth/google-complete?${params}`);
+        return res.redirect(isMobile ? `amora://auth-callback?${params}` : `${appUrl()}/auth/google-complete?${params}`);
       }
 
       const completion = jwt.sign({ purpose: 'google_signup', email: profile.email.toLowerCase(), name: profile.name || profile.email.split('@')[0] }, process.env.JWT_SECRET, { expiresIn: '10m' });
+      if (isMobile) {
+        return res.redirect(`amora://auth-callback?google=${encodeURIComponent(completion)}`);
+      }
       res.redirect(`${appUrl()}/register?google=${encodeURIComponent(completion)}`);
     } catch (e) {
       console.error('Google OAuth error:', e);
+      // We don't know the platform if state verification itself failed, so
+      // fall back to the web login page rather than guessing a deep link.
       res.redirect(`${appUrl()}/login?error=google_auth_failed`);
     }
   });
