@@ -3,6 +3,7 @@ const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
 // Configure multer for memory storage
 const storage = multer.memoryStorage();
@@ -283,16 +284,22 @@ module.exports = (prisma) => {
       if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
-      // In production, upload to S3 or cloud storage.
-      // For now, we'll just return a mock URL.
-      // TODO: Replace with actual file upload logic (e.g., AWS S3, Cloudinary, etc.)
-      const mockUrl = `https://storage.amoramatch.one/users/${req.user.id}/profile_${Date.now()}.jpg`;
-      
-      await prisma.user.update({
-        where: { id: req.user.id },
-        data: { profile_photo: mockUrl }
+      if (!process.env.S3_BUCKET || !process.env.S3_REGION || !process.env.S3_ACCESS_KEY_ID || !process.env.S3_SECRET_ACCESS_KEY || !process.env.S3_PUBLIC_BASE_URL) {
+        return res.status(503).json({ error: 'Media storage is not configured' });
+      }
+      const s3 = new S3Client({
+        region: process.env.S3_REGION,
+        endpoint: process.env.S3_ENDPOINT || undefined,
+        forcePathStyle: String(process.env.S3_FORCE_PATH_STYLE || '').toLowerCase() === 'true',
+        credentials: { accessKeyId: process.env.S3_ACCESS_KEY_ID, secretAccessKey: process.env.S3_SECRET_ACCESS_KEY }
       });
-      res.json({ url: mockUrl });
+      const ext = path.extname(req.file.originalname).toLowerCase() || '.jpg';
+      const key = `users/${req.user.id}/profile/${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
+      await s3.send(new PutObjectCommand({ Bucket: process.env.S3_BUCKET, Key: key, Body: req.file.buffer, ContentType: req.file.mimetype, CacheControl: 'public, max-age=31536000, immutable' }));
+      const base = process.env.S3_PUBLIC_BASE_URL.replace(/\/$/, '');
+      const url = `${base}/${key}`;
+      await prisma.user.update({ where: { id: req.user.id }, data: { profile_photo: url } });
+      res.json({ url });
     } catch (e) {
       console.error('Photo upload error:', e);
       res.status(500).json({ error: e.message });

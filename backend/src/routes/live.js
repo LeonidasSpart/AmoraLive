@@ -1,5 +1,6 @@
 // backend/src/routes/live.js
 const auth = require('../middleware/auth');
+const jwt = require('jsonwebtoken');
 
 module.exports = (prisma, io) => {
   const router = require('express').Router();
@@ -136,6 +137,30 @@ module.exports = (prisma, io) => {
     }
   });
 
+
+  // GET /live/:id/token – LiveKit access token for host/viewer. Requires LiveKit env vars.
+  router.get('/:id/token', auth, async (req, res) => {
+    try {
+      const { id } = req.params;
+      if (!process.env.LIVEKIT_API_KEY || !process.env.LIVEKIT_API_SECRET || !process.env.LIVEKIT_URL) {
+        return res.status(503).json({ error: 'Live video provider is not configured' });
+      }
+      const room = await prisma.liveRoom.findUnique({ where: { id }, select: { id: true, host_id: true, status: true } });
+      if (!room || room.status !== 'live') return res.status(404).json({ error: 'Live room is not active' });
+      const isHost = room.host_id === req.user.id;
+      const token = jwt.sign({
+        iss: process.env.LIVEKIT_API_KEY,
+        sub: req.user.id,
+        name: req.user.id,
+        video: { roomJoin: true, room: id, canPublish: isHost, canSubscribe: true, canPublishData: true }
+      }, process.env.LIVEKIT_API_SECRET, { expiresIn: '2h' });
+      res.json({ token, url: process.env.LIVEKIT_URL, roomId: id, role: isHost ? 'host' : 'viewer' });
+    } catch (e) {
+      console.error('Live token error:', e);
+      res.status(500).json({ error: 'Unable to create live token' });
+    }
+  });
+
   // ---------- POST /live (create room) ----------
   router.post('/', auth, async (req, res) => {
     try {
@@ -244,27 +269,19 @@ module.exports = (prisma, io) => {
         return res.status(400).json({ error: 'Room is not live' });
       }
 
-      // Add or update participant
-      await prisma.roomParticipant.upsert({
-        where: {
-          room_id_user_id: { room_id: id, user_id: userId }
-        },
-        update: {
-          left_at: null,
-          role: 'viewer' // unless already host/co-host
-        },
-        create: {
-          room_id: id,
-          user_id: userId,
-          role: 'viewer'
-        }
+      const participant = await prisma.roomParticipant.findUnique({
+        where: { room_id_user_id: { room_id: id, user_id: userId } }
       });
 
-      // Increment viewer count
-      const updated = await prisma.liveRoom.update({
-        where: { id },
-        data: { viewer_count: { increment: 1 } }
+      await prisma.roomParticipant.upsert({
+        where: { room_id_user_id: { room_id: id, user_id: userId } },
+        update: { left_at: null, role: participant?.role === 'host' ? 'host' : 'viewer' },
+        create: { room_id: id, user_id: userId, role: 'viewer' }
       });
+
+      const updated = participant?.left_at === null
+        ? room
+        : await prisma.liveRoom.update({ where: { id }, data: { viewer_count: { increment: 1 } } });
 
       // Broadcast viewer count update
       io.to(`live-${id}`).emit('viewer-count', { count: updated.viewer_count });
@@ -282,21 +299,26 @@ module.exports = (prisma, io) => {
       const { id } = req.params;
       const userId = req.user.id;
 
-      // Update participant left_at
-      await prisma.roomParticipant.updateMany({
-        where: {
-          room_id: id,
-          user_id: userId,
-          left_at: null
-        },
+      const participant = await prisma.roomParticipant.findUnique({
+        where: { room_id_user_id: { room_id: id, user_id: userId } }
+      });
+      if (!participant || participant.left_at) {
+        const current = await prisma.liveRoom.findUnique({ where: { id }, select: { viewer_count: true } });
+        return res.json({ success: true, viewer_count: Math.max(current?.viewer_count || 0, 0) });
+      }
+
+      await prisma.roomParticipant.update({
+        where: { room_id_user_id: { room_id: id, user_id: userId } },
         data: { left_at: new Date() }
       });
 
-      // Decrement viewer count
       const updated = await prisma.liveRoom.update({
         where: { id },
         data: { viewer_count: { decrement: 1 } }
       });
+      if (updated.viewer_count < 0) {
+        await prisma.liveRoom.update({ where: { id }, data: { viewer_count: 0 } });
+      }
 
       io.to(`live-${id}`).emit('viewer-count', { count: updated.viewer_count });
 
