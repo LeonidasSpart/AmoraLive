@@ -1,157 +1,21 @@
-// pages/login.jsx
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+
+const API = process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one';
 
 export default function Login() {
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      console.log('Sending request to:', 'https://api.amoramatch.one/auth/login');
-      const res = await fetch('https://api.amoramatch.one/auth/login', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ identifier, password })
-      });
-      console.log('Response status:', res.status);
-      const data = await res.json();
-      console.log('Response data:', data);
-      if (!res.ok) throw new Error(data.error || 'Login failed');
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      localStorage.setItem('userId', data.user.id);
-      // If admin, redirect to admin dashboard
-      if (data.user?.role === 'admin' || data.user?.role === 'superadmin') {
-        window.location.href = '/admin';
-      } else {
-        window.location.href = '/discover';
-      }
-    } catch (err) {
-      console.error('Login error:', err);
-      setError(err.message || 'Failed to connect to server');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return React.createElement('div', {
-    style: {
-      minHeight: '100vh',
-      background: '#0f0f1a',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: 'sans-serif'
-    }
-  }, [
-    React.createElement('form', {
-      key: 'form',
-      onSubmit: handleSubmit,
-      style: {
-        background: '#1a1a2e',
-        padding: '40px',
-        borderRadius: '12px',
-        width: '100%',
-        maxWidth: '400px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
-      }
-    }, [
-      React.createElement('h2', {
-        key: 'title',
-        style: { color: '#FF6B9D', marginBottom: '30px', textAlign: 'center' }
-      }, 'Login to AmoraLive'),
-      error && React.createElement('p', {
-        key: 'error',
-        style: { 
-          color: '#ff4444', 
-          marginBottom: '15px', 
-          textAlign: 'center',
-          background: '#2a1a1a',
-          padding: '8px',
-          borderRadius: '4px',
-          wordBreak: 'break-word'
-        }
-      }, error),
-      React.createElement('input', {
-        key: 'identifier',
-        type: 'text',
-        placeholder: 'Email or username',
-        value: identifier,
-        onChange: (e) => setIdentifier(e.target.value),
-        required: true,
-        style: {
-          width: '100%',
-          padding: '12px',
-          marginBottom: '15px',
-          borderRadius: '6px',
-          border: '1px solid #333',
-          background: '#0f0f1a',
-          color: '#fff',
-          fontSize: '16px'
-        }
-      }),
-      React.createElement('input', {
-        key: 'password',
-        type: 'password',
-        placeholder: 'Password',
-        value: password,
-        onChange: (e) => setPassword(e.target.value),
-        required: true,
-        style: {
-          width: '100%',
-          padding: '12px',
-          marginBottom: '20px',
-          borderRadius: '6px',
-          border: '1px solid #333',
-          background: '#0f0f1a',
-          color: '#fff',
-          fontSize: '16px'
-        }
-      }),
-      React.createElement('button', {
-        key: 'google',
-        type: 'button',
-        onClick: () => { window.location.href = 'https://api.amoramatch.one/auth/google/start'; },
-        style: { width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '6px', border: '1px solid #444', background: '#fff', color: '#111', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }
-      }, 'Continue with Google'),
-      React.createElement('div', { key: 'divider', style: { textAlign: 'center', color: '#666', margin: '10px 0 14px' } }, 'or'),
-      React.createElement('button', {
-        key: 'submit',
-        type: 'submit',
-        disabled: loading,
-        style: {
-          width: '100%',
-          padding: '12px',
-          borderRadius: '6px',
-          border: 'none',
-          background: '#FF6B9D',
-          color: '#fff',
-          fontSize: '16px',
-          fontWeight: 'bold',
-          cursor: loading ? 'not-allowed' : 'pointer',
-          opacity: loading ? 0.7 : 1
-        }
-      }, loading ? 'Logging in...' : 'Login'),
-      React.createElement('p', {
-        key: 'register-link',
-        style: { marginTop: '20px', textAlign: 'center', color: '#aaa' }
-      }, [
-        "Don't have an account? ",
-        React.createElement(Link, {
-          key: 'link',
-          href: '/register',
-          style: { color: '#FF6B9D', textDecoration: 'none' }
-        }, 'Register')
-      ])
-    ])
-  ]);
+  const router = useRouter();
+  const [identifier,setIdentifier]=useState(''); const [password,setPassword]=useState(''); const [error,setError]=useState(''); const [loading,setLoading]=useState(false);
+  const googleLogin=()=>{ window.location.href=`${API}/auth/google/start`; };
+  const handleSubmit=async(e)=>{ e.preventDefault(); setError(''); setLoading(true); try { const res=await fetch(`${API}/auth/login`,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({identifier:identifier.trim(),password})}); const data=await res.json().catch(()=>({})); if(!res.ok) throw new Error(data.error||'We could not sign you in. Please check your details.'); localStorage.setItem('accessToken',data.accessToken); if(data.refreshToken)localStorage.setItem('refreshToken',data.refreshToken); if(data.user?.id)localStorage.setItem('userId',data.user.id); router.replace(data.user?.role==='admin'||data.user?.role==='superadmin'?'/admin':'/discover'); } catch(err){setError(err.message||'Unable to connect to AmoraLive.');} finally{setLoading(false);} };
+  return <div className="amora-auth-page"><div className="amora-auth-shell">
+    <section className="amora-auth-brand"><img src="/brand/amora-logo.png" alt="Amora — Meaningful Connections"/><h1>Welcome back to <span className="amora-gradient-text">Amora.</span></h1><p>Come back to your conversations, matches and live moments — wherever you are.</p></section>
+    <section className="amora-auth-form"><Link href="/" style={{color:'#8f89a2',textDecoration:'none',fontSize:13}}>← Back to AmoraLive</Link><div style={{height:20}}/><h2>Sign in</h2><p className="lead">Use your email or username to continue.</p>
+      {router.query.error && <div className="amora-error">Google sign-in could not be completed. Please try again.</div>}{error&&<div className="amora-error">{error}</div>}
+      <form onSubmit={handleSubmit}><div className="amora-field"><label className="amora-label">Email or username</label><input className="amora-input" autoComplete="username" value={identifier} onChange={e=>setIdentifier(e.target.value)} placeholder="you@example.com or username" required/></div><div className="amora-field"><label className="amora-label">Password</label><input className="amora-input" autoComplete="current-password" type="password" value={password} onChange={e=>setPassword(e.target.value)} placeholder="Your password" required/></div><button className="amora-btn amora-btn-primary amora-auth-submit" disabled={loading}>{loading?'Signing you in…':'Sign in'}</button></form>
+      <div className="amora-divider">OR</div><button className="amora-google" type="button" onClick={googleLogin}>Continue with Google</button>
+      <p className="amora-auth-bottom">New to Amora? <Link href="/register">Create your account</Link></p>
+    </section>
+  </div></div>;
 }

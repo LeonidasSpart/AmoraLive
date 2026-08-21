@@ -1,10 +1,20 @@
-// pages/_app.jsx
 import React from 'react';
-import Script from 'next/script';
+import Head from 'next/head';
+import '../styles.css';
 
 export default function App({ Component, pageProps }) {
-  return React.createElement(React.Fragment, null, [
-    React.createElement(Script, { key: 'livekit', src: 'https://cdn.jsdelivr.net/npm/livekit-client@2.15.4/dist/livekit-client.umd.min.js', strategy: 'afterInteractive' }),
-    React.createElement(Component, { key: 'page', ...pageProps })
-  ]);
+  return (
+    <>
+      <Head>
+        <title>AmoraLive — Meaningful Connections</title>
+        <meta name="description" content="AmoraLive — connect, chat, match and share meaningful moments." />
+        <meta name="theme-color" content="#070616" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+        <link rel="icon" type="image/png" sizes="64x64" href="/brand/favicon-64.png" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/brand/amora-mark-192.png" />
+        <link rel="manifest" href="/manifest.webmanifest" />
+      </Head>
+      <Component {...pageProps} />
+    </>
+  );
 }
