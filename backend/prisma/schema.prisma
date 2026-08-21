@@ -59,6 +59,10 @@ model User {
   memberships      Membership[]
   roomParticipants RoomParticipant[]
   liveChatMessages LiveChatMessage[]
+  swipesGiven      Swipe[]           @relation("swiper")
+  swipesReceived   Swipe[]           @relation("swipeTarget")
+  videoMatchesAsA  VideoMatchSession[] @relation("videoMatchUserA")
+  videoMatchesAsB  VideoMatchSession[] @relation("videoMatchUserB")
 }
 
 model Session {
@@ -307,11 +311,48 @@ model Match {
   user1_id   String
   user2_id   String
   created_at DateTime @default(now())
+  source     String   @default("browse") // "browse" | "video_match"
 
   user1      User     @relation("user1", fields: [user1_id], references: [id])
   user2      User     @relation("user2", fields: [user2_id], references: [id])
 
   @@id([user1_id, user2_id])
+}
+
+// One row per swipe decision. Used to (a) stop showing already-swiped
+// people in /matches/next, and (b) detect mutual likes so a Match is only
+// created when BOTH sides have liked each other.
+model Swipe {
+  swiper_id  String
+  target_id  String
+  decision   String   // "like" | "pass"
+  source     String   @default("browse") // "browse" | "video_match"
+  created_at DateTime @default(now())
+
+  swiper     User     @relation("swiper", fields: [swiper_id], references: [id])
+  target     User     @relation("swipeTarget", fields: [target_id], references: [id])
+
+  @@id([swiper_id, target_id])
+}
+
+// A short, live 1:1 video "first impression" session (10-20s) that two
+// online users are randomly paired into. If both like each other once the
+// video window ends, it becomes a real Match with an open chat.
+model VideoMatchSession {
+  id              String    @id @default(uuid())
+  user_a_id       String
+  user_b_id       String
+  room_name       String    @unique
+  status          String    @default("active") // active | deciding | matched | ended
+  duration_secs   Int       @default(15)
+  user_a_decision String?   // like | pass
+  user_b_decision String?
+  ended_reason    String?   // completed | disconnect | timeout
+  started_at      DateTime  @default(now())
+  decided_at      DateTime?
+
+  user_a          User      @relation("videoMatchUserA", fields: [user_a_id], references: [id])
+  user_b          User      @relation("videoMatchUserB", fields: [user_b_id], references: [id])
 }
 
 model Block {
