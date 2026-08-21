@@ -56,7 +56,31 @@ try {
 
 // ---------- Middleware ----------
 app.use(helmet());
-app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || '*' }));
+const configuredCorsOrigins = (process.env.CORS_ORIGIN || '')
+  .split(',')
+  .map((origin) => origin.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+
+const allowedCorsOrigins = configuredCorsOrigins.length
+  ? configuredCorsOrigins
+  : ['https://amoramatch.one', 'https://www.amoramatch.one'];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow non-browser/server-to-server requests.
+    if (!origin) return callback(null, true);
+    const normalizedOrigin = origin.trim().replace(/\/$/, '');
+    if (allowedCorsOrigins.includes(normalizedOrigin)) return callback(null, true);
+    return callback(new Error(`CORS origin not allowed: ${origin}`));
+  },
+  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Accept', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 204,
+};
+
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
+console.log('🔐 Auth/CORS configuration loaded for Amora web authentication');
 
 // Stripe requires the raw request body for signature verification. This route
 // must be registered before express.json().
@@ -159,7 +183,7 @@ let io;
 if (redisReady && pub && sub) {
   const { createAdapter } = require('@socket.io/redis-adapter');
   io = new Server(server, {
-    cors: { origin: process.env.CORS_ORIGIN?.split(',') || '*' },
+    cors: { origin: allowedCorsOrigins, methods: ['GET', 'POST'] },
     adapter: createAdapter(pub, sub)
   });
 } else {
