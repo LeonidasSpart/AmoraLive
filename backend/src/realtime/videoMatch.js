@@ -134,7 +134,15 @@ module.exports = function registerVideoMatch(io, prisma) {
         update: {},
         create: { user1_id, user2_id, source: 'video_match' }
       }).catch(err => { console.error('video match Match upsert failed:', err.message); return null; });
-      if (match) matchId = `${match.user1_id}_${match.user2_id}`;
+      if (match) {
+        matchId = `${match.user1_id}_${match.user2_id}`;
+        await prisma.notification.createMany({
+          data: [
+            { user_id: session.userAId, type: 'new_match', payload: { peerId: session.userBId, source: 'video_match' } },
+            { user_id: session.userBId, type: 'new_match', payload: { peerId: session.userAId, source: 'video_match' } }
+          ]
+        }).catch(err => console.error('Failed to create video match notifications:', err.message));
+      }
     } else {
       recentPairs.set(pairKey(session.userAId, session.userBId), Date.now());
     }
