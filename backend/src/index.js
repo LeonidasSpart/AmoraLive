@@ -487,6 +487,9 @@ const giftRoutes =
 const walletRoutes =
   require('./routes/wallet')(prisma);
 
+const iapRoutes =
+  require('./routes/iap')(prisma);
+
 const membershipRoutes =
   require('./routes/membership')(prisma);
 
@@ -513,6 +516,7 @@ app.use('/users', userRoutes);
 app.use('/live', liveRoutes);
 app.use('/gifts', giftRoutes);
 app.use('/wallet', walletRoutes);
+app.use('/wallet/iap', iapRoutes);
 app.use('/membership', membershipRoutes);
 app.use('/store', storeRoutes);
 app.use('/events', eventRoutes);
@@ -654,6 +658,15 @@ io.on('connection', (socket) => {
       );
     }
   );
+
+  // ---------- Event (team-battle) leaderboard room ----------
+  socket.on('join-event', (eventId) => {
+    if (eventId) socket.join(`event-${eventId}`);
+  });
+
+  socket.on('leave-event', (eventId) => {
+    if (eventId) socket.leave(`event-${eventId}`);
+  });
 
   socket.on(
     'live-chat',
@@ -866,7 +879,16 @@ io.on('connection', (socket) => {
 // details). Registered as a second io.on('connection', ...) listener; the
 // auth gate above (socket.use) already applies to every socket regardless
 // of which listener is attached, so these events stay protected.
-require('./realtime/videoMatch')(io, prisma);
+//
+// Loaded defensively: if this file is missing from the deploy (or throws
+// for any other reason) the whole API must NOT go down over an optional
+// feature. Same graceful-degradation philosophy as the Redis setup above.
+try {
+  require('./realtime/videoMatch')(io, prisma);
+  console.log('✅ Video match queue registered');
+} catch (e) {
+  console.error('⚠️ Video match queue failed to load — video matching is disabled, rest of the API is unaffected:', e.message);
+}
 
 // ---------- Native WebSocket bridge ----------
 // Keeps the existing web client compatible.
