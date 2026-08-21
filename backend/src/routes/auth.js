@@ -15,6 +15,7 @@ function calculateAge(dob) {
 
 module.exports = (prisma) => {
   const router = require('express').Router();
+  const appUrl = () => (process.env.APP_URL || 'https://www.amoramatch.one').replace(/\/+$/, '');
   const registerSchema = z.object({
     email: z.string().email(),
     username: z.string().min(3).max(20).regex(/^[a-zA-Z0-9_.-]+$/),
@@ -32,7 +33,7 @@ module.exports = (prisma) => {
   async function sendVerificationEmail(user) {
     if (!mailer) return false;
     const token = jwt.sign({ id: user.id, purpose: 'email_verification' }, process.env.JWT_SECRET, { expiresIn: '24h' });
-    const verifyUrl = `${process.env.APP_URL || 'https://www.amoramatch.one'}/auth/verify-email?token=${encodeURIComponent(token)}`;
+    const verifyUrl = `${appUrl()}/auth/verify-email?token=${encodeURIComponent(token)}`;
     await mailer.sendMail({
       from: process.env.EMAIL_FROM || process.env.SMTP_USER,
       to: user.email,
@@ -88,7 +89,7 @@ module.exports = (prisma) => {
       const decoded = jwt.verify(String(req.query.token || ''), process.env.JWT_SECRET);
       if (decoded.purpose !== 'email_verification') throw new Error('Invalid token');
       await prisma.user.update({ where: { id: decoded.id }, data: { is_verified: true } });
-      res.redirect(`${process.env.APP_URL || 'https://www.amoramatch.one'}/login?verified=1`);
+      res.redirect(`${appUrl()}/login?verified=1`);
     } catch {
       res.status(400).send('Verification link is invalid or expired.');
     }
@@ -135,17 +136,17 @@ module.exports = (prisma) => {
 
       const existing = await prisma.user.findUnique({ where: { email: profile.email.toLowerCase() } });
       if (existing) {
-        if (!existing.is_active) return res.redirect(`${process.env.APP_URL}/login?error=account_suspended`);
+        if (!existing.is_active) return res.redirect(`${appUrl()}/login?error=account_suspended`);
         const session = await createSession(existing);
         const params = new URLSearchParams({ accessToken: session.accessToken, refreshToken: session.refreshToken, userId: existing.id });
-        return res.redirect(`${process.env.APP_URL || 'https://www.amoramatch.one'}/auth/google-complete?${params}`);
+        return res.redirect(`${appUrl()}/auth/google-complete?${params}`);
       }
 
       const completion = jwt.sign({ purpose: 'google_signup', email: profile.email.toLowerCase(), name: profile.name || profile.email.split('@')[0] }, process.env.JWT_SECRET, { expiresIn: '10m' });
-      res.redirect(`${process.env.APP_URL || 'https://www.amoramatch.one'}/register?google=${encodeURIComponent(completion)}`);
+      res.redirect(`${appUrl()}/register?google=${encodeURIComponent(completion)}`);
     } catch (e) {
       console.error('Google OAuth error:', e);
-      res.redirect(`${process.env.APP_URL || 'https://www.amoramatch.one'}/login?error=google_auth_failed`);
+      res.redirect(`${appUrl()}/login?error=google_auth_failed`);
     }
   });
 
