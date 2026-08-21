@@ -32,6 +32,7 @@ model User {
   xp              Int      @default(0)
   membership_tier String   @default("free")
   badges          String[]
+  notification_preferences Json?
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
@@ -129,9 +130,12 @@ model CoinPackage {
   coins_amount Int
   bonus_coins Int      @default(0)
   is_promotion Boolean @default(false)
+  is_active   Boolean  @default(true)
   region      String?
   platform    String
   stripe_price_id String?
+  apple_product_id  String? // App Store Connect in-app purchase product ID
+  google_product_id String? // Play Console in-app product ID
   created_at  DateTime @default(now())
 
   purchases   Purchase[]
@@ -143,9 +147,13 @@ model Purchase {
   package_id    String
   price_paid    Int
   platform      String
-  purchase_token String
+  // Unique so the exact same Apple transaction / Google purchase token /
+  // Stripe session can never credit a wallet twice, even under retries or
+  // a client resubmitting the same receipt.
+  purchase_token String  @unique
   status        String   @default("pending")
   created_at    DateTime @default(now())
+  verified_at   DateTime?
 
   user          User     @relation(fields: [user_id], references: [id])
   package       CoinPackage @relation(fields: [package_id], references: [id])
@@ -199,6 +207,7 @@ model Event {
   starts_at   DateTime
   ends_at     DateTime
   event_type  String
+  teams       String[] // e.g. ["Dragon", "Slayer"] — the pickable sides
   is_active   Boolean  @default(true)
   created_at  DateTime @default(now())
 
