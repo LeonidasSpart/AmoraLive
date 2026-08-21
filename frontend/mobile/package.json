@@ -24,6 +24,8 @@
     "socket.io-client": "^4.8.1",
     "livekit-client": "^2.9.0",
     "@livekit/react-native": "^2.7.0",
-    "@livekit/react-native-webrtc": "^125.0.0"
+    "@livekit/react-native-webrtc": "^125.0.0",
+    "expo-image-picker": "~17.0.0",
+    "react-native-iap": "^12.16.2"
   }
 }

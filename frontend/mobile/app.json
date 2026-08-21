@@ -8,7 +8,7 @@
     "userInterfaceStyle": "dark",
     "android": {
       "package": "one.amoramatch.app",
-      "permissions": ["CAMERA", "RECORD_AUDIO", "MODIFY_AUDIO_SETTINGS"],
+      "permissions": ["CAMERA", "RECORD_AUDIO", "MODIFY_AUDIO_SETTINGS", "READ_EXTERNAL_STORAGE"],
       "adaptiveIcon": {
         "backgroundColor": "#090713"
       }
@@ -17,14 +17,22 @@
       "bundleIdentifier": "one.amoramatch.app",
       "supportsTablet": true,
       "infoPlist": {
-        "NSCameraUsageDescription": "Amora uses your camera for live video matches and live rooms.",
-        "NSMicrophoneUsageDescription": "Amora uses your microphone for live video matches and live rooms."
+        "NSCameraUsageDescription": "Amora uses your camera for live video matches, live rooms, and profile photos.",
+        "NSMicrophoneUsageDescription": "Amora uses your microphone for live video matches and live rooms.",
+        "NSPhotoLibraryUsageDescription": "Amora needs access to your photos so you can set a profile picture."
       }
     },
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      "@livekit/react-native-webrtc"
+      "@livekit/react-native-webrtc",
+      "react-native-iap",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Amora needs access to your photos so you can set a profile picture."
+        }
+      ]
     ],
     "extra": {
       "apiUrl": "https://api.amoramatch.one"
