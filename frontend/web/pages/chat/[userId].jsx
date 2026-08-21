@@ -52,15 +52,15 @@ export default function ChatRoom() {
     const token = localStorage.getItem('accessToken');
     if (!token) return;
     // In production, use the actual WebSocket URL
-    const ws = new WebSocket('wss://api.amoramatch.one');
+    const ws = new WebSocket('wss://api.amoramatch.one/ws');
     ws.onopen = () => {
-      ws.send(JSON.stringify({ type: 'authenticate', userId: localStorage.getItem('userId') }));
+      ws.send(JSON.stringify({ type: 'authenticate', token }));
       ws.send(JSON.stringify({ type: 'join-chat', userId }));
     };
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      if (data.type === 'private-message') {
-        setMessages(prev => [...prev, data.message]);
+      if (data.type === 'private-message' || data.type === 'private-message-sent') {
+        setMessages(prev => prev.some(m => m.id === data.message.id) ? prev : [...prev, data.message]);
       } else if (data.type === 'typing') {
         setIsTyping(data.isTyping);
       } else if (data.type === 'read-receipt') {
@@ -92,26 +92,9 @@ export default function ChatRoom() {
     if (!input.trim()) return;
     const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch(`https://api.amoramatch.one/messages/${userId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ content: input.trim() })
-      });
-      if (!res.ok) throw new Error('Failed to send');
-      const data = await res.json();
-      setMessages(prev => [...prev, data]);
+      if (!socket || socket.readyState !== WebSocket.OPEN) throw new Error('Realtime connection is not ready');
+      socket.send(JSON.stringify({ type: 'private-message', receiverId: userId, content: input.trim() }));
       setInput('');
-      // Send via socket for real-time
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
-          type: 'private-message',
-          receiverId: userId,
-          content: input.trim()
-        }));
-      }
     } catch (err) {
       setError(err.message);
     }
