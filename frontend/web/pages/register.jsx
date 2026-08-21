@@ -1,6 +1,7 @@
 // pages/register.jsx
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -10,19 +11,36 @@ export default function Register() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const [googleToken, setGoogleToken] = useState('');
+  const [googleMode, setGoogleMode] = useState(false);
+
+  React.useEffect(() => {
+    if (!router.isReady) return;
+    if (router.query.google) { setGoogleToken(String(router.query.google)); setGoogleMode(true); }
+  }, [router.isReady, router.query.google]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('https://api.amoramatch.one/auth/register', {
+      const endpoint = googleMode ? 'https://api.amoramatch.one/auth/google/complete' : 'https://api.amoramatch.one/auth/register';
+      const body = googleMode ? { completionToken: googleToken, username, dateOfBirth } : { email, username, password, dateOfBirth };
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, username, password, dateOfBirth })
+        body: JSON.stringify(body)
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Registration failed');
+      if (googleMode) {
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+        localStorage.setItem('userId', data.user.id);
+        window.location.href = '/discover';
+        return;
+      }
       setSuccess(true);
     } catch (err) {
       setError(err.message);
@@ -89,12 +107,15 @@ export default function Register() {
       React.createElement('h2', {
         key: 'title',
         style: { color: '#FF6B9D', marginBottom: '30px', textAlign: 'center' }
-      }, 'Create Account'),
+      }, googleMode ? 'Complete Google Registration' : 'Create Account'),
       error && React.createElement('p', {
         key: 'error',
         style: { color: '#ff4444', marginBottom: '15px', textAlign: 'center' }
       }, error),
-      React.createElement('input', {
+      googleMode && React.createElement('p', { key: 'google-note', style: { color: '#aaa', textAlign: 'center', marginBottom: 18 } }, 'Finish your Google registration by choosing a username and confirming you are 18+.'),
+      !googleMode && React.createElement('button', { key: 'google', type: 'button', onClick: () => { window.location.href = 'https://api.amoramatch.one/auth/google/start'; }, style: { width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '6px', border: '1px solid #444', background: '#fff', color: '#111', fontWeight: 'bold', cursor: 'pointer' } }, 'Continue with Google'),
+      !googleMode && React.createElement('div', { key: 'divider', style: { textAlign: 'center', color: '#666', margin: '10px 0 14px' } }, 'or'),
+      !googleMode && React.createElement('input', {
         key: 'email',
         type: 'email',
         placeholder: 'Email',
@@ -131,7 +152,7 @@ export default function Register() {
           fontSize: '16px'
         }
       }),
-      React.createElement('input', {
+      !googleMode && React.createElement('input', {
         key: 'password',
         type: 'password',
         placeholder: 'Password (min 8 chars)',

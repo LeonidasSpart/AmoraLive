@@ -118,6 +118,13 @@ export default function Login() {
         }
       }),
       React.createElement('button', {
+        key: 'google',
+        type: 'button',
+        onClick: () => { window.location.href = 'https://api.amoramatch.one/auth/google/start'; },
+        style: { width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '6px', border: '1px solid #444', background: '#fff', color: '#111', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer' }
+      }, 'Continue with Google'),
+      React.createElement('div', { key: 'divider', style: { textAlign: 'center', color: '#666', margin: '10px 0 14px' } }, 'or'),
+      React.createElement('button', {
         key: 'submit',
         type: 'submit',
         disabled: loading,

@@ -41,40 +41,10 @@ export default function Discover() {
       setRooms(Array.isArray(data) ? data : data.rooms || []);
     } catch (err) {
       setError(err.message);
-      setRooms(generateMockRooms());
+      setRooms([]);
     } finally {
       setLoading(false);
     }
-  };
-
-  const generateMockRooms = () => {
-    const hosts = ['Lucia★', 'Jemima', 'Capybara', 'Edward', 'Gizem', 'Osa23', 'Caramelo', 'Wigo'];
-    const titles = [
-      'Dragon Slayer Event!',
-      'Just chatting 🎤',
-      'Dancing live 💃',
-      'Q&A with fans',
-      'Gaming session 🎮',
-      'Travel vlog ✈️',
-      'Music night 🎵',
-      'Dating advice 💕'
-    ];
-    const categoriesList = ['Chat', 'Music', 'Gaming', 'Entertainment', 'Lifestyle', 'Travel', 'Q&A', 'Dating'];
-    return Array.from({ length: 12 }, (_, i) => ({
-      id: `room-${i}`,
-      title: titles[i % titles.length],
-      host: {
-        id: `user-${i}`,
-        username: hosts[i % hosts.length],
-        display_name: hosts[i % hosts.length],
-        profile_photo: null
-      },
-      category: categoriesList[i % categoriesList.length],
-      viewer_count: Math.floor(Math.random() * 500) + 10,
-      status: 'live',
-      thumbnail_url: null,
-      created_at: new Date(Date.now() - i * 600000).toISOString()
-    }));
   };
 
   useEffect(() => {
