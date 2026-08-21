@@ -28,6 +28,7 @@ export default function AdminLayout({ children }) {
         ['/admin', 'Dashboard'],
         ['/admin/users', 'Users'],
         ['/admin/rooms', 'Rooms'],
+        ['/admin/events', 'Events'],
         ['/admin/gifts', 'Gifts'],
         ['/admin/reports', 'Reports'],
         ['/admin/packages', 'Packages']
