@@ -1,222 +1,150 @@
-// pages/register.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import AuthLayout from '../components/AuthLayout';
+
+const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 
 export default function Register() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [googleToken, setGoogleToken] = useState('');
-  const [googleMode, setGoogleMode] = useState(false);
 
-  React.useEffect(() => {
+  const googleMode = Boolean(googleToken);
+
+  useEffect(() => {
     if (!router.isReady) return;
-    if (router.query.google) { setGoogleToken(String(router.query.google)); setGoogleMode(true); }
+    if (router.query.google) setGoogleToken(String(router.query.google));
   }, [router.isReady, router.query.google]);
+
+  const startGoogle = () => {
+    setError('');
+    setGoogleLoading(true);
+    window.location.assign(`${API}/auth/google/start`);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     try {
-      const endpoint = googleMode ? 'https://api.amoramatch.one/auth/google/complete' : 'https://api.amoramatch.one/auth/register';
-      const body = googleMode ? { completionToken: googleToken, username, dateOfBirth } : { email, username, password, dateOfBirth };
+      const endpoint = googleMode ? `${API}/auth/google/complete` : `${API}/auth/register`;
+      const body = googleMode
+        ? { completionToken: googleToken, username: username.trim(), dateOfBirth }
+        : { email: email.trim(), username: username.trim(), password, dateOfBirth };
+
       const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(body),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Registration failed');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Registration failed. Please check your details.');
+
       if (googleMode) {
         localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('refreshToken', data.refreshToken);
-        localStorage.setItem('userId', data.user.id);
-        window.location.href = '/discover';
+        if (data.refreshToken) localStorage.setItem('refreshToken', data.refreshToken);
+        if (data.user?.id) localStorage.setItem('userId', data.user.id);
+        window.location.assign('/discover');
         return;
       }
       setSuccess(true);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Unable to create your Amora account.');
     } finally {
       setLoading(false);
     }
   };
 
   if (success) {
-    return React.createElement('div', {
-      style: {
-        minHeight: '100vh',
-        background: '#0f0f1a',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'sans-serif',
-        color: '#fff'
-      }
-    }, [
-      React.createElement('div', {
-        key: 'success',
-        style: {
-          background: '#1a1a2e',
-          padding: '40px',
-          borderRadius: '12px',
-          textAlign: 'center',
-          maxWidth: '400px'
-        }
-      }, [
-        React.createElement('h2', { key: 'title', style: { color: '#4caf50' } }, 'Registration successful!'),
-        React.createElement('p', { key: 'msg', style: { margin: '20px 0' } }, 'Please check your email to verify your account.'),
-        React.createElement(Link, {
-          key: 'login',
-          href: '/login',
-          style: { color: '#FF6B9D', textDecoration: 'none' }
-        }, 'Go to Login')
-      ])
-    ]);
+    return (
+      <AuthLayout
+        eyebrow="YOU'RE IN"
+        title="Check your inbox."
+        subtitle="Your Amora account is ready. Verify your email address to continue."
+        footerText="Already verified?"
+        footerHref="/login"
+        footerLabel="Sign in"
+      >
+        <div className="amora-success-box">
+          <div className="amora-success-icon">✓</div>
+          <h2>Registration successful</h2>
+          <p>We sent a verification link to your email. Open it, then come back and sign in.</p>
+          <Link href="/login" className="amora-btn amora-btn-primary amora-auth-submit">Go to Login</Link>
+        </div>
+      </AuthLayout>
+    );
   }
 
-  return React.createElement('div', {
-    style: {
-      minHeight: '100vh',
-      background: '#0f0f1a',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      fontFamily: 'sans-serif'
-    }
-  }, [
-    React.createElement('form', {
-      key: 'form',
-      onSubmit: handleSubmit,
-      style: {
-        background: '#1a1a2e',
-        padding: '40px',
-        borderRadius: '12px',
-        width: '100%',
-        maxWidth: '400px',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
-      }
-    }, [
-      React.createElement('h2', {
-        key: 'title',
-        style: { color: '#FF6B9D', marginBottom: '30px', textAlign: 'center' }
-      }, googleMode ? 'Complete Google Registration' : 'Create Account'),
-      error && React.createElement('p', {
-        key: 'error',
-        style: { color: '#ff4444', marginBottom: '15px', textAlign: 'center' }
-      }, error),
-      googleMode && React.createElement('p', { key: 'google-note', style: { color: '#aaa', textAlign: 'center', marginBottom: 18 } }, 'Finish your Google registration by choosing a username and confirming you are 18+.'),
-      !googleMode && React.createElement('button', { key: 'google', type: 'button', onClick: () => { window.location.href = 'https://api.amoramatch.one/auth/google/start'; }, style: { width: '100%', padding: '12px', marginBottom: '12px', borderRadius: '6px', border: '1px solid #444', background: '#fff', color: '#111', fontWeight: 'bold', cursor: 'pointer' } }, 'Continue with Google'),
-      !googleMode && React.createElement('div', { key: 'divider', style: { textAlign: 'center', color: '#666', margin: '10px 0 14px' } }, 'or'),
-      !googleMode && React.createElement('input', {
-        key: 'email',
-        type: 'email',
-        placeholder: 'Email',
-        value: email,
-        onChange: (e) => setEmail(e.target.value),
-        required: true,
-        style: {
-          width: '100%',
-          padding: '12px',
-          marginBottom: '15px',
-          borderRadius: '6px',
-          border: '1px solid #333',
-          background: '#0f0f1a',
-          color: '#fff',
-          fontSize: '16px'
-        }
-      }),
-      React.createElement('input', {
-        key: 'username',
-        type: 'text',
-        placeholder: 'Username (min 3 chars)',
-        value: username,
-        onChange: (e) => setUsername(e.target.value),
-        required: true,
-        minLength: 3,
-        style: {
-          width: '100%',
-          padding: '12px',
-          marginBottom: '15px',
-          borderRadius: '6px',
-          border: '1px solid #333',
-          background: '#0f0f1a',
-          color: '#fff',
-          fontSize: '16px'
-        }
-      }),
-      !googleMode && React.createElement('input', {
-        key: 'password',
-        type: 'password',
-        placeholder: 'Password (min 8 chars)',
-        value: password,
-        onChange: (e) => setPassword(e.target.value),
-        required: true,
-        minLength: 8,
-        style: {
-          width: '100%',
-          padding: '12px',
-          marginBottom: '15px',
-          borderRadius: '6px',
-          border: '1px solid #333',
-          background: '#0f0f1a',
-          color: '#fff',
-          fontSize: '16px'
-        }
-      }),
-      React.createElement('input', {
-        key: 'dob',
-        type: 'date',
-        placeholder: 'Date of Birth',
-        value: dateOfBirth,
-        onChange: (e) => setDateOfBirth(e.target.value),
-        required: true,
-        style: {
-          width: '100%',
-          padding: '12px',
-          marginBottom: '20px',
-          borderRadius: '6px',
-          border: '1px solid #333',
-          background: '#0f0f1a',
-          color: '#fff',
-          fontSize: '16px'
-        }
-      }),
-      React.createElement('button', {
-        key: 'submit',
-        type: 'submit',
-        disabled: loading,
-        style: {
-          width: '100%',
-          padding: '12px',
-          borderRadius: '6px',
-          border: 'none',
-          background: '#FF6B9D',
-          color: '#fff',
-          fontSize: '16px',
-          fontWeight: 'bold',
-          cursor: loading ? 'not-allowed' : 'pointer',
-          opacity: loading ? 0.7 : 1
-        }
-      }, loading ? 'Registering...' : 'Register'),
-      React.createElement('p', {
-        key: 'login-link',
-        style: { marginTop: '20px', textAlign: 'center', color: '#aaa' }
-      }, [
-        "Already have an account? ",
-        React.createElement(Link, {
-          key: 'link',
-          href: '/login',
-          style: { color: '#FF6B9D', textDecoration: 'none' }
-        }, 'Login')
-      ])
-    ])
-  ]);
+  return (
+    <AuthLayout
+      eyebrow={googleMode ? 'GOOGLE SIGN UP' : 'JOIN AMORA'}
+      title={googleMode ? 'Finish your Amora account.' : 'Create your Amora account.'}
+      subtitle={googleMode ? 'One last step: choose your username and confirm your age.' : 'Meet people, build connections and share meaningful moments.'}
+      footerText="Already have an account?"
+      footerHref="/login"
+      footerLabel="Sign in"
+    >
+      <Link href="/" className="amora-auth-back">← Back to AmoraLive</Link>
+
+      {error && <div className="amora-error" role="alert">{error}</div>}
+
+      {!googleMode && (
+        <>
+          <button className="amora-google" type="button" onClick={startGoogle} disabled={googleLoading}>
+            <span className="amora-google-icon">G</span>
+            {googleLoading ? 'Connecting to Google…' : 'Continue with Google'}
+          </button>
+          <div className="amora-divider"><span>OR</span></div>
+        </>
+      )}
+
+      <form onSubmit={handleSubmit} className="amora-auth-form">
+        {!googleMode && (
+          <div className="amora-field">
+            <label className="amora-label" htmlFor="email">Email address</label>
+            <input id="email" className="amora-input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+          </div>
+        )}
+
+        <div className="amora-field">
+          <label className="amora-label" htmlFor="username">Username</label>
+          <input id="username" className="amora-input" type="text" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Choose a username" minLength={3} maxLength={20} pattern="[A-Za-z0-9_.-]{3,20}" required />
+          <div className="amora-field-hint">3–20 characters: letters, numbers, dots, dashes or underscores.</div>
+        </div>
+
+        {!googleMode && (
+          <div className="amora-field">
+            <label className="amora-label" htmlFor="register-password">Password</label>
+            <div className="amora-password-wrap">
+              <input id="register-password" className="amora-input" type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" minLength={8} required />
+              <button type="button" className="amora-password-toggle" onClick={() => setShowPassword((v) => !v)}>{showPassword ? 'Hide' : 'Show'}</button>
+            </div>
+          </div>
+        )}
+
+        <div className="amora-field">
+          <label className="amora-label" htmlFor="dob">Date of birth</label>
+          <input id="dob" className="amora-input amora-date-input" type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} required />
+          <div className="amora-field-hint">AmoraLive is an 18+ community.</div>
+        </div>
+
+        <button className="amora-btn amora-btn-primary amora-auth-submit" type="submit" disabled={loading}>
+          {loading ? (googleMode ? 'Creating your account…' : 'Creating account…') : (googleMode ? 'Finish registration' : 'Create account')}
+        </button>
+      </form>
+
+      <p className="amora-auth-small">
+        By creating an account, you agree to our <Link href="/legal/terms">Terms</Link> and <Link href="/legal/privacy">Privacy Policy</Link>.
+      </p>
+    </AuthLayout>
+  );
 }
