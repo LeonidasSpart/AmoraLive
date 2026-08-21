@@ -501,7 +501,6 @@ const adminRoutes =
 
 const matchRoutes =
   require('./routes/matches')(prisma);
-
 const messageRoutes =
   require('./routes/messages')(prisma, io);
 
@@ -717,17 +716,8 @@ io.on('connection', (socket) => {
     }
   );
 
-  socket.on(
-    'video-match-signal',
-    (data) => {
-      io.to(
-        data.targetId
-      ).emit(
-        'video-signal',
-        data
-      );
-    }
-  );
+  // Note: 1:1 quick video matching is handled by the LiveKit-based queue in
+  // ./realtime/videoMatch.js, not by manual WebRTC signal relaying.
 
   // ---------- Private chat ----------
   socket.on(
@@ -871,6 +861,12 @@ io.on('connection', (socket) => {
     }
   );
 });
+
+// Quick "video match" 1:1 live-video first-impression queue (see module for
+// details). Registered as a second io.on('connection', ...) listener; the
+// auth gate above (socket.use) already applies to every socket regardless
+// of which listener is attached, so these events stay protected.
+require('./realtime/videoMatch')(io, prisma);
 
 // ---------- Native WebSocket bridge ----------
 // Keeps the existing web client compatible.
