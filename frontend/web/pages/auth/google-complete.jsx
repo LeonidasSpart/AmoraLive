@@ -7,12 +7,12 @@ export default function GoogleComplete() {
 
   useEffect(() => {
     if (!router.isReady) return;
-    const { accessToken, refreshToken, userId } = router.query;
+    const { accessToken, refreshToken, userId, role } = router.query;
     if (!accessToken) return;
     localStorage.setItem('accessToken', String(accessToken));
     if (refreshToken) localStorage.setItem('refreshToken', String(refreshToken));
     if (userId) localStorage.setItem('userId', String(userId));
-    router.replace('/discover');
+    router.replace(role === 'admin' || role === 'superadmin' ? '/admin' : '/discover');
   }, [router.isReady, router.query]);
 
   return (
