@@ -15,7 +15,8 @@ function calculateAge(dob) {
 
 module.exports = (prisma) => {
   const router = require('express').Router();
-  const appUrl = () => (process.env.APP_URL || 'https://www.amoramatch.one').replace(/\/+$/, '');
+  const appUrl = () => (process.env.APP_URL || 'https://amoramatch.one').replace(/\/+$/, '');
+  const googleRedirectUri = () => (process.env.GOOGLE_REDIRECT_URI || 'https://api.amoramatch.one/auth/google/callback').replace(/\/+$/, '');
   const registerSchema = z.object({
     email: z.string().email(),
     username: z.string().min(3).max(20).regex(/^[a-zA-Z0-9_.-]+$/),
@@ -118,16 +119,45 @@ module.exports = (prisma) => {
 
   // Google OAuth: existing users can log in immediately. New users are returned
   // a short-lived completion token because DOB/username are required by Amora.
+  // The flow uses a signed state value bound to a short-lived HttpOnly cookie to
+  // protect the redirect flow against CSRF.
   router.get('/google/start', (req, res) => {
-    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_REDIRECT_URI) return res.status(503).send('Google authentication is not configured');
-    const params = new URLSearchParams({ client_id: process.env.GOOGLE_CLIENT_ID, redirect_uri: process.env.GOOGLE_REDIRECT_URI, response_type: 'code', scope: 'openid email profile', access_type: 'offline', prompt: 'select_account' });
+    if (!process.env.GOOGLE_CLIENT_ID) return res.status(503).send('Google authentication is not configured');
+    const state = crypto.randomBytes(32).toString('hex');
+    const stateToken = jwt.sign({ purpose: 'google_oauth_state', state }, process.env.JWT_SECRET, { expiresIn: '10m' });
+    res.cookie('amora_google_state', stateToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'lax',
+      maxAge: 10 * 60 * 1000,
+      path: '/auth/google'
+    });
+    const params = new URLSearchParams({
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      redirect_uri: googleRedirectUri(),
+      response_type: 'code',
+      scope: 'openid email profile',
+      access_type: 'offline',
+      prompt: 'select_account',
+      state: stateToken
+    });
     res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
   });
 
   router.get('/google/callback', async (req, res) => {
     try {
-      if (!req.query.code || !process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET || !process.env.GOOGLE_REDIRECT_URI) throw new Error('Google authentication is not configured');
-      const tokenRes = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ code: String(req.query.code), client_id: process.env.GOOGLE_CLIENT_ID, client_secret: process.env.GOOGLE_CLIENT_SECRET, redirect_uri: process.env.GOOGLE_REDIRECT_URI, grant_type: 'authorization_code' }) });
+      if (!req.query.code || !process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) throw new Error('Google authentication is not configured');
+      const stateToken = String(req.query.state || '');
+      const cookieHeader = String(req.headers.cookie || '');
+      const cookieMatch = cookieHeader.match(/(?:^|;\s*)amora_google_state=([^;]+)/);
+      const cookieState = cookieMatch ? decodeURIComponent(cookieMatch[1]) : '';
+      const state = jwt.verify(stateToken, process.env.JWT_SECRET);
+      const cookieStateDecoded = jwt.verify(cookieState, process.env.JWT_SECRET);
+      if (state.purpose !== 'google_oauth_state' || cookieStateDecoded.purpose !== 'google_oauth_state' || state.state !== cookieStateDecoded.state) {
+        throw new Error('Invalid Google OAuth state');
+      }
+      res.setHeader('Set-Cookie', 'amora_google_state=; Max-Age=0; Path=/auth/google; Secure; HttpOnly; SameSite=Lax');
+      const tokenRes = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ code: String(req.query.code), client_id: process.env.GOOGLE_CLIENT_ID, client_secret: process.env.GOOGLE_CLIENT_SECRET, redirect_uri: googleRedirectUri(), grant_type: 'authorization_code' }) });
       const tokens = await tokenRes.json();
       if (!tokenRes.ok) throw new Error(tokens.error_description || 'Google token exchange failed');
       const profileRes = await fetch('https://openidconnect.googleapis.com/v1/userinfo', { headers: { Authorization: `Bearer ${tokens.access_token}` } });
@@ -138,7 +168,7 @@ module.exports = (prisma) => {
       if (existing) {
         if (!existing.is_active) return res.redirect(`${appUrl()}/login?error=account_suspended`);
         const session = await createSession(existing);
-        const params = new URLSearchParams({ accessToken: session.accessToken, refreshToken: session.refreshToken, userId: existing.id });
+        const params = new URLSearchParams({ accessToken: session.accessToken, refreshToken: session.refreshToken, userId: existing.id, role: existing.role });
         return res.redirect(`${appUrl()}/auth/google-complete?${params}`);
       }
 
