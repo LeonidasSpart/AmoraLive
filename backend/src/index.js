@@ -144,6 +144,16 @@ app.post('/payments/stripe/webhook', express.raw({ type: 'application/json' }), 
 
 app.use(express.json({ limit: '20mb' }));
 
+app.use((req, res, next) => {
+  // Browsers can preserve a trailing slash from NEXT_PUBLIC_API_URL and produce
+  // /\/auth/google/start. Express does not match that path to /auth.
+  if (req.url.startsWith('//')) {
+    req.url = req.url.replace(/^\/+/, '/');
+  }
+  next();
+});
+
+
 // ---------- Socket.io ----------
 let io;
 if (redisReady && pub && sub) {
