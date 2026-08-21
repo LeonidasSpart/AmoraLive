@@ -228,178 +228,177 @@ button { -webkit-tap-highlight-color: transparent; }
 }
 /* Refined authentication experience */
 .amora-auth-page {
-  min-height:100svh;
-  padding:28px 18px;
-  display:grid;
-  place-items:center;
-  overflow-x:hidden;
+  min-height: 100svh;
+  padding: clamp(18px, 4vw, 44px) 16px;
+  display: grid;
+  place-items: center;
+  overflow-x: hidden;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255,63,157,.17), transparent 30%),
+    radial-gradient(circle at 88% 88%, rgba(155,53,255,.18), transparent 34%),
+    var(--amora-bg);
 }
 .amora-auth-card {
-  width:min(560px,100%);
-  border:1px solid rgba(255,255,255,.10);
-  border-radius:30px;
-  overflow:hidden;
-  background:linear-gradient(180deg,rgba(18,12,37,.96),rgba(10,8,25,.98));
-  box-shadow:0 35px 110px rgba(0,0,0,.55),0 0 80px rgba(255,63,157,.07);
+  width: min(520px, 100%);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 30px;
+  overflow: hidden;
+  background: linear-gradient(180deg, rgba(18,12,37,.98), rgba(9,7,23,.99));
+  box-shadow: 0 35px 110px rgba(0,0,0,.55), 0 0 80px rgba(255,63,157,.08);
 }
 .amora-auth-top {
-  padding:42px 34px 34px;
-  text-align:center;
-  background:radial-gradient(circle at 20% 0%,rgba(255,63,157,.18),transparent 38%),radial-gradient(circle at 90% 30%,rgba(155,53,255,.13),transparent 34%),linear-gradient(145deg,#130b25,#080719);
-  border-bottom:1px solid rgba(255,255,255,.08);
+  padding: 38px 32px 30px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(255,63,157,.20), transparent 38%),
+    radial-gradient(circle at 90% 30%, rgba(155,53,255,.16), transparent 34%),
+    linear-gradient(145deg, #130b25, #080719);
+  border-bottom: 1px solid rgba(255,255,255,.07);
 }
-.amora-auth-logo-link { display:inline-flex; align-items:center; justify-content:center; }
+.amora-auth-logo-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 22px;
+  border-radius: 50%;
+  text-decoration: none;
+}
 .amora-auth-logo {
-  width:92px;
-  height:92px;
-  object-fit:contain;
-  display:block;
-  filter:drop-shadow(0 14px 28px rgba(255,63,157,.20));
-}
-.amora-auth-brand-name {
-  margin-top:10px;
-  font-size:20px;
-  line-height:1;
-  letter-spacing:.34em;
-  padding-left:.34em;
-  color:#f3eef9;
-  font-weight:500;
-}
-.amora-auth-tagline {
-  margin-top:7px;
-  font-size:8px;
-  letter-spacing:.32em;
-  padding-left:.32em;
-  color:#ff79bd;
-  font-weight:800;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 16px 30px rgba(255,63,157,.22));
 }
 .amora-auth-eyebrow {
-  display:inline-flex;
-  margin-top:24px;
-  padding:7px 11px;
-  border:1px solid rgba(255,63,157,.24);
-  border-radius:999px;
-  color:#ff8dc5;
-  background:rgba(255,63,157,.07);
-  font-size:10px;
-  letter-spacing:.18em;
-  font-weight:800;
+  display: inline-flex;
+  padding: 7px 11px;
+  border: 1px solid rgba(255,63,157,.25);
+  border-radius: 999px;
+  color: #ff9bca;
+  background: rgba(255,63,157,.07);
+  font-size: 10px;
+  letter-spacing: .18em;
+  font-weight: 800;
 }
 .amora-auth-top h1 {
-  margin:17px 0 9px;
-  font-size:clamp(30px,5vw,42px);
-  line-height:1.04;
-  letter-spacing:-.045em;
+  margin: 16px 0 9px;
+  font-size: clamp(30px, 5vw, 42px);
+  line-height: 1.04;
+  letter-spacing: -.045em;
 }
 .amora-auth-top p {
-  margin:0 auto;
-  max-width:420px;
-  color:var(--amora-muted);
-  font-size:15px;
-  line-height:1.6;
+  margin: 0 auto;
+  max-width: 430px;
+  color: var(--amora-muted);
+  font-size: 15px;
+  line-height: 1.6;
 }
-.amora-auth-body { padding:30px 34px 28px; }
+.amora-auth-body { padding: 30px 34px 28px; }
 .amora-auth-back {
-  display:inline-block;
-  margin-bottom:24px;
-  color:#8f89a2;
-  text-decoration:none;
-  font-size:13px;
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 24px;
+  color: #8f89a2;
+  text-decoration: none;
+  font-size: 13px;
+  transition: color .2s ease;
 }
-.amora-auth-back:hover { color:#fff; }
-.amora-auth-form { display:block; }
-.amora-field-hint { margin-top:7px; color:#77718a; font-size:11px; line-height:1.45; }
-.amora-password-wrap { position:relative; }
-.amora-password-wrap .amora-input { padding-right:76px; }
+.amora-auth-back:hover { color: #fff; }
+.amora-auth-form { display: block; }
+.amora-field { margin-bottom: 18px; }
+.amora-field-hint { margin-top: 7px; color: #77718a; font-size: 11px; line-height: 1.45; }
+.amora-password-wrap { position: relative; }
+.amora-password-wrap .amora-input { padding-right: 78px; }
 .amora-password-toggle {
-  position:absolute;
-  right:8px;
-  top:8px;
-  min-height:36px;
-  padding:0 10px;
-  border:0;
-  border-radius:10px;
-  background:rgba(255,255,255,.08);
-  color:#d8d2e3;
-  cursor:pointer;
-  font-size:12px;
-  font-weight:800;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(255,255,255,.08);
+  color: #d8d2e3;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
 }
-.amora-password-toggle:hover { background:rgba(255,255,255,.13); color:#fff; }
-.amora-date-input { color-scheme:dark; }
-.amora-date-input::-webkit-calendar-picker-indicator { opacity:.75; cursor:pointer; }
+.amora-password-toggle:hover { background: rgba(255,255,255,.13); color: #fff; }
+.amora-date-input { color-scheme: dark; }
+.amora-date-input::-webkit-calendar-picker-indicator { opacity: .75; cursor: pointer; }
 .amora-google {
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:11px;
-  width:100%;
-  min-height:52px;
-  background:#fff;
-  color:#18131e;
-  border:1px solid rgba(0,0,0,.12);
-  border-radius:14px;
-  font-weight:800;
-  cursor:pointer;
-  transition:transform .2s, box-shadow .2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+  width: 100%;
+  min-height: 54px;
+  background: #fff;
+  color: #18131e;
+  border: 1px solid rgba(0,0,0,.12);
+  border-radius: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
 }
-.amora-google:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 10px 25px rgba(0,0,0,.22); }
-.amora-google:disabled { opacity:.72; cursor:wait; }
+.amora-google:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 25px rgba(0,0,0,.22); }
+.amora-google:disabled { opacity: .72; cursor: wait; }
 .amora-google-icon {
-  width:22px;
-  height:22px;
-  display:grid;
-  place-items:center;
-  font-weight:900;
-  font-size:17px;
-  font-family:Arial,sans-serif;
-  color:#4285f4;
+  width: 21px;
+  height: 21px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
 }
-.amora-auth-small { margin:20px 0 0; color:#77718a; text-align:center; font-size:11px; line-height:1.55; }
-.amora-auth-small a { color:#ff79bd; text-decoration:none; font-weight:700; }
+.amora-google-icon svg { display: block; width: 21px; height: 21px; }
+.amora-auth-small { margin: 20px 0 0; color: #77718a; text-align: center; font-size: 11px; line-height: 1.55; }
+.amora-auth-small a { color: #ff79bd; text-decoration: none; font-weight: 700; }
 .amora-auth-footer {
-  padding:19px 24px 24px;
-  color:#77718a;
-  text-align:center;
-  font-size:13px;
-  border-top:1px solid rgba(255,255,255,.06);
+  padding: 19px 24px 24px;
+  color: #77718a;
+  text-align: center;
+  font-size: 13px;
+  border-top: 1px solid rgba(255,255,255,.06);
 }
-.amora-auth-footer a { color:#ff79bd; text-decoration:none; font-weight:800; }
-.amora-success-box { text-align:center; padding:8px 0 2px; }
+.amora-auth-footer a { color: #ff79bd; text-decoration: none; font-weight: 800; }
+.amora-success-box { text-align: center; padding: 8px 0 2px; }
 .amora-success-icon {
-  width:58px;
-  height:58px;
-  margin:0 auto 16px;
-  display:grid;
-  place-items:center;
-  border-radius:50%;
-  background:rgba(69,210,139,.12);
-  border:1px solid rgba(69,210,139,.3);
-  color:#68e2a3;
-  font-size:28px;
-  font-weight:900;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(69,210,139,.12);
+  border: 1px solid rgba(69,210,139,.3);
+  color: #68e2a3;
+  font-size: 28px;
+  font-weight: 900;
 }
-.amora-success-box h2 { margin:0 0 8px; font-size:24px; }
-.amora-success-box p { margin:0 0 22px; color:var(--amora-muted); line-height:1.6; }
-.amora-loading-state { min-height:150px; display:grid; place-items:center; text-align:center; color:var(--amora-muted); }
+.amora-success-box h2 { margin: 0 0 8px; font-size: 24px; }
+.amora-success-box p { margin: 0 0 22px; color: var(--amora-muted); line-height: 1.6; }
+.amora-loading-state { min-height: 150px; display: grid; place-items: center; text-align: center; color: var(--amora-muted); }
 .amora-spinner {
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  border:3px solid rgba(255,255,255,.12);
-  border-top-color:#ff3f9d;
-  border-right-color:#9b35ff;
-  animation:amora-spin .8s linear infinite;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,.12);
+  border-top-color: #ff3f9d;
+  border-right-color: #9b35ff;
+  animation: amora-spin .8s linear infinite;
 }
-@keyframes amora-spin { to { transform:rotate(360deg); } }
-@media (max-width:600px) {
-  .amora-auth-page { padding:12px; align-items:start; }
-  .amora-auth-card { margin:8px 0; border-radius:24px; }
-  .amora-auth-top { padding:30px 20px 26px; }
-  .amora-auth-logo { width:76px; height:76px; }
-  .amora-auth-brand-name { font-size:18px; }
-  .amora-auth-top h1 { font-size:29px; }
-  .amora-auth-top p { font-size:13px; }
-  .amora-auth-body { padding:24px 20px 22px; }
+@keyframes amora-spin { to { transform: rotate(360deg); } }
+@media (max-width: 600px) {
+  .amora-auth-page { padding: 10px; align-items: start; }
+  .amora-auth-card { margin: 8px 0; border-radius: 24px; }
+  .amora-auth-top { padding: 30px 20px 26px; }
+  .amora-auth-logo-link, .amora-auth-logo { width: 78px; height: 78px; }
+  .amora-auth-logo-link { margin-bottom: 18px; }
+  .amora-auth-top h1 { font-size: 29px; }
+  .amora-auth-top p { font-size: 13px; }
+  .amora-auth-body { padding: 24px 20px 22px; }
 }
-.amora-auth-shell { display:none !important; }
+.amora-auth-shell { display: none !important; }
