@@ -58,6 +58,24 @@ module.exports = (prisma) => {
     }
   });
 
+  // Public (any authenticated user) listing of purchasable coin packages.
+  // Distinct from /admin/packages, which is admin-only management —
+  // wallet.jsx was previously calling that admin route directly with a
+  // regular user's token and silently getting a 403 on every load, so no
+  // one ever saw packages to buy.
+  router.get('/packages', auth, async (req, res) => {
+    try {
+      const platform = ['web', 'ios', 'android'].includes(req.query.platform) ? req.query.platform : 'web';
+      const packages = await prisma.coinPackage.findMany({
+        where: { is_active: true, platform },
+        orderBy: { coins_amount: 'asc' }
+      });
+      res.json(packages);
+    } catch (e) {
+      res.status(500).json({ error: 'Unable to load packages' });
+    }
+  });
+
   router.post('/checkout', auth, async (req, res) => {
     const { packageId } = req.body;
     if (!packageId) return res.status(400).json({ error: 'packageId required' });
@@ -65,7 +83,7 @@ module.exports = (prisma) => {
 
     try {
       const pkg = await prisma.coinPackage.findUnique({ where: { id: packageId } });
-      if (!pkg || pkg.platform === 'app') return res.status(404).json({ error: 'Package not available on web' });
+      if (!pkg || !pkg.is_active || pkg.platform !== 'web') return res.status(404).json({ error: 'Package not available on web' });
       const token = crypto.randomUUID();
       const totalCoins = pkg.coins_amount + pkg.bonus_coins;
       const purchase = await prisma.purchase.create({

@@ -33,7 +33,7 @@ module.exports = (prisma, io) => {
       const existing = await prisma.giftTransaction.findUnique({ where: { tx_id: key } });
       if (existing) return res.json({ success: true, duplicate: true, transaction: existing });
 
-      const result = await prisma.$transaction(async (tx) => {
+      const txResult = await prisma.$transaction(async (tx) => {
         const gift = await tx.giftCatalog.findFirst({ where: { id: giftId, is_active: true } });
         if (!gift) throw Object.assign(new Error('Gift not found'), { statusCode: 404 });
 
@@ -83,6 +83,35 @@ module.exports = (prisma, io) => {
         if (room) {
           await tx.liveRoom.update({ where: { id: room.id }, data: { gift_count: { increment: qty } } });
         }
+
+        // If a live team-battle event is running, gifting is how you boost
+        // your team's score — same mechanic as the leaderboard/event system
+        // already exposed via /events/*. Score only counts if the sender
+        // has actually joined a team for the active event.
+        const activeEvent = await tx.event.findFirst({
+          where: { is_active: true, starts_at: { lte: new Date() }, ends_at: { gte: new Date() } }
+        });
+        if (activeEvent) {
+          const senderScore = await tx.eventScore.findUnique({
+            where: { user_id_event_id: { user_id: req.user.id, event_id: activeEvent.id } }
+          });
+          if (senderScore) {
+            await tx.eventScore.update({
+              where: { user_id_event_id: { user_id: req.user.id, event_id: activeEvent.id } },
+              data: { total_gifts_sent: { increment: totalCost } }
+            });
+          }
+          const receiverScore = await tx.eventScore.findUnique({
+            where: { user_id_event_id: { user_id: receiver.id, event_id: activeEvent.id } }
+          });
+          if (receiverScore) {
+            await tx.eventScore.update({
+              where: { user_id_event_id: { user_id: receiver.id, event_id: activeEvent.id } },
+              data: { total_gifts_received: { increment: totalCost } }
+            });
+          }
+        }
+
         await tx.notification.create({
           data: {
             user_id: receiver.id,
@@ -90,12 +119,30 @@ module.exports = (prisma, io) => {
             payload: { transactionId: transaction.id, giftId: gift.id, giftName: gift.name, quantity: qty, coinCost: totalCost, roomId: room?.id || null }
           }
         });
-        return transaction;
+        return { transaction, activeEventId: activeEvent?.id || null };
       });
 
+      const { transaction: result, activeEventId } = txResult;
       if (result.room_id) io.to(`live-${result.room_id}`).emit('gift-animation', result);
       io.to(`user-${result.receiver_id}`).emit('gift-received', result);
       io.to(`user-${result.sender_id}`).emit('gift-sent', result);
+
+      if (activeEventId) {
+        // Broadcast a fresh leaderboard so team battle screens update live,
+        // same shape as GET /events/leaderboard/:eventId.
+        prisma.eventScore.findMany({
+          where: { event_id: activeEventId },
+          orderBy: { total_gifts_sent: 'desc' },
+          take: 100,
+          include: { user: { select: { username: true, display_name: true, profile_photo: true } } }
+        }).then(scores => {
+          const teamTotals = {};
+          for (const s of scores) {
+            teamTotals[s.team_side] = (teamTotals[s.team_side] || 0) + s.total_gifts_sent + s.total_gifts_received;
+          }
+          io.to(`event-${activeEventId}`).emit('leaderboard-update', { scores, teamTotals });
+        }).catch(err => console.error('Leaderboard broadcast failed:', err.message));
+      }
       res.status(201).json({ success: true, transaction: result });
     } catch (e) {
       const status = e.statusCode || 500;

@@ -84,6 +84,15 @@ module.exports = (prisma) => {
       create: { user1_id, user2_id, source }
     });
 
+    // Notify both sides — a mutual match is worth surfacing even if neither
+    // person is online right now to see the socket event.
+    await prisma.notification.createMany({
+      data: [
+        { user_id: userId, type: 'new_match', payload: { peerId: targetUserId, source } },
+        { user_id: targetUserId, type: 'new_match', payload: { peerId: userId, source } }
+      ]
+    }).catch(err => console.error('Failed to create match notifications:', err.message));
+
     return { matched: true, matchId: `${match.user1_id}_${match.user2_id}`, targetUserId };
   }
 

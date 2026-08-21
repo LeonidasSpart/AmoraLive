@@ -171,22 +171,21 @@ module.exports = (prisma) => {
 
   // POST /store/equip – equip a cosmetic (unequip others of same type automatically)
   router.post('/equip', auth, async (req, res) => {
-    const { userCosmeticId } = req.body;
-    if (!userCosmeticId) {
-      return res.status(400).json({ error: 'userCosmeticId is required' });
+    const { cosmeticId } = req.body;
+    if (!cosmeticId) {
+      return res.status(400).json({ error: 'cosmeticId is required' });
     }
 
     try {
-      // Get the userCosmetic record
+      // UserCosmetic has a composite primary key [user_id, cosmetic_id] — no
+      // standalone id — so we look it up via that composite key, scoped to
+      // the authenticated user (this also prevents equipping someone else's item).
       const userCosmetic = await prisma.userCosmetic.findUnique({
-        where: { id: userCosmeticId },
+        where: { user_id_cosmetic_id: { user_id: req.user.id, cosmetic_id: cosmeticId } },
         include: { cosmetic: true }
       });
       if (!userCosmetic) {
         return res.status(404).json({ error: 'Item not found' });
-      }
-      if (userCosmetic.user_id !== req.user.id) {
-        return res.status(403).json({ error: 'Not your item' });
       }
       if (userCosmetic.expires_at && userCosmetic.expires_at < new Date()) {
         return res.status(400).json({ error: 'Item has expired' });
@@ -201,14 +200,14 @@ module.exports = (prisma) => {
           user_id: req.user.id,
           cosmetic: { type: userCosmetic.cosmetic.type },
           is_equipped: true,
-          id: { not: userCosmeticId }
+          cosmetic_id: { not: cosmeticId }
         },
         data: { is_equipped: false }
       });
 
       // Equip this one
       await prisma.userCosmetic.update({
-        where: { id: userCosmeticId },
+        where: { user_id_cosmetic_id: { user_id: req.user.id, cosmetic_id: cosmeticId } },
         data: { is_equipped: true }
       });
 
@@ -221,27 +220,24 @@ module.exports = (prisma) => {
 
   // POST /store/unequip – unequip a cosmetic
   router.post('/unequip', auth, async (req, res) => {
-    const { userCosmeticId } = req.body;
-    if (!userCosmeticId) {
-      return res.status(400).json({ error: 'userCosmeticId is required' });
+    const { cosmeticId } = req.body;
+    if (!cosmeticId) {
+      return res.status(400).json({ error: 'cosmeticId is required' });
     }
 
     try {
       const userCosmetic = await prisma.userCosmetic.findUnique({
-        where: { id: userCosmeticId }
+        where: { user_id_cosmetic_id: { user_id: req.user.id, cosmetic_id: cosmeticId } }
       });
       if (!userCosmetic) {
         return res.status(404).json({ error: 'Item not found' });
-      }
-      if (userCosmetic.user_id !== req.user.id) {
-        return res.status(403).json({ error: 'Not your item' });
       }
       if (!userCosmetic.is_equipped) {
         return res.status(400).json({ error: 'Already unequipped' });
       }
 
       await prisma.userCosmetic.update({
-        where: { id: userCosmeticId },
+        where: { user_id_cosmetic_id: { user_id: req.user.id, cosmetic_id: cosmeticId } },
         data: { is_equipped: false }
       });
 

@@ -104,6 +104,13 @@ module.exports = (prisma, io) => {
           }
         }
       });
+      await prisma.notification.create({
+        data: {
+          user_id: userId,
+          type: 'new_message',
+          payload: { senderId: currentUserId, senderName: message.sender.display_name || message.sender.username, preview: (content || '').slice(0, 120) }
+        }
+      }).catch(err => console.error('Failed to create message notification:', err.message));
       // Emit to recipient via socket
       io.to(`user-${userId}`).emit('private-message', message);
       res.status(201).json(message);
