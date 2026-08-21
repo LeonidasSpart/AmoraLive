@@ -1,0 +1,5 @@
+import { router } from "expo-router";
+import { View, Text, Pressable, StyleSheet } from "react-native";
+import { theme } from "../src/theme";
+export default function Live(){return <View style={s.page}><Pressable onPress={()=>router.back()}><Text style={s.back}>‹</Text></Pressable><Text style={s.title}>Live</Text><View style={s.banner}><Text style={s.live}>● LIVE</Text><Text style={s.bannerTitle}>Discover live creators</Text><Text style={s.muted}>Join a room, chat and send paid gifts.</Text></View><Pressable style={s.primary}><Text style={s.primaryText}>Explore Live Rooms</Text></Pressable></View>}
+const s=StyleSheet.create({page:{flex:1,backgroundColor:"#050407",padding:20},back:{fontSize:42,color:"#fff"},title:{fontSize:30,fontWeight:"900",color:"#fff",marginBottom:18},banner:{flex:1,backgroundColor:"#201735",borderRadius:24,padding:24,justifyContent:"flex-end"},live:{color:"#ff4d70",fontWeight:"900"},bannerTitle:{color:"#fff",fontSize:28,fontWeight:"900",marginTop:8},muted:{color:theme.muted,marginTop:8},primary:{backgroundColor:theme.pink,borderRadius:16,padding:17,alignItems:"center",marginTop:16},primaryText:{color:"#fff",fontWeight:"900"}});
