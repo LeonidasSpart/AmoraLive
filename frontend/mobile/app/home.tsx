@@ -20,6 +20,7 @@ export default function Home() {
       <Pressable style={s.box} onPress={()=>router.push("/messages")}><Text style={s.icon}>💬</Text><Text style={s.boxTitle}>Messages</Text></Pressable>
       <Pressable style={s.box} onPress={()=>router.push("/live")}><Text style={s.icon}>◉</Text><Text style={s.boxTitle}>Live</Text></Pressable>
       <Pressable style={s.box} onPress={()=>router.push("/wallet")}><Text style={s.icon}>🪙</Text><Text style={s.boxTitle}>Coins & Gifts</Text></Pressable>
+      <Pressable style={s.box} onPress={()=>router.push("/events")}><Text style={s.icon}>🏆</Text><Text style={s.boxTitle}>Events</Text></Pressable>
       <Pressable style={s.box} onPress={()=>router.push("/profile")}><Text style={s.icon}>◎</Text><Text style={s.boxTitle}>Profile</Text></Pressable>
     </View>
   </View>
