@@ -95,6 +95,24 @@ async function tryRefresh() {
   }
 }
 
+async function uploadFile(path: string, formData: FormData): Promise<any> {
+  const accessToken = await getAccessToken();
+  // Deliberately no Content-Type header here — fetch sets the correct
+  // multipart/form-data boundary automatically. Setting it manually (as the
+  // shared request() helper does for JSON) breaks multipart uploads.
+  const response = await fetch(`${API_URL}${path}`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {})
+    },
+    body: formData
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new ApiError(data.error || `API ${response.status}`, response.status);
+  return data;
+}
+
 export const api = {
   register: (body: unknown) => request('/auth/register', { method: 'POST', body: JSON.stringify(body) }),
   login: async (body: unknown) => {
@@ -115,6 +133,8 @@ export const api = {
     await clearSession();
   },
   me: () => request('/users/me'),
+  updateProfile: (body: unknown) => request('/users/me', { method: 'PATCH', body: JSON.stringify(body) }),
+  uploadPhoto: (formData: FormData) => uploadFile('/users/me/photos', formData),
   nextMatch: () => request('/matches/next'),
   acceptMatch: (targetUserId: string) => request('/matches/accept', { method: 'POST', body: JSON.stringify({ targetUserId }) }),
   skipMatch: (targetUserId: string) => request('/matches/skip', { method: 'POST', body: JSON.stringify({ targetUserId }) }),
@@ -127,6 +147,22 @@ export const api = {
   sendGift: (body: unknown) => request('/gifts/send', { method: 'POST', body: JSON.stringify(body) }),
   liveRooms: () => request('/live'),
   liveRoom: (roomId: string) => request(`/live/${roomId}`),
+  createLiveRoom: (body: { title: string; category: string; thumbnail_url?: string }) =>
+    request('/live', { method: 'POST', body: JSON.stringify(body) }),
+  liveToken: (roomId: string) => request(`/live/${roomId}/token`),
+  joinLiveRoom: (roomId: string) => request(`/live/${roomId}/join`, { method: 'POST' }),
+  leaveLiveRoom: (roomId: string) => request(`/live/${roomId}/leave`, { method: 'POST' }),
+  endLiveRoom: (roomId: string) => request(`/live/${roomId}/end`, { method: 'POST' }),
+  activeEvent: () => request('/events/active'),
+  joinEventTeam: (eventId: string, team: string) =>
+    request('/events/join', { method: 'POST', body: JSON.stringify({ eventId, team }) }),
+  eventLeaderboard: (eventId: string) => request(`/events/leaderboard/${eventId}`),
+  coinPackages: (platform: string) => request(`/wallet/packages?platform=${platform}`),
+  checkout: (packageId: string) => request('/wallet/checkout', { method: 'POST', body: JSON.stringify({ packageId }) }),
+  verifyApplePurchase: (packageId: string, receiptData: string) =>
+    request('/wallet/iap/apple/verify', { method: 'POST', body: JSON.stringify({ packageId, receiptData }) }),
+  verifyGooglePurchase: (packageId: string, purchaseToken: string) =>
+    request('/wallet/iap/google/verify', { method: 'POST', body: JSON.stringify({ packageId, purchaseToken }) }),
   membership: () => request('/membership/me')
 };
 
