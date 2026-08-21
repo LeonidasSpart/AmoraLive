@@ -17,14 +17,20 @@ export default function AuthLayout({
         <title>{title} — AmoraLive</title>
         <meta name="description" content={`${title} — AmoraLive, meaningful connections.`} />
       </Head>
+
       <main className="amora-auth-page">
         <div className="amora-auth-card">
           <div className="amora-auth-top">
             <Link href="/" className="amora-auth-logo-link" aria-label="AmoraLive home">
-              <img src="/brand/amora-header-logo.png" alt="Amora" className="amora-auth-logo" />
+              <img
+                src="/brand/amora-header-logo.png"
+                alt="Amora"
+                className="amora-auth-logo"
+                width="96"
+                height="96"
+              />
             </Link>
-            <div className="amora-auth-brand-name">AMORA</div>
-            <div className="amora-auth-tagline">MEANINGFUL CONNECTIONS</div>
+
             {eyebrow && <div className="amora-auth-eyebrow">{eyebrow}</div>}
             <h1>{title}</h1>
             {subtitle && <p>{subtitle}</p>}
