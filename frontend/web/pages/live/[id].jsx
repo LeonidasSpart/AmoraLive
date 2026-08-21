@@ -1,7 +1,9 @@
-// pages/live/[id].jsx
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+
+const API = 'https://api.amoramatch.one';
+const WS = 'wss://api.amoramatch.one/ws';
 
 export default function LiveRoom() {
   const router = useRouter();
@@ -12,493 +14,182 @@ export default function LiveRoom() {
   const [chatMessages, setChatMessages] = useState([]);
   const [messageInput, setMessageInput] = useState('');
   const [viewerCount, setViewerCount] = useState(0);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isHost, setIsHost] = useState(false);
   const [giftCatalog, setGiftCatalog] = useState([]);
   const [showGiftPicker, setShowGiftPicker] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(true);
+  const [socket, setSocket] = useState(null);
   const chatContainerRef = useRef(null);
-  const videoRef = useRef(null);
-
-  // Mock data for demonstration – will be replaced by real API
-  const mockRoom = {
-    id: id || 'room-1',
-    title: 'Dragon Slayer Event!',
-    host: { id: 'host-1', username: 'Lucia★', display_name: 'Lucia★', profile_photo: null },
-    category: 'Chat',
-    viewer_count: 243,
-    status: 'live',
-    stream_key: 'mock_stream',
-    thumbnail_url: null,
-    created_at: new Date(Date.now() - 3600000).toISOString(),
-    settings: { slow_mode: false, pinned_comment: null }
-  };
-
-  const mockMessages = [
-    { id: 'm1', user_id: 'u1', username: 'User1', message: 'Hello everyone! 🎉', created_at: new Date(Date.now() - 120000).toISOString() },
-    { id: 'm2', user_id: 'u2', username: 'User2', message: 'This is amazing!', created_at: new Date(Date.now() - 60000).toISOString() },
-    { id: 'm3', user_id: 'host-1', username: 'Lucia★', message: 'Welcome to the stream! ❤️', created_at: new Date(Date.now() - 30000).toISOString() }
-  ];
-
-  const mockGifts = [
-    { id: 'g1', name: 'Rose', image_url: '🌹', coin_price: 10, rarity: 'common' },
-    { id: 'g2', name: 'Heart', image_url: '❤️', coin_price: 50, rarity: 'common' },
-    { id: 'g3', name: 'Crown', image_url: '👑', coin_price: 200, rarity: 'rare' },
-    { id: 'g4', name: 'Dragon', image_url: '🐉', coin_price: 500, rarity: 'epic' },
-    { id: 'g5', name: 'Golden Rocket', image_url: '🚀', coin_price: 1000, rarity: 'legendary' }
-  ];
+  const videoContainerRef = useRef(null);
+  const livekitRoomRef = useRef(null);
+  const [videoReady, setVideoReady] = useState(false);
+  const [isHost, setIsHost] = useState(false);
 
   useEffect(() => {
     if (!id) return;
+    let ws;
+    let active = true;
 
-    // Fetch room data (replace with real API)
-    const fetchRoom = async () => {
+    const load = async () => {
+      const token = localStorage.getItem('accessToken');
+      if (!token) return router.push('/login');
       try {
-        const token = localStorage.getItem('accessToken');
-        if (!token) {
-          router.push('/login');
-          return;
-        }
-        // In production: fetch from API
-        // const res = await fetch(`https://api.amoramatch.one/live/${id}`, {
-        //   headers: { Authorization: `Bearer ${token}` }
-        // });
-        // const data = await res.json();
-        // setRoom(data);
-        // setViewerCount(data.viewer_count || 0);
-        // setIsHost(data.host.id === userId);
-        // setChatMessages(data.messages || []);
-        // setGiftCatalog(data.gifts || []);
-
-        // Using mock data for now
-        setRoom(mockRoom);
-        setViewerCount(mockRoom.viewer_count);
-        setIsHost(false); // would check against logged-in user
-        setChatMessages(mockMessages);
-        setGiftCatalog(mockGifts);
+        const [roomRes, giftsRes] = await Promise.all([
+          fetch(`${API}/live/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API}/gifts/catalog`)
+        ]);
+        if (!roomRes.ok) throw new Error('Live room not found');
+        const data = await roomRes.json();
+        const gifts = giftsRes.ok ? await giftsRes.json() : [];
+        if (!active) return;
+        setRoom(data);
+        const currentUserId = localStorage.getItem('userId');
+        setIsHost(data.host?.id === currentUserId);
+        setViewerCount(data.viewer_count || 0);
+        setChatMessages(data.messages || []);
+        setGiftCatalog(gifts || []);
         setLoading(false);
 
-        // Simulate WebSocket connection
-        const ws = new WebSocket('wss://api.amoramatch.one/live');
+        await fetch(`${API}/live/${id}/join`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        ws = new WebSocket(WS);
         ws.onopen = () => {
-          ws.send(JSON.stringify({ type: 'join', roomId: id }));
+          ws.send(JSON.stringify({ type: 'authenticate', token }));
+          ws.send(JSON.stringify({ type: 'join-live', roomId: id }));
         };
         ws.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          if (data.type === 'new-chat') {
-            setChatMessages(prev => [...prev, data.message]);
-          } else if (data.type === 'viewer-count') {
-            setViewerCount(data.count);
-          } else if (data.type === 'gift-animation') {
-            // Show gift animation
-            alert(`Gift sent: ${data.gift.name}`);
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'new-chat') setChatMessages(prev => [...prev, msg.message]);
+            if (msg.type === 'viewer-count') setViewerCount(msg.count);
+            if (msg.type === 'gift-animation') setChatMessages(prev => [...prev, { id: `gift-${Date.now()}`, system: true, message: `🎁 ${msg.transaction?.sender?.display_name || 'Someone'} sent ${msg.transaction?.gift?.name || 'a gift'}!` }]);
+          } catch {}
+        };
+        setSocket(ws);
+
+        // Real LiveKit video: the backend issues a short-lived role-aware token.
+        const connectLiveKit = async () => {
+          const waitForClient = async () => {
+            for (let i = 0; i < 30; i++) {
+              if (window.LivekitClient) return window.LivekitClient;
+              await new Promise(r => setTimeout(r, 200));
+            }
+            return null;
+          };
+          const LK = await waitForClient();
+          if (!LK || !active || !videoContainerRef.current) return;
+          const tokenRes = await fetch(`${API}/live/${id}/token`, { headers: { Authorization: `Bearer ${token}` } });
+          if (!tokenRes.ok) return;
+          const tokenData = await tokenRes.json();
+          const livekitRoom = new LK.Room({ adaptiveStream: true, dynacast: true });
+          livekitRoomRef.current = livekitRoom;
+          livekitRoom.on(LK.RoomEvent.TrackSubscribed, (track) => {
+            const element = track.attach();
+            element.style.width = '100%'; element.style.height = '100%'; element.style.objectFit = 'contain';
+            videoContainerRef.current?.appendChild(element);
+            setVideoReady(true);
+          });
+          livekitRoom.on(LK.RoomEvent.TrackUnsubscribed, (track) => track.detach().forEach(el => el.remove()));
+          await livekitRoom.connect(tokenData.url, tokenData.token);
+          if (tokenData.role === 'host') {
+            const tracks = await LK.createLocalTracks({ audio: true, video: true });
+            for (const track of tracks) {
+              await livekitRoom.localParticipant.publishTrack(track);
+              if (track.kind === 'video') {
+                const element = track.attach();
+                element.style.width = '100%'; element.style.height = '100%'; element.style.objectFit = 'contain';
+                videoContainerRef.current?.appendChild(element);
+                setVideoReady(true);
+              }
+            }
+          }
+          for (const publication of livekitRoom.remoteParticipants.values()) {
+            for (const pub of publication.trackPublications.values()) if (pub.track) {
+              const element = pub.track.attach();
+              element.style.width = '100%'; element.style.height = '100%'; element.style.objectFit = 'contain';
+              videoContainerRef.current?.appendChild(element);
+              setVideoReady(true);
+            }
           }
         };
-        return () => ws.close();
-      } catch (err) {
-        setError(err.message);
-        setLoading(false);
+        connectLiveKit().catch(err => console.warn('LiveKit connection unavailable:', err.message));
+      } catch (e) {
+        if (active) { setError(e.message); setLoading(false); }
       }
     };
-    fetchRoom();
+    load();
+
+    return () => {
+      active = false;
+      if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'leave-live', roomId: id }));
+      if (ws) ws.close();
+      if (livekitRoomRef.current) { livekitRoomRef.current.disconnect(); livekitRoomRef.current = null; }
+      const token = localStorage.getItem('accessToken');
+      if (token) fetch(`${API}/live/${id}/leave`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {});
+    };
   }, [id]);
 
-  // Auto-scroll chat
   useEffect(() => {
-    if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-    }
+    if (chatContainerRef.current) chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
   }, [chatMessages]);
 
-  const sendMessage = async (e) => {
+  const sendMessage = (e) => {
     e.preventDefault();
-    if (!messageInput.trim()) return;
-    // In production: send via WebSocket or API
-    setChatMessages(prev => [
-      ...prev,
-      { id: 'temp', user_id: 'me', username: 'Me', message: messageInput, created_at: new Date().toISOString() }
-    ]);
+    const message = messageInput.trim();
+    if (!message || !socket || socket.readyState !== WebSocket.OPEN) return;
+    socket.send(JSON.stringify({ type: 'live-chat', roomId: id, message }));
     setMessageInput('');
-    // Also send to server
-    try {
-      const token = localStorage.getItem('accessToken');
-      await fetch(`https://api.amoramatch.one/live/${id}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ message: messageInput })
-      });
-    } catch (err) {
-      console.error('Failed to send message', err);
-    }
   };
 
   const sendGift = async (giftId) => {
     const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch('https://api.amoramatch.one/gifts/send', {
+      const res = await fetch(`${API}/gifts/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ giftId, roomId: id })
+        body: JSON.stringify({ giftId, roomId: id, idempotencyKey: crypto.randomUUID() })
       });
-      if (res.ok) {
-        alert('Gift sent!');
-        setShowGiftPicker(false);
-      }
-    } catch (err) {
-      console.error('Gift failed', err);
-    }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Gift failed');
+      setShowGiftPicker(false);
+    } catch (e) { setError(e.message); }
   };
 
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen();
-      setIsFullscreen(true);
-    } else {
-      document.exitFullscreen();
-      setIsFullscreen(false);
-    }
-  };
+  if (loading) return <div style={{ minHeight: '100vh', background: '#0f0f1a', color: '#fff', display: 'grid', placeItems: 'center' }}>Loading live room…</div>;
+  if (error || !room) return <div style={{ minHeight: '100vh', background: '#0f0f1a', color: '#fff', display: 'grid', placeItems: 'center' }}><div><p style={{ color: '#ff6b6b' }}>{error || 'Room not found'}</p><Link href="/discover" style={{ color: '#FF6B9D' }}>← Back</Link></div></div>;
 
-  if (loading) {
-    return React.createElement('div', {
-      style: {
-        minHeight: '100vh',
-        background: '#0f0f1a',
-        color: '#fff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'sans-serif'
-      }
-    }, 'Loading room...');
-  }
+  const playbackUrl = room.settings?.playback_url || room.settings?.hls_url || room.settings?.playbackUrl;
 
-  if (error || !room) {
-    return React.createElement('div', {
-      style: {
-        minHeight: '100vh',
-        background: '#0f0f1a',
-        color: '#fff',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'sans-serif'
-      }
-    }, [
-      React.createElement('p', { key: 'msg', style: { color: '#ff6b6b' } }, `Error: ${error || 'Room not found'}`),
-      React.createElement(Link, {
-        key: 'back',
-        href: '/discover',
-        style: { marginTop: '20px', color: '#FF6B9D', textDecoration: 'none' }
-      }, '← Back to Discovery')
-    ]);
-  }
+  return (
+    <div style={{ height: '100vh', background: '#0f0f1a', color: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: 'sans-serif' }}>
+      <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
+        <div style={{ flex: 2, background: '#000', position: 'relative', minWidth: 0 }}>
+          <div ref={videoContainerRef} style={{ width: '100%', height: '100%', background: '#050509', position: 'relative', display: 'grid', placeItems: 'center' }}>
+            {!videoReady && playbackUrl && <video src={playbackUrl} autoPlay controls playsInline style={{ width: '100%', height: '100%', objectFit: 'contain', background: '#000' }} />}
+            {!videoReady && !playbackUrl && <div style={{ textAlign: 'center', padding: 30 }}><div style={{ fontSize: 64 }}>📺</div><h2>{room.title}</h2><p style={{ color: '#aaa' }}>{isHost ? 'Connecting your camera and microphone…' : 'Waiting for the host video…'}</p><p style={{ color: '#666', fontSize: 13 }}>LiveKit must be configured on Railway with LIVEKIT_URL, LIVEKIT_API_KEY and LIVEKIT_API_SECRET.</p></div>}
+          </div>
+          <span style={{ position: 'absolute', top: 16, left: 16, background: '#e22', padding: '5px 10px', borderRadius: 6, fontWeight: 700 }}>🔴 LIVE</span>
+          <span style={{ position: 'absolute', top: 16, right: 16, background: '#222c', padding: '5px 10px', borderRadius: 6 }}>👁 {viewerCount}</span>
+        </div>
 
-  return React.createElement('div', {
-    style: {
-      height: '100vh',
-      background: '#0f0f1a',
-      display: 'flex',
-      flexDirection: 'column',
-      fontFamily: 'sans-serif',
-      overflow: 'hidden'
-    }
-  }, [
-    // Main content: video + chat sidebar
-    React.createElement('div', {
-      key: 'main',
-      style: {
-        display: 'flex',
-        flex: 1,
-        overflow: 'hidden'
-      }
-    }, [
-      // Video area (2/3)
-      React.createElement('div', {
-        key: 'video',
-        style: {
-          flex: 2,
-          position: 'relative',
-          background: '#000',
-          display: 'flex',
-          flexDirection: 'column'
-        }
-      }, [
-        // Video player placeholder
-        React.createElement('div', {
-          ref: videoRef,
-          style: {
-            flex: 1,
-            background: '#1a1a2e',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative'
-          }
-        }, [
-          React.createElement('div', {
-            style: { color: '#444', fontSize: '64px' }
-          }, '📺'),
-          // Live badge
-          React.createElement('span', {
-            style: {
-              position: 'absolute',
-              top: '16px',
-              left: '16px',
-              background: '#ff0000',
-              color: '#fff',
-              padding: '4px 12px',
-              borderRadius: '4px',
-              fontSize: '12px',
-              fontWeight: 'bold'
-            }
-          }, '🔴 LIVE'),
-          // Viewer count
-          React.createElement('span', {
-            style: {
-              position: 'absolute',
-              top: '16px',
-              right: '16px',
-              background: 'rgba(0,0,0,0.7)',
-              color: '#fff',
-              padding: '4px 12px',
-              borderRadius: '12px',
-              fontSize: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }
-          }, [`👁️ ${viewerCount || 0}`]),
-          // Room title overlay
-          React.createElement('div', {
-            style: {
-              position: 'absolute',
-              bottom: '16px',
-              left: '16px',
-              color: '#fff',
-              fontSize: '18px',
-              fontWeight: 'bold',
-              textShadow: '0 2px 8px rgba(0,0,0,0.8)'
-            }
-          }, room.title),
-          // Host name
-          React.createElement('div', {
-            style: {
-              position: 'absolute',
-              bottom: '16px',
-              right: '16px',
-              color: '#aaa',
-              fontSize: '14px',
-              textShadow: '0 2px 8px rgba(0,0,0,0.8)'
-            }
-          }, [`Host: ${room.host?.display_name || room.host?.username}`]),
-          // Fullscreen button
-          React.createElement('button', {
-            onClick: toggleFullscreen,
-            style: {
-              position: 'absolute',
-              bottom: '60px',
-              right: '16px',
-              background: 'rgba(0,0,0,0.6)',
-              border: 'none',
-              color: '#fff',
-              padding: '8px 12px',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '16px'
-            }
-          }, isFullscreen ? '⛶' : '⛶')
-        ])
-      ]),
-
-      // Chat sidebar (1/3)
-      React.createElement('div', {
-        key: 'chat',
-        style: {
-          flex: 1,
-          background: '#1a1a2e',
-          display: 'flex',
-          flexDirection: 'column',
-          borderLeft: '1px solid #333',
-          minWidth: '280px'
-        }
-      }, [
-        // Chat header
-        React.createElement('div', {
-          style: {
-            padding: '12px 16px',
-            borderBottom: '1px solid #333',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }
-        }, [
-          React.createElement('span', { key: 'title', style: { color: '#fff', fontWeight: 'bold' } }, 'Live Chat'),
-          React.createElement('div', { key: 'actions', style: { display: 'flex', gap: '8px' } }, [
-            React.createElement('button', {
-              key: 'gift',
-              onClick: () => setShowGiftPicker(!showGiftPicker),
-              style: {
-                background: '#FF6B9D',
-                border: 'none',
-                color: '#fff',
-                padding: '4px 12px',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                fontSize: '12px'
-              }
-            }, '🎁 Gifts'),
-            React.createElement('button', {
-              key: 'toggle',
-              onClick: () => setIsChatOpen(!isChatOpen),
-              style: {
-                background: 'transparent',
-                border: 'none',
-                color: '#888',
-                cursor: 'pointer',
-                fontSize: '16px'
-              }
-            }, isChatOpen ? '➡️' : '⬅️')
-          ])
-        ]),
-
-        // Gift picker (toggled)
-        showGiftPicker && React.createElement('div', {
-          style: {
-            padding: '12px',
-            borderBottom: '1px solid #333',
-            maxHeight: '150px',
-            overflowY: 'auto',
-            background: '#0f0f1a'
-          }
-        }, [
-          React.createElement('div', {
-            style: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }
-          }, giftCatalog.map(gift =>
-            React.createElement('button', {
-              key: gift.id,
-              onClick: () => sendGift(gift.id),
-              style: {
-                background: '#1a1a2e',
-                border: '1px solid #333',
-                borderRadius: '8px',
-                padding: '8px',
-                color: '#fff',
-                cursor: 'pointer',
-                textAlign: 'center',
-                fontSize: '12px'
-              }
-            }, [
-              React.createElement('div', { key: 'icon', style: { fontSize: '24px' } }, gift.image_url || '🎁'),
-              React.createElement('div', { key: 'price', style: { color: '#FFD700', fontSize: '10px' } }, `${gift.coin_price} 🪙`)
-            ])
-          ))
-        ]),
-
-        // Chat messages
-        React.createElement('div', {
-          ref: chatContainerRef,
-          style: {
-            flex: 1,
-            overflowY: 'auto',
-            padding: '12px 16px',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '6px'
-          }
-        }, chatMessages.map(msg =>
-          React.createElement('div', {
-            key: msg.id,
-            style: {
-              display: 'flex',
-              gap: '8px',
-              alignItems: 'baseline',
-              fontSize: '13px',
-              wordWrap: 'break-word'
-            }
-          }, [
-            React.createElement('span', {
-              key: 'user',
-              style: {
-                color: msg.user_id === room.host.id ? '#FF6B9D' : '#4fc3f7',
-                fontWeight: 'bold',
-                whiteSpace: 'nowrap'
-              }
-            }, msg.username || 'User'),
-            React.createElement('span', {
-              key: 'msg',
-              style: { color: '#ddd' }
-            }, msg.message)
-          ])
-        )),
-
-        // Chat input
-        React.createElement('form', {
-          onSubmit: sendMessage,
-          style: {
-            padding: '12px 16px',
-            borderTop: '1px solid #333',
-            display: 'flex',
-            gap: '8px'
-          }
-        }, [
-          React.createElement('input', {
-            type: 'text',
-            placeholder: 'Send a message...',
-            value: messageInput,
-            onChange: (e) => setMessageInput(e.target.value),
-            style: {
-              flex: 1,
-              padding: '8px 12px',
-              borderRadius: '20px',
-              border: '1px solid #333',
-              background: '#0f0f1a',
-              color: '#fff',
-              outline: 'none',
-              fontSize: '14px'
-            }
-          }),
-          React.createElement('button', {
-            type: 'submit',
-            style: {
-              padding: '8px 16px',
-              borderRadius: '20px',
-              border: 'none',
-              background: '#FF6B9D',
-              color: '#fff',
-              cursor: 'pointer',
-              fontWeight: 'bold'
-            }
-          }, 'Send')
-        ])
-      ])
-    ]),
-
-    // Bottom bar (mobile friendly - optional)
-    React.createElement('div', {
-      style: {
-        padding: '8px 20px',
-        background: '#111',
-        borderTop: '1px solid #222',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        fontSize: '12px',
-        color: '#888'
-      }
-    }, [
-      React.createElement('span', { key: 'room' }, `Room: ${room.title}`),
-      React.createElement('span', { key: 'actions' }, [
-        React.createElement('button', {
-          key: 'report',
-          style: { background: 'transparent', border: 'none', color: '#888', cursor: 'pointer', marginLeft: '16px' }
-        }, 'Report'),
-        React.createElement('button', {
-          key: 'block',
-          style: { background: 'transparent', border: 'none', color: '#888', cursor: 'pointer', marginLeft: '16px' }
-        }, 'Block')
-      ])
-    ])
-  ]);
+        <aside style={{ width: 360, maxWidth: '40vw', background: '#151522', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: 16, borderBottom: '1px solid #29293a' }}><strong>{room.host?.display_name || room.host?.username}</strong><div style={{ color: '#888', fontSize: 13 }}>{room.category}</div></div>
+          <div ref={chatContainerRef} style={{ flex: 1, overflowY: 'auto', padding: 14 }}>
+            {chatMessages.map((m, i) => <div key={m.id || i} style={{ marginBottom: 10, color: m.system ? '#ffd166' : '#ddd' }}><strong>{m.user?.display_name || m.username || ''}</strong>{m.user?.display_name || m.username ? ': ' : ''}{m.message}</div>)}
+          </div>
+          <form onSubmit={sendMessage} style={{ display: 'flex', gap: 8, padding: 12, borderTop: '1px solid #29293a' }}>
+            <input value={messageInput} onChange={e => setMessageInput(e.target.value)} placeholder="Say something…" style={{ flex: 1, background: '#222235', border: 0, borderRadius: 10, color: '#fff', padding: '11px 12px' }} />
+            <button type="submit" style={{ background: '#FF6B9D', color: '#fff', border: 0, borderRadius: 10, padding: '0 16px' }}>Send</button>
+          </form>
+          <div style={{ padding: 12, borderTop: '1px solid #29293a', position: 'relative' }}>
+            <button onClick={() => setShowGiftPicker(v => !v)} style={{ width: '100%', padding: 12, border: 0, borderRadius: 10, background: '#ffb347', fontWeight: 700 }}>🎁 Send paid gift</button>
+            {showGiftPicker && <div style={{ position: 'absolute', bottom: 70, left: 12, right: 12, background: '#222235', border: '1px solid #444', borderRadius: 12, padding: 10, display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 8, maxHeight: 300, overflowY: 'auto' }}>
+              {giftCatalog.map(g => <button key={g.id} onClick={() => sendGift(g.id)} style={{ background: '#2c2c42', color: '#fff', border: 0, borderRadius: 10, padding: 10, cursor: 'pointer' }}><div>{g.image_url?.startsWith('http') ? '🎁' : (g.image_url || '🎁')}</div><strong>{g.name}</strong><div style={{ color: '#ffd166' }}>🪙 {g.coin_price}</div></button>)}
+            </div>}
+          </div>
+        </aside>
+      </div>
+    </div>
+  );
 }
