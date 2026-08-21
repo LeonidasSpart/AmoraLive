@@ -74,9 +74,9 @@ export default function Layout({ children }) {
   return React.createElement('div', {
     style: {
       minHeight: '100vh',
-      background: '#0f0f1a',
-      color: '#fff',
-      fontFamily: 'sans-serif',
+      background: 'var(--amora-bg)',
+      color: 'var(--amora-text)',
+      fontFamily: 'Inter, ui-sans-serif, system-ui, sans-serif',
       display: 'flex',
       flexDirection: 'column'
     }
@@ -86,21 +86,17 @@ export default function Layout({ children }) {
       key: 'header',
       style: {
         padding: '12px 24px',
-        borderBottom: '1px solid #222',
+        borderBottom: '1px solid var(--amora-border)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        background: '#1a1a2e',
+        background: 'rgba(21,16,43,.88)',
         position: 'sticky',
         top: 0,
         zIndex: 100
       }
     }, [
-      React.createElement(Link, {
-        key: 'logo',
-        href: '/discover',
-        style: { color: '#FF6B9D', fontSize: '24px', fontWeight: 'bold', textDecoration: 'none' }
-      }, 'AmoraLive'),
+      React.createElement(Link, { key: 'logo', href: '/discover', style: { display:'flex', alignItems:'center', textDecoration:'none' } }, React.createElement('img', { src:'/brand/amora-logo.png', alt:'Amora', style:{ width:'132px', height:'auto', display:'block' } })),
       React.createElement('nav', {
         key: 'nav',
         style: { display: 'flex', gap: '20px', alignItems: 'center' }
@@ -126,13 +122,13 @@ export default function Layout({ children }) {
         React.createElement(Link, {
           key: 'store',
           href: '/store',
-          style: { color: '#aaa', textDecoration: 'none', fontSize: '20px' }
+          style: { color: 'var(--amora-muted)', textDecoration: 'none', fontSize: '20px' }
         }, '🛍️'),
         React.createElement(Link, {
           key: 'notifications',
           href: '/notifications',
           style: {
-            color: '#aaa',
+            color: 'var(--amora-muted)',
             textDecoration: 'none',
             fontSize: '20px',
             position: 'relative',
@@ -146,8 +142,8 @@ export default function Layout({ children }) {
               position: 'absolute',
               top: '-6px',
               right: '-8px',
-              background: '#FF6B9D',
-              color: '#fff',
+              background: 'var(--amora-pink)',
+              color: 'var(--amora-text)',
               fontSize: '10px',
               padding: '2px 6px',
               borderRadius: '10px',
@@ -159,7 +155,7 @@ export default function Layout({ children }) {
           key: 'wallet',
           href: '/wallet',
           style: {
-            color: '#FFD700',
+            color: '#ffd66b',
             fontSize: '16px',
             textDecoration: 'none',
             display: 'flex',
@@ -174,11 +170,11 @@ export default function Layout({ children }) {
             width: '32px',
             height: '32px',
             borderRadius: '50%',
-            background: '#2a2a3e',
+            background: 'rgba(255,255,255,.05)',
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#fff',
+            color: 'var(--amora-text)',
             textDecoration: 'none',
             border: '2px solid #FF6B9D',
             fontSize: '14px'
@@ -188,7 +184,7 @@ export default function Layout({ children }) {
           key: 'admin',
           href: '/admin',
           style: {
-            color: '#FF6B9D',
+            color: 'var(--amora-pink-2)',
             textDecoration: 'none',
             fontSize: '14px',
             fontWeight: 'bold'
@@ -200,7 +196,7 @@ export default function Layout({ children }) {
           style: {
             background: 'transparent',
             border: 'none',
-            color: '#888',
+            color: '#8f89a2',
             cursor: 'pointer',
             fontSize: '14px'
           }
@@ -218,41 +214,41 @@ export default function Layout({ children }) {
     React.createElement('footer', {
       key: 'footer',
       style: {
-        borderTop: '1px solid #222',
+        borderTop: '1px solid var(--amora-border)',
         padding: '20px',
         textAlign: 'center',
-        color: '#666',
+        color: '#77718a',
         fontSize: '13px',
         display: 'flex',
         justifyContent: 'center',
         gap: '24px',
         flexWrap: 'wrap',
-        background: '#1a1a2e'
+        background: 'rgba(21,16,43,.88)'
       }
     }, [
       React.createElement(Link, {
         key: 'terms',
         href: '/legal/terms',
-        style: { color: '#666', textDecoration: 'none' }
+        style: { color: '#77718a', textDecoration: 'none' }
       }, 'Terms of Service'),
       React.createElement(Link, {
         key: 'privacy',
         href: '/legal/privacy',
-        style: { color: '#666', textDecoration: 'none' }
+        style: { color: '#77718a', textDecoration: 'none' }
       }, 'Privacy Policy'),
       React.createElement(Link, {
         key: 'guidelines',
         href: '/legal/guidelines',
-        style: { color: '#666', textDecoration: 'none' }
+        style: { color: '#77718a', textDecoration: 'none' }
       }, 'Community Guidelines'),
       React.createElement(Link, {
         key: 'cookies',
         href: '/legal/cookies',
-        style: { color: '#666', textDecoration: 'none' }
+        style: { color: '#77718a', textDecoration: 'none' }
       }, 'Cookie Policy'),
       React.createElement('span', {
         key: 'copyright',
-        style: { color: '#444' }
+        style: { color: '#55506a' }
       }, `© ${new Date().getFullYear()} AmoraLive. All rights reserved.`)
     ])
   ]);
