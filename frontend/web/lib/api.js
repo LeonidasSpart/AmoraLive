@@ -6,8 +6,15 @@
 // out and back in, even though a refreshToken was already being stored on
 // every login and just never used. This wraps fetch with that missing
 // refresh-and-retry step.
+//
+// Written as CommonJS (module.exports, no `export` keyword) because this
+// package.json declares "type": "commonjs" — under that setting webpack
+// parses plain .js files as CommonJS, and `export` syntax fails to parse.
+// Every page still imports this normally via `import { apiFetch } from
+// '../lib/api'` — that works fine against a CommonJS module through
+// webpack's standard ESM/CJS interop, so nothing else needed to change.
 
-export const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
+const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 
 let refreshInFlight = null;
 
@@ -65,7 +72,7 @@ async function refreshAccessToken() {
  * @param {RequestInit} options
  * @param {{ skipAuth?: boolean, skipRefresh?: boolean }} extra
  */
-export async function apiFetch(path, options = {}, extra = {}) {
+async function apiFetch(path, options = {}, extra = {}) {
   const url = path.startsWith('http') ? path : `${API}${path}`;
   const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
 
@@ -97,11 +104,11 @@ export async function apiFetch(path, options = {}, extra = {}) {
 }
 
 /** Convenience helper: apiFetch + parsed JSON + thrown Error on failure. */
-export async function apiJson(path, options = {}, extra = {}) {
+async function apiJson(path, options = {}, extra = {}) {
   const res = await apiFetch(path, options, extra);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
   return data;
 }
 
-export { getAccessToken, getRefreshToken, clearSession };
+module.exports = { API, apiFetch, apiJson, getAccessToken, getRefreshToken, clearSession };
