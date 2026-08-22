@@ -624,9 +624,20 @@ export default function LiveRoom() {
       <div style={s.chatOverlay}>
         <div ref={chatContainerRef} style={s.chatFeed}>
           {chatMessages.slice(-30).map((m, i) => (
-            <div key={m.id || i} style={{ ...s.chatLine, color: m.system ? '#ffd166' : '#fff' }}>
-              {!m.system && <strong>{m.user?.display_name || m.username || ''}<VerifiedBadge user={m.user} size={11} />: </strong>}
-              {m.message}
+            <div key={m.id || i} style={{ ...s.chatLine, color: m.system ? '#ffd166' : '#fff', display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+              {!m.system && (
+                <div style={s.chatAvatar}>
+                  {m.user?.profile_photo ? (
+                    <img src={m.user.profile_photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                  ) : (
+                    (m.user?.display_name || m.user?.username || m.username || '?')[0]?.toUpperCase()
+                  )}
+                </div>
+              )}
+              <span>
+                {!m.system && <strong>{m.user?.display_name || m.user?.username || m.username || ''}<VerifiedBadge user={m.user} size={11} />: </strong>}
+                {m.message}
+              </span>
             </div>
           ))}
         </div>
@@ -692,6 +703,7 @@ const s = {
   chatOverlay: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: '10px 12px 16px', background: 'linear-gradient(transparent, rgba(0,0,0,0.75) 60%)', zIndex: 2 },
   chatFeed: { maxHeight: 130, overflowY: 'auto', marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 4 },
   chatLine: { fontSize: 13, lineHeight: 1.3, textShadow: '0 1px 3px rgba(0,0,0,0.6)' },
+  chatAvatar: { width: 20, height: 20, minWidth: 20, borderRadius: '50%', background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, overflow: 'hidden', flexShrink: 0, marginTop: 1 },
   composer: { display: 'flex', gap: 8 },
   composerInput: { flex: 1, background: 'rgba(255,255,255,0.15)', border: 0, borderRadius: 20, color: '#fff', padding: '10px 14px', fontSize: 13 },
   sendBtn: { background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', color: '#fff', border: 0, borderRadius: 20, padding: '0 18px', fontWeight: 700, cursor: 'pointer' }
