@@ -1,4 +1,3 @@
-// pages/legal/terms.jsx
 import React, { useMemo, useState } from 'react';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
@@ -79,6 +78,7 @@ const BulletList = ({ items }) => (
 const Section = ({ id, number, title, children }) => (
   <section id={id} className="legal-section">
     <div className="section-number">{number}</div>
+
     <div className="section-content">
       <div className="section-label">LEGAL FRAMEWORK</div>
       <h2>{title}</h2>
@@ -117,6 +117,7 @@ export default function Terms() {
   return (
     <Layout>
       <div className="terms-page">
+
         <div className="ambient ambient-one" />
         <div className="ambient ambient-two" />
 
@@ -124,9 +125,11 @@ export default function Terms() {
 
           {/* HERO */}
           <header className="legal-hero">
+
             <div className="hero-grid" />
 
             <div className="hero-content">
+
               <div className="legal-badge">
                 <span className="badge-dot" />
                 AMORALIVE LEGAL
@@ -144,6 +147,7 @@ export default function Terms() {
               </p>
 
               <div className="hero-meta">
+
                 <div>
                   <span>VERSION</span>
                   <strong>2026.08</strong>
@@ -158,21 +162,35 @@ export default function Terms() {
                   <span>SCOPE</span>
                   <strong>International</strong>
                 </div>
+
               </div>
+
             </div>
 
+            {/* OFFICIAL AMORA LOGO */}
             <div className="hero-orb">
+
               <div className="orb-ring ring-one" />
               <div className="orb-ring ring-two" />
               <div className="orb-ring ring-three" />
-              <div className="orb-core">A</div>
+
+              <div className="orb-core">
+                <img
+                  src="/brand/amora-logo.png"
+                  alt="AmoraLive"
+                />
+              </div>
+
             </div>
+
           </header>
 
           {/* LEGAL STATUS */}
           <div className="status-grid">
+
             <div className="status-card">
               <div className="status-icon">EU</div>
+
               <div>
                 <strong>European Framework</strong>
                 <span>GDPR • DSA • Consumer Rights</span>
@@ -181,6 +199,7 @@ export default function Terms() {
 
             <div className="status-card">
               <div className="status-icon">CH</div>
+
               <div>
                 <strong>Swiss Framework</strong>
                 <span>FADP • Swiss mandatory law</span>
@@ -189,6 +208,7 @@ export default function Terms() {
 
             <div className="status-card">
               <div className="status-icon">18+</div>
+
               <div>
                 <strong>Adult Platform</strong>
                 <span>Age and safety controls apply</span>
@@ -197,18 +217,23 @@ export default function Terms() {
 
             <div className="status-card">
               <div className="status-icon">✓</div>
+
               <div>
                 <strong>Consumer Rights</strong>
                 <span>Mandatory rights preserved</span>
               </div>
             </div>
+
           </div>
 
           {/* NOTICE */}
           <div className="important-notice">
+
             <div className="notice-icon">!</div>
+
             <div>
               <strong>Important Legal Notice</strong>
+
               <p>
                 These Terms are designed for the international operation of
                 AmoraLive and take particular account of European and Swiss
@@ -217,12 +242,16 @@ export default function Terms() {
                 that cannot legally be waived.
               </p>
             </div>
+
           </div>
 
           <div className="legal-layout">
 
             {/* SIDEBAR */}
-            <aside className={`legal-sidebar ${menuOpen ? 'open' : ''}`}>
+            <aside
+              className={`legal-sidebar ${menuOpen ? 'open' : ''}`}
+            >
+
               <button
                 className="mobile-menu-button"
                 onClick={() => setMenuOpen(!menuOpen)}
@@ -232,22 +261,27 @@ export default function Terms() {
               </button>
 
               <div className="sidebar-inner">
+
                 <div className="sidebar-title">
                   <span>DOCUMENT</span>
                   <strong>Terms of Service</strong>
                 </div>
 
                 <div className="search-box">
+
                   <span>⌕</span>
+
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search terms..."
                     aria-label="Search Terms of Service"
                   />
+
                 </div>
 
                 <nav>
+
                   {filteredSections.map((section) => (
                     <button
                       key={section.id}
@@ -257,16 +291,27 @@ export default function Terms() {
                       {section.title}
                     </button>
                   ))}
+
                 </nav>
 
                 <div className="sidebar-links">
-                  <Link href="/legal/privacy">Privacy Policy</Link>
+
+                  <Link href="/legal/privacy">
+                    Privacy Policy
+                  </Link>
+
                   <Link href="/legal/community-guidelines">
                     Community Guidelines
                   </Link>
-                  <Link href="/legal/cookies">Cookie Policy</Link>
+
+                  <Link href="/legal/cookies">
+                    Cookie Policy
+                  </Link>
+
                 </div>
+
               </div>
+
             </aside>
 
             {/* DOCUMENT */}
@@ -307,12 +352,14 @@ export default function Terms() {
                   a younger age group.
                 </p>
 
-                <BulletList items={[
-                  'You must provide truthful registration information.',
-                  'You must not misrepresent your age.',
-                  'You must not assist a minor in bypassing AmoraLive age restrictions.',
-                  'You must comply with additional age requirements imposed by the law of your country.'
-                ]} />
+                <BulletList
+                  items={[
+                    'You must provide truthful registration information.',
+                    'You must not misrepresent your age.',
+                    'You must not assist a minor in bypassing AmoraLive age restrictions.',
+                    'You must comply with additional age requirements imposed by the law of your country.'
+                  ]}
+                />
               </Section>
 
               <Section
@@ -330,7 +377,11 @@ export default function Terms() {
                 <BulletList items={accountRules} />
               </Section>
 
-              <Section id="content" number="04" title="User Content">
+              <Section
+                id="content"
+                number="04"
+                title="User Content"
+              >
                 <p>
                   Users may upload, publish, transmit or otherwise make
                   available text, photographs, videos, audio, livestreams,
@@ -345,6 +396,7 @@ export default function Terms() {
 
                 <div className="quote-card">
                   <span className="quote-mark">"</span>
+
                   <p>
                     Your content remains yours. AmoraLive receives only the
                     permissions reasonably necessary to operate the service.
@@ -383,20 +435,26 @@ export default function Terms() {
                 </p>
               </Section>
 
-              <Section id="live" number="07" title="Live Streaming">
+              <Section
+                id="live"
+                number="07"
+                title="Live Streaming"
+              >
                 <p>
                   Livestream hosts are responsible for content and conduct
                   occurring during their broadcasts.
                 </p>
 
-                <BulletList items={[
-                  'Hosts must comply with these Terms and applicable law.',
-                  'Hosts must not intentionally facilitate prohibited content.',
-                  'Hosts must not use livestreams for fraud or illegal transactions.',
-                  'Hosts must respect intellectual-property rights.',
-                  'Hosts must not manipulate viewers through deceptive financial claims.',
-                  'Hosts may be subject to additional livestream safety rules.'
-                ]} />
+                <BulletList
+                  items={[
+                    'Hosts must comply with these Terms and applicable law.',
+                    'Hosts must not intentionally facilitate prohibited content.',
+                    'Hosts must not use livestreams for fraud or illegal transactions.',
+                    'Hosts must respect intellectual-property rights.',
+                    'Hosts must not manipulate viewers through deceptive financial claims.',
+                    'Hosts may be subject to additional livestream safety rules.'
+                  ]}
+                />
               </Section>
 
               <Section
@@ -417,20 +475,28 @@ export default function Terms() {
                 </p>
 
                 <div className="feature-grid">
+
                   <div>
                     <strong>Report</strong>
-                    <span>Flag potentially illegal or harmful content.</span>
+                    <span>
+                      Flag potentially illegal or harmful content.
+                    </span>
                   </div>
 
                   <div>
                     <strong>Review</strong>
-                    <span>Decisions may be reviewed under applicable rules.</span>
+                    <span>
+                      Decisions may be reviewed under applicable rules.
+                    </span>
                   </div>
 
                   <div>
                     <strong>Appeal</strong>
-                    <span>Eligible users may challenge moderation decisions.</span>
+                    <span>
+                      Eligible users may challenge moderation decisions.
+                    </span>
                   </div>
+
                 </div>
               </Section>
 
@@ -488,22 +554,29 @@ export default function Terms() {
                 </p>
 
                 <div className="warning-card">
-                  <strong>Digital items are not investments</strong>
+
+                  <strong>
+                    Digital items are not investments
+                  </strong>
+
                   <p>
                     Unless expressly stated otherwise, virtual coins and
                     digital gifts are platform functionality. They are not
                     physical property, deposits, securities, investments or
                     legal tender.
                   </p>
+
                 </div>
 
-                <BulletList items={[
-                  'Virtual coins have no cash value unless applicable law requires otherwise.',
-                  'Virtual items may not be sold or transferred outside AmoraLive unless expressly permitted.',
-                  'Users may not exploit technical errors to duplicate virtual currency.',
-                  'Fraudulent transactions may be cancelled or reversed where legally permitted.',
-                  'Prices and applicable taxes will be disclosed before purchase where required.'
-                ]} />
+                <BulletList
+                  items={[
+                    'Virtual coins have no cash value unless applicable law requires otherwise.',
+                    'Virtual items may not be sold or transferred outside AmoraLive unless expressly permitted.',
+                    'Users may not exploit technical errors to duplicate virtual currency.',
+                    'Fraudulent transactions may be cancelled or reversed where legally permitted.',
+                    'Prices and applicable taxes will be disclosed before purchase where required.'
+                  ]}
+                />
               </Section>
 
               <Section
@@ -545,14 +618,21 @@ export default function Terms() {
                 </p>
 
                 <div className="link-card">
+
                   <span>DATA PROTECTION</span>
+
                   <Link href="/legal/privacy">
                     Read the AmoraLive Privacy Policy →
                   </Link>
+
                 </div>
               </Section>
 
-              <Section id="gdpr" number="14" title="European GDPR">
+              <Section
+                id="gdpr"
+                number="14"
+                title="European GDPR"
+              >
                 <p>
                   Where the GDPR applies, AmoraLive will process personal data
                   in accordance with the GDPR and applicable national
@@ -597,25 +677,36 @@ export default function Terms() {
                 </p>
 
                 <div className="dsa-grid">
+
                   <div>
                     <strong>Notice & Action</strong>
-                    <span>Mechanisms for reporting potentially illegal content.</span>
+                    <span>
+                      Mechanisms for reporting potentially illegal content.
+                    </span>
                   </div>
 
                   <div>
                     <strong>Reasons</strong>
-                    <span>Appropriate explanations for certain moderation decisions.</span>
+                    <span>
+                      Appropriate explanations for certain moderation
+                      decisions.
+                    </span>
                   </div>
 
                   <div>
                     <strong>Complaints</strong>
-                    <span>Applicable internal complaint and appeal mechanisms.</span>
+                    <span>
+                      Applicable internal complaint and appeal mechanisms.
+                    </span>
                   </div>
 
                   <div>
                     <strong>Transparency</strong>
-                    <span>Required platform transparency information.</span>
+                    <span>
+                      Required platform transparency information.
+                    </span>
                   </div>
+
                 </div>
 
                 <p>
@@ -660,14 +751,16 @@ export default function Terms() {
                   platform metrics.
                 </p>
 
-                <BulletList items={[
-                  'No automated follower farms.',
-                  'No fake engagement services.',
-                  'No fraudulent gift transactions.',
-                  'No exploitation of payment or coin vulnerabilities.',
-                  'No attempts to bypass security controls.',
-                  'No malicious code or unauthorized access attempts.'
-                ]} />
+                <BulletList
+                  items={[
+                    'No automated follower farms.',
+                    'No fake engagement services.',
+                    'No fraudulent gift transactions.',
+                    'No exploitation of payment or coin vulnerabilities.',
+                    'No attempts to bypass security controls.',
+                    'No malicious code or unauthorized access attempts.'
+                  ]}
+                />
               </Section>
 
               <Section
@@ -786,8 +879,13 @@ export default function Terms() {
                 </p>
 
                 <div className="legal-protection">
+
                   <span>LEGAL PROTECTION</span>
-                  <strong>Mandatory statutory rights remain unaffected.</strong>
+
+                  <strong>
+                    Mandatory statutory rights remain unaffected.
+                  </strong>
+
                 </div>
               </Section>
 
@@ -826,8 +924,13 @@ export default function Terms() {
                 </p>
 
                 <div className="placeholder-card">
+
                   <span>REQUIRED BEFORE PUBLICATION</span>
-                  <strong>Insert verified legal entity + jurisdiction.</strong>
+
+                  <strong>
+                    Insert verified legal entity + jurisdiction.
+                  </strong>
+
                 </div>
               </Section>
 
@@ -859,11 +962,23 @@ export default function Terms() {
                 </p>
 
                 <div className="contact-card">
-                  <div className="contact-logo">A</div>
+
+                  {/* OFFICIAL AMORA LOGO */}
+                  <div className="contact-logo">
+                    <img
+                      src="/brand/amora-logo.png"
+                      alt="AmoraLive"
+                    />
+                  </div>
 
                   <div>
+
                     <span>AMORALIVE LEGAL DEPARTMENT</span>
-                    <strong>[INSERT LEGAL ENTITY]</strong>
+
+                    <strong>
+                      [INSERT LEGAL ENTITY]
+                    </strong>
+
                     <p>
                       Registered address: [INSERT REGISTERED ADDRESS]
                       <br />
@@ -873,17 +988,27 @@ export default function Terms() {
                       <br />
                       Support: [INSERT SUPPORT EMAIL]
                     </p>
+
                   </div>
+
                 </div>
               </Section>
 
               {/* FINAL */}
               <div className="final-card">
+
                 <div className="final-glow" />
 
-                <div className="final-symbol">A</div>
+                {/* OFFICIAL AMORA LOGO */}
+                <div className="final-symbol">
+                  <img
+                    src="/brand/amora-logo.png"
+                    alt="AmoraLive"
+                  />
+                </div>
 
                 <div>
+
                   <div className="section-label">
                     AMORALIVE PRINCIPLE
                   </div>
@@ -900,29 +1025,50 @@ export default function Terms() {
                     These Terms do not replace rights that users have under
                     mandatory national, European or international law.
                   </p>
+
                 </div>
+
               </div>
 
               <div className="document-footer">
+
                 <div>
                   <strong>AMORALIVE</strong>
-                  <span>Terms of Service • August 2026</span>
+                  <span>
+                    Terms of Service • August 2026
+                  </span>
                 </div>
 
                 <div className="footer-links">
-                  <Link href="/legal/privacy">Privacy</Link>
+
+                  <Link href="/legal/privacy">
+                    Privacy
+                  </Link>
+
                   <Link href="/legal/community-guidelines">
                     Community
                   </Link>
-                  <Link href="/legal/cookies">Cookies</Link>
-                  <Link href="/">Home</Link>
+
+                  <Link href="/legal/cookies">
+                    Cookies
+                  </Link>
+
+                  <Link href="/">
+                    Home
+                  </Link>
+
                 </div>
+
               </div>
+
             </article>
+
           </div>
+
         </div>
 
         <style jsx global>{`
+
           html {
             scroll-behavior: smooth;
           }
@@ -1045,7 +1191,12 @@ export default function Terms() {
           }
 
           .legal-hero h1 span {
-            background: linear-gradient(110deg, #ff4f9f, #ff85b9 45%, #a65cff);
+            background: linear-gradient(
+              110deg,
+              #ff4f9f,
+              #ff85b9 45%,
+              #a65cff
+            );
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -1121,6 +1272,7 @@ export default function Terms() {
             border-color: rgba(255,255,255,.18);
           }
 
+          /* OFFICIAL AMORA LOGO CORE */
           .orb-core {
             width: 100px;
             height: 100px;
@@ -1128,17 +1280,26 @@ export default function Terms() {
             transform: rotate(45deg);
             display: grid;
             place-items: center;
-            background: linear-gradient(135deg,#ff3f9d,#9b35ff);
+            background: linear-gradient(
+              135deg,
+              #ff3f9d,
+              #9b35ff
+            );
             box-shadow:
               0 0 50px rgba(255,63,157,.42),
               0 0 100px rgba(155,53,255,.22);
-            color: white;
-            font-size: 44px;
-            font-weight: 950;
+            overflow: hidden;
           }
 
-          .orb-core::first-letter {
+          .orb-core img {
+            width: 62px;
+            height: 62px;
+            object-fit: contain;
+            display: block;
             transform: rotate(-45deg);
+            filter: drop-shadow(
+              0 0 18px rgba(255,255,255,.18)
+            );
           }
 
           .status-grid {
@@ -1166,7 +1327,12 @@ export default function Terms() {
             display: grid;
             place-items: center;
             border-radius: 13px;
-            background: linear-gradient(135deg, rgba(255,63,157,.18), rgba(155,53,255,.18));
+            background:
+              linear-gradient(
+                135deg,
+                rgba(255,63,157,.18),
+                rgba(155,53,255,.18)
+              );
             border: 1px solid rgba(255,107,157,.18);
             color: #ff80b3;
             font-size: 11px;
@@ -1309,7 +1475,7 @@ export default function Terms() {
             background: transparent;
             border: 0;
             color: #777782;
-            padding: 7px 7px;
+            padding: 7px;
             border-radius: 9px;
             cursor: pointer;
             font-size: 10px;
@@ -1441,7 +1607,12 @@ export default function Terms() {
           .quote-card {
             position: relative;
             overflow: hidden;
-            background: linear-gradient(135deg, rgba(255,63,157,.08), rgba(155,53,255,.06));
+            background:
+              linear-gradient(
+                135deg,
+                rgba(255,63,157,.08),
+                rgba(155,53,255,.06)
+              );
             border: 1px solid rgba(255,107,157,.15);
           }
 
@@ -1513,7 +1684,12 @@ export default function Terms() {
           }
 
           .link-card {
-            background: linear-gradient(135deg, rgba(255,63,157,.09), rgba(155,53,255,.08));
+            background:
+              linear-gradient(
+                135deg,
+                rgba(255,63,157,.09),
+                rgba(155,53,255,.08)
+              );
             border: 1px solid rgba(255,107,157,.16);
           }
 
@@ -1562,12 +1738,18 @@ export default function Terms() {
             gap: 6px;
           }
 
+          /* CONTACT CARD */
           .contact-card {
             display: flex;
             gap: 15px;
             padding: 20px;
             border-radius: 18px;
-            background: linear-gradient(135deg, rgba(255,63,157,.08), rgba(155,53,255,.07));
+            background:
+              linear-gradient(
+                135deg,
+                rgba(255,63,157,.08),
+                rgba(155,53,255,.07)
+              );
             border: 1px solid rgba(255,107,157,.16);
           }
 
@@ -1579,11 +1761,23 @@ export default function Terms() {
             border-radius: 16px;
             display: grid;
             place-items: center;
-            color: white;
-            font-size: 24px;
-            font-weight: 950;
-            background: linear-gradient(135deg,#ff3f9d,#9b35ff);
-            box-shadow: 0 0 30px rgba(255,63,157,.22);
+            background:
+              linear-gradient(
+                135deg,
+                #ff3f9d,
+                #9b35ff
+              );
+            box-shadow:
+              0 0 30px rgba(255,63,157,.22);
+            overflow: hidden;
+          }
+
+          .contact-logo img,
+          .final-symbol img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+            display: block;
           }
 
           .contact-card span {
@@ -1608,6 +1802,7 @@ export default function Terms() {
             line-height: 1.7;
           }
 
+          /* FINAL CARD */
           .final-card {
             margin: 40px 0 20px;
             padding: 28px;
@@ -1690,6 +1885,7 @@ export default function Terms() {
           }
 
           @media (max-width: 1100px) {
+
             .hero-orb {
               right: -80px;
               opacity: .5;
@@ -1698,9 +1894,11 @@ export default function Terms() {
             .status-grid {
               grid-template-columns: repeat(2, 1fr);
             }
+
           }
 
           @media (max-width: 850px) {
+
             .legal-shell {
               padding: 16px 12px 60px;
             }
@@ -1745,6 +1943,11 @@ export default function Terms() {
               font-size: 30px;
             }
 
+            .orb-core img {
+              width: 43px;
+              height: 43px;
+            }
+
             .legal-layout {
               grid-template-columns: 1fr;
             }
@@ -1787,9 +1990,11 @@ export default function Terms() {
               border-radius: 20px;
               padding: 12px 18px;
             }
+
           }
 
           @media (max-width: 600px) {
+
             .legal-hero h1 {
               font-size: 48px;
               letter-spacing: -3px;
@@ -1834,8 +2039,11 @@ export default function Terms() {
             .contact-card {
               align-items: flex-start;
             }
+
           }
+
         `}</style>
+
       </div>
     </Layout>
   );
