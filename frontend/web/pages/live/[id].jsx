@@ -37,6 +37,9 @@ export default function LiveRoom() {
   const [showBattlePicker, setShowBattlePicker] = useState(false);
   const [challengeableRooms, setChallengeableRooms] = useState([]);
   const [giftAlert, setGiftAlert] = useState(null);
+  const [giftShowcase, setGiftShowcase] = useState(null);
+  const [walletBalance, setWalletBalance] = useState(0);
+  const [giftFilter, setGiftFilter] = useState('all');
 
   const chatContainerRef = useRef(null);
   const videoContainerRef = useRef(null);
@@ -163,6 +166,7 @@ export default function LiveRoom() {
         setGiftCatalog(gifts || []);
         setLoading(false);
         loadTopGifters(id);
+        apiFetch('/wallet/me').then((r) => (r.ok ? r.json() : null)).then((w) => { if (active && w) setWalletBalance(w.balance || 0); }).catch(() => {});
 
         if (!hostIsMe && data.host?.id) {
           apiFetch(`/users/${data.host.id}/follow-status`)
@@ -202,12 +206,15 @@ export default function LiveRoom() {
           if (!active) return;
           const name = tx.sender?.display_name || tx.sender?.username || 'Someone';
           const giftName = tx.gift?.name || 'a gift';
-          setChatMessages((prev) => [...prev, { id: `gift-${Date.now()}`, system: true, message: `🎁 ${name} sent ${giftName}!` }]);
+          const gift = tx.gift || {};
+          setChatMessages((prev) => [...prev, { id: `gift-${Date.now()}`, system: true, message: `${name} sent ${tx.quantity > 1 ? `${tx.quantity}× ` : ''}${giftName}` }]);
           setGiftCount((prev) => prev + (tx.quantity || 1));
-          setGiftAlert(`${name} sent ${tx.quantity > 1 ? `${tx.quantity}x ` : ''}${giftName}!`);
+          setGiftAlert(`${name} sent ${tx.quantity > 1 ? `${tx.quantity}× ` : ''}${giftName}!`);
+          setGiftShowcase({ ...gift, senderName: name, quantity: tx.quantity || 1 });
           spawnHeart();
           loadTopGifters(id);
           setTimeout(() => setGiftAlert(null), 3000);
+          setTimeout(() => setGiftShowcase(null), 5200);
         });
         socket.on('room-ended', () => {
           if (!active) return;
@@ -366,6 +373,11 @@ export default function LiveRoom() {
   };
 
   const sendGift = async (giftId) => {
+    const gift = giftCatalog.find((item) => item.id === giftId);
+    if (gift && walletBalance < gift.coin_price) {
+      setError(`You need ${gift.coin_price - walletBalance} more coins for ${gift.name}.`);
+      return;
+    }
     try {
       const res = await apiFetch(`/gifts/send`, {
         method: 'POST',
@@ -373,6 +385,7 @@ export default function LiveRoom() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Gift failed');
+      if (gift) setWalletBalance((value) => Math.max(0, value - gift.coin_price));
       setShowGiftPicker(false);
     } catch (e) {
       setError(e.message);
@@ -411,11 +424,24 @@ export default function LiveRoom() {
   if (loading) return <div style={s.centerPage}>Loading live room…</div>;
   if (!room) return <div style={s.centerPage}><div><p style={{ color: '#ff6b6b' }}>{error || 'Room not found'}</p><Link href="/discover" style={{ color: '#FF6B9D' }}>← Back</Link></div></div>;
 
+  const giftTabs = [
+    ['all', 'All'],
+    ['romantic', 'Romance'],
+    ['luxury', 'Luxury'],
+    ['cosmic', 'Cosmic'],
+    ['wild', 'Power']
+  ];
+  const visibleGifts = giftCatalog.filter((g) => giftFilter === 'all' || g.category === giftFilter);
+
   return (
     <div style={s.page}>
       <style>{`
         @keyframes floatUp { 0% { transform: translateY(0) scale(0.6); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-420px) scale(1.1); opacity: 0; } }
         @keyframes popIn { 0% { transform: scale(0.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes giftReveal { 0% { transform: translate(-50%,-50%) scale(.2) rotate(-12deg); opacity: 0; filter: blur(10px); } 18% { transform: translate(-50%,-50%) scale(1.12) rotate(3deg); opacity: 1; filter: blur(0); } 38% { transform: translate(-50%,-50%) scale(.96) rotate(0); } 70% { transform: translate(-50%,-50%) scale(1) rotate(0); } 100% { transform: translate(-50%,-58%) scale(.86) rotate(0); opacity: 0; } }
+        @keyframes giftHalo { 0%,100% { transform: scale(.65); opacity: .2; } 50% { transform: scale(1.35); opacity: .7; } }
+        @keyframes giftSpark { 0% { transform: scale(.3); opacity: 0; } 25% { opacity: 1; } 100% { transform: scale(1.6); opacity: 0; } }
+        @keyframes giftCardIn { from { transform: translateY(18px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
       `}</style>
 
       <div ref={videoContainerRef} style={battle ? s.videoTopHalf : s.video}>
@@ -454,6 +480,19 @@ export default function LiveRoom() {
         </div>
       )}
       {battleResult && <div style={s.battleResultBanner}>{battleResult}</div>}
+
+      {giftShowcase && (
+        <div style={s.giftShowcase} aria-live="polite">
+          <div style={s.giftHalo} />
+          <div style={s.giftSparks}>✦</div>
+          <div style={s.giftShowcaseCard}>
+            <div style={s.giftShowcaseEyebrow}>AMORA GIFT</div>
+            <img src={giftShowcase.image_url} alt={giftShowcase.name} style={s.giftShowcaseImage} />
+            <div style={s.giftShowcaseName}>{giftShowcase.name}</div>
+            <div style={s.giftShowcaseMeta}>{giftShowcase.senderName} · {giftShowcase.coin_price || 0} coins{giftShowcase.quantity > 1 ? ` · ×${giftShowcase.quantity}` : ''}</div>
+          </div>
+        </div>
+      )}
 
       <div style={s.topBar}>
         <Link href="/discover" style={s.closeBtn}>✕</Link>
@@ -498,7 +537,7 @@ export default function LiveRoom() {
           <div style={s.railCount}>{likeCount}</div>
         </button>
         <button onClick={() => setShowGiftPicker((v) => !v)} style={s.railBtn}>
-          <div style={s.railIcon}>🎁</div>
+          <div style={s.railIcon}><span style={s.gemIcon}>✦</span></div>
           <div style={s.railCount}>{giftCount}</div>
         </button>
         <button onClick={() => setShowLeaderboard((v) => !v)} style={s.railBtn}>
@@ -546,13 +585,30 @@ export default function LiveRoom() {
 
       {showGiftPicker && (
         <div style={s.giftPicker}>
-          {giftCatalog.map((g) => (
-            <button key={g.id} onClick={() => sendGift(g.id)} style={s.giftBtn}>
-              <div style={{ fontSize: 22 }}>{g.image_url?.startsWith('http') ? <img src={g.image_url} alt={g.name} style={{ width: 28, height: 28 }} /> : (g.image_url || '🎁')}</div>
-              <strong style={{ fontSize: 12 }}>{g.name}</strong>
-              <div style={{ color: '#ffd166', fontSize: 11 }}>🪙 {g.coin_price}</div>
-            </button>
-          ))}
+          <div style={s.giftPickerHeader}>
+            <div>
+              <div style={s.giftPickerTitle}>Gift Gallery</div>
+              <div style={s.giftPickerBalance}>Your balance · <strong>{walletBalance.toLocaleString()}</strong> coins</div>
+            </div>
+            <button onClick={() => setShowGiftPicker(false)} style={s.giftClose}>×</button>
+          </div>
+          <div style={s.giftTabs}>
+            {giftTabs.map(([key, label]) => (
+              <button key={key} onClick={() => setGiftFilter(key)} style={giftFilter === key ? s.giftTabActive : s.giftTab}>{label}</button>
+            ))}
+          </div>
+          <div style={s.giftGrid}>
+            {visibleGifts.map((g) => (
+              <button key={g.id} onClick={() => sendGift(g.id)} style={s.giftBtn} disabled={walletBalance < g.coin_price}>
+                <div style={{ ...s.giftImageWrap, opacity: walletBalance < g.coin_price ? .45 : 1 }}>
+                  <img src={g.image_url} alt={g.name} style={s.giftImage} />
+                </div>
+                <strong style={s.giftName}>{g.name}</strong>
+                <div style={s.giftPrice}>{g.coin_price.toLocaleString()} coins</div>
+                <div style={s.giftRarity}>{g.rarity}</div>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -627,17 +683,39 @@ const s = {
   followingBtn: { background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 12, padding: '4px 10px', fontSize: 11, cursor: 'pointer', marginLeft: 4 },
   viewerBadge: { background: 'rgba(0,0,0,0.4)', borderRadius: 14, padding: '6px 12px', fontSize: 12, fontWeight: 700, flexShrink: 0 },
   errorBanner: { position: 'absolute', top: 66, left: 12, right: 12, background: 'rgba(90,20,20,0.85)', color: '#f88', padding: '8px 12px', borderRadius: 8, fontSize: 13, zIndex: 4, textAlign: 'center' },
-  giftAlert: { position: 'absolute', top: 100, left: '50%', transform: 'translateX(-50%)', background: 'rgba(255,209,102,0.95)', color: '#3a2a00', padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 800, zIndex: 4, animation: 'popIn 0.25s ease-out', whiteSpace: 'nowrap' },
+  giftAlert: { position: 'absolute', top: 100, left: '50%', transform: 'translateX(-50%)', background: 'rgba(15,10,28,0.88)', border: '1px solid rgba(255,105,190,.5)', boxShadow: '0 8px 40px rgba(255,63,157,.22)', color: '#fff', padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 800, zIndex: 8, animation: 'popIn 0.25s ease-out', whiteSpace: 'nowrap' },
+  giftShowcase: { position: 'absolute', inset: 0, zIndex: 20, pointerEvents: 'none' },
+  giftHalo: { position: 'absolute', left: '50%', top: '45%', width: 260, height: 260, transform: 'translate(-50%,-50%)', borderRadius: '50%', background: 'radial-gradient(circle, rgba(255,85,180,.55), rgba(142,53,255,.25) 38%, transparent 70%)', animation: 'giftHalo 1.7s ease-in-out 2' },
+  giftSparks: { position: 'absolute', left: '50%', top: '45%', transform: 'translate(-50%,-50%)', color: '#fff', fontSize: 110, textShadow: '0 0 30px #ff4fa3, 0 0 70px #9b35ff', animation: 'giftSpark 1.8s ease-out 1' },
+  giftShowcaseCard: { position: 'absolute', left: '50%', top: '45%', width: 250, textAlign: 'center', animation: 'giftReveal 5.2s cubic-bezier(.16,.8,.2,1) forwards' },
+  giftShowcaseEyebrow: { fontSize: 10, letterSpacing: 3, fontWeight: 900, color: '#ffd166', marginBottom: 2 },
+  giftShowcaseImage: { width: 190, height: 190, objectFit: 'contain', filter: 'drop-shadow(0 0 26px rgba(255,84,181,.8))' },
+  giftShowcaseName: { fontSize: 25, fontWeight: 900, letterSpacing: '-.02em', textShadow: '0 3px 20px rgba(255,63,157,.65)' },
+  giftShowcaseMeta: { marginTop: 5, color: '#e8dff1', fontSize: 12 },
   heartLayer: { position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3 },
   heart: { position: 'absolute', bottom: 100, fontSize: 26, animation: 'floatUp 2.2s ease-out forwards' },
   rightRail: { position: 'absolute', right: 10, bottom: 150, display: 'flex', flexDirection: 'column', gap: 18, alignItems: 'center', zIndex: 3 },
   railBtn: { background: 'transparent', border: 0, color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, cursor: 'pointer' },
-  railIcon: { width: 46, height: 46, borderRadius: '50%', background: 'rgba(0,0,0,0.35)', display: 'grid', placeItems: 'center', fontSize: 22 },
+  railIcon: { width: 46, height: 46, borderRadius: '50%', background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,.12)', display: 'grid', placeItems: 'center', fontSize: 22 },
+  gemIcon: { display: 'grid', placeItems: 'center', width: 28, height: 28, borderRadius: 9, transform: 'rotate(45deg)', background: 'linear-gradient(135deg,#ff5ab0,#9b35ff)', color: '#fff', boxShadow: '0 0 18px rgba(255,70,170,.7)' },
   railCount: { fontSize: 11, fontWeight: 700, textShadow: '0 1px 3px rgba(0,0,0,0.8)' },
   leaderboardPanel: { position: 'absolute', right: 70, bottom: 150, width: 220, background: 'rgba(15,15,26,0.92)', border: '1px solid #333', borderRadius: 14, padding: 14, zIndex: 4 },
   leaderboardRow: { display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, padding: '4px 0' },
-  giftPicker: { position: 'absolute', left: 12, right: 70, bottom: 150, background: 'rgba(15,15,26,0.92)', border: '1px solid #333', borderRadius: 14, padding: 10, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, maxHeight: 240, overflowY: 'auto', zIndex: 4 },
-  giftBtn: { background: 'rgba(255,255,255,0.06)', color: '#fff', border: 0, borderRadius: 10, padding: 8, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 },
+  giftPicker: { position: 'absolute', left: 10, right: 64, bottom: 142, background: 'linear-gradient(180deg, rgba(18,10,38,.98), rgba(8,7,20,.98))', border: '1px solid rgba(255,105,190,.35)', boxShadow: '0 18px 60px rgba(0,0,0,.55), 0 0 40px rgba(155,53,255,.12)', borderRadius: 20, padding: 12, maxHeight: 360, overflowY: 'auto', zIndex: 10, animation: 'giftCardIn .22s ease-out' },
+  giftPickerHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
+  giftPickerTitle: { fontSize: 17, fontWeight: 900 },
+  giftPickerBalance: { color: '#9d94ab', fontSize: 10, marginTop: 2 },
+  giftClose: { width: 28, height: 28, borderRadius: '50%', border: '1px solid rgba(255,255,255,.15)', background: 'rgba(255,255,255,.06)', color: '#fff', fontSize: 20, cursor: 'pointer' },
+  giftTabs: { display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 9 },
+  giftTab: { border: '1px solid rgba(255,255,255,.12)', background: 'transparent', color: '#aaa', borderRadius: 999, padding: '6px 10px', fontSize: 10, cursor: 'pointer', whiteSpace: 'nowrap' },
+  giftTabActive: { border: '1px solid rgba(255,105,190,.65)', background: 'linear-gradient(135deg, rgba(255,63,157,.25), rgba(155,53,255,.25))', color: '#fff', borderRadius: 999, padding: '6px 10px', fontSize: 10, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' },
+  giftGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 7 },
+  giftBtn: { background: 'linear-gradient(180deg, rgba(255,255,255,.075), rgba(255,255,255,.025))', color: '#fff', border: '1px solid rgba(255,255,255,.08)', borderRadius: 13, padding: 7, cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, minWidth: 0 },
+  giftImageWrap: { width: 58, height: 58, display: 'grid', placeItems: 'center' },
+  giftImage: { width: 56, height: 56, objectFit: 'contain', filter: 'drop-shadow(0 4px 12px rgba(255,63,157,.3))' },
+  giftName: { fontSize: 9, lineHeight: 1.1, textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' },
+  giftPrice: { color: '#ffd166', fontSize: 8, fontWeight: 800 },
+  giftRarity: { color: '#9f91b1', fontSize: 7, textTransform: 'uppercase', letterSpacing: .6 },
   chatOverlay: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: '10px 12px 16px', background: 'linear-gradient(transparent, rgba(0,0,0,0.75) 60%)', zIndex: 2 },
   chatFeed: { maxHeight: 130, overflowY: 'auto', marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 4 },
   chatLine: { fontSize: 13, lineHeight: 1.3, textShadow: '0 1px 3px rgba(0,0,0,0.6)' },
