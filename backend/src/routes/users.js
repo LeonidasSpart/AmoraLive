@@ -71,6 +71,30 @@ module.exports = (prisma) => {
   // ---------- GET /users/:userId (public profile view) ----------
   // Was previously missing entirely — chat/[userId].jsx has always called
   // this to load the other person's name/photo, and it 404'd every time.
+  // ---------- GET /users/:userId/gifts (public gift wall) ----------
+  router.get('/:userId/gifts', auth, async (req, res) => {
+    try {
+      const limit = Math.min(Math.max(Number(req.query.limit) || 24, 1), 100);
+      const gifts = await prisma.giftTransaction.findMany({
+        where: { receiver_id: req.params.userId, status: 'completed' },
+        orderBy: { created_at: 'desc' },
+        take: limit,
+        include: {
+          gift: true,
+          sender: { select: { id: true, username: true, display_name: true, profile_photo: true } }
+        }
+      });
+      const totals = gifts.reduce((acc, tx) => {
+        acc.count += tx.quantity;
+        acc.coins += tx.coin_cost;
+        return acc;
+      }, { count: 0, coins: 0 });
+      res.json({ gifts, totals });
+    } catch (e) {
+      res.status(500).json({ error: 'Unable to load gift wall' });
+    }
+  });
+
   router.get('/:userId', auth, async (req, res) => {
     try {
       const user = await prisma.user.findUnique({
@@ -135,30 +159,44 @@ module.exports = (prisma) => {
     try {
       const user = await prisma.user.findUnique({
         where: { id: req.user.id },
-        select: { privacy_settings: true }
+        select: { notification_preferences: true }
       });
-      res.json(user?.privacy_settings || {});
+      res.json(user?.notification_preferences?._privacy || {
+        online_status_visible: true,
+        profile_visible: true,
+        show_age: true,
+        show_location: true
+      });
     } catch (e) {
       res.status(500).json({ error: e.message });
     }
   });
 
   // ---------- PATCH /users/me/privacy ----------
+  // Privacy settings live inside the existing JSON notification_preferences
+  // field so this feature works on the current production schema without a
+  // destructive database migration.
   router.patch('/me/privacy', auth, async (req, res) => {
     const { online_status_visible, profile_visible, show_age, show_location } = req.body;
     try {
+      const current = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: { notification_preferences: true }
+      });
+      const preferences = current?.notification_preferences && typeof current.notification_preferences === 'object'
+        ? current.notification_preferences
+        : {};
+      const privacy_settings = {
+        online_status_visible: online_status_visible ?? true,
+        profile_visible: profile_visible ?? true,
+        show_age: show_age ?? true,
+        show_location: show_location ?? true
+      };
       const updated = await prisma.user.update({
         where: { id: req.user.id },
-        data: {
-          privacy_settings: {
-            online_status_visible: online_status_visible ?? true,
-            profile_visible: profile_visible ?? true,
-            show_age: show_age ?? true,
-            show_location: show_location ?? true
-          }
-        }
+        data: { notification_preferences: { ...preferences, _privacy: privacy_settings } }
       });
-      res.json({ success: true, privacy_settings: updated.privacy_settings });
+      res.json({ success: true, privacy_settings: updated.notification_preferences?._privacy });
     } catch (e) {
       res.status(500).json({ error: e.message });
     }

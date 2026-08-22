@@ -7,14 +7,16 @@ module.exports = (prisma, io) => {
   router.get('/catalog', async (req, res) => {
     try {
       const now = new Date();
-      const gifts = await prisma.giftCatalog.findMany({
-        where: {
-          is_active: true,
-          OR: [{ available_from: null }, { available_from: { lte: now } }],
-          AND: [{ OR: [{ available_to: null }, { available_to: { gte: now } }] }]
-        },
-        orderBy: { coin_price: 'asc' }
-      });
+      const category = String(req.query.category || '').trim();
+      const rarity = String(req.query.rarity || '').trim();
+      const where = {
+        is_active: true,
+        OR: [{ available_from: null }, { available_from: { lte: now } }],
+        AND: [{ OR: [{ available_to: null }, { available_to: { gte: now } }] }]
+      };
+      if (category) where.category = category;
+      if (rarity) where.rarity = rarity;
+      const gifts = await prisma.giftCatalog.findMany({ where, orderBy: { coin_price: 'asc' } });
       res.json(gifts);
     } catch (e) {
       res.status(500).json({ error: 'Unable to load gifts' });
