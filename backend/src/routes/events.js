@@ -45,7 +45,7 @@ module.exports = (prisma, io) => {
       where: { event_id: req.params.eventId },
       orderBy: { total_gifts_sent: 'desc' },
       take: 100,
-      include: { user: { select: { username: true, display_name: true, profile_photo: true } } }
+      include: { user: { select: { username: true, display_name: true, profile_photo: true, is_verified: true, membership_tier: true } } }
     });
 
     // Per-team totals, so the UI can show an overall score bar, not just an
