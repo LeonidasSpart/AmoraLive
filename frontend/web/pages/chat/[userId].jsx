@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { apiFetch } from '../../lib/api';
 
 export default function ChatRoom() {
   const router = useRouter();
@@ -18,24 +19,19 @@ export default function ChatRoom() {
 
   // Fetch messages
   const fetchMessages = async () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
+    if (!localStorage.getItem('accessToken')) {
       router.push('/login');
       return;
     }
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`https://api.amoramatch.one/messages/${userId}?limit=50`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch(`/messages/${userId}?limit=50`);
       if (!res.ok) throw new Error('Failed to load messages');
       const data = await res.json();
       setMessages(data || []);
       // Also fetch user info
-      const userRes = await fetch(`https://api.amoramatch.one/users/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const userRes = await apiFetch(`/users/${userId}`);
       if (userRes.ok) {
         const userData = await userRes.json();
         setOtherUser(userData);
