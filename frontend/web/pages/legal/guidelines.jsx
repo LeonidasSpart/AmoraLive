@@ -4,6 +4,8 @@ import React, { useMemo, useState } from 'react';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
 
+const AMORA_LOGO = '/images/amora-logo.png';
+
 const sections = [
   { id: 'welcome', number: '01', title: 'Our Community' },
   { id: 'principles', number: '02', title: 'Our Core Principles' },
@@ -119,7 +121,6 @@ export default function Guidelines() {
 
   return (
     <Layout>
-
       <div className="guidelines-page">
 
         <div className="guidelines-orb orb-one" />
@@ -127,7 +128,9 @@ export default function Guidelines() {
 
         <div className="guidelines-shell">
 
-          {/* HERO */}
+          {/* =========================================================
+              HERO
+          ========================================================= */}
 
           <header className="guidelines-hero">
 
@@ -157,7 +160,7 @@ export default function Guidelines() {
 
                 <div>
                   <span>VERSION</span>
-                  <strong>2026.08</strong>
+                  <strong>V1.0.1</strong>
                 </div>
 
                 <div>
@@ -174,20 +177,28 @@ export default function Guidelines() {
 
             </div>
 
+            {/* OFFICIAL AMORA LOGO */}
+
             <div className="hero-symbol">
 
               <div className="symbol-ring ring-one" />
               <div className="symbol-ring ring-two" />
 
               <div className="symbol-core">
-                <span>A</span>
+                <img
+                  src={AMORA_LOGO}
+                  alt="AmoraLive official logo"
+                  className="hero-amora-logo"
+                />
               </div>
 
             </div>
 
           </header>
 
-          {/* PRINCIPLE CARDS */}
+          {/* =========================================================
+              PRINCIPLE CARDS
+          ========================================================= */}
 
           <div className="principle-grid">
 
@@ -217,7 +228,9 @@ export default function Guidelines() {
 
           </div>
 
-          {/* SAFETY NOTICE */}
+          {/* =========================================================
+              SAFETY NOTICE
+          ========================================================= */}
 
           <div className="safety-banner">
 
@@ -241,7 +254,9 @@ export default function Guidelines() {
 
           <div className="guidelines-layout">
 
-            {/* SIDEBAR */}
+            {/* =======================================================
+                SIDEBAR
+            ======================================================= */}
 
             <aside
               className={`guidelines-sidebar ${
@@ -252,6 +267,8 @@ export default function Guidelines() {
               <button
                 className="mobile-menu-button"
                 onClick={() => setMenuOpen(!menuOpen)}
+                aria-expanded={menuOpen}
+                aria-label="Toggle community navigation"
               >
                 <span>☰</span>
                 Community Navigation
@@ -311,7 +328,9 @@ export default function Guidelines() {
 
             </aside>
 
-            {/* DOCUMENT */}
+            {/* =======================================================
+                DOCUMENT
+            ======================================================= */}
 
             <article className="guidelines-document">
 
@@ -336,14 +355,12 @@ export default function Guidelines() {
                 </p>
 
                 <div className="quote-card">
-
                   <span>"</span>
 
                   <p>
                     Freedom to express yourself comes with responsibility for
                     the impact your behaviour has on other people.
                   </p>
-
                 </div>
 
               </Section>
@@ -542,9 +559,7 @@ export default function Guidelines() {
                     'No trafficking or exploitation of minors.',
                     'No encouragement of dangerous contact between adults and minors.'
                   ]}
-                >
-
-                </BulletList>
+                />
 
                 <p>
                   Severe violations may result in immediate permanent
@@ -1246,12 +1261,20 @@ export default function Guidelines() {
 
               </Section>
 
-              {/* FINAL */}
+              {/* =======================================================
+                  FINAL AMORA BRAND CARD
+              ======================================================= */}
 
               <div className="final-card">
 
-                <div className="final-symbol">
-                  A
+                <div className="final-logo-wrapper">
+
+                  <img
+                    src={AMORA_LOGO}
+                    alt="AmoraLive official logo"
+                    className="final-amora-logo"
+                  />
+
                 </div>
 
                 <div>
@@ -1273,14 +1296,16 @@ export default function Guidelines() {
 
               </div>
 
-              {/* FOOTER */}
+              {/* =======================================================
+                  FOOTER
+              ======================================================= */}
 
               <div className="document-footer">
 
                 <div>
                   <strong>AMORALIVE</strong>
                   <span>
-                    Community Guidelines • August 2026
+                    Community Guidelines • V1.0.1 • August 2026
                   </span>
                 </div>
 
@@ -1536,18 +1561,19 @@ export default function Guidelines() {
               );
             box-shadow:
               0 0 80px rgba(255,63,157,.28);
+            overflow: hidden;
           }
 
-          .symbol-core span {
-            width: 140px;
-            height: 140px;
-            display: grid;
-            place-items: center;
-            border-radius: 50%;
-            background: #090910;
-            color: #fff;
-            font-size: 50px;
-            font-weight: 950;
+          /* OFFICIAL AMORA LOGO */
+
+          .hero-amora-logo {
+            width: 130px;
+            height: 130px;
+            object-fit: contain;
+            display: block;
+            filter:
+              drop-shadow(0 0 20px rgba(255,255,255,.18))
+              drop-shadow(0 0 30px rgba(255,63,157,.22));
           }
 
           .principle-grid {
@@ -1982,6 +2008,10 @@ export default function Guidelines() {
             line-height: 1.7;
           }
 
+          /* =========================================================
+             FINAL AMORA LOGO CARD
+          ========================================================= */
+
           .final-card {
             display: flex;
             align-items: center;
@@ -2000,18 +2030,32 @@ export default function Guidelines() {
             border: 1px solid rgba(255,107,157,.2);
           }
 
-          .final-symbol {
-            width: 54px;
-            min-width: 54px;
-            height: 54px;
+          .final-logo-wrapper {
+            width: 70px;
+            min-width: 70px;
+            height: 70px;
             display: grid;
             place-items: center;
-            border-radius: 16px;
-            background: linear-gradient(135deg,#ff3f9d,#9b35ff);
-            color: #fff;
-            font-size: 24px;
-            font-weight: 950;
-            box-shadow: 0 0 30px rgba(255,63,157,.22);
+            border-radius: 20px;
+            background:
+              linear-gradient(
+                135deg,
+                rgba(255,63,157,.20),
+                rgba(155,53,255,.18)
+              );
+            border: 1px solid rgba(255,107,157,.22);
+            box-shadow:
+              0 0 35px rgba(255,63,157,.16);
+          }
+
+          .final-amora-logo {
+            width: 56px;
+            height: 56px;
+            object-fit: contain;
+            display: block;
+            filter:
+              drop-shadow(0 0 12px rgba(255,255,255,.16))
+              drop-shadow(0 0 20px rgba(255,63,157,.20));
           }
 
           .final-card h2 {
@@ -2118,10 +2162,9 @@ export default function Guidelines() {
               height: 110px;
             }
 
-            .symbol-core span {
-              width: 88px;
-              height: 88px;
-              font-size: 32px;
+            .hero-amora-logo {
+              width: 82px;
+              height: 82px;
             }
 
             .guidelines-layout {
@@ -2179,6 +2222,10 @@ export default function Guidelines() {
               font-size: 13px;
             }
 
+            .hero-meta {
+              gap: 20px;
+            }
+
             .principle-grid {
               grid-template-columns: 1fr;
             }
@@ -2208,7 +2255,6 @@ export default function Guidelines() {
         `}</style>
 
       </div>
-
     </Layout>
   );
 }
