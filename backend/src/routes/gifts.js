@@ -89,7 +89,7 @@ module.exports = (prisma, io) => {
             status: 'completed',
             tx_id: key
           },
-          include: { gift: true, sender: { select: { id: true, username: true, display_name: true } }, receiver: { select: { id: true, username: true, display_name: true } } }
+          include: { gift: true, sender: { select: { id: true, username: true, display_name: true, is_verified: true, membership_tier: true } }, receiver: { select: { id: true, username: true, display_name: true, is_verified: true, membership_tier: true } } }
         });
 
         if (room) {
@@ -165,7 +165,7 @@ module.exports = (prisma, io) => {
           where: { event_id: activeEventId },
           orderBy: { total_gifts_sent: 'desc' },
           take: 100,
-          include: { user: { select: { username: true, display_name: true, profile_photo: true } } }
+          include: { user: { select: { username: true, display_name: true, profile_photo: true, is_verified: true, membership_tier: true } } }
         }).then(scores => {
           const teamTotals = {};
           for (const s of scores) {
