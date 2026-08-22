@@ -24,11 +24,11 @@ module.exports = (prisma) => {
     dateOfBirth: z.string().transform(d => new Date(d))
   });
 
-  const mailer = process.env.SMTP_HOST ? nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT || 587),
-    secure: String(process.env.SMTP_SECURE || '').toLowerCase() === 'true',
-    auth: process.env.SMTP_USER ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASSWORD } : undefined
+  const mailer = process.env.EMAIL_HOST ? nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: Number(process.env.EMAIL_PORT || 587),
+    secure: String(process.env.EMAIL_SECURE || '').toLowerCase() === 'true',
+    auth: process.env.EMAIL_USER ? { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS } : undefined
   }) : null;
 
   async function sendVerificationEmail(user) {
@@ -36,7 +36,7 @@ module.exports = (prisma) => {
     const token = jwt.sign({ id: user.id, purpose: 'email_verification' }, process.env.JWT_SECRET, { expiresIn: '24h' });
     const verifyUrl = `${appUrl()}/auth/verify-email?token=${encodeURIComponent(token)}`;
     await mailer.sendMail({
-      from: process.env.EMAIL_FROM || process.env.SMTP_USER,
+      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
       to: user.email,
       subject: 'Verify your AmoraLive account',
       text: `Verify your AmoraLive account: ${verifyUrl}`,

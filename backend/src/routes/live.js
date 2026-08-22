@@ -373,5 +373,30 @@ module.exports = (prisma, io) => {
     }
   });
 
+  // ---------- GET /live/:id/top-gifters ----------
+  // Powers the in-room leaderboard panel: who has sent the most this
+  // stream, distinct from the global team-battle event leaderboard.
+  router.get('/:id/top-gifters', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const totals = await prisma.giftTransaction.groupBy({
+        by: ['sender_id'],
+        where: { room_id: id, status: 'completed' },
+        _sum: { coin_cost: true },
+        orderBy: { _sum: { coin_cost: 'desc' } },
+        take: 10
+      });
+      const senders = await prisma.user.findMany({
+        where: { id: { in: totals.map((t) => t.sender_id) } },
+        select: { id: true, username: true, display_name: true, profile_photo: true }
+      });
+      const byId = Object.fromEntries(senders.map((u) => [u.id, u]));
+      res.json(totals.map((t) => ({ user: byId[t.sender_id], totalCoins: t._sum.coin_cost || 0 })));
+    } catch (e) {
+      console.error('Error fetching top gifters:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   return router;
 };

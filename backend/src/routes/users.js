@@ -236,6 +236,58 @@ module.exports = (prisma) => {
     }
   });
 
+  // Follow/unfollow was previously entirely missing — /users/me/followers,
+  // /users/me/following, and the Discover ?following=true filter all
+  // existed and worked, but there was no way to ever actually follow
+  // someone in the first place.
+  router.post('/:userId/follow', auth, async (req, res) => {
+    const { userId } = req.params;
+    if (userId === req.user.id) return res.status(400).json({ error: 'You cannot follow yourself.' });
+    try {
+      const target = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, is_active: true } });
+      if (!target || !target.is_active) return res.status(404).json({ error: 'User not found' });
+
+      await prisma.follow.upsert({
+        where: { follower_id_following_id: { follower_id: req.user.id, following_id: userId } },
+        update: {},
+        create: { follower_id: req.user.id, following_id: userId }
+      });
+
+      await prisma.notification.create({
+        data: { user_id: userId, type: 'new_follower', payload: { followerId: req.user.id } }
+      }).catch(err => console.error('Failed to create follow notification:', err.message));
+
+      const count = await prisma.follow.count({ where: { following_id: userId } });
+      res.json({ following: true, followerCount: count });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  router.post('/:userId/unfollow', auth, async (req, res) => {
+    const { userId } = req.params;
+    try {
+      await prisma.follow.deleteMany({ where: { follower_id: req.user.id, following_id: userId } });
+      const count = await prisma.follow.count({ where: { following_id: userId } });
+      res.json({ following: false, followerCount: count });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  router.get('/:userId/follow-status', auth, async (req, res) => {
+    const { userId } = req.params;
+    try {
+      const [isFollowing, followerCount] = await Promise.all([
+        prisma.follow.findUnique({ where: { follower_id_following_id: { follower_id: req.user.id, following_id: userId } } }),
+        prisma.follow.count({ where: { following_id: userId } })
+      ]);
+      res.json({ following: Boolean(isFollowing), followerCount });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ---------- GET /users/me/blocks ----------
   router.get('/me/blocks', auth, async (req, res) => {
     try {
@@ -284,19 +336,19 @@ module.exports = (prisma) => {
       if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
-      if (!process.env.S3_BUCKET || !process.env.S3_REGION || !process.env.S3_ACCESS_KEY_ID || !process.env.S3_SECRET_ACCESS_KEY || !process.env.S3_PUBLIC_BASE_URL) {
+      if (!process.env.AWS_S3_BUCKET || !process.env.AWS_REGION || !process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_S3_BUCKET_URL) {
         return res.status(503).json({ error: 'Media storage is not configured' });
       }
       const s3 = new S3Client({
-        region: process.env.S3_REGION,
-        endpoint: process.env.S3_ENDPOINT || undefined,
-        forcePathStyle: String(process.env.S3_FORCE_PATH_STYLE || '').toLowerCase() === 'true',
-        credentials: { accessKeyId: process.env.S3_ACCESS_KEY_ID, secretAccessKey: process.env.S3_SECRET_ACCESS_KEY }
+        region: process.env.AWS_REGION,
+        endpoint: process.env.AWS_S3_ENDPOINT || undefined,
+        forcePathStyle: String(process.env.AWS_S3_FORCE_PATH_STYLE || '').toLowerCase() === 'true',
+        credentials: { accessKeyId: process.env.AWS_ACCESS_KEY_ID, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY }
       });
       const ext = path.extname(req.file.originalname).toLowerCase() || '.jpg';
       const key = `users/${req.user.id}/profile/${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
-      await s3.send(new PutObjectCommand({ Bucket: process.env.S3_BUCKET, Key: key, Body: req.file.buffer, ContentType: req.file.mimetype, CacheControl: 'public, max-age=31536000, immutable' }));
-      const base = process.env.S3_PUBLIC_BASE_URL.replace(/\/$/, '');
+      await s3.send(new PutObjectCommand({ Bucket: process.env.AWS_S3_BUCKET, Key: key, Body: req.file.buffer, ContentType: req.file.mimetype, CacheControl: 'public, max-age=31536000, immutable' }));
+      const base = process.env.AWS_S3_BUCKET_URL.replace(/\/$/, '');
       const url = `${base}/${key}`;
       await prisma.user.update({ where: { id: req.user.id }, data: { profile_photo: url } });
       res.json({ url });

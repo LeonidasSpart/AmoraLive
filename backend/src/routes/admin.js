@@ -2,7 +2,7 @@
 const auth = require('../middleware/auth');
 const adminMiddleware = require('../middleware/admin');
 
-module.exports = (prisma) => {
+module.exports = (prisma, io) => {
   const router = require('express').Router();
   const adminCheck = adminMiddleware(prisma);
 
@@ -125,6 +125,10 @@ module.exports = (prisma) => {
         where: { id: roomId },
         data: { status: 'ended', end_time: new Date() }
       });
+      // Without this, anyone currently watching (or the host's own camera
+      // connection) never finds out the room was force-ended by an admin —
+      // it would just silently drop off the next time Discover refetches.
+      io.to(`live-${roomId}`).emit('room-ended', { roomId });
       res.json({ success: true });
     } catch (e) {
       res.status(400).json({ error: e.message });

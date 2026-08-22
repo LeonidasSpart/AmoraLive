@@ -21,6 +21,13 @@ module.exports = (prisma, io) => {
     }
   });
 
+  // Platform take rate is 20% for ordinary gifting, but during a live
+  // team-battle event gifts specifically fund that battle's monetization —
+  // per spec, 65% to the streamer/receiver and 35% to Amora while a battle
+  // is active, regardless of whether the sender/receiver have joined a team.
+  const NORMAL_RECEIVER_SHARE = 0.80;
+  const BATTLE_RECEIVER_SHARE = 0.65;
+
   router.post('/send', auth, async (req, res) => {
     const { giftId, receiverId, roomId, quantity = 1, idempotencyKey } = req.body;
     const qty = Number(quantity);
@@ -49,6 +56,12 @@ module.exports = (prisma, io) => {
         }
         if (!receiver || receiver.id === req.user.id) throw Object.assign(new Error('Invalid receiver'), { statusCode: 400 });
 
+        // Looked up before the wallet math below, since it decides the split.
+        const activeEvent = await tx.event.findFirst({
+          where: { is_active: true, starts_at: { lte: new Date() }, ends_at: { gte: new Date() } }
+        });
+        const receiverSharePct = activeEvent ? BATTLE_RECEIVER_SHARE : NORMAL_RECEIVER_SHARE;
+
         const totalCost = gift.coin_price * qty;
         const senderWallet = await tx.wallet.upsert({ where: { user_id: req.user.id }, create: { user_id: req.user.id }, update: {} });
         const debit = await tx.wallet.updateMany({
@@ -58,7 +71,7 @@ module.exports = (prisma, io) => {
         if (debit.count !== 1) throw Object.assign(new Error('Insufficient coin balance'), { statusCode: 402 });
         const updatedSender = await tx.wallet.findUnique({ where: { user_id: req.user.id } });
 
-        const receiverShare = Math.floor(totalCost * 0.8);
+        const receiverShare = Math.floor(totalCost * receiverSharePct);
         const receiverWallet = await tx.wallet.upsert({ where: { user_id: receiver.id }, create: { user_id: receiver.id }, update: {} });
         const updatedReceiver = await tx.wallet.update({
           where: { user_id: receiver.id },
@@ -73,7 +86,7 @@ module.exports = (prisma, io) => {
             gift_id: gift.id,
             quantity: qty,
             coin_cost: totalCost,
-            platform_share: 0.20,
+            platform_share: 1 - receiverSharePct,
             status: 'completed',
             tx_id: key
           },
@@ -88,9 +101,6 @@ module.exports = (prisma, io) => {
         // your team's score — same mechanic as the leaderboard/event system
         // already exposed via /events/*. Score only counts if the sender
         // has actually joined a team for the active event.
-        const activeEvent = await tx.event.findFirst({
-          where: { is_active: true, starts_at: { lte: new Date() }, ends_at: { gte: new Date() } }
-        });
         if (activeEvent) {
           const senderScore = await tx.eventScore.findUnique({
             where: { user_id_event_id: { user_id: req.user.id, event_id: activeEvent.id } }
