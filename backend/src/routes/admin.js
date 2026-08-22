@@ -368,4 +368,98 @@ module.exports = (prisma, io) => {
       });
       res.json(updated);
     } catch (e) {
-      res.status(400).
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  // Soft delete: packages are commonly referenced by past Purchase rows, so
+  // a hard delete would fail on the foreign-key constraint (or silently
+  // orphan purchase history if it didn't). Deactivating keeps history intact
+  // and matches the same pattern already used for GiftCatalog/Cosmetic.
+  router.delete('/packages/:packageId', auth, adminCheck, async (req, res) => {
+    const { packageId } = req.params;
+    try {
+      const updated = await prisma.coinPackage.update({
+        where: { id: packageId },
+        data: { is_active: false }
+      });
+      res.json({ success: true, package: updated });
+    } catch (e) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  router.post('/packages/:packageId/reactivate', auth, adminCheck, async (req, res) => {
+    const { packageId } = req.params;
+    try {
+      const updated = await prisma.coinPackage.update({
+        where: { id: packageId },
+        data: { is_active: true }
+      });
+      res.json({ success: true, package: updated });
+    } catch (e) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  // ---------- Team-battle Events ----------
+  router.get('/events', auth, adminCheck, async (req, res) => {
+    try {
+      const events = await prisma.event.findMany({ orderBy: { starts_at: 'desc' }, take: 50 });
+      res.json(events);
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  router.post('/events', auth, adminCheck, async (req, res) => {
+    const { title, description, banner_url, starts_at, ends_at, event_type, teams } = req.body;
+    if (!title || !starts_at || !ends_at || !event_type) {
+      return res.status(400).json({ error: 'title, starts_at, ends_at, and event_type are required.' });
+    }
+    const teamList = Array.isArray(teams) ? teams.filter(Boolean) : [];
+    if (teamList.length < 2) {
+      return res.status(400).json({ error: 'Provide at least two teams for people to pick between.' });
+    }
+    try {
+      const event = await prisma.event.create({
+        data: {
+          title,
+          description: description || null,
+          banner_url: banner_url || null,
+          starts_at: new Date(starts_at),
+          ends_at: new Date(ends_at),
+          event_type,
+          teams: teamList
+        }
+      });
+      res.status(201).json(event);
+    } catch (e) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  router.post('/events/:eventId/end', auth, adminCheck, async (req, res) => {
+    try {
+      const event = await prisma.event.update({
+        where: { id: req.params.eventId },
+        data: { is_active: false, ends_at: new Date() }
+      });
+      res.json(event);
+    } catch (e) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  router.delete('/events/:eventId', auth, adminCheck, async (req, res) => {
+    try {
+      await prisma.eventScore.deleteMany({ where: { event_id: req.params.eventId } });
+      await prisma.event.delete({ where: { id: req.params.eventId } });
+      res.json({ success: true });
+    } catch (e) {
+      res.status(400).json({ error: e.message });
+    }
+  });
+
+  return router;
+};
