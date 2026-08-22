@@ -3,7 +3,12 @@ const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const bcrypt = require('bcrypt');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { UTApi } = require('uploadthing/server');
+
+// Media storage is UploadThing (not AWS S3) — one API token, no IAM
+// policies or permission boundaries to manage. UTApi reads
+// UPLOADTHING_TOKEN from the environment automatically.
+const utapi = process.env.UPLOADTHING_TOKEN ? new UTApi() : null;
 
 // Configure multer for memory storage
 const storage = multer.memoryStorage();
@@ -336,20 +341,23 @@ module.exports = (prisma) => {
       if (!req.file) {
         return res.status(400).json({ error: 'No file uploaded' });
       }
-      if (!process.env.AWS_S3_BUCKET || !process.env.AWS_REGION || !process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_S3_BUCKET_URL) {
+      if (!utapi) {
         return res.status(503).json({ error: 'Media storage is not configured' });
       }
-      const s3 = new S3Client({
-        region: process.env.AWS_REGION,
-        endpoint: process.env.AWS_S3_ENDPOINT || undefined,
-        forcePathStyle: String(process.env.AWS_S3_FORCE_PATH_STYLE || '').toLowerCase() === 'true',
-        credentials: { accessKeyId: process.env.AWS_ACCESS_KEY_ID, secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY }
-      });
       const ext = path.extname(req.file.originalname).toLowerCase() || '.jpg';
-      const key = `users/${req.user.id}/profile/${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
-      await s3.send(new PutObjectCommand({ Bucket: process.env.AWS_S3_BUCKET, Key: key, Body: req.file.buffer, ContentType: req.file.mimetype, CacheControl: 'public, max-age=31536000, immutable' }));
-      const base = process.env.AWS_S3_BUCKET_URL.replace(/\/$/, '');
-      const url = `${base}/${key}`;
+      const filename = `${req.user.id}-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
+      // Node 18+ has File/Blob globally (via undici) — no extra dependency
+      // needed to wrap the multer buffer for UploadThing's SDK.
+      const file = new File([req.file.buffer], filename, { type: req.file.mimetype });
+
+      const result = await utapi.uploadFiles(file);
+      if (result.error) {
+        throw new Error(result.error.message || 'Upload failed');
+      }
+      // ufsUrl is UploadThing's current CDN-backed URL field; older SDK
+      // versions only returned `url`, so fall back to it if present.
+      const url = result.data.ufsUrl || result.data.url;
+
       await prisma.user.update({ where: { id: req.user.id }, data: { profile_photo: url } });
       res.json({ url });
     } catch (e) {
