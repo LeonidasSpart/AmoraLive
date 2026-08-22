@@ -1,137 +1,307 @@
-import React, { useEffect, useMemo, useState } from 'react';
+// pages/discover.jsx
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Layout from '../components/Layout';
 
-const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
-
-const tabs = [
-  ['recommended', '✨', 'Recommended'],
-  ['trending', '🔥', 'Trending'],
-  ['new', '💎', 'New'],
-  ['following', '💗', 'Following'],
-];
-
-const categories = ['All', 'Chat', 'Music', 'Entertainment', 'Gaming', 'Lifestyle', 'Travel', 'Dating'];
-
-function initials(name = 'A') {
-  return name.trim().slice(0, 1).toUpperCase();
-}
-
 export default function Discover() {
   const [rooms, setRooms] = useState([]);
-  const [activeTab, setActiveTab] = useState('recommended');
-  const [category, setCategory] = useState('All');
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('recommended');
   const [error, setError] = useState('');
 
+  const tabs = [
+    { key: 'recommended', label: 'Recommended' },
+    { key: 'trending', label: 'Trending' },
+    { key: 'new', label: 'New' },
+    { key: 'following', label: 'Following' },
+    { key: 'categories', label: 'Categories' }
+  ];
+
+  const categories = ['Chat', 'Music', 'Entertainment', 'Gaming', 'Lifestyle', 'Travel', 'Q&A', 'Dating'];
+
   const fetchRooms = async () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-    if (!token) return;
-    setLoading(true); setError('');
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+      window.location.href = '/login';
+      return;
+    }
+    setLoading(true);
+    setError('');
     try {
-      let url = `${API}/live?limit=48`;
+      let url = 'https://api.amoramatch.one/live?limit=30';
       if (activeTab === 'trending') url += '&sort=viewer_count';
       if (activeTab === 'new') url += '&sort=newest';
       if (activeTab === 'following') url += '&following=true';
-      const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-      if (!res.ok) throw new Error('Unable to load live rooms.');
+      
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to fetch live rooms');
       const data = await res.json();
       setRooms(Array.isArray(data) ? data : data.rooms || []);
-    } catch (e) {
-      setRooms([]); setError(e.message || 'Something went wrong.');
-    } finally { setLoading(false); }
+    } catch (err) {
+      setError(err.message);
+      setRooms([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { fetchRooms(); }, [activeTab]);
+  useEffect(() => {
+    fetchRooms();
+  }, [activeTab]);
 
-  const visibleRooms = useMemo(() => {
-    if (category === 'All') return rooms;
-    return rooms.filter((room) => String(room.category || '').toLowerCase() === category.toLowerCase());
-  }, [rooms, category]);
+  const timeSince = (date) => {
+    const diff = Math.floor((Date.now() - new Date(date).getTime()) / 60000);
+    if (diff < 1) return 'Just now';
+    if (diff < 60) return `${diff}m ago`;
+    const hours = Math.floor(diff / 60);
+    if (hours < 24) return `${hours}h ago`;
+    return `${Math.floor(hours / 24)}d ago`;
+  };
 
-  return (
-    <Layout>
-      <div className="amora-discover">
-        <section className="amora-discover-hero">
-          <div>
-            <span className="amora-kicker">AMORALIVE • LIVE NOW</span>
-            <h1>Find your <span>spark.</span></h1>
-            <p>Meet creators, flirt, chat, match and discover your next favourite person — all in one beautiful place.</p>
-          </div>
-          <div className="amora-hero-pills">
-            <Link href="/go-live" className="amora-hot-action">🔴 Go Live</Link>
-            <Link href="/video-match" className="amora-soft-action">💘 Quick Match</Link>
-          </div>
-        </section>
+  return React.createElement(Layout, null,
+    React.createElement('div', null, [
+      // Tabs
+      React.createElement('nav', {
+        key: 'tabs',
+        style: {
+          display: 'flex',
+          gap: '8px',
+          overflowX: 'auto',
+          paddingBottom: '15px',
+          marginBottom: '20px',
+          borderBottom: '1px solid #1a1a2e'
+        }
+      }, tabs.map(tab =>
+        React.createElement('button', {
+          key: tab.key,
+          onClick: () => setActiveTab(tab.key),
+          style: {
+            padding: '8px 20px',
+            borderRadius: '20px',
+            border: 'none',
+            background: activeTab === tab.key ? '#FF6B9D' : 'transparent',
+            color: activeTab === tab.key ? '#fff' : '#888',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: activeTab === tab.key ? 'bold' : 'normal',
+            transition: 'all 0.2s',
+            whiteSpace: 'nowrap',
+            border: activeTab === tab.key ? 'none' : '1px solid #333'
+          }
+        }, tab.label)
+      )),
 
-        <div className="amora-discover-tabs">
-          {tabs.map(([key, icon, label]) => (
-            <button key={key} className={activeTab === key ? 'is-active' : ''} onClick={() => setActiveTab(key)}>
-              <span>{icon}</span>{label}
-            </button>
-          ))}
-        </div>
+      // Categories sub‑tabs
+      activeTab === 'categories' && React.createElement('div', {
+        key: 'category-grid',
+        style: {
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '12px',
+          marginBottom: '20px',
+          padding: '10px 0'
+        }
+      }, categories.map(cat =>
+        React.createElement('button', {
+          key: cat,
+          style: {
+            padding: '8px 20px',
+            borderRadius: '20px',
+            border: '1px solid #333',
+            background: '#1a1a2e',
+            color: '#fff',
+            cursor: 'pointer',
+            fontSize: '14px',
+            transition: '0.2s'
+          },
+          onMouseEnter: (e) => e.target.style.background = '#2a2a3e',
+          onMouseLeave: (e) => e.target.style.background = '#1a1a2e'
+        }, cat)
+      )),
 
-        <div className="amora-category-strip">
-          {categories.map((item) => (
-            <button key={item} className={category === item ? 'is-active' : ''} onClick={() => setCategory(item)}>{item}</button>
-          ))}
-        </div>
+      // Loading / Error / Grid
+      loading && React.createElement('div', {
+        key: 'loading',
+        style: { textAlign: 'center', padding: '60px 0', color: '#666' }
+      }, 'Loading live streams...'),
 
-        <section className="amora-section-heading">
-          <div>
-            <h2>{activeTab === 'trending' ? 'Trending tonight' : activeTab === 'new' ? 'Fresh faces' : 'Live for you'}</h2>
-            <p>{visibleRooms.length ? `${visibleRooms.length} live rooms available` : 'Your next connection could be one tap away.'}</p>
-          </div>
-          <button className="amora-refresh" onClick={fetchRooms}>↻ Refresh</button>
-        </section>
+      error && React.createElement('div', {
+        key: 'error',
+        style: { textAlign: 'center', padding: '40px 0', color: '#ff6b6b' }
+      }, [
+        React.createElement('p', { key: 'msg' }, `Error: ${error}`),
+        React.createElement('button', {
+          key: 'retry',
+          onClick: fetchRooms,
+          style: {
+            marginTop: '10px',
+            padding: '8px 24px',
+            borderRadius: '6px',
+            border: 'none',
+            background: '#FF6B9D',
+            color: '#fff',
+            cursor: 'pointer'
+          }
+        }, 'Retry')
+      ]),
 
-        {loading && <div className="amora-live-grid">{Array.from({ length: 8 }).map((_, i) => <div className="amora-skeleton-card" key={i} />)}</div>}
-
-        {!loading && error && (
-          <div className="amora-empty-card"><div className="amora-empty-icon">♡</div><h3>We hit a little pause</h3><p>{error}</p><button onClick={fetchRooms} className="amora-hot-action">Try again</button></div>
-        )}
-
-        {!loading && !error && visibleRooms.length === 0 && (
-          <div className="amora-empty-card"><div className="amora-empty-icon">✦</div><h3>No live rooms right now</h3><p>Be the first to light up Amora and start your own live room.</p><Link href="/go-live" className="amora-hot-action">Start your live</Link></div>
-        )}
-
-        {!loading && !error && visibleRooms.length > 0 && (
-          <div className="amora-live-grid">
-            {visibleRooms.map((room, index) => {
-              const host = room.host || {};
-              const name = host.display_name || host.username || 'Amora creator';
-              return (
-                <Link href={`/live/${room.id}`} className="amora-live-card" key={room.id}>
-                  <div className={`amora-live-media tone-${index % 6}`}>
-                    {room.thumbnail_url ? <img src={room.thumbnail_url} alt="" /> : <div className="amora-avatar-fallback">{initials(name)}</div>}
-                    <div className="amora-live-shade" />
-                    <div className="amora-live-topline"><span className="amora-live-badge">● LIVE</span><span className="amora-viewers">👁 {room.viewer_count || 0}</span></div>
-                    <span className="amora-video-orb">▶</span>
-                    <div className="amora-live-bottom">
-                      <div className="amora-host-line">
-                        <span className="amora-host-avatar">{host.profile_photo ? <img src={host.profile_photo} alt="" /> : initials(name)}</span>
-                        <span><strong>{name}</strong><small>● Online now</small></span>
-                      </div>
-                      <span className="amora-heart">♡</span>
-                    </div>
-                  </div>
-                  <div className="amora-live-info">
-                    <h3>{room.title || 'Come say hello 💕'}</h3>
-                    <span>#{room.category || 'General'}</span>
-                    <b>Join the room →</b>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
-
-        <section className="amora-discover-cta">
-          <div><span className="amora-kicker">YOUR MOMENT</span><h2>Ready to be the one everyone notices?</h2><p>Start a live room, collect gifts, grow your audience and make genuine connections.</p></div>
-          <Link href="/go-live" className="amora-hot-action">✨ Start Live</Link>
-        </section>
-      </div>
-    </Layout>
+      !loading && !error && React.createElement('div', {
+        key: 'grid',
+        style: {
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+          gap: '20px',
+          marginTop: '10px'
+        }
+      }, rooms.length === 0 ? [
+        React.createElement('div', {
+          key: 'empty',
+          style: {
+            gridColumn: '1 / -1',
+            textAlign: 'center',
+            padding: '60px 0',
+            color: '#666'
+          }
+        }, [
+          React.createElement('p', { key: 'msg', style: { fontSize: '18px' } }, 'No live streams right now'),
+          React.createElement('p', { key: 'sub', style: { fontSize: '14px' } }, 'Check back later or start your own!')
+        ])
+      ] : rooms.map(room =>
+        React.createElement(Link, {
+          key: room.id,
+          href: `/live/${room.id}`,
+          style: { textDecoration: 'none' }
+        }, [
+          React.createElement('div', {
+            style: {
+              background: '#1a1a2e',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+              cursor: 'pointer',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.3)'
+            },
+            onMouseEnter: (e) => {
+              e.currentTarget.style.transform = 'translateY(-4px)';
+              e.currentTarget.style.boxShadow = '0 6px 20px rgba(255,107,157,0.15)';
+            },
+            onMouseLeave: (e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 10px rgba(0,0,0,0.3)';
+            }
+          }, [
+            // Thumbnail
+            React.createElement('div', {
+              style: {
+                position: 'relative',
+                height: '140px',
+                background: '#2a2a3e',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                overflow: 'hidden'
+              }
+            }, [
+              !room.thumbnail_url && React.createElement('div', {
+                key: 'placeholder',
+                style: { color: '#444', fontSize: '40px' }
+              }, '📺'),
+              room.thumbnail_url && React.createElement('img', {
+                key: 'thumb',
+                src: room.thumbnail_url,
+                alt: room.title,
+                style: { width: '100%', height: '100%', objectFit: 'cover' }
+              }),
+              React.createElement('span', {
+                key: 'live-badge',
+                style: {
+                  position: 'absolute',
+                  top: '8px',
+                  left: '8px',
+                  background: '#ff0000',
+                  color: '#fff',
+                  fontSize: '10px',
+                  padding: '2px 8px',
+                  borderRadius: '4px',
+                  fontWeight: 'bold',
+                  textTransform: 'uppercase'
+                }
+              }, 'LIVE'),
+              React.createElement('span', {
+                key: 'viewers',
+                style: {
+                  position: 'absolute',
+                  bottom: '8px',
+                  right: '8px',
+                  background: 'rgba(0,0,0,0.7)',
+                  color: '#fff',
+                  fontSize: '12px',
+                  padding: '4px 10px',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }
+              }, ['👁️', ` ${room.viewer_count || 0}`])
+            ]),
+            // Info
+            React.createElement('div', {
+              style: { padding: '12px 14px' }
+            }, [
+              React.createElement('div', {
+                key: 'host',
+                style: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }
+              }, [
+                React.createElement('div', {
+                  style: {
+                    width: '28px',
+                    height: '28px',
+                    borderRadius: '50%',
+                    background: '#2a2a3e',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'hidden',
+                    fontSize: '14px'
+                  }
+                }, room.host?.profile_photo
+                  ? React.createElement('img', {
+                      src: room.host.profile_photo,
+                      alt: room.host.display_name || room.host.username,
+                      style: { width: '100%', height: '100%', objectFit: 'cover' }
+                    })
+                  : '👤'
+                ),
+                React.createElement('span', {
+                  style: { color: '#fff', fontSize: '13px', fontWeight: '500' }
+                }, room.host?.display_name || room.host?.username || 'Unknown')
+              ]),
+              React.createElement('h3', {
+                style: {
+                  color: '#fff',
+                  fontSize: '15px',
+                  margin: '4px 0 2px 0',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }
+              }, room.title || 'Untitled'),
+              React.createElement('div', {
+                style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }
+              }, [
+                React.createElement('span', {
+                  style: { color: '#888', fontSize: '11px' }
+                }, `#${room.category || 'General'}`),
+                React.createElement('span', {
+                  style: { color: '#666', fontSize: '11px' }
+                }, timeSince(room.created_at))
+              ])
+            ])
+          ])
+        ])
+      ))
+    ])
   );
 }
