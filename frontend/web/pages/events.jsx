@@ -191,7 +191,7 @@ const s = {
   error: { color: '#ff6b6b', marginBottom: 12 },
   teamPicker: { marginBottom: 20 },
   teamButtons: { display: 'flex', gap: 10, marginTop: 8 },
-  teamBtn: { flex: 1, background: '#161625', border: '1px solid #FF6B9D', color: '#FF6B9D', padding: '14px 0', borderRadius: 10, fontWeight: 'bold', cursor: 'pointer', fontSize: 15 },
+  teamBtn: { flex: 1, background: '#161625', border: '1px solid #FF6B9D', color: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', padding: '14px 0', borderRadius: 10, fontWeight: 'bold', cursor: 'pointer', fontSize: 15 },
   myTeamBanner: { background: '#1e1526', border: '1px solid #FF6B9D', borderRadius: 10, padding: 12, color: '#eee', marginBottom: 20, fontSize: 14 },
   scoreBar: { height: 10, background: '#2a2a3e', borderRadius: 6, overflow: 'hidden' },
   scoreBarFill: { height: '100%', background: 'linear-gradient(90deg, #FF6B9D, #ff3355)' },

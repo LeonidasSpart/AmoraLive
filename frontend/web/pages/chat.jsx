@@ -81,7 +81,7 @@ export default function ChatList() {
           padding: '8px 24px',
           borderRadius: '6px',
           border: 'none',
-          background: '#FF6B9D',
+          background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
           color: '#fff',
           cursor: 'pointer'
         }
@@ -218,7 +218,7 @@ export default function ChatList() {
                   }, conv.last_message || ''),
                   conv.unread_count > 0 && React.createElement('span', {
                     style: {
-                      background: '#FF6B9D',
+                      background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
                       color: '#fff',
                       borderRadius: '50%',
                       padding: '2px 8px',

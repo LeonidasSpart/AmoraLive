@@ -197,7 +197,7 @@ const s = {
   balance: { color: '#ffd45c', fontWeight: 'bold', background: '#1a1a2e', padding: '8px 16px', borderRadius: 20 },
   tabs: { display: 'flex', gap: 8, marginBottom: 20 },
   tab: { background: 'transparent', border: '1px solid #333', color: '#aaa', padding: '8px 18px', borderRadius: 20, cursor: 'pointer' },
-  tabActive: { background: '#FF6B9D', border: '1px solid #FF6B9D', color: '#fff', padding: '8px 18px', borderRadius: 20, cursor: 'pointer' },
+  tabActive: { background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', border: '1px solid #FF6B9D', color: '#fff', padding: '8px 18px', borderRadius: 20, cursor: 'pointer' },
   message: { color: '#8f8', background: '#1a3a1a', padding: 10, borderRadius: 8, marginBottom: 16, textAlign: 'center' },
   error: { color: '#ff6b6b', textAlign: 'center', marginBottom: 16 },
   centerMsg: { color: '#888', textAlign: 'center', padding: '60px 0' },
@@ -209,7 +209,7 @@ const s = {
   cardName: { color: '#fff', fontWeight: 'bold', textAlign: 'center' },
   cardMeta: { color: '#888', fontSize: 12 },
   cardPrice: { color: '#ffd45c', fontWeight: 'bold' },
-  buyBtn: { width: '100%', background: '#FF6B9D', border: 'none', color: '#fff', padding: '8px 0', borderRadius: 8, cursor: 'pointer', fontWeight: 'bold' },
+  buyBtn: { width: '100%', background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', border: 'none', color: '#fff', padding: '8px 0', borderRadius: 8, cursor: 'pointer', fontWeight: 'bold' },
   ownedBtn: { width: '100%', background: '#333', border: 'none', color: '#888', padding: '8px 0', borderRadius: 8, cursor: 'not-allowed' },
   equippedBtn: { width: '100%', background: '#35df70', border: 'none', color: '#06110a', padding: '8px 0', borderRadius: 8, cursor: 'pointer', fontWeight: 'bold' }
 };

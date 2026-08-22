@@ -94,7 +94,7 @@ const s = {
   input: { background: '#161625', border: '1px solid #2a2a3e', borderRadius: 10, padding: 12, color: '#fff', fontSize: 15 },
   categoryGrid: { display: 'flex', flexWrap: 'wrap', gap: 8 },
   category: { background: 'transparent', border: '1px solid #333', color: '#aaa', padding: '8px 14px', borderRadius: 20, cursor: 'pointer', fontSize: 13 },
-  categoryActive: { background: '#FF6B9D', border: '1px solid #FF6B9D', color: '#fff', padding: '8px 14px', borderRadius: 20, cursor: 'pointer', fontSize: 13 },
+  categoryActive: { background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', border: '1px solid #FF6B9D', color: '#fff', padding: '8px 14px', borderRadius: 20, cursor: 'pointer', fontSize: 13 },
   error: { color: '#ff6b6b', marginTop: 8, fontSize: 13 },
   goBtn: { marginTop: 24, background: '#ff3355', border: 'none', color: '#fff', padding: '14px 0', borderRadius: 12, fontSize: 16, fontWeight: 'bold', cursor: 'pointer' },
   note: { color: '#666', fontSize: 12, marginTop: 16, textAlign: 'center' }

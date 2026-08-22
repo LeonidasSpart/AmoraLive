@@ -173,7 +173,7 @@ export default function Profile() {
             padding: '8px 24px',
             borderRadius: '6px',
             border: 'none',
-            background: '#FF6B9D',
+            background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
             color: '#fff',
             cursor: 'pointer'
           }
@@ -227,7 +227,7 @@ export default function Profile() {
         position: 'absolute',
         bottom: '8px',
         right: '8px',
-        background: '#FF6B9D',
+        background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
         border: 'none',
         borderRadius: '50%',
         width: '36px',
@@ -337,7 +337,7 @@ export default function Profile() {
           padding: '10px',
           borderRadius: '8px',
           border: 'none',
-          background: '#FF6B9D',
+          background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
           color: '#fff',
           cursor: 'pointer',
           fontWeight: 'bold'
@@ -540,7 +540,7 @@ export default function Profile() {
           padding: '10px 24px',
           borderRadius: '6px',
           border: 'none',
-          background: '#FF6B9D',
+          background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
           color: '#fff',
           cursor: 'pointer',
           fontWeight: 'bold'
@@ -645,7 +645,7 @@ export default function Profile() {
           style: {
             padding: '4px 12px',
             borderRadius: '12px',
-            background: '#FF6B9D',
+            background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
             color: '#fff',
             fontSize: '12px'
           }

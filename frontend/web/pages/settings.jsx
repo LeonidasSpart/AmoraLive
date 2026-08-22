@@ -29,6 +29,7 @@ export default function Settings() {
 
   // Membership state
   const [membership, setMembership] = useState(null);
+  const [upgrading, setUpgrading] = useState(null);
 
   const fetchUser = async () => {
     if (!localStorage.getItem('accessToken')) {
@@ -139,6 +140,24 @@ export default function Settings() {
     router.push('/login');
   };
 
+  const upgradeMembership = async (tier) => {
+    setUpgrading(tier);
+    setError('');
+    try {
+      const res = await apiFetch('/membership/checkout', {
+        method: 'POST',
+        body: JSON.stringify({ tier })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Unable to start checkout.');
+      if (!data.checkoutUrl) throw new Error('Checkout is not available right now.');
+      window.location.href = data.checkoutUrl;
+    } catch (err) {
+      setError(err.message);
+      setUpgrading(null);
+    }
+  };
+
   const deleteAccount = async () => {
     if (!confirm('Are you sure? This action is permanent and cannot be undone.')) return;
     try {
@@ -187,7 +206,7 @@ export default function Settings() {
           marginBottom: '4px',
           borderRadius: '6px',
           border: 'none',
-          background: activeSection === key ? '#FF6B9D' : 'transparent',
+          background: activeSection === key ? 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)' : 'transparent',
           color: activeSection === key ? '#fff' : '#aaa',
           cursor: 'pointer',
           textAlign: 'left',
@@ -311,7 +330,7 @@ export default function Settings() {
               padding: '10px',
               borderRadius: '6px',
               border: 'none',
-              background: '#FF6B9D',
+              background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
               color: '#fff',
               cursor: 'pointer',
               fontWeight: 'bold',
@@ -371,11 +390,11 @@ export default function Settings() {
   // Membership section
   if (activeSection === 'membership') {
     const plans = [
-      ['Premium', '$9.99/month', 'Ad-free, exclusive gifts, priority support'],
-      ['VIP', '$29.99/month', 'All Premium benefits + extra coins, profile boost'],
-      ['SVIP', '$59.99/month', 'All VIP benefits + private shows, unlimited gifts']
+      ['premium', 'Premium', '$9.99/month', 'Ad-free, exclusive gifts, priority support'],
+      ['vip', 'VIP', '$29.99/month', 'All Premium benefits + extra coins, profile boost'],
+      ['svip', 'SVIP', '$59.99/month', 'All VIP benefits + private shows, unlimited gifts']
     ];
-    const planChildren = plans.map(([tier, price, desc]) =>
+    const planChildren = plans.map(([tierKey, tier, price, desc]) =>
       React.createElement('div', {
         key: tier,
         style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', borderRadius: '6px', border: '1px solid #333', background: '#0f0f1a' }
@@ -388,8 +407,10 @@ export default function Settings() {
           React.createElement('span', { style: { color: '#FFD700', marginRight: '12px' } }, price),
           React.createElement('button', {
             key: 'btn',
-            style: { padding: '4px 16px', borderRadius: '4px', border: 'none', background: '#FF6B9D', color: '#fff', cursor: 'pointer' }
-          }, 'Upgrade')
+            onClick: () => upgradeMembership(tierKey),
+            disabled: upgrading === tierKey,
+            style: { padding: '4px 16px', borderRadius: '4px', border: 'none', background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', color: '#fff', cursor: upgrading === tierKey ? 'wait' : 'pointer', opacity: upgrading === tierKey ? 0.6 : 1 }
+          }, upgrading === tierKey ? 'Redirecting…' : 'Upgrade')
         ])
       ])
     );

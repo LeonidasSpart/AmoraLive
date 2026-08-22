@@ -79,7 +79,7 @@ export default function Discover() {
             padding: '8px 20px',
             borderRadius: '20px',
             border: 'none',
-            background: activeTab === tab.key ? '#FF6B9D' : 'transparent',
+            background: activeTab === tab.key ? 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)' : 'transparent',
             color: activeTab === tab.key ? '#fff' : '#888',
             cursor: 'pointer',
             fontSize: '14px',
@@ -138,7 +138,7 @@ export default function Discover() {
             padding: '8px 24px',
             borderRadius: '6px',
             border: 'none',
-            background: '#FF6B9D',
+            background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
             color: '#fff',
             cursor: 'pointer'
           }

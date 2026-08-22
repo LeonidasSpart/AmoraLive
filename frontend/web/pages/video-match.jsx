@@ -266,8 +266,8 @@ const s = {
   fallback: { width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#fff' },
   actions: { display: 'flex', gap: 40, marginTop: 24 },
   pass: { width: 64, height: 64, borderRadius: '50%', border: 'none', background: '#444', color: '#fff', fontSize: 28, cursor: 'pointer' },
-  like: { width: 72, height: 72, borderRadius: '50%', border: 'none', background: '#FF6B9D', color: '#fff', fontSize: 32, cursor: 'pointer' },
+  like: { width: 72, height: 72, borderRadius: '50%', border: 'none', background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', color: '#fff', fontSize: 32, cursor: 'pointer' },
   waitingText: { color: '#888', marginTop: 12, fontSize: 13 },
   infoText: { color: '#888', marginTop: 12, fontSize: 13 },
-  primaryBtn: { marginTop: 16, padding: '10px 28px', borderRadius: 8, border: 'none', background: '#FF6B9D', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }
+  primaryBtn: { marginTop: 16, padding: '10px 28px', borderRadius: 8, border: 'none', background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }
 };
