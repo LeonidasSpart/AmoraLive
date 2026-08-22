@@ -68,6 +68,39 @@ module.exports = (prisma) => {
     }
   });
 
+  // ---------- GET /users/:userId (public profile view) ----------
+  // Was previously missing entirely — chat/[userId].jsx has always called
+  // this to load the other person's name/photo, and it 404'd every time.
+  router.get('/:userId', auth, async (req, res) => {
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: req.params.userId },
+        select: {
+          id: true,
+          username: true,
+          display_name: true,
+          bio: true,
+          profile_photo: true,
+          cover_photo: true,
+          online_status: true,
+          is_verified: true,
+          membership_tier: true,
+          level: true,
+          location: true,
+          interests: true,
+          is_active: true,
+          created_at: true
+        }
+      });
+      if (!user || !user.is_active) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      res.json(user);
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ---------- POST /users/me/change-password ----------
   router.post('/me/change-password', auth, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
@@ -204,7 +237,9 @@ module.exports = (prisma) => {
               id: true,
               username: true,
               display_name: true,
-              profile_photo: true
+              profile_photo: true,
+              is_verified: true,
+              membership_tier: true
             }
           }
         }
@@ -228,7 +263,9 @@ module.exports = (prisma) => {
               id: true,
               username: true,
               display_name: true,
-              profile_photo: true
+              profile_photo: true,
+              is_verified: true,
+              membership_tier: true
             }
           }
         }
@@ -304,7 +341,9 @@ module.exports = (prisma) => {
               id: true,
               username: true,
               display_name: true,
-              profile_photo: true
+              profile_photo: true,
+              is_verified: true,
+              membership_tier: true
             }
           }
         }
