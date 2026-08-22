@@ -12,7 +12,7 @@ export default function AdminUsers() {
   const limit = 20;
 
   const fetchUsers = (pageNum = 1, searchTerm = '') => {
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) { window.location.href = '/login'; return; }
     setLoading(true);
     fetch(`https://api.amoramatch.one/admin/users?page=${pageNum}&limit=${limit}&search=${encodeURIComponent(searchTerm)}`, {
@@ -31,7 +31,7 @@ export default function AdminUsers() {
   useEffect(() => { fetchUsers(1, ''); }, []);
 
   const updateRole = (userId, role) => {
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('accessToken');
     fetch(`https://api.amoramatch.one/admin/users/${userId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -42,7 +42,7 @@ export default function AdminUsers() {
   };
 
   const toggleStatus = (userId, currentStatus) => {
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('accessToken');
     fetch(`https://api.amoramatch.one/admin/users/${userId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -53,7 +53,7 @@ export default function AdminUsers() {
 
   const deleteUser = (userId) => {
     if (!confirm('Delete this user?')) return;
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('accessToken');
     fetch(`https://api.amoramatch.one/admin/users/${userId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
       .then(() => fetchUsers(page, search));
   };

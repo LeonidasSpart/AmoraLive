@@ -8,7 +8,7 @@ export default function AdminDashboard() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem('adminToken');
+    const token = localStorage.getItem('accessToken');
     if (!token) {
       window.location.href = '/login';
       return;
