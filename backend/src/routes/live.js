@@ -344,12 +344,18 @@ module.exports = (prisma, io) => {
         return res.status(400).json({ error: 'Room is not live' });
       }
 
-      // Check permissions
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { role: true }
-      });
-      const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
+      // Check permissions — skip the role lookup entirely when the
+      // requester is already the host (the overwhelmingly common case for
+      // this endpoint), so a host ending their own stream never depends on
+      // this extra query succeeding.
+      let isAdmin = false;
+      if (room.host_id !== userId) {
+        const user = await prisma.user.findUnique({
+          where: { id: userId },
+          select: { role: true }
+        });
+        isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
+      }
       if (room.host_id !== userId && !isAdmin) {
         return res.status(403).json({ error: 'Only host or admin can end this room' });
       }
