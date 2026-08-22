@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { apiFetch } from '../lib/api';
 
 export default function Wallet() {
   const router = useRouter();
@@ -14,8 +15,7 @@ export default function Wallet() {
   const [showPackages, setShowPackages] = useState(false);
 
   const fetchWalletData = async () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
+    if (!localStorage.getItem('accessToken')) {
       router.push('/login');
       return;
     }
@@ -23,26 +23,20 @@ export default function Wallet() {
     setError('');
     try {
       // Get balance
-      const balanceRes = await fetch('https://api.amoramatch.one/wallet/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const balanceRes = await apiFetch('/wallet/me');
       if (!balanceRes.ok) throw new Error('Failed to fetch wallet');
       const wallet = await balanceRes.json();
       setBalance(wallet.balance);
 
       // Get transactions (or gifts based on tab)
       const endpoint = activeTab === 'transactions' ? 'transactions' : 'gifts';
-      const txRes = await fetch(`https://api.amoramatch.one/wallet/${endpoint}?limit=100`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const txRes = await apiFetch(`/wallet/${endpoint}?limit=100`);
       if (!txRes.ok) throw new Error('Failed to fetch transactions');
       const data = await txRes.json();
       setTransactions(data);
 
       // Get coin packages (for purchase)
-      const pkgRes = await fetch('https://api.amoramatch.one/wallet/packages?platform=web', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const pkgRes = await apiFetch('/wallet/packages?platform=web');
       if (pkgRes.ok) {
         const pkgs = await pkgRes.json();
         setPackages(pkgs);
@@ -59,14 +53,9 @@ export default function Wallet() {
   }, [activeTab]);
 
   const purchasePackage = async (packageId) => {
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch('https://api.amoramatch.one/wallet/purchase', {
+      const res = await apiFetch('/wallet/purchase', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify({ packageId })
       });
       if (!res.ok) throw new Error('Purchase failed');

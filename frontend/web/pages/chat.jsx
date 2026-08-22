@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { apiFetch } from '../lib/api';
 
 export default function ChatList() {
   const router = useRouter();
@@ -10,17 +11,14 @@ export default function ChatList() {
   const [error, setError] = useState('');
 
   const fetchConversations = async () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
+    if (!localStorage.getItem('accessToken')) {
       router.push('/login');
       return;
     }
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('https://api.amoramatch.one/messages/conversations', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/messages/conversations');
       if (!res.ok) throw new Error('Failed to load conversations');
       const data = await res.json();
       setConversations(data || []);

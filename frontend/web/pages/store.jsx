@@ -2,8 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
-
-const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
+import { apiFetch } from '../lib/api';
 
 const TYPE_LABELS = {
   avatar_frame: 'Avatar Frames',
@@ -24,15 +23,8 @@ export default function Store() {
   const [purchasingId, setPurchasingId] = useState(null);
   const [tab, setTab] = useState('catalog'); // catalog | owned
 
-  const authHeaders = () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return null;
-    return { Authorization: `Bearer ${token}` };
-  };
-
   const load = async () => {
-    const headers = authHeaders();
-    if (!headers) {
+    if (!localStorage.getItem('accessToken')) {
       router.push('/login');
       return;
     }
@@ -40,9 +32,9 @@ export default function Store() {
     setError('');
     try {
       const [catalogRes, ownedRes, walletRes] = await Promise.all([
-        fetch(`${API}/store/catalog`),
-        fetch(`${API}/store/my`, { headers }),
-        fetch(`${API}/wallet/me`, { headers })
+        apiFetch('/store/catalog', {}, { skipAuth: true }),
+        apiFetch('/store/my'),
+        apiFetch('/wallet/me')
       ]);
       if (!catalogRes.ok) throw new Error('Unable to load the store right now.');
       setCatalog(await catalogRes.json());
@@ -63,8 +55,7 @@ export default function Store() {
   const ownedIds = new Set(owned.map((o) => o.cosmetic_id));
 
   const purchase = async (item) => {
-    const headers = authHeaders();
-    if (!headers) return router.push('/login');
+    if (!localStorage.getItem('accessToken')) return router.push('/login');
     if (balance < item.price_coins) {
       setMessage("You don't have enough coins for this item.");
       return;
@@ -72,9 +63,8 @@ export default function Store() {
     setPurchasingId(item.id);
     setMessage('');
     try {
-      const res = await fetch(`${API}/store/purchase`, {
+      const res = await apiFetch('/store/purchase', {
         method: 'POST',
-        headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({ cosmeticId: item.id })
       });
       const data = await res.json().catch(() => ({}));
@@ -89,13 +79,10 @@ export default function Store() {
   };
 
   const toggleEquip = async (userCosmetic) => {
-    const headers = authHeaders();
-    if (!headers) return;
     const endpoint = userCosmetic.is_equipped ? 'unequip' : 'equip';
     try {
-      const res = await fetch(`${API}/store/${endpoint}`, {
+      const res = await apiFetch(`/store/${endpoint}`, {
         method: 'POST',
-        headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({ cosmeticId: userCosmetic.cosmetic_id })
       });
       const data = await res.json().catch(() => ({}));

@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Layout from '../components/Layout';
+import { apiFetch } from '../lib/api';
 
 export default function Discover() {
   const [rooms, setRooms] = useState([]);
@@ -20,22 +21,19 @@ export default function Discover() {
   const categories = ['Chat', 'Music', 'Entertainment', 'Gaming', 'Lifestyle', 'Travel', 'Q&A', 'Dating'];
 
   const fetchRooms = async () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
+    if (!localStorage.getItem('accessToken')) {
       window.location.href = '/login';
       return;
     }
     setLoading(true);
     setError('');
     try {
-      let url = 'https://api.amoramatch.one/live?limit=30';
+      let url = '/live?limit=30';
       if (activeTab === 'trending') url += '&sort=viewer_count';
       if (activeTab === 'new') url += '&sort=newest';
       if (activeTab === 'following') url += '&following=true';
-      
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+
+      const res = await apiFetch(url);
       if (!res.ok) throw new Error('Failed to fetch live rooms');
       const data = await res.json();
       setRooms(Array.isArray(data) ? data : data.rooms || []);

@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
+import { apiFetch, clearSession } from '../lib/api';
 
 export default function Profile() {
   const router = useRouter();
@@ -20,17 +21,14 @@ export default function Profile() {
 
   // --- Data fetching ---
   const fetchProfile = async () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
+    if (!localStorage.getItem('accessToken')) {
       router.push('/login');
       return;
     }
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('https://api.amoramatch.one/users/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/users/me');
       if (!res.ok) throw new Error('Failed to fetch profile');
       const data = await res.json();
       setUser(data);
@@ -50,15 +48,10 @@ export default function Profile() {
   };
 
   const fetchFollows = async () => {
-    const token = localStorage.getItem('accessToken');
     try {
       const [followersRes, followingRes] = await Promise.all([
-        fetch('https://api.amoramatch.one/users/me/followers', {
-          headers: { Authorization: `Bearer ${token}` }
-        }),
-        fetch('https://api.amoramatch.one/users/me/following', {
-          headers: { Authorization: `Bearer ${token}` }
-        })
+        apiFetch('/users/me/followers'),
+        apiFetch('/users/me/following')
       ]);
       if (followersRes.ok) {
         const data = await followersRes.json();
@@ -74,11 +67,8 @@ export default function Profile() {
   };
 
   const fetchBlocked = async () => {
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch('https://api.amoramatch.one/users/me/blocks', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/users/me/blocks');
       if (res.ok) {
         const data = await res.json();
         setBlockedUsers(data.blocks || []);
@@ -97,14 +87,9 @@ export default function Profile() {
   // --- Actions ---
   const updateProfile = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch('https://api.amoramatch.one/users/me', {
+      const res = await apiFetch('/users/me', {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify(editForm)
       });
       if (!res.ok) throw new Error('Update failed');
@@ -122,13 +107,8 @@ export default function Profile() {
     const formData = new FormData();
     formData.append('photo', file);
     setUploading(true);
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch('https://api.amoramatch.one/users/me/photos', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData
-      });
+      const res = await apiFetch('/users/me/photos', { method: 'POST', body: formData });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Upload failed');
       setUser({ ...user, profile_photo: data.url });
@@ -141,14 +121,10 @@ export default function Profile() {
 
   const deleteAccount = async () => {
     if (!confirm('Are you sure? This action is permanent.')) return;
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch('https://api.amoramatch.one/users/me', {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/users/me', { method: 'DELETE' });
       if (res.ok) {
-        localStorage.clear();
+        clearSession();
         router.push('/');
       }
     } catch (err) {
@@ -440,10 +416,8 @@ export default function Profile() {
             React.createElement('span', { style: { color: '#aaa' } }, block.username || 'User'),
             React.createElement('button', {
               onClick: async () => {
-                const token = localStorage.getItem('accessToken');
-                await fetch(`https://api.amoramatch.one/users/me/unblock`, {
+                await apiFetch('/users/me/unblock', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                   body: JSON.stringify({ userId: block.blocked_id || block.id })
                 });
                 fetchBlocked();

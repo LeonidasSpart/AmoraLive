@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { apiFetch, clearSession } from '../lib/api';
 
 export default function Settings() {
   const router = useRouter();
@@ -30,16 +31,13 @@ export default function Settings() {
   const [membership, setMembership] = useState(null);
 
   const fetchUser = async () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
+    if (!localStorage.getItem('accessToken')) {
       router.push('/login');
       return;
     }
     setLoading(true);
     try {
-      const res = await fetch('https://api.amoramatch.one/users/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/users/me');
       if (!res.ok) throw new Error('Failed to fetch user');
       const data = await res.json();
       setUser(data);
@@ -51,11 +49,8 @@ export default function Settings() {
   };
 
   const fetchPrivacy = async () => {
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch('https://api.amoramatch.one/users/me/privacy', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/users/me/privacy');
       if (res.ok) {
         const data = await res.json();
         setPrivacy({ ...privacy, ...data });
@@ -66,11 +61,8 @@ export default function Settings() {
   };
 
   const fetchMembership = async () => {
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch('https://api.amoramatch.one/membership/me', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/membership/me');
       if (res.ok) {
         const data = await res.json();
         setMembership(data);
@@ -100,14 +92,9 @@ export default function Settings() {
     setPasswordLoading(true);
     setError('');
     setSuccess('');
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch('https://api.amoramatch.one/users/me/change-password', {
+      const res = await apiFetch('/users/me/change-password', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify({ currentPassword, newPassword })
       });
       const data = await res.json();
@@ -128,14 +115,9 @@ export default function Settings() {
     setPrivacyLoading(true);
     const updated = { ...privacy, [key]: value };
     setPrivacy(updated);
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch('https://api.amoramatch.one/users/me/privacy', {
+      const res = await apiFetch('/users/me/privacy', {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify(updated)
       });
       if (!res.ok) throw new Error('Failed to update privacy');
@@ -151,26 +133,18 @@ export default function Settings() {
   const logout = async () => {
     const token = localStorage.getItem('refreshToken');
     try {
-      await fetch('https://api.amoramatch.one/auth/logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: token })
-      });
+      await apiFetch('/auth/logout', { method: 'POST', body: JSON.stringify({ refreshToken: token }) }, { skipRefresh: true });
     } catch (e) {}
-    localStorage.clear();
+    clearSession();
     router.push('/login');
   };
 
   const deleteAccount = async () => {
     if (!confirm('Are you sure? This action is permanent and cannot be undone.')) return;
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch('https://api.amoramatch.one/users/me', {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await apiFetch('/users/me', { method: 'DELETE' });
       if (res.ok) {
-        localStorage.clear();
+        clearSession();
         router.push('/');
       }
     } catch (err) {

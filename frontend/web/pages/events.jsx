@@ -2,8 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
-
-const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
+import { apiFetch, API } from '../lib/api';
 
 function formatTimeLeft(seconds) {
   if (seconds <= 0) return 'Ended';
@@ -29,14 +28,8 @@ export default function Events() {
   const socketRef = useRef(null);
   const countdownRef = useRef(null);
 
-  const authHeaders = () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return null;
-    return { Authorization: `Bearer ${token}` };
-  };
-
-  const loadLeaderboard = async (eventId, headers) => {
-    const res = await fetch(`${API}/events/leaderboard/${eventId}`, { headers });
+  const loadLeaderboard = async (eventId) => {
+    const res = await apiFetch(`/events/leaderboard/${eventId}`);
     if (res.ok) {
       const data = await res.json();
       setScores(data.scores || []);
@@ -45,8 +38,7 @@ export default function Events() {
   };
 
   useEffect(() => {
-    const headers = authHeaders();
-    if (!headers) {
+    if (!localStorage.getItem('accessToken')) {
       router.push('/login');
       return;
     }
@@ -54,7 +46,7 @@ export default function Events() {
 
     (async () => {
       try {
-        const res = await fetch(`${API}/events/active`, { headers });
+        const res = await apiFetch('/events/active');
         if (res.status === 404) {
           setEvent(null);
           setLoading(false);
@@ -66,7 +58,7 @@ export default function Events() {
         setEvent(data);
         setMyTeam(data.myTeam);
         setTimeLeft(data.timeLeft);
-        await loadLeaderboard(data.id, headers);
+        await loadLeaderboard(data.id);
 
         const { io } = await import('socket.io-client');
         if (!active) return;
@@ -103,14 +95,12 @@ export default function Events() {
   }, []);
 
   const joinTeam = async (team) => {
-    const headers = authHeaders();
-    if (!headers || !event) return;
+    if (!event) return;
     setJoining(true);
     setError('');
     try {
-      const res = await fetch(`${API}/events/join`, {
+      const res = await apiFetch('/events/join', {
         method: 'POST',
-        headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({ eventId: event.id, team })
       });
       const data = await res.json().catch(() => ({}));

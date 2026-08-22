@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
+import { apiFetch } from '../lib/api';
 
-const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 const CATEGORIES = ['Chat', 'Music', 'Dance', 'Gaming', 'Talent', 'Just Chatting', 'General'];
 
 export default function GoLive() {
@@ -20,16 +20,14 @@ export default function GoLive() {
       setError('Give your live room a title.');
       return;
     }
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
+    if (!localStorage.getItem('accessToken')) {
       router.push('/login');
       return;
     }
     setLoading(true);
     try {
-      const res = await fetch(`${API}/live`, {
+      const res = await apiFetch('/live', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ title: title.trim(), category })
       });
       const data = await res.json().catch(() => ({}));

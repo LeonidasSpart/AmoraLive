@@ -3,8 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
-
-const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
+import { apiFetch } from '../lib/api';
 
 function describe(notification) {
   const p = notification.payload || {};
@@ -38,22 +37,15 @@ export default function Notifications() {
   const [error, setError] = useState('');
   const [markingAll, setMarkingAll] = useState(false);
 
-  const authHeaders = () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return null;
-    return { Authorization: `Bearer ${token}` };
-  };
-
   const load = async () => {
-    const headers = authHeaders();
-    if (!headers) {
+    if (!localStorage.getItem('accessToken')) {
       router.push('/login');
       return;
     }
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(`${API}/notifications?limit=50`, { headers });
+      const res = await apiFetch('/notifications?limit=50');
       if (!res.ok) throw new Error('Unable to load notifications.');
       const data = await res.json();
       setNotifications(data.notifications || []);
@@ -70,20 +62,16 @@ export default function Notifications() {
   }, []);
 
   const markRead = async (id) => {
-    const headers = authHeaders();
-    if (!headers) return;
     setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, is_read: true } : n)));
     try {
-      await fetch(`${API}/notifications/${id}/read`, { method: 'PATCH', headers });
+      await apiFetch(`/notifications/${id}/read`, { method: 'PATCH' });
     } catch {}
   };
 
   const markAllRead = async () => {
-    const headers = authHeaders();
-    if (!headers) return;
     setMarkingAll(true);
     try {
-      await fetch(`${API}/notifications/mark-all-read`, { method: 'POST', headers });
+      await apiFetch('/notifications/mark-all-read', { method: 'POST' });
       setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
     } catch {} finally {
       setMarkingAll(false);
@@ -91,11 +79,9 @@ export default function Notifications() {
   };
 
   const removeNotification = async (id) => {
-    const headers = authHeaders();
-    if (!headers) return;
     setNotifications((prev) => prev.filter((n) => n.id !== id));
     try {
-      await fetch(`${API}/notifications/${id}`, { method: 'DELETE', headers });
+      await apiFetch(`/notifications/${id}`, { method: 'DELETE' });
     } catch {}
   };
 
