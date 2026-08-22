@@ -17,6 +17,7 @@ export default function Profile() {
   const [following, setFollowing] = useState([]);
   const [showBlockList, setShowBlockList] = useState(false);
   const [blockedUsers, setBlockedUsers] = useState([]);
+  const [giftWall, setGiftWall] = useState({ gifts: [], totals: { count: 0, coins: 0 } });
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -33,6 +34,7 @@ export default function Profile() {
       if (!res.ok) throw new Error('Failed to fetch profile');
       const data = await res.json();
       setUser(data);
+      fetchGiftWall(data.id);
       setEditForm({
         display_name: data.display_name || '',
         bio: data.bio || '',
@@ -64,6 +66,16 @@ export default function Profile() {
       }
     } catch (e) {
       console.error('Failed to fetch follows', e);
+    }
+  };
+
+  const fetchGiftWall = async (userId) => {
+    if (!userId) return;
+    try {
+      const res = await apiFetch(`/users/${userId}/gifts?limit=18`);
+      if (res.ok) setGiftWall(await res.json());
+    } catch (e) {
+      console.error('Failed to fetch gift wall', e);
     }
   };
 
@@ -637,6 +649,39 @@ export default function Profile() {
         }, detailChildren)
       );
     }
+
+    // Gift wall — real visual gifts received on the profile.
+    const wallGifts = giftWall.gifts || [];
+    contentChildren.push(
+      React.createElement('div', {
+        key: 'gift-wall',
+        style: {
+          background: 'linear-gradient(145deg, #171029, #0d0a19)',
+          border: '1px solid rgba(255,105,190,.22)',
+          padding: '20px',
+          borderRadius: '18px',
+          marginBottom: '16px',
+          boxShadow: '0 18px 45px rgba(0,0,0,.22)'
+        }
+      }, [
+        React.createElement('div', { key: 'head', style: { display: 'flex', justifyContent: 'space-between', alignItems: 'end', gap: 12, marginBottom: 14 } }, [
+          React.createElement('div', { key: 'title' }, [
+            React.createElement('div', { style: { color: '#ffd166', fontSize: 10, fontWeight: 900, letterSpacing: 2, textTransform: 'uppercase' } }, 'Amora Gift Gallery'),
+            React.createElement('h3', { style: { color: '#fff', margin: '4px 0 0', fontSize: 22 } }, 'Your most memorable gifts')
+          ]),
+          React.createElement('div', { key: 'totals', style: { textAlign: 'right', color: '#9f91b1', fontSize: 11 } }, `${giftWall.totals?.count || 0} gifts · ${(giftWall.totals?.coins || 0).toLocaleString()} coins`)
+        ]),
+        wallGifts.length === 0
+          ? React.createElement('div', { key: 'empty', style: { color: '#77718a', padding: '28px 0', textAlign: 'center' } }, 'Your first spectacular gift will appear here.')
+          : React.createElement('div', { key: 'grid', style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(90px,1fr))', gap: 10 } }, wallGifts.map((tx) =>
+              React.createElement('div', { key: tx.id, style: { background: 'rgba(255,255,255,.045)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 14, padding: 8, textAlign: 'center' } }, [
+                React.createElement('img', { src: tx.gift?.image_url, alt: tx.gift?.name || 'Gift', style: { width: 68, height: 68, objectFit: 'contain', filter: 'drop-shadow(0 6px 16px rgba(255,63,157,.3))' } }),
+                React.createElement('div', { style: { color: '#fff', fontSize: 10, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, tx.gift?.name),
+                React.createElement('div', { style: { color: '#ffd166', fontSize: 9, marginTop: 2 } }, `${tx.quantity > 1 ? `×${tx.quantity} · ` : ''}${tx.sender?.display_name || tx.sender?.username || 'Someone'}`)
+              ])
+            ))
+      ])
+    );
 
     // Badges
     if (user.badges && user.badges.length > 0) {
