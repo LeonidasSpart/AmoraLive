@@ -5,7 +5,7 @@ function signAccessToken(user) {
   return jwt.sign(
     { id: user.id, tier: user.membership_tier, role: user.role },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.ACCESS_TOKEN_TTL || '15m' }
+    { expiresIn: process.env.JWT_ACCESS_EXPIRATION || '15m' }
   );
 }
 
@@ -13,7 +13,7 @@ function signRefreshToken(user) {
   return jwt.sign(
     { id: user.id, type: 'refresh' },
     process.env.JWT_SECRET,
-    { expiresIn: process.env.REFRESH_TOKEN_TTL || '7d' }
+    { expiresIn: process.env.JWT_REFRESH_EXPIRATION || '7d' }
   );
 }
 

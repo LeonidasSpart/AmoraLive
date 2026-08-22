@@ -443,30 +443,26 @@ app.use((req, res, next) => {
 });
 
 // ---------- Socket.io ----------
+// Redis connects asynchronously, so the adapter must not depend on the
+// `connect` event having fired before Socket.IO is constructed.
 let io;
+const socketCors = {
+  origin: uniqueAllowedCorsOrigins,
+  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  credentials: true
+};
 
-if (redisReady && pub && sub) {
-  const {
-    createAdapter
-  } = require('@socket.io/redis-adapter');
-
-  io = new Server(server, {
-    cors: {
-      origin: uniqueAllowedCorsOrigins,
-      methods: ['GET', 'POST'],
-      credentials: true
-    },
-
-    adapter: createAdapter(pub, sub)
-  });
+if (pub && sub) {
+  try {
+    const { createAdapter } = require('@socket.io/redis-adapter');
+    io = new Server(server, { cors: socketCors, adapter: createAdapter(pub, sub) });
+    console.log('🔌 Socket.IO Redis adapter enabled');
+  } catch (err) {
+    console.warn('Socket.IO Redis adapter unavailable – using local adapter:', err.message);
+    io = new Server(server, { cors: socketCors });
+  }
 } else {
-  io = new Server(server, {
-    cors: {
-      origin: uniqueAllowedCorsOrigins,
-      methods: ['GET', 'POST'],
-      credentials: true
-    }
-  });
+  io = new Server(server, { cors: socketCors });
 }
 
 app.set('io', io);
@@ -500,7 +496,7 @@ const eventRoutes =
   require('./routes/events')(prisma, io);
 
 const adminRoutes =
-  require('./routes/admin')(prisma);
+  require('./routes/admin')(prisma, io);
 
 const matchRoutes =
   require('./routes/matches')(prisma);
@@ -728,6 +724,22 @@ io.on('connection', (socket) => {
       );
     }
   );
+
+  // ---------- Live "like" (heart tap) ----------
+  socket.on('live-like', async (roomId) => {
+    if (!socket.userId || !roomId) return;
+    try {
+      const updated = await prisma.liveRoom.update({
+        where: { id: roomId },
+        data: { like_count: { increment: 1 } },
+        select: { like_count: true }
+      });
+      io.to(`live-${roomId}`).emit('like-count', { count: updated.like_count, from: socket.userId });
+    } catch (err) {
+      // Room may not exist / already ended — not worth logging noisily
+      // since taps can arrive slightly after a stream ends.
+    }
+  });
 
   // Note: 1:1 quick video matching is handled by the LiveKit-based queue in
   // ./realtime/videoMatch.js, not by manual WebRTC signal relaying.
