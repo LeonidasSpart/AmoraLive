@@ -2,11 +2,19 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { apiFetch } from '../../lib/api';
+import GiftIcon from '../../components/GiftIcon';
 
 const RARITIES = ['common', 'rare', 'epic', 'legendary', 'mythic'];
-const CATEGORIES = ['classic', 'romantic', 'luxury', 'seasonal', 'fun', 'cosmic', 'wild'];
+const CATEGORIES = ['romance', 'luxury', 'cosmic', 'power', 'fun'];
+const GLYPHS = [
+  'rose', 'heart', 'kiss', 'letter', 'crownHeart',
+  'diamond', 'crown', 'car', 'jet', 'champagne', 'ring', 'chest', 'palace', 'throne',
+  'galaxy', 'moon', 'planet', 'supernova', 'blackhole', 'starPortal', 'infinity',
+  'lightning', 'flame', 'phoenix', 'dragon', 'sword',
+  'confetti', 'balloon', 'cupcake', 'iceCream', 'music', 'butterfly', 'teddyBear', 'giftBox', 'partyPopper'
+];
 
-const emptyForm = { name: '', description: '', image_url: '', animation_url: '', coin_price: '', rarity: 'common', category: 'classic' };
+const emptyForm = { name: '', description: '', image_url: '', animation_url: '', coin_price: '', rarity: 'common', category: 'romance', glyph: 'giftBox' };
 
 export default function AdminGifts() {
   const [gifts, setGifts] = useState([]);
@@ -48,7 +56,8 @@ export default function AdminGifts() {
       animation_url: gift.animation_url || '',
       coin_price: String(gift.coin_price ?? ''),
       rarity: gift.rarity || 'common',
-      category: gift.category || 'classic'
+      category: gift.category || 'romance',
+      glyph: gift.glyph || 'giftBox'
     });
   };
 
@@ -60,8 +69,8 @@ export default function AdminGifts() {
   const save = async (e) => {
     e.preventDefault();
     setError('');
-    if (!form.name.trim() || !form.image_url.trim() || !form.coin_price) {
-      setError('Name, image URL, and coin price are required.');
+    if (!form.name.trim() || !form.coin_price) {
+      setError('Name and coin price are required.');
       return;
     }
     setSaving(true);
@@ -73,7 +82,8 @@ export default function AdminGifts() {
         animation_url: form.animation_url.trim() || undefined,
         coin_price: Number(form.coin_price),
         rarity: form.rarity,
-        category: form.category
+        category: form.category,
+        glyph: form.glyph
       };
       const res = await apiFetch(`/admin/gifts${editingId ? `/${editingId}` : ''}`, {
         method: editingId ? 'PATCH' : 'POST',
@@ -141,7 +151,17 @@ export default function AdminGifts() {
           <select style={s.input} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
+          <select style={s.input} value={form.glyph} onChange={(e) => setForm({ ...form, glyph: e.target.value })}>
+            {GLYPHS.map((g) => <option key={g} value={g}>{g} (vector icon)</option>)}
+          </select>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#0f0f1a', border: '1px solid #333', borderRadius: 8, padding: '0 12px' }}>
+            <span style={{ color: '#888', fontSize: 12 }}>Preview:</span>
+            <GiftIcon name={form.name} glyph={form.glyph} rarity={form.rarity} size={32} />
+          </div>
         </div>
+        <p style={{ color: '#777', fontSize: 12, marginTop: 4 }}>
+          Image URL is optional — leave blank to use the vector icon above (never falls back to a broken image or emoji).
+        </p>
         <textarea style={{ ...s.input, marginTop: 10, width: '100%', minHeight: 50 }} placeholder="Description (optional)" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
         {error && <div style={s.error}>{error}</div>}
         <div style={{ marginTop: 14, display: 'flex', gap: 10 }}>
@@ -170,7 +190,9 @@ export default function AdminGifts() {
           <tbody>
             {gifts.map((g) => (
               <tr key={g.id}>
-                <td style={s.td}>{g.image_url ? <img src={g.image_url} alt={g.name} style={{ width: 44, height: 44, objectFit: 'contain', borderRadius: 10, background: '#0d0918' }} /> : '—'}</td>
+                <td style={s.td}>
+                  {g.image_url ? <img src={g.image_url} alt={g.name} style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 6 }} /> : <GiftIcon name={g.name} glyph={g.glyph} rarity={g.rarity} size={36} />}
+                </td>
                 <td style={s.td}>{g.name}</td>
                 <td style={s.td}>🪙 {g.coin_price}</td>
                 <td style={s.td}>{g.rarity}</td>
