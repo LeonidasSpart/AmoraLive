@@ -423,6 +423,7 @@ export default function LiveRoom() {
   if (!room) return <div style={s.centerPage}><div><p style={{ color: '#ff6b6b' }}>{error || 'Room not found'}</p><Link href="/discover" style={{ color: '#FF6B9D' }}>← Back</Link></div></div>;
 
   return (
+    <div style={s.stage}>
     <div style={s.page}>
       <style>{`
         @keyframes floatUp { 0% { transform: translateY(0) scale(0.6); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-420px) scale(1.1); opacity: 0; } }
@@ -652,12 +653,21 @@ export default function LiveRoom() {
         </form>
       </div>
     </div>
+    </div>
   );
 }
 
 const s = {
   centerPage: { minHeight: '100vh', background: '#0a0a12', color: '#fff', display: 'grid', placeItems: 'center', fontFamily: 'sans-serif' },
-  page: { position: 'relative', height: '100vh', maxWidth: 480, margin: '0 auto', background: '#000', overflow: 'hidden', fontFamily: 'sans-serif', color: '#fff' },
+  // TikTok-style letterboxing: the outer stage is always full viewport with
+  // a solid black background; the inner page is capped to a 9:16 portrait
+  // box. On phones (already taller than 9:16) `maxWidth: 100vw` is what
+  // actually constrains it, so it stays full-bleed exactly as before. On a
+  // landscape tablet or desktop, `calc(100vh * 9 / 16)` becomes the smaller
+  // number and the box centers with black bars on the sides — no JS or
+  // media queries needed, this is a pure CSS "contain" calculation.
+  stage: { position: 'fixed', inset: 0, width: '100vw', height: '100vh', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  page: { position: 'relative', height: '100%', width: 'calc(100vh * 9 / 16)', maxWidth: '100vw', flexShrink: 0, background: '#000', overflow: 'hidden', fontFamily: 'sans-serif', color: '#fff' },
   video: { position: 'absolute', inset: 0, background: '#0a0a12', display: 'grid', placeItems: 'center', overflow: 'hidden' },
   videoTopHalf: { position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: '#0a0a12', display: 'grid', placeItems: 'center', overflow: 'hidden', borderBottom: '2px solid #FF6B9D' },
   videoBottomHalf: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', background: '#0a0a12', display: 'grid', placeItems: 'center', overflow: 'hidden' },
