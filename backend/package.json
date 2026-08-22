@@ -2,7 +2,7 @@
   "name": "amoralive-backend",
   "version": "1.0.0",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "prisma generate && node src/index.js",
     "dev": "nodemon src/index.js",
     "db:migrate": "npx prisma migrate deploy",
     "db:generate": "npx prisma generate",
