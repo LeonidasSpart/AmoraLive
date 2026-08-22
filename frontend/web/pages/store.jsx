@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
+import Link from 'next/link';
 
 const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 
@@ -115,8 +116,8 @@ export default function Store() {
     <Layout>
       <div style={s.page}>
         <div style={s.header}>
-          <h1 style={s.title}>Boutique</h1>
-          <div style={s.balance}>🪙 {balance}</div>
+          <div><span className="amora-kicker">AMORA ROYAL SHOP</span><h1 style={s.title}>Boutique</h1><p style={{margin:'5px 0 0',color:'#77718a',fontSize:13}}>Wear the attention. Own your aura.</p></div>
+          <div style={{display:'flex',gap:8,alignItems:'center'}}><Link href="/outfits" className="amora-soft-action">✨ My Outfits</Link><div style={s.balance}>🪙 {balance}</div></div>
         </div>
 
         <div style={s.tabs}>
