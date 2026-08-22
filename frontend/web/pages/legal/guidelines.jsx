@@ -1,10 +1,8 @@
-// pages/legal/guidelines.jsx
-
 import React, { useMemo, useState } from 'react';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
 
-const AMORA_LOGO = '/images/amora-logo.png';
+const AMORA_LOGO = '/brand/amora-logo.png';
 
 const sections = [
   { id: 'welcome', number: '01', title: 'Our Community' },
@@ -92,6 +90,47 @@ const RuleCard = ({ number, title, children }) => (
   </div>
 );
 
+/*
+ * Centralized official-logo component.
+ *
+ * The official Amora logo is stored in:
+ * frontend/web/public/brand/amora-logo.png
+ *
+ * Therefore the browser URL is:
+ * /brand/amora-logo.png
+ *
+ * Keeping the image path in one place prevents different sections
+ * from accidentally using different Amora logos.
+ */
+const AmoraLogo = ({
+  className = '',
+  alt = 'AmoraLive official logo'
+}) => {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) {
+    return (
+      <div
+        className={`amora-logo-fallback ${className}`}
+        aria-label={alt}
+        role="img"
+      >
+        A
+      </div>
+    );
+  }
+
+  return (
+    <img
+      src={AMORA_LOGO}
+      alt={alt}
+      className={`amora-logo ${className}`}
+      onError={() => setFailed(true)}
+      draggable="false"
+    />
+  );
+};
+
 export default function Guidelines() {
   const [search, setSearch] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
@@ -177,19 +216,26 @@ export default function Guidelines() {
 
             </div>
 
-            {/* OFFICIAL AMORA LOGO */}
+            {/* =====================================================
+                OFFICIAL AMORA LOGO
+            ===================================================== */}
 
-            <div className="hero-symbol">
+            <div className="hero-symbol" aria-hidden="true">
 
               <div className="symbol-ring ring-one" />
               <div className="symbol-ring ring-two" />
 
               <div className="symbol-core">
-                <img
-                  src={AMORA_LOGO}
-                  alt="AmoraLive official logo"
-                  className="hero-amora-logo"
-                />
+
+                <div className="logo-light">
+
+                  <AmoraLogo
+                    className="hero-amora-logo"
+                    alt="AmoraLive official logo"
+                  />
+
+                </div>
+
               </div>
 
             </div>
@@ -1269,11 +1315,14 @@ export default function Guidelines() {
 
                 <div className="final-logo-wrapper">
 
-                  <img
-                    src={AMORA_LOGO}
-                    alt="AmoraLive official logo"
-                    className="final-amora-logo"
-                  />
+                  <div className="final-logo-light">
+
+                    <AmoraLogo
+                      className="final-amora-logo"
+                      alt="AmoraLive official logo"
+                    />
+
+                  </div>
 
                 </div>
 
@@ -1391,6 +1440,10 @@ export default function Guidelines() {
             right: -280px;
             bottom: 10%;
           }
+
+          /* =========================================================
+             HERO
+          ========================================================= */
 
           .guidelines-hero {
             min-height: 450px;
@@ -1517,6 +1570,10 @@ export default function Guidelines() {
             font-size: 11px;
           }
 
+          /* =========================================================
+             HERO LOGO
+          ========================================================= */
+
           .hero-symbol {
             position: absolute;
             right: 3%;
@@ -1526,12 +1583,14 @@ export default function Guidelines() {
             transform: translateY(-50%);
             display: grid;
             place-items: center;
+            z-index: 2;
           }
 
           .symbol-ring {
             position: absolute;
             border-radius: 50%;
             border: 1px solid rgba(255,107,157,.22);
+            pointer-events: none;
           }
 
           .ring-one {
@@ -1548,8 +1607,8 @@ export default function Guidelines() {
           }
 
           .symbol-core {
-            width: 170px;
-            height: 170px;
+            width: 180px;
+            height: 180px;
             display: grid;
             place-items: center;
             border-radius: 50%;
@@ -1562,19 +1621,63 @@ export default function Guidelines() {
             box-shadow:
               0 0 80px rgba(255,63,157,.28);
             overflow: hidden;
+            position: relative;
+            z-index: 5;
           }
 
-          /* OFFICIAL AMORA LOGO */
+          .logo-light {
+            width: 142px;
+            height: 142px;
+            display: grid;
+            place-items: center;
+            border-radius: 50%;
+            background: rgba(8,8,15,.92);
+            border: 1px solid rgba(255,255,255,.10);
+            box-shadow:
+              inset 0 0 30px rgba(255,255,255,.025),
+              0 0 25px rgba(0,0,0,.35);
+            overflow: hidden;
+          }
+
+          .amora-logo {
+            display: block;
+            object-fit: contain;
+            object-position: center;
+            max-width: 100%;
+            max-height: 100%;
+            user-select: none;
+          }
 
           .hero-amora-logo {
-            width: 130px;
-            height: 130px;
+            width: 108px;
+            height: 108px;
             object-fit: contain;
+            object-position: center;
             display: block;
             filter:
-              drop-shadow(0 0 20px rgba(255,255,255,.18))
-              drop-shadow(0 0 30px rgba(255,63,157,.22));
+              drop-shadow(0 0 14px rgba(255,255,255,.16))
+              drop-shadow(0 0 22px rgba(255,63,157,.20));
           }
+
+          .amora-logo-fallback {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-size: 45px;
+            font-weight: 950;
+            background:
+              linear-gradient(
+                135deg,
+                #ff3f9d,
+                #9b35ff
+              );
+          }
+
+          /* =========================================================
+             PRINCIPLES
+          ========================================================= */
 
           .principle-grid {
             display: grid;
@@ -1629,6 +1732,10 @@ export default function Guidelines() {
             font-size: 10px;
           }
 
+          /* =========================================================
+             SAFETY
+          ========================================================= */
+
           .safety-banner {
             display: flex;
             align-items: flex-start;
@@ -1668,6 +1775,10 @@ export default function Guidelines() {
             font-size: 11px;
             line-height: 1.7;
           }
+
+          /* =========================================================
+             LAYOUT
+          ========================================================= */
 
           .guidelines-layout {
             display: grid;
@@ -1792,6 +1903,10 @@ export default function Guidelines() {
           .mobile-menu-button {
             display: none;
           }
+
+          /* =========================================================
+             DOCUMENT
+          ========================================================= */
 
           .guidelines-document {
             min-width: 0;
@@ -2031,27 +2146,40 @@ export default function Guidelines() {
           }
 
           .final-logo-wrapper {
-            width: 70px;
-            min-width: 70px;
-            height: 70px;
+            width: 78px;
+            min-width: 78px;
+            height: 78px;
             display: grid;
             place-items: center;
-            border-radius: 20px;
+            border-radius: 22px;
             background:
               linear-gradient(
                 135deg,
-                rgba(255,63,157,.20),
-                rgba(155,53,255,.18)
+                rgba(255,63,157,.22),
+                rgba(155,53,255,.20)
               );
-            border: 1px solid rgba(255,107,157,.22);
+            border: 1px solid rgba(255,107,157,.24);
             box-shadow:
               0 0 35px rgba(255,63,157,.16);
+            overflow: hidden;
+          }
+
+          .final-logo-light {
+            width: 64px;
+            height: 64px;
+            display: grid;
+            place-items: center;
+            border-radius: 18px;
+            background: rgba(8,8,15,.94);
+            border: 1px solid rgba(255,255,255,.10);
+            overflow: hidden;
           }
 
           .final-amora-logo {
-            width: 56px;
-            height: 56px;
+            width: 51px;
+            height: 51px;
             object-fit: contain;
+            object-position: center;
             display: block;
             filter:
               drop-shadow(0 0 12px rgba(255,255,255,.16))
@@ -2070,6 +2198,10 @@ export default function Guidelines() {
             font-size: 12px;
             line-height: 1.7;
           }
+
+          /* =========================================================
+             FOOTER
+          ========================================================= */
 
           .document-footer {
             display: flex;
@@ -2109,6 +2241,10 @@ export default function Guidelines() {
             font-weight: 700;
           }
 
+          /* =========================================================
+             RESPONSIVE
+          ========================================================= */
+
           @media (max-width: 1100px) {
 
             .hero-symbol {
@@ -2144,7 +2280,7 @@ export default function Guidelines() {
               bottom: -60px;
               top: auto;
               transform: none;
-              opacity: .25;
+              opacity: .30;
             }
 
             .ring-one {
@@ -2158,13 +2294,18 @@ export default function Guidelines() {
             }
 
             .symbol-core {
-              width: 110px;
-              height: 110px;
+              width: 118px;
+              height: 118px;
+            }
+
+            .logo-light {
+              width: 92px;
+              height: 92px;
             }
 
             .hero-amora-logo {
-              width: 82px;
-              height: 82px;
+              width: 70px;
+              height: 70px;
             }
 
             .guidelines-layout {
@@ -2248,6 +2389,12 @@ export default function Guidelines() {
             .final-card {
               flex-direction: column;
               align-items: flex-start;
+            }
+
+            .final-logo-wrapper {
+              width: 72px;
+              min-width: 72px;
+              height: 72px;
             }
 
           }
