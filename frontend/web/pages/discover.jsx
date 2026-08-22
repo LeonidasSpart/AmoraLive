@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Layout from '../components/Layout';
 import { apiFetch } from '../lib/api';
+import VerifiedBadge from '../components/VerifiedBadge';
 
 export default function Discover() {
   const [rooms, setRooms] = useState([]);
@@ -273,8 +274,9 @@ export default function Discover() {
                   : '👤'
                 ),
                 React.createElement('span', {
-                  style: { color: '#fff', fontSize: '13px', fontWeight: '500' }
-                }, room.host?.display_name || room.host?.username || 'Unknown')
+                  key: 'hostname',
+                  style: { display: 'inline-flex', alignItems: 'center', color: '#fff', fontSize: '13px', fontWeight: '500' }
+                }, [room.host?.display_name || room.host?.username || 'Unknown', React.createElement(VerifiedBadge, { key: 'badge', user: room.host, size: 12 })])
               ]),
               React.createElement('h3', {
                 style: {
