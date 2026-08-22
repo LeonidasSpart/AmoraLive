@@ -443,26 +443,30 @@ app.use((req, res, next) => {
 });
 
 // ---------- Socket.io ----------
-// Redis connects asynchronously, so the adapter must not depend on the
-// `connect` event having fired before Socket.IO is constructed.
 let io;
-const socketCors = {
-  origin: uniqueAllowedCorsOrigins,
-  methods: ['GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  credentials: true
-};
 
-if (pub && sub) {
-  try {
-    const { createAdapter } = require('@socket.io/redis-adapter');
-    io = new Server(server, { cors: socketCors, adapter: createAdapter(pub, sub) });
-    console.log('🔌 Socket.IO Redis adapter enabled');
-  } catch (err) {
-    console.warn('Socket.IO Redis adapter unavailable – using local adapter:', err.message);
-    io = new Server(server, { cors: socketCors });
-  }
+if (redisReady && pub && sub) {
+  const {
+    createAdapter
+  } = require('@socket.io/redis-adapter');
+
+  io = new Server(server, {
+    cors: {
+      origin: uniqueAllowedCorsOrigins,
+      methods: ['GET', 'POST'],
+      credentials: true
+    },
+
+    adapter: createAdapter(pub, sub)
+  });
 } else {
-  io = new Server(server, { cors: socketCors });
+  io = new Server(server, {
+    cors: {
+      origin: uniqueAllowedCorsOrigins,
+      methods: ['GET', 'POST'],
+      credentials: true
+    }
+  });
 }
 
 app.set('io', io);
@@ -476,6 +480,9 @@ const userRoutes =
 
 const liveRoutes =
   require('./routes/live')(prisma, io);
+
+const battleRoutes =
+  require('./routes/battles')(prisma, io);
 
 const giftRoutes =
   require('./routes/gifts')(prisma, io);
@@ -510,6 +517,7 @@ const notificationRoutes =
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/live', liveRoutes);
+app.use('/live', battleRoutes);
 app.use('/gifts', giftRoutes);
 app.use('/wallet', walletRoutes);
 app.use('/wallet/iap', iapRoutes);
