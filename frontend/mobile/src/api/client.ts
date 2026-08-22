@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 
-const API_URL: string =
+export const API_URL: string =
   (Constants.expoConfig?.extra as any)?.apiUrl || 'https://api.amoramatch.one';
 
 const ACCESS_KEY = 'accessToken';
