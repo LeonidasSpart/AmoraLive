@@ -209,8 +209,6 @@ export default function Guidelines() {
 
             </div>
 
-            {/* OFFICIAL AMORA LOGO */}
-
             <div className="hero-symbol">
 
               <div className="symbol-ring ring-one" />
@@ -1434,10 +1432,6 @@ export default function Guidelines() {
             bottom: 10%;
           }
 
-          /* =========================================================
-             HERO
-          ========================================================= */
-
           .guidelines-hero {
             min-height: 450px;
             position: relative;
@@ -1563,10 +1557,6 @@ export default function Guidelines() {
             font-size: 11px;
           }
 
-          /* =========================================================
-             HERO LOGO
-          ========================================================= */
-
           .hero-symbol {
             position: absolute;
             right: 3%;
@@ -1668,10 +1658,6 @@ export default function Guidelines() {
               );
           }
 
-          /* =========================================================
-             PRINCIPLES
-          ========================================================= */
-
           .principle-grid {
             display: grid;
             grid-template-columns: repeat(4,1fr);
@@ -1725,10 +1711,6 @@ export default function Guidelines() {
             font-size: 10px;
           }
 
-          /* =========================================================
-             SAFETY
-          ========================================================= */
-
           .safety-banner {
             display: flex;
             align-items: flex-start;
@@ -1768,10 +1750,6 @@ export default function Guidelines() {
             font-size: 11px;
             line-height: 1.7;
           }
-
-          /* =========================================================
-             LAYOUT
-          ========================================================= */
 
           .guidelines-layout {
             display: grid;
@@ -1900,10 +1878,6 @@ export default function Guidelines() {
           .mobile-menu-button {
             display: none;
           }
-
-          /* =========================================================
-             DOCUMENT
-          ========================================================= */
 
           .guidelines-document {
             min-width: 0;
@@ -2120,10 +2094,6 @@ export default function Guidelines() {
             line-height: 1.7;
           }
 
-          /* =========================================================
-             FINAL AMORA LOGO CARD
-          ========================================================= */
-
           .final-card {
             display: flex;
             align-items: center;
@@ -2196,10 +2166,6 @@ export default function Guidelines() {
             line-height: 1.7;
           }
 
-          /* =========================================================
-             FOOTER
-          ========================================================= */
-
           .document-footer {
             display: flex;
             align-items: center;
@@ -2241,10 +2207,6 @@ export default function Guidelines() {
           .footer-links a:hover {
             color: #ff9ac5;
           }
-
-          /* =========================================================
-             RESPONSIVE
-          ========================================================= */
 
           @media (max-width: 1100px) {
 
