@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { apiFetch } from '../lib/api';
+import VerifiedBadge from '../components/VerifiedBadge';
 
 export default function ChatList() {
   const router = useRouter();
@@ -187,12 +188,15 @@ export default function ChatList() {
                   }
                 }, [
                   React.createElement('span', {
+                    key: 'name',
                     style: {
+                      display: 'inline-flex',
+                      alignItems: 'center',
                       color: '#fff',
                       fontWeight: conv.unread_count > 0 ? 'bold' : 'normal',
                       fontSize: '16px'
                     }
-                  }, conv.display_name || conv.username),
+                  }, [conv.display_name || conv.username, React.createElement(VerifiedBadge, { key: 'badge', user: conv, size: 13 })]),
                   conv.last_message_time && React.createElement('span', {
                     style: { color: '#666', fontSize: '12px' }
                   }, timeAgo(conv.last_message_time))
