@@ -139,7 +139,7 @@ export default function AdminReports() {
 const s = {
   tabs: { display: 'flex', gap: 8, marginBottom: 20 },
   tab: { background: 'transparent', border: '1px solid #333', color: '#aaa', padding: '6px 16px', borderRadius: 16, cursor: 'pointer', fontSize: 13 },
-  tabActive: { background: '#FF6B9D', border: '1px solid #FF6B9D', color: '#fff', padding: '6px 16px', borderRadius: 16, cursor: 'pointer', fontSize: 13 },
+  tabActive: { background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', border: '1px solid #FF6B9D', color: '#fff', padding: '6px 16px', borderRadius: 16, cursor: 'pointer', fontSize: 13 },
   error: { color: '#ff6b6b', marginBottom: 12 },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: { textAlign: 'left', borderBottom: '1px solid #333', padding: 8, color: '#999', fontSize: 13 },

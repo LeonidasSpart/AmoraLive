@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { apiFetch } from '../../lib/api';
 
-const RARITIES = ['common', 'rare', 'epic', 'legendary'];
-const CATEGORIES = ['classic', 'romantic', 'luxury', 'seasonal', 'fun'];
+const RARITIES = ['common', 'rare', 'epic', 'legendary', 'mythic'];
+const CATEGORIES = ['classic', 'romantic', 'luxury', 'seasonal', 'fun', 'cosmic', 'wild'];
 
 const emptyForm = { name: '', description: '', image_url: '', animation_url: '', coin_price: '', rarity: 'common', category: 'classic' };
 
@@ -12,9 +12,11 @@ export default function AdminGifts() {
   const [gifts, setGifts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [form, setForm] = useState(emptyForm);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [seeding, setSeeding] = useState(false);
 
   const load = async () => {
     if (!localStorage.getItem('accessToken')) {
@@ -98,9 +100,33 @@ export default function AdminGifts() {
     }
   };
 
+  const seedDefaults = async () => {
+    if (!confirm("Add Amora's default 50-gift catalog and starter coin packages? Existing gifts with matching names will be updated, everything else is added fresh.")) return;
+    setSeeding(true);
+    setError('');
+    setMessage('');
+    try {
+      const res = await apiFetch('/admin/gifts/seed-defaults', { method: 'POST' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Unable to seed the default catalog.');
+      setMessage(`Seeded ${data.gifts.total} gifts (${data.gifts.created} new, ${data.gifts.updated} updated) and ${data.packages.total} coin packages.`);
+      await load();
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setSeeding(false);
+    }
+  };
+
   return (
     <AdminLayout>
-      <h1 style={{ marginBottom: 20 }}>Gift Catalog</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <h1 style={{ margin: 0 }}>Gift Catalog</h1>
+        <button onClick={seedDefaults} disabled={seeding} style={s.seedBtn}>
+          {seeding ? 'Seeding…' : '✨ Seed default 50-gift catalog'}
+        </button>
+      </div>
+      {message && <div style={s.success}>{message}</div>}
 
       <form onSubmit={save} style={s.form}>
         <h3 style={{ marginTop: 0 }}>{editingId ? 'Edit gift' : 'Add a new gift'}</h3>
@@ -164,11 +190,13 @@ export default function AdminGifts() {
 }
 
 const s = {
+  seedBtn: { background: 'linear-gradient(90deg, #7B2FF7, #F72585)', border: 'none', color: '#fff', padding: '10px 18px', borderRadius: 20, cursor: 'pointer', fontWeight: 'bold' },
+  success: { color: '#8f8', background: '#1a3a1a', padding: 10, borderRadius: 8, marginBottom: 16 },
   form: { background: '#161625', border: '1px solid #2a2a3e', borderRadius: 12, padding: 20, marginBottom: 32 },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 },
   input: { background: '#0f0f1a', border: '1px solid #333', borderRadius: 8, padding: 10, color: '#fff' },
   error: { color: '#ff6b6b', marginTop: 10 },
-  createBtn: { background: '#FF6B9D', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 'bold' },
+  createBtn: { background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 'bold' },
   cancelBtn: { background: 'transparent', border: '1px solid #444', color: '#ccc', padding: '10px 20px', borderRadius: 8, cursor: 'pointer' },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: { textAlign: 'left', borderBottom: '1px solid #333', padding: 8, color: '#999', fontSize: 13 },

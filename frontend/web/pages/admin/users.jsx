@@ -62,7 +62,7 @@ export default function AdminUsers() {
         React.createElement('h1', { style: { color: '#FF6B9D' } }, 'Users'),
         React.createElement('form', { onSubmit: handleSearch, style: { display: 'flex', gap: '10px' } },
           React.createElement('input', { type: 'text', placeholder: 'Search...', value: search, onChange: (e) => setSearch(e.target.value), style: { padding: '8px', borderRadius: '6px', border: '1px solid #333', background: '#1a1a2e', color: '#fff' } }),
-          React.createElement('button', { type: 'submit', style: { padding: '8px 16px', background: '#FF6B9D', border: 'none', borderRadius: '6px', color: '#fff', cursor: 'pointer' } }, 'Search')
+          React.createElement('button', { type: 'submit', style: { padding: '8px 16px', background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', border: 'none', borderRadius: '6px', color: '#fff', cursor: 'pointer' } }, 'Search')
         )
       ),
       React.createElement('table', { style: { width: '100%', borderCollapse: 'collapse', color: '#fff', background: '#1a1a2e', borderRadius: '8px', overflow: 'hidden' } },

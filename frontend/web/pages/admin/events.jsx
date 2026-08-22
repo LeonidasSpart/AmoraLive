@@ -167,7 +167,7 @@ const s = {
   input: { background: '#0f0f1a', border: '1px solid #333', borderRadius: 8, padding: 10, color: '#fff' },
   label: { display: 'flex', flexDirection: 'column', gap: 4, color: '#aaa', fontSize: 13 },
   error: { color: '#ff6b6b', marginTop: 10 },
-  createBtn: { marginTop: 14, background: '#FF6B9D', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 'bold' },
+  createBtn: { marginTop: 14, background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', border: 'none', color: '#fff', padding: '10px 20px', borderRadius: 8, cursor: 'pointer', fontWeight: 'bold' },
   table: { width: '100%', borderCollapse: 'collapse' },
   th: { textAlign: 'left', borderBottom: '1px solid #333', padding: 8, color: '#999', fontSize: 13 },
   td: { borderBottom: '1px solid #222', padding: 8, fontSize: 13 },
