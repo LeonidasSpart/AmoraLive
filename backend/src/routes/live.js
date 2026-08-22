@@ -61,7 +61,9 @@ module.exports = (prisma, io) => {
               id: true,
               username: true,
               display_name: true,
-              profile_photo: true
+              profile_photo: true,
+              is_verified: true,
+              membership_tier: true
             }
           }
         }
@@ -86,7 +88,9 @@ module.exports = (prisma, io) => {
               id: true,
               username: true,
               display_name: true,
-              profile_photo: true
+              profile_photo: true,
+              is_verified: true,
+              membership_tier: true
             }
           },
           participants: {
@@ -96,7 +100,9 @@ module.exports = (prisma, io) => {
                   id: true,
                   username: true,
                   display_name: true,
-                  profile_photo: true
+                  profile_photo: true,
+                  is_verified: true,
+                  membership_tier: true
                 }
               }
             },
@@ -110,7 +116,10 @@ module.exports = (prisma, io) => {
                 select: {
                   id: true,
                   username: true,
-                  display_name: true
+                  display_name: true,
+                  profile_photo: true,
+                  is_verified: true,
+                  membership_tier: true
                 }
               }
             }
@@ -183,7 +192,9 @@ module.exports = (prisma, io) => {
               id: true,
               username: true,
               display_name: true,
-              profile_photo: true
+              profile_photo: true,
+              is_verified: true,
+              membership_tier: true
             }
           }
         }
@@ -238,7 +249,10 @@ module.exports = (prisma, io) => {
             select: {
               id: true,
               username: true,
-              display_name: true
+              display_name: true,
+              profile_photo: true,
+              is_verified: true,
+              membership_tier: true
             }
           }
         }
@@ -394,7 +408,7 @@ module.exports = (prisma, io) => {
       });
       const senders = await prisma.user.findMany({
         where: { id: { in: totals.map((t) => t.sender_id) } },
-        select: { id: true, username: true, display_name: true, profile_photo: true }
+        select: { id: true, username: true, display_name: true, profile_photo: true, is_verified: true, membership_tier: true }
       });
       const byId = Object.fromEntries(senders.map((u) => [u.id, u]));
       res.json(totals.map((t) => ({ user: byId[t.sender_id], totalCoins: t._sum.coin_cost || 0 })));
