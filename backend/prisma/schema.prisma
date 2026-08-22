@@ -239,6 +239,7 @@ model LiveRoom {
   end_time    DateTime?
   viewer_count Int     @default(0)
   gift_count  Int      @default(0)
+  like_count  Int      @default(0)
   stream_key  String
   thumbnail_url String?
   settings    Json?
