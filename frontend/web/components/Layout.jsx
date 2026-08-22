@@ -102,6 +102,14 @@ export default function Layout({ children }) {
 
       <main className="amora-app-main">{children}</main>
 
+      <nav className="amora-mobile-bottom" aria-label="Mobile navigation">
+        <Link href="/discover" className={router.pathname === '/discover' ? 'is-active' : ''}><span>✨</span><span>Discover</span></Link>
+        <Link href="/video-match" className={router.pathname === '/video-match' ? 'is-active' : ''}><span>💘</span><span>Match</span></Link>
+        <Link href="/go-live" className={router.pathname === '/go-live' ? 'is-active' : ''}><span className="live-dot">●</span><span>Live</span></Link>
+        <Link href="/chat" className={router.pathname.startsWith('/chat') ? 'is-active' : ''}><span>💬</span><span>Chat</span></Link>
+        <Link href="/profile" className={router.pathname === '/profile' ? 'is-active' : ''}><span>👤</span><span>Profile</span></Link>
+      </nav>
+
       <footer className="amora-app-footer">
         <Link href="/legal/terms">Terms of Service</Link>
         <Link href="/legal/privacy">Privacy Policy</Link>
