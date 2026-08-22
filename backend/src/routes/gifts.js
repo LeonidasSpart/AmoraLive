@@ -7,19 +7,57 @@ module.exports = (prisma, io) => {
   router.get('/catalog', async (req, res) => {
     try {
       const now = new Date();
-      const category = String(req.query.category || '').trim();
-      const rarity = String(req.query.rarity || '').trim();
-      const where = {
-        is_active: true,
-        OR: [{ available_from: null }, { available_from: { lte: now } }],
-        AND: [{ OR: [{ available_to: null }, { available_to: { gte: now } }] }]
-      };
-      if (category) where.category = category;
-      if (rarity) where.rarity = rarity;
-      const gifts = await prisma.giftCatalog.findMany({ where, orderBy: { coin_price: 'asc' } });
+      const gifts = await prisma.giftCatalog.findMany({
+        where: {
+          is_active: true,
+          OR: [{ available_from: null }, { available_from: { lte: now } }],
+          AND: [{ OR: [{ available_to: null }, { available_to: { gte: now } }] }]
+        },
+        orderBy: [{ category: 'asc' }, { sort_order: 'asc' }, { coin_price: 'asc' }]
+      });
       res.json(gifts);
     } catch (e) {
-      res.status(500).json({ error: 'Unable to load gifts' });
+      res.status(500).json({ error: 'Unable to load gifts', code: 'CATALOG_LOAD_FAILED' });
+    }
+  });
+
+  // ---------- GET /gifts/history (current user's sent + received) ----------
+  // Registered before /:id — otherwise Express would match "history" as an
+  // :id value and this route would be unreachable.
+  router.get('/history', auth, async (req, res) => {
+    const { direction = 'all', limit = 50 } = req.query;
+    const take = Math.min(Number(limit) || 50, 100);
+    try {
+      const where = direction === 'sent'
+        ? { sender_id: req.user.id }
+        : direction === 'received'
+          ? { receiver_id: req.user.id }
+          : { OR: [{ sender_id: req.user.id }, { receiver_id: req.user.id }] };
+
+      const history = await prisma.giftTransaction.findMany({
+        where: { ...where, status: 'completed' },
+        orderBy: { created_at: 'desc' },
+        take,
+        include: {
+          gift: true,
+          sender: { select: { id: true, username: true, display_name: true, profile_photo: true, is_verified: true, membership_tier: true } },
+          receiver: { select: { id: true, username: true, display_name: true, profile_photo: true, is_verified: true, membership_tier: true } }
+        }
+      });
+      res.json(history);
+    } catch (e) {
+      res.status(500).json({ error: 'Unable to load gift history', code: 'HISTORY_LOAD_FAILED' });
+    }
+  });
+
+  // ---------- GET /gifts/:id ----------
+  router.get('/:id', async (req, res) => {
+    try {
+      const gift = await prisma.giftCatalog.findUnique({ where: { id: req.params.id } });
+      if (!gift || !gift.is_active) return res.status(404).json({ error: 'Gift not found', code: 'GIFT_NOT_FOUND' });
+      res.json(gift);
+    } catch (e) {
+      res.status(500).json({ error: 'Unable to load gift', code: 'GIFT_LOAD_FAILED' });
     }
   });
 
@@ -31,7 +69,7 @@ module.exports = (prisma, io) => {
     const { giftId, receiverId, roomId, quantity = 1, idempotencyKey } = req.body;
     const qty = Number(quantity);
     if (!giftId || (!receiverId && !roomId) || !Number.isInteger(qty) || qty < 1 || qty > 100) {
-      return res.status(400).json({ error: 'giftId, receiverId or roomId, and valid quantity are required' });
+      return res.status(400).json({ error: 'giftId, receiverId or roomId, and valid quantity are required', code: 'INVALID_REQUEST' });
     }
 
     const key = idempotencyKey || crypto.randomUUID();
@@ -41,19 +79,19 @@ module.exports = (prisma, io) => {
 
       const txResult = await prisma.$transaction(async (tx) => {
         const gift = await tx.giftCatalog.findFirst({ where: { id: giftId, is_active: true } });
-        if (!gift) throw Object.assign(new Error('Gift not found'), { statusCode: 404 });
+        if (!gift) throw Object.assign(new Error('Gift not found'), { statusCode: 404, code: 'GIFT_NOT_FOUND' });
 
         let receiver = null;
         let room = null;
         if (roomId) {
           room = await tx.liveRoom.findUnique({ where: { id: roomId }, include: { host: true } });
-          if (!room || room.status !== 'live') throw Object.assign(new Error('Live room is not active'), { statusCode: 409 });
+          if (!room || room.status !== 'live') throw Object.assign(new Error('Live room is not active'), { statusCode: 409, code: 'ROOM_NOT_ACTIVE' });
           receiver = room.host;
         } else {
           receiver = await tx.user.findUnique({ where: { id: receiverId } });
-          if (!receiver || !receiver.is_active) throw Object.assign(new Error('Receiver not found'), { statusCode: 404 });
+          if (!receiver || !receiver.is_active) throw Object.assign(new Error('Receiver not found'), { statusCode: 404, code: 'RECEIVER_NOT_FOUND' });
         }
-        if (!receiver || receiver.id === req.user.id) throw Object.assign(new Error('Invalid receiver'), { statusCode: 400 });
+        if (!receiver || receiver.id === req.user.id) throw Object.assign(new Error('Invalid receiver'), { statusCode: 400, code: 'INVALID_RECEIVER' });
 
         // Looked up before the wallet math below: an active team-battle
         // event still tracks EventScore, and an active PK battle (see
@@ -69,7 +107,7 @@ module.exports = (prisma, io) => {
           where: { user_id: req.user.id, balance: { gte: totalCost } },
           data: { balance: { decrement: totalCost }, lifetime_spent: { increment: totalCost } }
         });
-        if (debit.count !== 1) throw Object.assign(new Error('Insufficient coin balance'), { statusCode: 402 });
+        if (debit.count !== 1) throw Object.assign(new Error('Insufficient coin balance'), { statusCode: 402, code: 'INSUFFICIENT_BALANCE' });
         const updatedSender = await tx.wallet.findUnique({ where: { user_id: req.user.id } });
 
         const receiverShare = Math.floor(totalCost * RECEIVER_SHARE);
@@ -180,7 +218,10 @@ module.exports = (prisma, io) => {
     } catch (e) {
       const status = e.statusCode || 500;
       if (status >= 500) console.error('Gift transaction error:', e);
-      res.status(status).json({ error: status === 500 ? 'Gift transaction failed' : e.message });
+      res.status(status).json({
+        error: status === 500 ? 'Gift transaction failed' : e.message,
+        code: e.code || (status === 500 ? 'TRANSACTION_FAILED' : 'GIFT_SEND_FAILED')
+      });
     }
   });
 
