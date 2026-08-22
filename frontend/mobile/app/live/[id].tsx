@@ -11,7 +11,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Animated,
-  Image
+  Image,
+  Modal
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { Room, RoomEvent, Track, RemoteTrack } from "livekit-client";
@@ -22,6 +23,14 @@ import { api, API_URL, getUserId } from "../../src/api/client";
 type ChatMessage = { id: string; message?: string; content?: string; user?: any; username?: string; system?: boolean };
 type Gift = { id: string; name: string; image_url: string; coin_price: number };
 type TopGifter = { user: { id: string; display_name: string; username: string }; totalCoins: number };
+type BattleState = {
+  battleId: string;
+  mySide: "a" | "b";
+  endsAt: number;
+  opponent: { id: string; title: string; host: any };
+  scoreA: number;
+  scoreB: number;
+};
 
 let heartSeq = 0;
 
@@ -52,6 +61,7 @@ export default function LiveRoom() {
   const [chat, setChat] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [remoteTrack, setRemoteTrack] = useState<RemoteTrack | null>(null);
+  const [opponentTrack, setOpponentTrack] = useState<RemoteTrack | null>(null);
   const [videoAvailable, setVideoAvailable] = useState(true);
   const [gifts, setGifts] = useState<Gift[]>([]);
   const [showGiftPicker, setShowGiftPicker] = useState(false);
@@ -63,8 +73,17 @@ export default function LiveRoom() {
   const [hearts, setHearts] = useState<{ id: number; left: number }[]>([]);
   const [ending, setEnding] = useState(false);
 
+  const [battle, setBattle] = useState<BattleState | null>(null);
+  const [battleTimeLeft, setBattleTimeLeft] = useState(0);
+  const [battleResult, setBattleResult] = useState<string | null>(null);
+  const [incomingInvite, setIncomingInvite] = useState<any>(null);
+  const [outgoingInvite, setOutgoingInvite] = useState<boolean>(false);
+  const [showBattlePicker, setShowBattlePicker] = useState(false);
+  const [challengeableRooms, setChallengeableRooms] = useState<any[]>([]);
+
   const socketRef = useRef<any>(null);
   const livekitRoomRef = useRef<Room | null>(null);
+  const opponentRoomRef = useRef<Room | null>(null);
   const listRef = useRef<FlatList>(null);
 
   const spawnHeart = () => {
@@ -80,18 +99,41 @@ export default function LiveRoom() {
     } catch {}
   }, [id]);
 
+  const disconnectOpponent = useCallback(async () => {
+    if (opponentRoomRef.current) {
+      await opponentRoomRef.current.disconnect();
+      opponentRoomRef.current = null;
+    }
+    setOpponentTrack(null);
+  }, []);
+
+  const connectOpponentVideo = useCallback(async (opponentRoomId: string) => {
+    try {
+      const tokenData = await api.liveToken(opponentRoomId).catch(() => null);
+      if (!tokenData?.token || !tokenData?.url) return;
+      const room = new Room({ adaptiveStream: true, dynacast: true });
+      opponentRoomRef.current = room;
+      room.on(RoomEvent.TrackSubscribed, (track) => {
+        if (track.kind === Track.Kind.Video) setOpponentTrack(track as RemoteTrack);
+      });
+      room.on(RoomEvent.TrackUnsubscribed, () => setOpponentTrack(null));
+      await room.connect(tokenData.url, tokenData.token);
+    } catch {}
+  }, []);
+
   const teardown = useCallback(async () => {
     if (livekitRoomRef.current) {
       await livekitRoomRef.current.disconnect();
       livekitRoomRef.current = null;
     }
+    await disconnectOpponent();
     if (socketRef.current) {
       socketRef.current.emit("leave-live", id);
       socketRef.current.disconnect();
       socketRef.current = null;
     }
     await api.leaveLiveRoom(String(id)).catch(() => {});
-  }, [id]);
+  }, [id, disconnectOpponent]);
 
   useEffect(() => {
     let active = true;
@@ -160,6 +202,56 @@ export default function LiveRoom() {
           setTimeout(() => router.replace("/live"), 1500);
         });
 
+        // ---------- PK battle events ----------
+        socket.on("battle:invite", (payload: any) => active && setIncomingInvite(payload));
+        socket.on("battle:invite_expired", () => {
+          if (!active) return;
+          setIncomingInvite(null);
+          setOutgoingInvite(false);
+        });
+        socket.on("battle:invite_declined", () => {
+          if (!active) return;
+          setOutgoingInvite(false);
+          setError("Your battle invite was declined.");
+        });
+        socket.on("battle:invite_cancelled", () => active && setIncomingInvite(null));
+        socket.on("battle:started", async (payload: any) => {
+          if (!active) return;
+          setIncomingInvite(null);
+          setOutgoingInvite(false);
+          setBattle({ ...payload, scoreA: 0, scoreB: 0 });
+          setBattleResult(null);
+          await connectOpponentVideo(payload.opponent.id);
+        });
+        socket.on("battle:score", (payload: any) => {
+          if (!active) return;
+          setBattle((prev) => (prev && prev.battleId === payload.battleId ? { ...prev, scoreA: payload.scoreA, scoreB: payload.scoreB } : prev));
+        });
+        socket.on("battle:ended", async (payload: any) => {
+          if (!active) return;
+          setBattle((prev) => {
+            if (!prev || prev.battleId !== payload.battleId) return prev;
+            const mine = prev.mySide === "a" ? payload.scoreA : payload.scoreB;
+            const theirs = prev.mySide === "a" ? payload.scoreB : payload.scoreA;
+            setBattleResult(mine === theirs ? "🤝 It's a draw!" : mine > theirs ? "🏆 You won the battle!" : "😢 You lost the battle.");
+            return { ...prev, scoreA: payload.scoreA, scoreB: payload.scoreB };
+          });
+          await disconnectOpponent();
+          setTimeout(() => {
+            if (active) {
+              setBattle(null);
+              setBattleResult(null);
+            }
+          }, 4000);
+        });
+
+        // In case this viewer joined a room that's already mid-battle.
+        api.battleStatus(String(id)).then(async (b: any) => {
+          if (!active || !b?.active) return;
+          setBattle({ battleId: b.battleId, mySide: b.mySide, endsAt: b.endsAt, opponent: b.opponent, scoreA: b.scoreA, scoreB: b.scoreB });
+          await connectOpponentVideo(b.opponent.id);
+        }).catch(() => {});
+
         const tokenData = await api.liveToken(String(id)).catch(() => null);
         if (tokenData?.token && tokenData?.url) {
           const lkRoom = new Room({ adaptiveStream: true, dynacast: true });
@@ -189,6 +281,17 @@ export default function LiveRoom() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
+
+  useEffect(() => {
+    if (!battle?.endsAt) {
+      setBattleTimeLeft(0);
+      return;
+    }
+    const tick = () => setBattleTimeLeft(Math.max(0, Math.ceil((battle.endsAt - Date.now()) / 1000)));
+    tick();
+    const interval = setInterval(tick, 500);
+    return () => clearInterval(interval);
+  }, [battle?.endsAt, battle?.battleId]);
 
   const sendChat = () => {
     const message = draft.trim();
@@ -224,6 +327,39 @@ export default function LiveRoom() {
     }
   };
 
+  const openBattlePicker = async () => {
+    try {
+      const rooms = await api.liveRooms();
+      setChallengeableRooms((Array.isArray(rooms) ? rooms : []).filter((r: any) => r.id !== id));
+    } catch {}
+    setShowBattlePicker(true);
+  };
+
+  const startChallenge = async (targetRoomId: string) => {
+    try {
+      await api.battleInvite(String(id), targetRoomId);
+      setOutgoingInvite(true);
+      setShowBattlePicker(false);
+    } catch (e: any) {
+      setError(e.message || "Unable to send battle invite.");
+    }
+  };
+
+  const respondToInvite = async (accept: boolean) => {
+    if (!incomingInvite) return;
+    try {
+      if (accept) await api.battleAccept(String(id));
+      else await api.battleDecline(String(id));
+    } catch {}
+    setIncomingInvite(null);
+  };
+
+  const endBattle = async () => {
+    try {
+      await api.battleEnd(String(id));
+    } catch {}
+  };
+
   const endLive = async () => {
     setEnding(true);
     try {
@@ -246,9 +382,13 @@ export default function LiveRoom() {
     );
   }
 
+  const myScore = battle ? (battle.mySide === "a" ? battle.scoreA : battle.scoreB) : 0;
+  const oppScore = battle ? (battle.mySide === "a" ? battle.scoreB : battle.scoreA) : 0;
+  const battleFillPct = battle ? Math.round((myScore / (myScore + oppScore || 1)) * 100) : 50;
+
   return (
     <KeyboardAvoidingView style={s.page} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <View style={s.videoBox}>
+      <View style={battle ? s.videoTopHalf : s.videoBox}>
         {videoAvailable && remoteTrack ? (
           <VideoView style={s.videoFill} videoTrack={remoteTrack} objectFit="cover" />
         ) : (
@@ -259,8 +399,43 @@ export default function LiveRoom() {
         )}
       </View>
 
+      {battle && (
+        <View style={s.videoBottomHalf}>
+          {opponentTrack ? (
+            <VideoView style={s.videoFill} videoTrack={opponentTrack} objectFit="cover" />
+          ) : (
+            <View style={s.fallback}>
+              <Text style={{ fontSize: 30 }}>📺</Text>
+            </View>
+          )}
+          <View style={s.opponentLabel}>
+            <Text style={{ color: "#fff", fontSize: 11, fontWeight: "700" }}>{battle.opponent?.host?.display_name || battle.opponent?.host?.username}</Text>
+          </View>
+        </View>
+      )}
+
+      {battle && (
+        <View style={s.battleBar}>
+          <View style={s.battleScoreRow}>
+            <Text style={s.battleScoreText}>🔥 {myScore}</Text>
+            <View style={s.battleTimerBadge}>
+              <Text style={{ color: "#fff", fontSize: 12 }}>{Math.floor(battleTimeLeft / 60)}:{String(battleTimeLeft % 60).padStart(2, "0")}</Text>
+            </View>
+            <Text style={s.battleScoreText}>{oppScore} 🔥</Text>
+          </View>
+          <View style={s.battleFillTrack}>
+            <View style={[s.battleFill, { width: `${battleFillPct}%` }]} />
+          </View>
+        </View>
+      )}
+      {!!battleResult && (
+        <View style={s.battleResultBanner}>
+          <Text style={{ color: "#fff", fontWeight: "800", fontSize: 18 }}>{battleResult}</Text>
+        </View>
+      )}
+
       <View style={s.topBar}>
-        <Pressable onPress={isHost ? leave : leave} style={s.closeBtn}>
+        <Pressable onPress={leave} style={s.closeBtn}>
           <Text style={{ color: "#fff", fontSize: 18 }}>✕</Text>
         </Pressable>
         <View style={s.hostChip}>
@@ -283,9 +458,22 @@ export default function LiveRoom() {
       </View>
 
       {!!error && <Text style={s.error}>{error}</Text>}
+      {outgoingInvite && !battle && (
+        <View style={s.inviteBanner}><Text style={{ color: "#fff", fontSize: 13 }}>⚔️ Battle invite sent — waiting for a response…</Text></View>
+      )}
       {!!giftAlert && (
         <View style={s.giftAlert}>
           <Text style={{ color: "#3a2a00", fontWeight: "800", fontSize: 13 }}>{giftAlert}</Text>
+        </View>
+      )}
+
+      {incomingInvite && isHost && !battle && (
+        <View style={s.inviteBanner}>
+          <Text style={{ color: "#fff", fontWeight: "700", marginBottom: 8 }}>🔥 {incomingInvite.fromHost?.display_name || incomingInvite.fromHost?.username} wants to battle!</Text>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <Pressable onPress={() => respondToInvite(true)} style={s.acceptBtn}><Text style={{ color: "#06110a", fontWeight: "700" }}>Accept</Text></Pressable>
+            <Pressable onPress={() => respondToInvite(false)} style={s.declineBtn}><Text style={{ color: "#fff", fontWeight: "700" }}>Decline</Text></Pressable>
+          </View>
         </View>
       )}
 
@@ -308,6 +496,18 @@ export default function LiveRoom() {
           <View style={s.railIcon}><Text style={{ fontSize: 22 }}>🏆</Text></View>
           <Text style={s.railCount}>Top</Text>
         </Pressable>
+        {isHost && !battle && (
+          <Pressable onPress={openBattlePicker} style={s.railBtn}>
+            <View style={s.railIcon}><Text style={{ fontSize: 22 }}>⚔️</Text></View>
+            <Text style={s.railCount}>Battle</Text>
+          </Pressable>
+        )}
+        {isHost && battle && (
+          <Pressable onPress={endBattle} style={s.railBtn}>
+            <View style={s.railIcon}><Text style={{ fontSize: 22 }}>⚔️</Text></View>
+            <Text style={s.railCount}>End</Text>
+          </Pressable>
+        )}
         {isHost && (
           <Pressable onPress={endLive} disabled={ending} style={s.railBtn}>
             <View style={s.railIcon}><Text style={{ fontSize: 20 }}>⏹</Text></View>
@@ -349,6 +549,32 @@ export default function LiveRoom() {
         </View>
       )}
 
+      <Modal visible={showBattlePicker} transparent animationType="fade" onRequestClose={() => setShowBattlePicker(false)}>
+        <Pressable style={s.modalOverlay} onPress={() => setShowBattlePicker(false)}>
+          <Pressable style={s.modalPanel} onPress={(e) => e.stopPropagation()}>
+            <Text style={{ color: "#fff", fontWeight: "800", marginBottom: 10 }}>⚔️ Challenge a live streamer</Text>
+            {challengeableRooms.length === 0 ? (
+              <Text style={{ color: "#999", fontSize: 13 }}>No other streamers are live right now.</Text>
+            ) : (
+              <FlatList
+                data={challengeableRooms}
+                keyExtractor={(item) => item.id}
+                style={{ maxHeight: 320 }}
+                renderItem={({ item }) => (
+                  <Pressable onPress={() => startChallenge(item.id)} style={s.challengeRow}>
+                    <Text style={{ color: "#fff", flex: 1, fontSize: 13 }} numberOfLines={1}>{item.host?.display_name || item.host?.username} — {item.title}</Text>
+                    <Text style={{ color: "#999", fontSize: 12 }}>👁 {item.viewer_count}</Text>
+                  </Pressable>
+                )}
+              />
+            )}
+            <Pressable onPress={() => setShowBattlePicker(false)} style={[s.declineBtn, { marginTop: 12 }]}>
+              <Text style={{ color: "#fff", fontWeight: "700", textAlign: "center" }}>Cancel</Text>
+            </Pressable>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
       <View style={s.chatOverlay}>
         <FlatList
           ref={listRef}
@@ -384,9 +610,19 @@ export default function LiveRoom() {
 const s = StyleSheet.create({
   page: { flex: 1, backgroundColor: "#000" },
   videoBox: { ...StyleSheet.absoluteFillObject, backgroundColor: "#0a0a12", alignItems: "center", justifyContent: "center" },
+  videoTopHalf: { position: "absolute", top: 0, left: 0, right: 0, height: "50%", backgroundColor: "#0a0a12", alignItems: "center", justifyContent: "center", borderBottomWidth: 2, borderBottomColor: theme.pink, overflow: "hidden" },
+  videoBottomHalf: { position: "absolute", bottom: 0, left: 0, right: 0, height: "50%", backgroundColor: "#0a0a12", alignItems: "center", justifyContent: "center", overflow: "hidden" },
+  opponentLabel: { position: "absolute", bottom: 8, left: 8, backgroundColor: "rgba(0,0,0,0.5)", paddingHorizontal: 8, paddingVertical: 3, borderRadius: 8 },
   videoFill: { width: "100%", height: "100%" },
   fallback: { alignItems: "center", justifyContent: "center" },
   fallbackText: { color: theme.muted, marginTop: 8 },
+  battleBar: { position: "absolute", top: "50%", left: 0, right: 0, transform: [{ translateY: -20 }], zIndex: 5, paddingHorizontal: 16 },
+  battleScoreRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 4 },
+  battleScoreText: { color: "#fff", fontWeight: "800", fontSize: 14 },
+  battleTimerBadge: { backgroundColor: "rgba(0,0,0,0.6)", borderRadius: 10, paddingHorizontal: 10, paddingVertical: 2 },
+  battleFillTrack: { height: 6, backgroundColor: "rgba(255,255,255,0.25)", borderRadius: 4, overflow: "hidden" },
+  battleFill: { height: "100%", backgroundColor: theme.pink },
+  battleResultBanner: { position: "absolute", top: "40%", alignSelf: "center", backgroundColor: "rgba(0,0,0,0.8)", paddingHorizontal: 24, paddingVertical: 14, borderRadius: 16, zIndex: 6 },
   topBar: { position: "absolute", top: 50, left: 12, right: 12, flexDirection: "row", alignItems: "center", gap: 8 },
   closeBtn: { width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(0,0,0,0.4)", alignItems: "center", justifyContent: "center" },
   hostChip: { flex: 1, flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "rgba(0,0,0,0.35)", borderRadius: 20, paddingHorizontal: 10, paddingVertical: 6 },
@@ -396,7 +632,10 @@ const s = StyleSheet.create({
   viewerBadge: { backgroundColor: "rgba(0,0,0,0.4)", borderRadius: 14, paddingHorizontal: 10, paddingVertical: 6 },
   viewerBadgeText: { color: "#fff", fontSize: 12, fontWeight: "700" },
   error: { color: "#ff6b6b", textAlign: "center", marginTop: 100, position: "absolute", left: 12, right: 12 },
-  giftAlert: { position: "absolute", top: 110, alignSelf: "center", backgroundColor: "rgba(255,209,102,0.95)", borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8 },
+  inviteBanner: { position: "absolute", top: 100, left: 12, right: 12, backgroundColor: "rgba(20,20,35,0.95)", borderWidth: 1, borderColor: theme.pink, borderRadius: 12, padding: 12, zIndex: 5 },
+  acceptBtn: { flex: 1, backgroundColor: "#35df70", borderRadius: 10, paddingVertical: 8, alignItems: "center" },
+  declineBtn: { flex: 1, backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 10, paddingVertical: 8, alignItems: "center" },
+  giftAlert: { position: "absolute", top: 140, alignSelf: "center", backgroundColor: "rgba(255,209,102,0.95)", borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8 },
   heartLayer: { ...StyleSheet.absoluteFillObject },
   rightRail: { position: "absolute", right: 10, bottom: 160, alignItems: "center", gap: 18 },
   railBtn: { alignItems: "center", gap: 2 },
@@ -405,6 +644,9 @@ const s = StyleSheet.create({
   leaderboardPanel: { position: "absolute", right: 66, bottom: 160, width: 200, backgroundColor: "rgba(15,15,26,0.92)", borderRadius: 14, padding: 14, borderWidth: 1, borderColor: "#333" },
   giftPicker: { position: "absolute", left: 12, right: 66, bottom: 160, backgroundColor: "rgba(15,15,26,0.92)", borderRadius: 14, padding: 10, flexDirection: "row", flexWrap: "wrap", gap: 8, maxHeight: 220, borderWidth: 1, borderColor: "#333" },
   giftBtn: { width: "22%", backgroundColor: "rgba(255,255,255,0.06)", borderRadius: 10, padding: 8, alignItems: "center", gap: 2 },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center" },
+  modalPanel: { width: "85%", maxHeight: "70%", backgroundColor: "#161625", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#333" },
+  challengeRow: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "rgba(255,255,255,0.06)", borderRadius: 10, padding: 10, marginBottom: 8 },
   chatOverlay: { position: "absolute", left: 0, right: 0, bottom: 0, paddingHorizontal: 12, paddingBottom: 20, paddingTop: 10 },
   chatMsg: { color: "#eee", fontSize: 13, paddingVertical: 3 },
   systemMsg: { color: theme.gold, fontSize: 13, paddingVertical: 3, fontStyle: "italic" },
