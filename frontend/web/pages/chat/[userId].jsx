@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { apiFetch } from '../../lib/api';
+import VerifiedBadge from '../../components/VerifiedBadge';
 
 export default function ChatRoom() {
   const router = useRouter();
@@ -201,8 +202,8 @@ export default function ChatRoom() {
       React.createElement('div', { key: 'info', style: { flex: 1 } }, [
         React.createElement('span', {
           key: 'name',
-          style: { color: '#fff', fontWeight: 'bold' }
-        }, otherUser?.display_name || otherUser?.username || 'User'),
+          style: { display: 'inline-flex', alignItems: 'center', color: '#fff', fontWeight: 'bold' }
+        }, [otherUser?.display_name || otherUser?.username || 'User', React.createElement(VerifiedBadge, { key: 'badge', user: otherUser, size: 14 })]),
         React.createElement('span', {
           key: 'status',
           style: {
