@@ -1,7 +1,8 @@
+// pages/_app.js
+
 import React from 'react';
 import Head from 'next/head';
 import '../styles.css';
-import CookieConsent from '../components/CookieConsent';
 
 export default function App({ Component, pageProps }) {
   return (
@@ -136,9 +137,6 @@ export default function App({ Component, pageProps }) {
       </Head>
 
       <Component {...pageProps} />
-
-      {/* Global AmoraLive cookie consent system */}
-      <CookieConsent />
     </>
   );
 }
