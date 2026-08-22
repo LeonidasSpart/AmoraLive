@@ -70,6 +70,7 @@ export default function LiveRoom() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [followBusy, setFollowBusy] = useState(false);
   const [giftAlert, setGiftAlert] = useState<string | null>(null);
+  const [giftShowcase, setGiftShowcase] = useState<any | null>(null);
   const [hearts, setHearts] = useState<{ id: number; left: number }[]>([]);
   const [ending, setEnding] = useState(false);
 
@@ -189,12 +190,15 @@ export default function LiveRoom() {
           if (!active) return;
           const name = tx.sender?.display_name || tx.sender?.username || "Someone";
           const giftName = tx.gift?.name || "a gift";
-          setChat((prev) => [...prev, { id: `gift-${Date.now()}`, system: true, message: `🎁 ${name} sent ${giftName}!` }]);
+          const gift = tx.gift || {};
+          setChat((prev) => [...prev, { id: `gift-${Date.now()}`, system: true, message: `${name} sent ${tx.quantity > 1 ? `${tx.quantity}× ` : ""}${giftName}` }]);
           setGiftCount((prev) => prev + (tx.quantity || 1));
-          setGiftAlert(`${name} sent ${tx.quantity > 1 ? `${tx.quantity}x ` : ""}${giftName}!`);
+          setGiftAlert(`${name} sent ${tx.quantity > 1 ? `${tx.quantity}× ` : ""}${giftName}!`);
+          setGiftShowcase({ ...gift, senderName: name, quantity: tx.quantity || 1 });
           spawnHeart();
           loadTopGifters();
           setTimeout(() => setGiftAlert(null), 3000);
+          setTimeout(() => setGiftShowcase(null), 5200);
         });
         socket.on("room-ended", () => {
           if (!active) return;
@@ -461,9 +465,18 @@ export default function LiveRoom() {
       {outgoingInvite && !battle && (
         <View style={s.inviteBanner}><Text style={{ color: "#fff", fontSize: 13 }}>⚔️ Battle invite sent — waiting for a response…</Text></View>
       )}
+      {!!giftShowcase && (
+        <View style={s.giftShowcase} pointerEvents="none">
+          <View style={s.giftHalo} />
+          <Image source={{ uri: giftShowcase.image_url?.startsWith("/") ? `${API_URL}${giftShowcase.image_url}` : giftShowcase.image_url }} style={s.giftShowcaseImage} />
+          <Text style={s.giftShowcaseEyebrow}>AMORA GIFT</Text>
+          <Text style={s.giftShowcaseName}>{giftShowcase.name}</Text>
+          <Text style={s.giftShowcaseMeta}>{giftShowcase.senderName} · {giftShowcase.coin_price || 0} coins{giftShowcase.quantity > 1 ? ` · ×${giftShowcase.quantity}` : ""}</Text>
+        </View>
+      )}
       {!!giftAlert && (
         <View style={s.giftAlert}>
-          <Text style={{ color: "#3a2a00", fontWeight: "800", fontSize: 13 }}>{giftAlert}</Text>
+          <Text style={{ color: "#fff", fontWeight: "800", fontSize: 13 }}>{giftAlert}</Text>
         </View>
       )}
 
@@ -489,7 +502,7 @@ export default function LiveRoom() {
           <Text style={s.railCount}>{likeCount}</Text>
         </Pressable>
         <Pressable onPress={() => setShowGiftPicker((v) => !v)} style={s.railBtn}>
-          <View style={s.railIcon}><Text style={{ fontSize: 22 }}>🎁</Text></View>
+          <View style={s.railIcon}><View style={s.gemIcon}><Text style={{ color: "#fff", fontSize: 15 }}>✦</Text></View></View>
           <Text style={s.railCount}>{giftCount}</Text>
         </Pressable>
         <Pressable onPress={() => setShowLeaderboard((v) => !v)} style={s.railBtn}>
@@ -537,11 +550,7 @@ export default function LiveRoom() {
         <View style={s.giftPicker}>
           {gifts.map((g) => (
             <Pressable key={g.id} onPress={() => sendGift(g.id)} style={s.giftBtn}>
-              {g.image_url?.startsWith("http") ? (
-                <Image source={{ uri: g.image_url }} style={{ width: 26, height: 26 }} />
-              ) : (
-                <Text style={{ fontSize: 22 }}>{g.image_url || "🎁"}</Text>
-              )}
+              <Image source={{ uri: g.image_url?.startsWith("/") ? `${API_URL}${g.image_url}` : g.image_url }} style={s.giftImage} />
               <Text style={{ color: "#fff", fontSize: 11, fontWeight: "700" }} numberOfLines={1}>{g.name}</Text>
               <Text style={{ color: theme.gold, fontSize: 10 }}>🪙 {g.coin_price}</Text>
             </Pressable>
@@ -635,11 +644,19 @@ const s = StyleSheet.create({
   inviteBanner: { position: "absolute", top: 100, left: 12, right: 12, backgroundColor: "rgba(20,20,35,0.95)", borderWidth: 1, borderColor: theme.pink, borderRadius: 12, padding: 12, zIndex: 5 },
   acceptBtn: { flex: 1, backgroundColor: "#35df70", borderRadius: 10, paddingVertical: 8, alignItems: "center" },
   declineBtn: { flex: 1, backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 10, paddingVertical: 8, alignItems: "center" },
-  giftAlert: { position: "absolute", top: 140, alignSelf: "center", backgroundColor: "rgba(255,209,102,0.95)", borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8 },
+  giftAlert: { position: "absolute", top: 140, alignSelf: "center", backgroundColor: "rgba(15,10,28,0.92)", borderWidth: 1, borderColor: "rgba(255,105,190,.55)", borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, zIndex: 12 },
+  giftShowcase: { position: "absolute", left: 0, right: 0, top: "24%", alignItems: "center", zIndex: 20 },
+  giftHalo: { position: "absolute", width: 260, height: 260, borderRadius: 130, backgroundColor: "rgba(255,63,157,.22)", shadowColor: theme.pink, shadowOpacity: .8, shadowRadius: 45, shadowOffset: { width: 0, height: 0 } },
+  giftShowcaseImage: { width: 210, height: 210, resizeMode: "contain" },
+  giftShowcaseEyebrow: { color: theme.gold, fontSize: 10, letterSpacing: 3, fontWeight: "900", marginTop: -8 },
+  giftShowcaseName: { color: "#fff", fontSize: 25, fontWeight: "900", textShadowColor: "rgba(255,63,157,.7)", textShadowRadius: 14 },
+  giftShowcaseMeta: { color: "#e8dff1", fontSize: 12, marginTop: 4 },
   heartLayer: { ...StyleSheet.absoluteFillObject },
   rightRail: { position: "absolute", right: 10, bottom: 160, alignItems: "center", gap: 18 },
   railBtn: { alignItems: "center", gap: 2 },
   railIcon: { width: 46, height: 46, borderRadius: 23, backgroundColor: "rgba(0,0,0,0.35)", alignItems: "center", justifyContent: "center" },
+  gemIcon: { width: 28, height: 28, borderRadius: 8, backgroundColor: theme.pink, alignItems: "center", justifyContent: "center", transform: [{ rotate: "45deg" }] },
+  giftImage: { width: 48, height: 48, resizeMode: "contain" },
   railCount: { color: "#fff", fontSize: 11, fontWeight: "700" },
   leaderboardPanel: { position: "absolute", right: 66, bottom: 160, width: 200, backgroundColor: "rgba(15,15,26,0.92)", borderRadius: 14, padding: 14, borderWidth: 1, borderColor: "#333" },
   giftPicker: { position: "absolute", left: 12, right: 66, bottom: 160, backgroundColor: "rgba(15,15,26,0.92)", borderRadius: 14, padding: 10, flexDirection: "row", flexWrap: "wrap", gap: 8, maxHeight: 220, borderWidth: 1, borderColor: "#333" },
