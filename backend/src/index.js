@@ -555,30 +555,8 @@ app.get('/', (req, res) => {
 });
 
 // ---------- Health check ----------
-app.get('/health', async (req, res) => {
-  const required = ['DATABASE_URL', 'JWT_SECRET', 'APP_URL', 'CORS_ORIGIN'];
-  const productionFeatures = {
-    redis: Boolean(process.env.REDIS_URL),
-    stripe: Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_WEBHOOK_SECRET),
-    googleLogin: Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REDIRECT_URI),
-    email: Boolean(process.env.EMAIL_HOST && process.env.EMAIL_PORT && process.env.EMAIL_USER && process.env.EMAIL_PASS && process.env.EMAIL_FROM),
-    media: Boolean(process.env.UPLOADTHING_TOKEN),
-    livekit: Boolean(process.env.LIVEKIT_URL && process.env.LIVEKIT_API_KEY && process.env.LIVEKIT_API_SECRET),
-    appleIap: Boolean(process.env.APPLE_SHARED_SECRET),
-    googleIap: Boolean(process.env.GOOGLE_SERVICE_ACCOUNT_JSON && process.env.GOOGLE_PLAY_PACKAGE_NAME)
-  };
-  const missing = required.filter((key) => !process.env[key]);
-  let database = 'unknown';
-  try { await prisma.$queryRaw`SELECT 1`; database = 'ok'; } catch { database = 'error'; }
-  const healthy = database === 'ok' && missing.length === 0;
-  res.status(healthy ? 200 : 503).json({
-    service: 'AmoraLive API',
-    status: healthy ? 'ok' : 'degraded',
-    database,
-    missingRequired: missing,
-    features: productionFeatures,
-    timestamp: new Date().toISOString()
-  });
+app.get('/health', (req, res) => {
+  res.send('AmoraLive API running');
 });
 
 // ---------- Socket.IO handlers ----------
@@ -725,6 +703,18 @@ io.on('connection', (socket) => {
                 String(
                   message
                 ).trim()
+            },
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  username: true,
+                  display_name: true,
+                  profile_photo: true,
+                  is_verified: true,
+                  membership_tier: true
+                }
+              }
             }
           });
 
