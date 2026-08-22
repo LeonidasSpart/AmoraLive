@@ -32,7 +32,10 @@ function getStoredConsent() {
       necessary: true
     };
   } catch (error) {
-    console.warn('AmoraLive cookie consent could not be read:', error);
+    console.warn(
+      'AmoraLive cookie consent could not be read:',
+      error
+    );
     return null;
   }
 }
@@ -60,7 +63,10 @@ function saveConsent(consent) {
       })
     );
   } catch (error) {
-    console.warn('AmoraLive cookie consent could not be saved:', error);
+    console.warn(
+      'AmoraLive cookie consent could not be saved:',
+      error
+    );
   }
 }
 
@@ -144,11 +150,11 @@ function CookieToggle({
           }
         }}
         aria-pressed={checked}
-        aria-label={`${label}: ${checked ? 'enabled' : 'disabled'}`}
+        aria-label={`${label}: ${
+          checked ? 'enabled' : 'disabled'
+        }`}
       >
-
         <span />
-
       </button>
 
     </div>
@@ -176,7 +182,8 @@ export default function CookieConsent() {
     }
 
     const handleSettings = () => {
-      const current = getStoredConsent() || DEFAULT_CONSENT;
+      const current =
+        getStoredConsent() || DEFAULT_CONSENT;
 
       setConsent(current);
       setSettingsOpen(true);
@@ -207,7 +214,9 @@ export default function CookieConsent() {
         type="button"
         className="amora-cookie-floating-button"
         onClick={() => {
-          setConsent(getStoredConsent() || DEFAULT_CONSENT);
+          setConsent(
+            getStoredConsent() || DEFAULT_CONSENT
+          );
           setSettingsOpen(true);
           setVisible(true);
         }}
@@ -234,7 +243,6 @@ export default function CookieConsent() {
     setConsent(next);
     setSettingsOpen(false);
     setVisible(false);
-
   };
 
   const rejectOptional = () => {
@@ -254,7 +262,6 @@ export default function CookieConsent() {
     setConsent(next);
     setSettingsOpen(false);
     setVisible(false);
-
   };
 
   const savePreferences = () => {
@@ -273,7 +280,6 @@ export default function CookieConsent() {
     setConsent(next);
     setSettingsOpen(false);
     setVisible(false);
-
   };
 
   return (
@@ -300,18 +306,27 @@ export default function CookieConsent() {
         {!settingsOpen ? (
 
           <>
+
             <div className="amora-cookie-brand">
 
               <div className="amora-cookie-logo">
+
+                {/* OFFICIAL AMORA LOGO */}
                 <img
-                  src="/images/amora-logo.png"
+                  src="/brand/amora-logo.png"
                   alt="AmoraLive"
                 />
+
               </div>
 
               <div>
+
                 <strong>AmoraLive</strong>
-                <span>Privacy & Cookie Control</span>
+
+                <span>
+                  Privacy & Cookie Control
+                </span>
+
               </div>
 
             </div>
@@ -329,16 +344,17 @@ export default function CookieConsent() {
               </h2>
 
               <p>
-                AmoraLive uses necessary cookies and similar technologies
-                to operate and secure the platform. With your permission,
-                we may also use optional technologies for preferences,
-                analytics and advertising.
+                AmoraLive uses necessary cookies and similar
+                technologies to operate and secure the platform.
+                With your permission, we may also use optional
+                technologies for preferences, analytics and
+                advertising.
               </p>
 
               <p className="amora-cookie-small">
-                You can accept all optional technologies, reject them, or
-                customise your choices. You can change your decision later
-                from Cookie Settings.
+                You can accept all optional technologies, reject
+                them, or customise your choices. You can change
+                your decision later from Cookie Settings.
               </p>
 
             </div>
@@ -424,9 +440,10 @@ export default function CookieConsent() {
             </div>
 
             <p className="amora-cookie-settings-intro">
-              Choose which optional categories you allow. Necessary
-              technologies cannot be disabled because they are required
-              for core functionality, security and your requested service.
+              Choose which optional categories you allow.
+              Necessary technologies cannot be disabled because
+              they are required for core functionality, security
+              and your requested service.
             </p>
 
             <div className="amora-cookie-settings-list">
@@ -566,12 +583,14 @@ export default function CookieConsent() {
               rgba(155,53,255,.18)
             );
           border: 1px solid rgba(255,107,157,.20);
+          overflow: hidden;
         }
 
         .amora-cookie-logo img {
-          width: 34px;
-          height: 34px;
+          width: 38px;
+          height: 38px;
           object-fit: contain;
+          display: block;
         }
 
         .amora-cookie-brand strong,
