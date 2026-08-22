@@ -40,7 +40,7 @@ export default function Wallet() {
       setTransactions(data);
 
       // Get coin packages (for purchase)
-      const pkgRes = await fetch('https://api.amoramatch.one/admin/packages', {
+      const pkgRes = await fetch('https://api.amoramatch.one/wallet/packages?platform=web', {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (pkgRes.ok) {

@@ -129,8 +129,8 @@ export default function Profile() {
         headers: { Authorization: `Bearer ${token}` },
         body: formData
       });
-      if (!res.ok) throw new Error('Upload failed');
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
       setUser({ ...user, profile_photo: data.url });
     } catch (err) {
       setError(err.message);
