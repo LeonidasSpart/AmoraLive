@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Rose">
+<defs>
+ <radialGradient id="bg"><stop offset="0" stop-color="#ff9ccf" stop-opacity=".26"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+ <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff4fa3"/><stop offset=".5" stop-color="#ff9ccf"/><stop offset="1" stop-color="#ffdfef"/></linearGradient>
+ <linearGradient id="g2" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#ff9ccf"/><stop offset=".5" stop-color="#ff4fa3"/><stop offset="1" stop-color="#ffdfef"/></linearGradient>
+ <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".4" stop-color="#ffdfef"/><stop offset="1" stop-color="#ff9ccf"/></linearGradient>
+ <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<circle cx="256" cy="256" r="220" fill="url(#bg)"/>
+<g opacity=".95" filter="url(#glow)"><animateTransform attributeName="transform" type="rotate" values="-2 256 256;2 256 256;-2 256 256" dur="3.6s" repeatCount="indefinite"/><g fill="none" stroke="url(#g2)" stroke-width="14" stroke-linecap="round"><path d="M256 330 C215 285 195 240 218 198 C238 162 282 164 300 192 C315 155 364 162 370 204 C378 250 329 295 256 330Z"/><path d="M256 330 C256 280 256 220 286 185"/><path d="M256 330 C220 350 196 372 184 404 M256 330 C294 350 321 372 330 404"/></g></g>
+<g fill="#fff" opacity=".85"><circle cx="108" cy="128" r="4"/><circle cx="407" cy="126" r="3"/><circle cx="415" cy="340" r="4"/><circle cx="105" cy="356" r="3"/></g>
+<path d="M120 408 Q256 450 392 408" fill="none" stroke="#ff9ccf" stroke-opacity=".35" stroke-width="6" stroke-linecap="round"/>
+</svg>

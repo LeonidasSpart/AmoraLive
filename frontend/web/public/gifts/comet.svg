@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Comet">
+<defs>
+ <radialGradient id="bg"><stop offset="0" stop-color="#22d3ee" stop-opacity=".26"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+ <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8b5cf6"/><stop offset=".5" stop-color="#22d3ee"/><stop offset="1" stop-color="#e9d5ff"/></linearGradient>
+ <linearGradient id="g2" x1="0" y1="1" x2="1" y2="0"><stop stop-color="#22d3ee"/><stop offset=".5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#e9d5ff"/></linearGradient>
+ <linearGradient id="g3" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".4" stop-color="#e9d5ff"/><stop offset="1" stop-color="#22d3ee"/></linearGradient>
+ <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<circle cx="256" cy="256" r="220" fill="url(#bg)"/>
+<g opacity=".95" filter="url(#glow)"><animateTransform attributeName="transform" type="rotate" values="-2 256 256;2 256 256;-2 256 256" dur="3.6s" repeatCount="indefinite"/><path d="M330 170 C390 225 374 286 320 340 C266 394 205 382 150 330 C214 340 258 318 285 291 C312 264 335 220 330 170Z" fill="url(#g2)" stroke="white" stroke-opacity=".55" stroke-width="5"/><path d="M285 291 C228 350 155 390 92 392" fill="none" stroke="url(#g3)" stroke-width="22" stroke-linecap="round" opacity=".75"/></g>
+<g fill="#fff" opacity=".85"><circle cx="108" cy="128" r="4"/><circle cx="407" cy="126" r="3"/><circle cx="415" cy="340" r="4"/><circle cx="105" cy="356" r="3"/></g>
+<path d="M120 408 Q256 450 392 408" fill="none" stroke="#22d3ee" stroke-opacity=".35" stroke-width="6" stroke-linecap="round"/>
+</svg>
