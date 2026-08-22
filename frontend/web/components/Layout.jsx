@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { apiFetch, clearSession } from '../lib/api';
 
 export default function Layout({ children }) {
   const router = useRouter();
@@ -20,18 +21,17 @@ export default function Layout({ children }) {
   }, []);
 
   const fetchUserData = async () => {
-    const token = localStorage.getItem('accessToken');
     try {
-      const userRes = await fetch('https://api.amoramatch.one/users/me', { headers: { Authorization: `Bearer ${token}` } });
+      const userRes = await apiFetch('/users/me');
       if (userRes.ok) setUser(await userRes.json());
 
-      const walletRes = await fetch('https://api.amoramatch.one/wallet/me', { headers: { Authorization: `Bearer ${token}` } });
+      const walletRes = await apiFetch('/wallet/me');
       if (walletRes.ok) {
         const wallet = await walletRes.json();
         setBalance(wallet.balance || 0);
       }
 
-      const notifRes = await fetch('https://api.amoramatch.one/notifications/unread-count', { headers: { Authorization: `Bearer ${token}` } });
+      const notifRes = await apiFetch('/notifications/unread-count');
       if (notifRes.ok) {
         const data = await notifRes.json();
         setUnreadCount(data.count || 0);
@@ -44,13 +44,9 @@ export default function Layout({ children }) {
   const logout = async () => {
     const token = localStorage.getItem('refreshToken');
     try {
-      await fetch('https://api.amoramatch.one/auth/logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: token }),
-      });
+      await apiFetch('/auth/logout', { method: 'POST', body: JSON.stringify({ refreshToken: token }) }, { skipRefresh: true });
     } catch (e) {}
-    localStorage.clear();
+    clearSession();
     router.push('/login');
   };
 
