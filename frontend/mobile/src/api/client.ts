@@ -149,6 +149,12 @@ export const api = {
   followUser: (userId: string) => request(`/users/${userId}/follow`, { method: 'POST' }),
   unfollowUser: (userId: string) => request(`/users/${userId}/unfollow`, { method: 'POST' }),
   followStatus: (userId: string) => request(`/users/${userId}/follow-status`),
+  battleStatus: (roomId: string) => request(`/live/${roomId}/battle`),
+  battleInvite: (roomId: string, targetRoomId: string) =>
+    request(`/live/${roomId}/battle/invite`, { method: 'POST', body: JSON.stringify({ targetRoomId }) }),
+  battleAccept: (roomId: string) => request(`/live/${roomId}/battle/accept`, { method: 'POST' }),
+  battleDecline: (roomId: string) => request(`/live/${roomId}/battle/decline`, { method: 'POST' }),
+  battleEnd: (roomId: string) => request(`/live/${roomId}/battle/end`, { method: 'POST' }),
   liveRooms: () => request('/live'),
   liveRoom: (roomId: string) => request(`/live/${roomId}`),
   createLiveRoom: (body: { title: string; category: string; thumbnail_url?: string }) =>
