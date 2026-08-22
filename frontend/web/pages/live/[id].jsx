@@ -611,7 +611,7 @@ const s = {
   battleScoreRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#fff', fontWeight: 800, fontSize: 14, textShadow: '0 1px 4px rgba(0,0,0,0.8)', marginBottom: 4 },
   battleTimer: { background: 'rgba(0,0,0,0.6)', borderRadius: 10, padding: '2px 10px', fontSize: 12 },
   battleFillTrack: { height: 6, background: 'rgba(255,255,255,0.25)', borderRadius: 4, overflow: 'hidden' },
-  battleFill: { height: '100%', background: '#FF6B9D' },
+  battleFill: { height: '100%', background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)' },
   battleResultBanner: { position: 'absolute', top: '42%', left: '50%', transform: 'translate(-50%,-50%)', background: 'rgba(0,0,0,0.8)', color: '#fff', fontWeight: 800, fontSize: 18, padding: '14px 24px', borderRadius: 16, zIndex: 6, animation: 'popIn 0.3s ease-out' },
   inviteBanner: { position: 'absolute', top: 70, left: 12, right: 12, background: 'rgba(20,20,35,0.95)', border: '1px solid #FF6B9D', borderRadius: 12, padding: 12, zIndex: 5 },
   acceptBtn: { background: '#35df70', color: '#06110a', border: 0, borderRadius: 10, padding: '8px 16px', fontWeight: 700, cursor: 'pointer', flex: 1 },
@@ -622,8 +622,8 @@ const s = {
   topBar: { position: 'absolute', top: 0, left: 0, right: 0, padding: '16px 12px', display: 'flex', alignItems: 'center', gap: 10, background: 'linear-gradient(rgba(0,0,0,0.6), transparent)', zIndex: 3 },
   closeBtn: { color: '#fff', textDecoration: 'none', fontSize: 20, width: 32, height: 32, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.4)', borderRadius: '50%' },
   hostChip: { display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(0,0,0,0.35)', borderRadius: 20, padding: '6px 10px', flex: 1, minWidth: 0 },
-  hostAvatar: { width: 30, height: 30, borderRadius: '50%', background: '#FF6B9D', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 13, flexShrink: 0 },
-  followBtn: { background: '#FF6B9D', color: '#fff', border: 0, borderRadius: 12, padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer', marginLeft: 4 },
+  hostAvatar: { width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 13, flexShrink: 0 },
+  followBtn: { background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', color: '#fff', border: 0, borderRadius: 12, padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer', marginLeft: 4 },
   followingBtn: { background: 'rgba(255,255,255,0.15)', color: '#fff', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 12, padding: '4px 10px', fontSize: 11, cursor: 'pointer', marginLeft: 4 },
   viewerBadge: { background: 'rgba(0,0,0,0.4)', borderRadius: 14, padding: '6px 12px', fontSize: 12, fontWeight: 700, flexShrink: 0 },
   errorBanner: { position: 'absolute', top: 66, left: 12, right: 12, background: 'rgba(90,20,20,0.85)', color: '#f88', padding: '8px 12px', borderRadius: 8, fontSize: 13, zIndex: 4, textAlign: 'center' },
@@ -643,5 +643,5 @@ const s = {
   chatLine: { fontSize: 13, lineHeight: 1.3, textShadow: '0 1px 3px rgba(0,0,0,0.6)' },
   composer: { display: 'flex', gap: 8 },
   composerInput: { flex: 1, background: 'rgba(255,255,255,0.15)', border: 0, borderRadius: 20, color: '#fff', padding: '10px 14px', fontSize: 13 },
-  sendBtn: { background: '#FF6B9D', color: '#fff', border: 0, borderRadius: 20, padding: '0 18px', fontWeight: 700, cursor: 'pointer' }
+  sendBtn: { background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', color: '#fff', border: 0, borderRadius: 20, padding: '0 18px', fontWeight: 700, cursor: 'pointer' }
 };
