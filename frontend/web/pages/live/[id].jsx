@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import { apiFetch } from '../../lib/api';
 
 const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 
@@ -67,7 +68,6 @@ export default function LiveRoom() {
   };
 
   const connectOpponentVideo = async (opponentRoomId) => {
-    const token = localStorage.getItem('accessToken');
     const LK = window.LivekitClient;
     if (!LK) return;
     // The opponent video container only mounts once `battle` state becomes
@@ -80,7 +80,7 @@ export default function LiveRoom() {
     }
     if (!opponentVideoRef.current) return;
     try {
-      const tokenRes = await fetch(`${API}/live/${opponentRoomId}/token`, { headers: { Authorization: `Bearer ${token}` } });
+      const tokenRes = await apiFetch(`/live/${opponentRoomId}/token`);
       if (!tokenRes.ok) return;
       const tokenData = await tokenRes.json();
       const opponentRoom = new LK.Room({ adaptiveStream: true, dynacast: true });
@@ -98,11 +98,9 @@ export default function LiveRoom() {
   };
 
   const startChallenge = async (targetRoomId) => {
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch(`${API}/live/${id}/battle/invite`, {
+      const res = await apiFetch(`/live/${id}/battle/invite`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ targetRoomId })
       });
       const data = await res.json().catch(() => ({}));
@@ -115,9 +113,8 @@ export default function LiveRoom() {
   };
 
   const openBattlePicker = async () => {
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch(`${API}/live?limit=20&sort=viewer_count`, { headers: { Authorization: `Bearer ${token}` } });
+      const res = await apiFetch(`/live?limit=20&sort=viewer_count`);
       if (res.ok) {
         const rooms = await res.json();
         setChallengeableRooms((Array.isArray(rooms) ? rooms : []).filter((r) => r.id !== id));
@@ -130,11 +127,9 @@ export default function LiveRoom() {
 
   const respondToInvite = async (accept) => {
     if (!incomingInvite) return;
-    const token = localStorage.getItem('accessToken');
     try {
-      await fetch(`${API}/live/${id}/battle/${accept ? 'accept' : 'decline'}`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` }
+      await apiFetch(`/live/${id}/battle/${accept ? 'accept' : 'decline'}`, {
+        method: 'POST'
       });
     } catch {}
     setIncomingInvite(null);
@@ -149,7 +144,7 @@ export default function LiveRoom() {
       if (!token) return router.push('/login');
       try {
         const [roomRes, giftsRes] = await Promise.all([
-          fetch(`${API}/live/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
+          apiFetch(`/live/${id}`),
           fetch(`${API}/gifts/catalog`)
         ]);
         if (!roomRes.ok) throw new Error('Live room not found');
@@ -170,13 +165,13 @@ export default function LiveRoom() {
         loadTopGifters(id);
 
         if (!hostIsMe && data.host?.id) {
-          fetch(`${API}/users/${data.host.id}/follow-status`, { headers: { Authorization: `Bearer ${token}` } })
+          apiFetch(`/users/${data.host.id}/follow-status`)
             .then((r) => (r.ok ? r.json() : null))
             .then((d) => { if (active && d) setIsFollowing(d.following); })
             .catch(() => {});
         }
 
-        await fetch(`${API}/live/${id}/join`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+        await apiFetch(`/live/${id}/join`, { method: 'POST' });
 
         const { io } = await import('socket.io-client');
         if (!active) return;
@@ -184,7 +179,10 @@ export default function LiveRoom() {
         socketRef.current = socket;
 
         socket.on('connect', () => {
-          socket.emit('authenticate', token, (ack) => {
+          // Re-read from storage rather than the `token` closed over above —
+          // apiFetch may have already silently refreshed it by this point.
+          const currentToken = localStorage.getItem('accessToken');
+          socket.emit('authenticate', currentToken, (ack) => {
             if (!ack?.ok) {
               setError('Your session expired. Please sign in again.');
               return;
@@ -285,7 +283,7 @@ export default function LiveRoom() {
           };
           const LK = await waitForClient();
           if (!LK || !active || !videoContainerRef.current) return;
-          const tokenRes = await fetch(`${API}/live/${id}/token`, { headers: { Authorization: `Bearer ${token}` } });
+          const tokenRes = await apiFetch(`/live/${id}/token`);
           if (!tokenRes.ok) return;
           const tokenData = await tokenRes.json();
           const livekitRoom = new LK.Room({ adaptiveStream: true, dynacast: true });
@@ -329,8 +327,7 @@ export default function LiveRoom() {
 
     return () => {
       active = false;
-      const token = localStorage.getItem('accessToken');
-      fetch(`${API}/live/${id}/leave`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {});
+      apiFetch(`/live/${id}/leave`, { method: 'POST' }, { skipRefresh: true }).catch(() => {});
       socketRef.current?.emit('leave-live', id);
       socketRef.current?.disconnect();
       livekitRoomRef.current?.disconnect();
@@ -369,11 +366,9 @@ export default function LiveRoom() {
   };
 
   const sendGift = async (giftId) => {
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch(`${API}/gifts/send`, {
+      const res = await apiFetch(`/gifts/send`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ giftId, roomId: id, idempotencyKey: window.crypto.randomUUID() })
       });
       const data = await res.json();
@@ -387,11 +382,9 @@ export default function LiveRoom() {
   const toggleFollow = async () => {
     if (!room?.host?.id) return;
     setFollowBusy(true);
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch(`${API}/users/${room.host.id}/${isFollowing ? 'unfollow' : 'follow'}`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` }
+      const res = await apiFetch(`/users/${room.host.id}/${isFollowing ? 'unfollow' : 'follow'}`, {
+        method: 'POST'
       });
       if (res.ok) setIsFollowing((v) => !v);
     } catch {} finally {
@@ -402,9 +395,8 @@ export default function LiveRoom() {
   const endLive = async () => {
     if (!confirm('End this live stream now?')) return;
     setEnding(true);
-    const token = localStorage.getItem('accessToken');
     try {
-      const res = await fetch(`${API}/live/${id}/end`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+      const res = await apiFetch(`/live/${id}/end`, { method: 'POST' });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || 'Unable to end this room.');
@@ -521,8 +513,7 @@ export default function LiveRoom() {
         )}
         {isHost && battle && (
           <button onClick={async () => {
-            const token = localStorage.getItem('accessToken');
-            await fetch(`${API}/live/${id}/battle/end`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {});
+            await apiFetch(`/live/${id}/battle/end`, { method: 'POST' }).catch(() => {});
           }} style={s.railBtn}>
             <div style={s.railIcon}>⚔️</div>
             <div style={s.railCount}>End</div>
