@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { apiFetch } from '../../lib/api';
+import VerifiedBadge from '../../components/VerifiedBadge';
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -28,14 +29,18 @@ export default function AdminUsers() {
 
   useEffect(() => { fetchUsers(1, ''); }, []);
 
-  const updateRole = (userId, role) => {
+  const patchUser = (userId, body) => {
     apiFetch(`/admin/users/${userId}`, {
       method: 'PATCH',
-      body: JSON.stringify({ role })
+      body: JSON.stringify(body)
     })
       .then(r => r.json())
       .then(() => fetchUsers(page, search));
   };
+
+  const updateRole = (userId, role) => patchUser(userId, { role });
+  const updateTier = (userId, membership_tier) => patchUser(userId, { membership_tier });
+  const toggleVerified = (userId, current) => patchUser(userId, { is_verified: !current });
 
   const toggleStatus = (userId, currentStatus) => {
     apiFetch(`/admin/users/${userId}`, {
@@ -68,15 +73,15 @@ export default function AdminUsers() {
       React.createElement('table', { style: { width: '100%', borderCollapse: 'collapse', color: '#fff', background: '#1a1a2e', borderRadius: '8px', overflow: 'hidden' } },
         React.createElement('thead', null,
           React.createElement('tr', { style: { background: '#2a2a3e' } },
-            ['Username', 'Email', 'Role', 'Level', 'Status', 'Actions'].map(h => React.createElement('th', { key: h, style: { padding: '12px 16px', textAlign: 'left' } }, h))
+            ['Username', 'Email', 'Role', 'Level', 'Tier', 'Verified', 'Status', 'Actions'].map(h => React.createElement('th', { key: h, style: { padding: '12px 16px', textAlign: 'left' } }, h))
           )
         ),
         React.createElement('tbody', null,
           users.length === 0
-            ? React.createElement('tr', null, React.createElement('td', { colSpan: 6, style: { padding: '40px', textAlign: 'center', color: '#666' } }, 'No users'))
+            ? React.createElement('tr', null, React.createElement('td', { colSpan: 8, style: { padding: '40px', textAlign: 'center', color: '#666' } }, 'No users'))
             : users.map(user =>
                 React.createElement('tr', { key: user.id, style: { borderBottom: '1px solid #222' } },
-                  React.createElement('td', { style: { padding: '12px 16px' } }, user.username),
+                  React.createElement('td', { style: { padding: '12px 16px', display: 'flex', alignItems: 'center' } }, [user.username, React.createElement(VerifiedBadge, { key: 'b', user, size: 13 })]),
                   React.createElement('td', { style: { padding: '12px 16px' } }, user.email),
                   React.createElement('td', { style: { padding: '12px 16px' } },
                     React.createElement('select', {
@@ -86,6 +91,19 @@ export default function AdminUsers() {
                     }, ['user', 'admin', 'superadmin'].map(r => React.createElement('option', { key: r, value: r }, r))
                   )),
                   React.createElement('td', { style: { padding: '12px 16px' } }, user.level || 0),
+                  React.createElement('td', { style: { padding: '12px 16px' } },
+                    React.createElement('select', {
+                      value: user.membership_tier || 'free',
+                      onChange: (e) => updateTier(user.id, e.target.value),
+                      style: { background: '#1a1a2e', color: '#fff', border: '1px solid #333', padding: '4px 8px', borderRadius: '4px' }
+                    }, ['free', 'premium', 'vip', 'svip'].map(t => React.createElement('option', { key: t, value: t }, t))
+                  )),
+                  React.createElement('td', { style: { padding: '12px 16px' } },
+                    React.createElement('button', {
+                      onClick: () => toggleVerified(user.id, user.is_verified),
+                      style: { padding: '4px 12px', borderRadius: '4px', border: 'none', cursor: 'pointer', background: user.is_verified ? '#1a5a2a' : '#333', color: user.is_verified ? '#8f8' : '#ccc' }
+                    }, user.is_verified ? '✓ Verified' : 'Verify')
+                  ),
                   React.createElement('td', { style: { padding: '12px 16px' } },
                     React.createElement('span', {
                       style: { padding: '4px 12px', borderRadius: '12px', fontSize: '12px', background: user.is_active ? '#1a5a2a' : '#5a1a1a', color: user.is_active ? '#8f8' : '#f88' }
