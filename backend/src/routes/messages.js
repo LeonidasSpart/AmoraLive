@@ -12,6 +12,7 @@ module.exports = (prisma, io) => {
       const conversations = await prisma.$queryRaw`
         SELECT 
           u.id, u.username, u.display_name, u.profile_photo, u.online_status,
+          u.is_verified, u.membership_tier,
           m.id as last_message_id, m.content as last_message, m.created_at as last_message_time,
           m.sender_id as last_sender_id,
           (SELECT COUNT(*) FROM "Message" WHERE "receiver_id" = ${userId} AND "sender_id" = u.id AND "read_at" IS NULL) as unread_count
@@ -49,7 +50,7 @@ module.exports = (prisma, io) => {
         take: Math.min(Number(limit), 100),
         include: {
           sender: {
-            select: { id: true, username: true, display_name: true, profile_photo: true }
+            select: { id: true, username: true, display_name: true, profile_photo: true, is_verified: true, membership_tier: true }
           }
         }
       });
@@ -100,7 +101,7 @@ module.exports = (prisma, io) => {
         },
         include: {
           sender: {
-            select: { id: true, username: true, display_name: true, profile_photo: true }
+            select: { id: true, username: true, display_name: true, profile_photo: true, is_verified: true, membership_tier: true }
           }
         }
       });
