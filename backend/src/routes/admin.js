@@ -142,11 +142,11 @@ module.exports = (prisma, io) => {
 
   router.patch('/users/:userId', auth, adminCheck, async (req, res) => {
     const { userId } = req.params;
-    const { role, is_active, membership_tier, level } = req.body;
+    const { role, is_active, is_verified, membership_tier, level } = req.body;
     try {
       const updated = await prisma.user.update({
         where: { id: userId },
-        data: { role, is_active, membership_tier, level }
+        data: { role, is_active, is_verified, membership_tier, level }
       });
       const { password_hash, ...safeUser } = updated;
       res.json(safeUser);
