@@ -204,6 +204,7 @@ export default function Privacy() {
 
             </div>
 
+            {/* OFFICIAL AMORALIVE LOGO */}
             <div className="privacy-shield">
 
               <div className="shield-ring shield-ring-one" />
@@ -211,7 +212,10 @@ export default function Privacy() {
 
               <div className="shield">
                 <div className="shield-inner">
-                  A
+                  <img
+                    src="/brand/amora-logo.png"
+                    alt="AmoraLive"
+                  />
                 </div>
               </div>
 
@@ -1400,8 +1404,12 @@ export default function Privacy() {
 
                 <div className="privacy-contact-card">
 
+                  {/* OFFICIAL AMORALIVE LOGO */}
                   <div className="privacy-contact-logo">
-                    A
+                    <img
+                      src="/brand/amora-logo.png"
+                      alt="AmoraLive"
+                    />
                   </div>
 
                   <div>
@@ -1443,8 +1451,12 @@ export default function Privacy() {
 
                 <div className="privacy-final-glow" />
 
+                {/* OFFICIAL AMORALIVE LOGO */}
                 <div className="privacy-final-symbol">
-                  A
+                  <img
+                    src="/brand/amora-logo.png"
+                    alt="AmoraLive"
+                  />
                 </div>
 
                 <div>
@@ -1760,9 +1772,17 @@ export default function Privacy() {
             display: grid;
             place-items: center;
             background: #0b0b12;
-            color: #fff;
-            font-size: 45px;
-            font-weight: 950;
+            overflow: hidden;
+          }
+
+          .shield-inner img {
+            width: 72px;
+            height: 72px;
+            object-fit: contain;
+            display: block;
+            filter: drop-shadow(
+              0 0 18px rgba(255,255,255,.18)
+            );
           }
 
           .privacy-status-grid {
@@ -2357,6 +2377,7 @@ export default function Privacy() {
             border: 1px solid rgba(255,107,157,.16);
           }
 
+          /* OFFICIAL AMORALIVE LOGO CONTAINER */
           .privacy-contact-logo,
           .privacy-final-symbol {
             width: 52px;
@@ -2366,10 +2387,16 @@ export default function Privacy() {
             place-items: center;
             border-radius: 16px;
             background: linear-gradient(135deg,#ff3f9d,#9b35ff);
-            color: #fff;
-            font-size: 24px;
-            font-weight: 950;
             box-shadow: 0 0 30px rgba(255,63,157,.22);
+            overflow: hidden;
+          }
+
+          .privacy-contact-logo img,
+          .privacy-final-symbol img {
+            width: 34px;
+            height: 34px;
+            object-fit: contain;
+            display: block;
           }
 
           .privacy-contact-card span {
@@ -2530,7 +2557,11 @@ export default function Privacy() {
             .shield-inner {
               width: 82px;
               height: 96px;
-              font-size: 30px;
+            }
+
+            .shield-inner img {
+              width: 48px;
+              height: 48px;
             }
 
             .privacy-layout {
