@@ -6,6 +6,78 @@ module.exports = (prisma, io) => {
   const router = require('express').Router();
   const adminCheck = adminMiddleware(prisma);
 
+  // ---------- Admin coin grants — admin support tool, not a purchase ----------
+  // Lets an admin top up any user's wallet (including their own) directly,
+  // for support/testing purposes. Every grant is logged to AuditLog and
+  // notifies the recipient, same as any other wallet change.
+  router.get('/wallet/lookup', auth, adminCheck, async (req, res) => {
+    const query = String(req.query.query || '').trim();
+    if (!query) return res.json([]);
+    try {
+      const users = await prisma.user.findMany({
+        where: {
+          OR: [
+            { username: { contains: query, mode: 'insensitive' } },
+            { email: { contains: query, mode: 'insensitive' } },
+            { display_name: { contains: query, mode: 'insensitive' } }
+          ]
+        },
+        select: { id: true, username: true, display_name: true, email: true, profile_photo: true, wallet: { select: { balance: true } } },
+        take: 10
+      });
+      res.json(users);
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  router.post('/wallet/grant', auth, adminCheck, async (req, res) => {
+    const { userId, amount, note } = req.body;
+    const grantAmount = Number(amount);
+    if (!userId || !Number.isInteger(grantAmount) || grantAmount === 0) {
+      return res.status(400).json({ error: 'userId and a non-zero integer amount are required.' });
+    }
+    if (Math.abs(grantAmount) > 100000000) {
+      return res.status(400).json({ error: 'That amount is too large for a single grant.' });
+    }
+    try {
+      const target = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, username: true } });
+      if (!target) return res.status(404).json({ error: 'User not found.' });
+
+      const wallet = await prisma.wallet.upsert({
+        where: { user_id: userId },
+        create: { user_id: userId, balance: Math.max(grantAmount, 0), lifetime_earned: Math.max(grantAmount, 0) },
+        update: grantAmount > 0
+          ? { balance: { increment: grantAmount }, lifetime_earned: { increment: grantAmount } }
+          : { balance: { increment: grantAmount } }
+      });
+
+      await Promise.all([
+        prisma.notification.create({
+          data: {
+            user_id: userId,
+            type: 'admin_coin_grant',
+            payload: { amount: grantAmount, note: note || null, balance: wallet.balance }
+          }
+        }).catch(() => {}),
+        prisma.auditLog.create({
+          data: {
+            admin_id: req.user.id,
+            action: grantAmount > 0 ? 'wallet_grant' : 'wallet_deduct',
+            target_type: 'user',
+            target_id: userId,
+            details: { amount: grantAmount, note: note || null }
+          }
+        }).catch(() => {})
+      ]);
+
+      res.json({ success: true, balance: wallet.balance, username: target.username });
+    } catch (e) {
+      console.error('Wallet grant error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // ---------- Dashboard Stats ----------
   router.get('/stats', auth, adminCheck, async (req, res) => {
     try {
