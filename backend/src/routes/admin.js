@@ -145,6 +145,47 @@ module.exports = (prisma, io) => {
     }
   });
 
+  // Self-service catalog seeding — upserts Amora's default 50-gift catalog
+  // and starter coin packages. Exists so a fresh/empty catalog can be
+  // populated from the admin UI directly, without needing Railway console
+  // access to run `npx prisma db seed`.
+  router.post('/gifts/seed-defaults', auth, adminCheck, async (req, res) => {
+    try {
+      const { GIFTS, COIN_PACKAGES } = require('../data/defaultCatalog');
+      let giftsCreated = 0, giftsUpdated = 0, packagesCreated = 0, packagesUpdated = 0;
+
+      for (const gift of GIFTS) {
+        const existing = await prisma.giftCatalog.findFirst({ where: { name: gift.name } });
+        if (existing) {
+          await prisma.giftCatalog.update({ where: { id: existing.id }, data: { ...gift, is_active: true } });
+          giftsUpdated++;
+        } else {
+          await prisma.giftCatalog.create({ data: gift });
+          giftsCreated++;
+        }
+      }
+      for (const pkg of COIN_PACKAGES) {
+        const existing = await prisma.coinPackage.findFirst({ where: { name: pkg.name, platform: pkg.platform } });
+        if (existing) {
+          await prisma.coinPackage.update({ where: { id: existing.id }, data: { ...pkg, is_active: true } });
+          packagesUpdated++;
+        } else {
+          await prisma.coinPackage.create({ data: pkg });
+          packagesCreated++;
+        }
+      }
+
+      res.json({
+        success: true,
+        gifts: { created: giftsCreated, updated: giftsUpdated, total: GIFTS.length },
+        packages: { created: packagesCreated, updated: packagesUpdated, total: COIN_PACKAGES.length }
+      });
+    } catch (e) {
+      console.error('Seed defaults error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   router.post('/gifts', auth, adminCheck, async (req, res) => {
     const { name, description, image_url, animation_url, coin_price, rarity, category, is_active } = req.body;
     try {
