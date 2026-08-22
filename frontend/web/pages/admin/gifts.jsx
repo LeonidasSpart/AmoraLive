@@ -156,7 +156,7 @@ export default function AdminGifts() {
           <tbody>
             {gifts.map((g) => (
               <tr key={g.id}>
-                <td style={s.td}>{g.image_url ? <img src={g.image_url} alt={g.name} style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 6 }} /> : '—'}</td>
+                <td style={s.td}>{g.image_url ? (g.image_url.startsWith('http') ? <img src={g.image_url} alt={g.name} style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 6 }} /> : <span style={{ fontSize: 24 }}>{g.image_url}</span>) : '—'}</td>
                 <td style={s.td}>{g.name}</td>
                 <td style={s.td}>🪙 {g.coin_price}</td>
                 <td style={s.td}>{g.rarity}</td>
