@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import { apiFetch, clearSession } from '../lib/api';
+import VerifiedBadge from '../components/VerifiedBadge';
 
 export default function Profile() {
   const router = useRouter();
@@ -272,8 +273,8 @@ export default function Profile() {
   sidebarChildren.push(
     React.createElement('h2', {
       key: 'display-name',
-      style: { textAlign: 'center', color: '#fff', marginBottom: '4px' }
-    }, user.display_name || user.username)
+      style: { textAlign: 'center', color: '#fff', marginBottom: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }
+    }, [user.display_name || user.username, React.createElement(VerifiedBadge, { key: 'badge', user, size: 16 })])
   );
   sidebarChildren.push(
     React.createElement('p', {
