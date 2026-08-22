@@ -1,6 +1,7 @@
 // pages/admin/index.jsx
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
+import { apiFetch } from '../../lib/api';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
@@ -8,14 +9,11 @@ export default function AdminDashboard() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
+    if (!localStorage.getItem('accessToken')) {
       window.location.href = '/login';
       return;
     }
-    fetch('https://api.amoramatch.one/admin/stats', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiFetch('/admin/stats')
       .then(r => {
         if (!r.ok) throw new Error('Failed to fetch stats');
         return r.json();

@@ -1,8 +1,7 @@
 // pages/admin/events.jsx
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
-
-const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
+import { apiFetch } from '../../lib/api';
 
 function toLocalInputValue(date) {
   const pad = (n) => String(n).padStart(2, '0');
@@ -29,21 +28,14 @@ export default function AdminEvents() {
     ends_at: toLocalInputValue(inFiveDays)
   });
 
-  const authHeaders = () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return null;
-    return { Authorization: `Bearer ${token}` };
-  };
-
   const load = async () => {
-    const headers = authHeaders();
-    if (!headers) {
+    if (!localStorage.getItem('accessToken')) {
       window.location.href = '/login';
       return;
     }
     setLoading(true);
     try {
-      const res = await fetch(`${API}/admin/events`, { headers });
+      const res = await apiFetch('/admin/events');
       if (!res.ok) throw new Error('Failed to fetch events');
       setEvents(await res.json());
     } catch (e) {
@@ -60,17 +52,14 @@ export default function AdminEvents() {
   const createEvent = async (e) => {
     e.preventDefault();
     setError('');
-    const headers = authHeaders();
-    if (!headers) return;
     if (!form.title.trim() || !form.teamA.trim() || !form.teamB.trim()) {
       setError('Title and both team names are required.');
       return;
     }
     setCreating(true);
     try {
-      const res = await fetch(`${API}/admin/events`, {
+      const res = await apiFetch('/admin/events', {
         method: 'POST',
-        headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({
           title: form.title.trim(),
           description: form.description.trim() || undefined,
@@ -93,11 +82,9 @@ export default function AdminEvents() {
   };
 
   const endEvent = async (id) => {
-    const headers = authHeaders();
-    if (!headers) return;
     if (!confirm('End this event now?')) return;
     try {
-      await fetch(`${API}/admin/events/${id}/end`, { method: 'POST', headers });
+      await apiFetch(`/admin/events/${id}/end`, { method: 'POST' });
       await load();
     } catch (e) {
       setError(e.message);
@@ -105,11 +92,9 @@ export default function AdminEvents() {
   };
 
   const deleteEvent = async (id) => {
-    const headers = authHeaders();
-    if (!headers) return;
     if (!confirm('Permanently delete this event and its scores?')) return;
     try {
-      await fetch(`${API}/admin/events/${id}`, { method: 'DELETE', headers });
+      await apiFetch(`/admin/events/${id}`, { method: 'DELETE' });
       await load();
     } catch (e) {
       setError(e.message);

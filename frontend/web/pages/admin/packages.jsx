@@ -1,8 +1,8 @@
 // pages/admin/packages.jsx
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
+import { apiFetch } from '../../lib/api';
 
-const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 const PLATFORMS = ['web', 'ios', 'android'];
 
 const emptyForm = { name: '', price_cents: '', coins_amount: '', bonus_coins: '0', is_promotion: false, region: '', platform: 'web', stripe_price_id: '', apple_product_id: '', google_product_id: '' };
@@ -15,21 +15,14 @@ export default function AdminPackages() {
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const authHeaders = () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return null;
-    return { Authorization: `Bearer ${token}` };
-  };
-
   const load = async () => {
-    const headers = authHeaders();
-    if (!headers) {
+    if (!localStorage.getItem('accessToken')) {
       window.location.href = '/login';
       return;
     }
     setLoading(true);
     try {
-      const res = await fetch(`${API}/admin/packages`, { headers });
+      const res = await apiFetch('/admin/packages');
       if (!res.ok) throw new Error('Failed to fetch packages');
       setPackages(await res.json());
     } catch (e) {
@@ -67,8 +60,6 @@ export default function AdminPackages() {
   const save = async (e) => {
     e.preventDefault();
     setError('');
-    const headers = authHeaders();
-    if (!headers) return;
     if (!form.name.trim() || !form.price_cents || !form.coins_amount) {
       setError('Name, price, and coin amount are required.');
       return;
@@ -87,9 +78,8 @@ export default function AdminPackages() {
         apple_product_id: form.apple_product_id.trim() || undefined,
         google_product_id: form.google_product_id.trim() || undefined
       };
-      const res = await fetch(`${API}/admin/packages${editingId ? `/${editingId}` : ''}`, {
+      const res = await apiFetch(`/admin/packages${editingId ? `/${editingId}` : ''}`, {
         method: editingId ? 'PATCH' : 'POST',
-        headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
       const data = await res.json().catch(() => ({}));
@@ -104,11 +94,9 @@ export default function AdminPackages() {
   };
 
   const remove = async (id) => {
-    const headers = authHeaders();
-    if (!headers) return;
     if (!confirm('Deactivate this package? It will stop appearing for purchase, but past purchase history stays intact.')) return;
     try {
-      const res = await fetch(`${API}/admin/packages/${id}`, { method: 'DELETE', headers });
+      const res = await apiFetch(`/admin/packages/${id}`, { method: 'DELETE' });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Unable to deactivate package.');
       await load();
@@ -118,10 +106,8 @@ export default function AdminPackages() {
   };
 
   const reactivate = async (id) => {
-    const headers = authHeaders();
-    if (!headers) return;
     try {
-      const res = await fetch(`${API}/admin/packages/${id}/reactivate`, { method: 'POST', headers });
+      const res = await apiFetch(`/admin/packages/${id}/reactivate`, { method: 'POST' });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || 'Unable to reactivate package.');
       await load();

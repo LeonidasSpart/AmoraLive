@@ -1,8 +1,8 @@
 // pages/admin/reports.jsx
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
+import { apiFetch } from '../../lib/api';
 
-const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 const STATUSES = ['pending', 'reviewed', 'dismissed', 'all'];
 
 export default function AdminReports() {
@@ -15,15 +15,8 @@ export default function AdminReports() {
   const [actioning, setActioning] = useState(null);
   const limit = 20;
 
-  const authHeaders = () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return null;
-    return { Authorization: `Bearer ${token}` };
-  };
-
   const load = async (pageNum = 1, statusFilter = status) => {
-    const headers = authHeaders();
-    if (!headers) {
+    if (!localStorage.getItem('accessToken')) {
       window.location.href = '/login';
       return;
     }
@@ -31,7 +24,7 @@ export default function AdminReports() {
     setError('');
     try {
       const qsStatus = statusFilter === 'all' ? '' : statusFilter;
-      const res = await fetch(`${API}/admin/reports?page=${pageNum}&limit=${limit}&status=${qsStatus}`, { headers });
+      const res = await apiFetch(`/admin/reports?page=${pageNum}&limit=${limit}&status=${qsStatus}`);
       if (!res.ok) throw new Error('Failed to fetch reports');
       const data = await res.json();
       setReports(data.reports || []);
@@ -50,13 +43,10 @@ export default function AdminReports() {
   }, [status]);
 
   const review = async (reportId, newStatus, actionTaken) => {
-    const headers = authHeaders();
-    if (!headers) return;
     setActioning(reportId);
     try {
-      const res = await fetch(`${API}/admin/reports/${reportId}`, {
+      const res = await apiFetch(`/admin/reports/${reportId}`, {
         method: 'PATCH',
-        headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus, action_taken: actionTaken })
       });
       if (!res.ok) throw new Error('Unable to update this report.');

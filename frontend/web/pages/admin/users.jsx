@@ -1,6 +1,7 @@
 // pages/admin/users.jsx
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
+import { apiFetch } from '../../lib/api';
 
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
@@ -12,12 +13,9 @@ export default function AdminUsers() {
   const limit = 20;
 
   const fetchUsers = (pageNum = 1, searchTerm = '') => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) { window.location.href = '/login'; return; }
+    if (!localStorage.getItem('accessToken')) { window.location.href = '/login'; return; }
     setLoading(true);
-    fetch(`https://api.amoramatch.one/admin/users?page=${pageNum}&limit=${limit}&search=${encodeURIComponent(searchTerm)}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiFetch(`/admin/users?page=${pageNum}&limit=${limit}&search=${encodeURIComponent(searchTerm)}`)
       .then(r => r.json())
       .then(data => {
         setUsers(data.users || []);
@@ -31,10 +29,8 @@ export default function AdminUsers() {
   useEffect(() => { fetchUsers(1, ''); }, []);
 
   const updateRole = (userId, role) => {
-    const token = localStorage.getItem('accessToken');
-    fetch(`https://api.amoramatch.one/admin/users/${userId}`, {
+    apiFetch(`/admin/users/${userId}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ role })
     })
       .then(r => r.json())
@@ -42,10 +38,8 @@ export default function AdminUsers() {
   };
 
   const toggleStatus = (userId, currentStatus) => {
-    const token = localStorage.getItem('accessToken');
-    fetch(`https://api.amoramatch.one/admin/users/${userId}`, {
+    apiFetch(`/admin/users/${userId}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify({ is_active: !currentStatus })
     })
       .then(() => fetchUsers(page, search));
@@ -53,8 +47,7 @@ export default function AdminUsers() {
 
   const deleteUser = (userId) => {
     if (!confirm('Delete this user?')) return;
-    const token = localStorage.getItem('accessToken');
-    fetch(`https://api.amoramatch.one/admin/users/${userId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } })
+    apiFetch(`/admin/users/${userId}`, { method: 'DELETE' })
       .then(() => fetchUsers(page, search));
   };
 

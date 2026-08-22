@@ -1,6 +1,7 @@
 // pages/admin/rooms.jsx
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
+import { apiFetch } from '../../lib/api';
 
 export default function AdminRooms() {
   const [rooms, setRooms] = useState([]);
@@ -11,12 +12,9 @@ export default function AdminRooms() {
   const limit = 20;
 
   const fetchRooms = (pageNum = 1) => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) { window.location.href = '/login'; return; }
+    if (!localStorage.getItem('accessToken')) { window.location.href = '/login'; return; }
     setLoading(true);
-    fetch(`https://api.amoramatch.one/admin/rooms?page=${pageNum}&limit=${limit}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiFetch(`/admin/rooms?page=${pageNum}&limit=${limit}`)
       .then(r => r.json())
       .then(data => {
         setRooms(data.rooms || []);
@@ -31,11 +29,7 @@ export default function AdminRooms() {
 
   const endRoom = (roomId) => {
     if (!confirm('End this room?')) return;
-    const token = localStorage.getItem('accessToken');
-    fetch(`https://api.amoramatch.one/admin/rooms/${roomId}/end`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    apiFetch(`/admin/rooms/${roomId}/end`, { method: 'POST' })
       .then(() => fetchRooms(page));
   };
 

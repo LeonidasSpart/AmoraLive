@@ -1,8 +1,8 @@
 // pages/admin/gifts.jsx
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
+import { apiFetch } from '../../lib/api';
 
-const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 const RARITIES = ['common', 'rare', 'epic', 'legendary'];
 const CATEGORIES = ['classic', 'romantic', 'luxury', 'seasonal', 'fun'];
 
@@ -16,21 +16,14 @@ export default function AdminGifts() {
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const authHeaders = () => {
-    const token = localStorage.getItem('accessToken');
-    if (!token) return null;
-    return { Authorization: `Bearer ${token}` };
-  };
-
   const load = async () => {
-    const headers = authHeaders();
-    if (!headers) {
+    if (!localStorage.getItem('accessToken')) {
       window.location.href = '/login';
       return;
     }
     setLoading(true);
     try {
-      const res = await fetch(`${API}/admin/gifts`, { headers });
+      const res = await apiFetch('/admin/gifts');
       if (!res.ok) throw new Error('Failed to fetch gifts');
       setGifts(await res.json());
     } catch (e) {
@@ -65,8 +58,6 @@ export default function AdminGifts() {
   const save = async (e) => {
     e.preventDefault();
     setError('');
-    const headers = authHeaders();
-    if (!headers) return;
     if (!form.name.trim() || !form.image_url.trim() || !form.coin_price) {
       setError('Name, image URL, and coin price are required.');
       return;
@@ -82,9 +73,8 @@ export default function AdminGifts() {
         rarity: form.rarity,
         category: form.category
       };
-      const res = await fetch(`${API}/admin/gifts${editingId ? `/${editingId}` : ''}`, {
+      const res = await apiFetch(`/admin/gifts${editingId ? `/${editingId}` : ''}`, {
         method: editingId ? 'PATCH' : 'POST',
-        headers: { ...headers, 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
       const data = await res.json().catch(() => ({}));
@@ -99,11 +89,9 @@ export default function AdminGifts() {
   };
 
   const deactivate = async (id) => {
-    const headers = authHeaders();
-    if (!headers) return;
     if (!confirm('Deactivate this gift? It will disappear from the catalog.')) return;
     try {
-      await fetch(`${API}/admin/gifts/${id}`, { method: 'DELETE', headers });
+      await apiFetch(`/admin/gifts/${id}`, { method: 'DELETE' });
       await load();
     } catch (e) {
       setError(e.message);
