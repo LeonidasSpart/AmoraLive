@@ -143,7 +143,7 @@ export default function ChatRoom() {
           padding: '8px 24px',
           borderRadius: '6px',
           border: 'none',
-          background: '#FF6B9D',
+          background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
           color: '#fff',
           cursor: 'pointer'
         }
@@ -242,7 +242,7 @@ export default function ChatRoom() {
         style: {
           alignSelf: isMine ? 'flex-end' : 'flex-start',
           maxWidth: '70%',
-          background: isMine ? '#FF6B9D' : '#2a2a3e',
+          background: isMine ? 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)' : '#2a2a3e',
           padding: '10px 14px',
           borderRadius: isMine ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
           color: '#fff',
@@ -293,7 +293,7 @@ export default function ChatRoom() {
           padding: '10px 20px',
           borderRadius: '20px',
           border: 'none',
-          background: '#FF6B9D',
+          background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
           color: '#fff',
           cursor: 'pointer',
           fontWeight: 'bold'
