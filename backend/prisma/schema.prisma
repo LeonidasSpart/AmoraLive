@@ -243,6 +243,7 @@ model LiveRoom {
   stream_key  String
   thumbnail_url String?
   settings    Json?
+  active_battle_id String? // set while this room is in a PK battle
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
@@ -250,6 +251,28 @@ model LiveRoom {
   participants RoomParticipant[]
   messages    LiveChatMessage[]
   gifts       GiftTransaction[]
+  battlesAsA  PkBattle[] @relation("battleRoomA")
+  battlesAsB  PkBattle[] @relation("battleRoomB")
+}
+
+// PK ("player kill" / head-to-head) battle between two live hosts. Viewers
+// on either side gift into that side's room as normal — gifts.js tallies
+// the coin value into score_a/score_b for whichever room is in an active
+// battle. Highest score when the timer runs out wins.
+model PkBattle {
+  id             String    @id @default(uuid())
+  room_a_id      String
+  room_b_id      String
+  status         String    @default("active") // active | ended
+  duration_secs  Int       @default(180)
+  score_a        Int       @default(0)
+  score_b        Int       @default(0)
+  winner_room_id String?
+  started_at     DateTime  @default(now())
+  ended_at       DateTime?
+
+  room_a         LiveRoom  @relation("battleRoomA", fields: [room_a_id], references: [id])
+  room_b         LiveRoom  @relation("battleRoomB", fields: [room_b_id], references: [id])
 }
 
 model RoomParticipant {
