@@ -28,11 +28,20 @@ export default function LiveRoom() {
   const [ending, setEnding] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
   const [floatingHearts, setFloatingHearts] = useState([]);
+  const [battle, setBattle] = useState(null); // { battleId, mySide, endsAt, opponent, scoreA, scoreB }
+  const [battleTimeLeft, setBattleTimeLeft] = useState(0);
+  const [battleResult, setBattleResult] = useState(null); // { text }
+  const [incomingInvite, setIncomingInvite] = useState(null);
+  const [outgoingInvite, setOutgoingInvite] = useState(null); // { targetRoomId }
+  const [showBattlePicker, setShowBattlePicker] = useState(false);
+  const [challengeableRooms, setChallengeableRooms] = useState([]);
   const [giftAlert, setGiftAlert] = useState(null);
 
   const chatContainerRef = useRef(null);
   const videoContainerRef = useRef(null);
+  const opponentVideoRef = useRef(null);
   const livekitRoomRef = useRef(null);
+  const opponentLivekitRoomRef = useRef(null);
   const socketRef = useRef(null);
 
   const spawnHeart = () => {
@@ -47,6 +56,88 @@ export default function LiveRoom() {
       const res = await fetch(`${API}/live/${roomId}/top-gifters`);
       if (res.ok) setTopGifters(await res.json());
     } catch {}
+  };
+
+  const disconnectOpponentVideo = () => {
+    if (opponentLivekitRoomRef.current) {
+      opponentLivekitRoomRef.current.disconnect();
+      opponentLivekitRoomRef.current = null;
+    }
+    if (opponentVideoRef.current) opponentVideoRef.current.innerHTML = '';
+  };
+
+  const connectOpponentVideo = async (opponentRoomId) => {
+    const token = localStorage.getItem('accessToken');
+    const LK = window.LivekitClient;
+    if (!LK) return;
+    // The opponent video container only mounts once `battle` state becomes
+    // truthy, which happens asynchronously right before this runs — wait
+    // for the ref to actually attach rather than bailing immediately.
+    let attempts = 0;
+    while (!opponentVideoRef.current && attempts < 25) {
+      await new Promise((r) => setTimeout(r, 100));
+      attempts++;
+    }
+    if (!opponentVideoRef.current) return;
+    try {
+      const tokenRes = await fetch(`${API}/live/${opponentRoomId}/token`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!tokenRes.ok) return;
+      const tokenData = await tokenRes.json();
+      const opponentRoom = new LK.Room({ adaptiveStream: true, dynacast: true });
+      opponentLivekitRoomRef.current = opponentRoom;
+      opponentRoom.on(LK.RoomEvent.TrackSubscribed, (track) => {
+        const element = track.attach();
+        element.style.width = '100%';
+        element.style.height = '100%';
+        element.style.objectFit = 'cover';
+        opponentVideoRef.current?.appendChild(element);
+      });
+      opponentRoom.on(LK.RoomEvent.TrackUnsubscribed, (track) => track.detach().forEach((el) => el.remove()));
+      await opponentRoom.connect(tokenData.url, tokenData.token);
+    } catch {}
+  };
+
+  const startChallenge = async (targetRoomId) => {
+    const token = localStorage.getItem('accessToken');
+    try {
+      const res = await fetch(`${API}/live/${id}/battle/invite`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ targetRoomId })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Unable to send battle invite.');
+      setOutgoingInvite({ targetRoomId });
+      setShowBattlePicker(false);
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  const openBattlePicker = async () => {
+    const token = localStorage.getItem('accessToken');
+    try {
+      const res = await fetch(`${API}/live?limit=20&sort=viewer_count`, { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) {
+        const rooms = await res.json();
+        setChallengeableRooms((Array.isArray(rooms) ? rooms : []).filter((r) => r.id !== id));
+      }
+      setShowBattlePicker(true);
+    } catch {
+      setShowBattlePicker(true);
+    }
+  };
+
+  const respondToInvite = async (accept) => {
+    if (!incomingInvite) return;
+    const token = localStorage.getItem('accessToken');
+    try {
+      await fetch(`${API}/live/${id}/battle/${accept ? 'accept' : 'decline'}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` }
+      });
+    } catch {}
+    setIncomingInvite(null);
   };
 
   useEffect(() => {
@@ -126,6 +217,63 @@ export default function LiveRoom() {
           setTimeout(() => router.push('/discover'), 1500);
         });
 
+        // ---------- PK battle events ----------
+        socket.on('battle:invite', (payload) => {
+          if (!active) return;
+          setIncomingInvite(payload);
+        });
+        socket.on('battle:invite_expired', () => {
+          if (!active) return;
+          setIncomingInvite(null);
+          setOutgoingInvite(null);
+        });
+        socket.on('battle:invite_declined', () => {
+          if (!active) return;
+          setOutgoingInvite(null);
+          setError('Your battle invite was declined.');
+        });
+        socket.on('battle:invite_cancelled', () => {
+          if (!active) return;
+          setIncomingInvite(null);
+        });
+        socket.on('battle:started', async (payload) => {
+          if (!active) return;
+          setIncomingInvite(null);
+          setOutgoingInvite(null);
+          setBattle({ ...payload, scoreA: 0, scoreB: 0 });
+          setBattleResult(null);
+          await connectOpponentVideo(payload.opponent.id);
+        });
+        socket.on('battle:score', (payload) => {
+          if (!active) return;
+          setBattle((prev) => (prev && prev.battleId === payload.battleId ? { ...prev, scoreA: payload.scoreA, scoreB: payload.scoreB } : prev));
+        });
+        socket.on('battle:ended', (payload) => {
+          if (!active) return;
+          setBattle((prev) => {
+            if (!prev || prev.battleId !== payload.battleId) return prev;
+            const myScore = prev.mySide === 'a' ? payload.scoreA : payload.scoreB;
+            const oppScore = prev.mySide === 'a' ? payload.scoreB : payload.scoreA;
+            const text = myScore === oppScore ? "🤝 It's a draw!" : myScore > oppScore ? '🏆 You won the battle!' : '😢 You lost the battle.';
+            setBattleResult(text);
+            return { ...prev, scoreA: payload.scoreA, scoreB: payload.scoreB };
+          });
+          disconnectOpponentVideo();
+          setTimeout(() => {
+            if (active) {
+              setBattle(null);
+              setBattleResult(null);
+            }
+          }, 4000);
+        });
+
+        // In case a viewer joins a room that's already mid-battle.
+        fetch(`${API}/live/${id}/battle`).then((r) => (r.ok ? r.json() : null)).then(async (b) => {
+          if (!active || !b?.active) return;
+          setBattle({ battleId: b.battleId, mySide: b.mySide, endsAt: b.endsAt, opponent: b.opponent, scoreA: b.scoreA, scoreB: b.scoreB });
+          await connectOpponentVideo(b.opponent.id);
+        }).catch(() => {});
+
         // Real LiveKit video: the backend issues a short-lived role-aware token.
         const connectLiveKit = async () => {
           const waitForClient = async () => {
@@ -186,6 +334,7 @@ export default function LiveRoom() {
       socketRef.current?.emit('leave-live', id);
       socketRef.current?.disconnect();
       livekitRoomRef.current?.disconnect();
+      opponentLivekitRoomRef.current?.disconnect();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
@@ -193,6 +342,17 @@ export default function LiveRoom() {
   useEffect(() => {
     if (chatContainerRef.current) chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
   }, [chatMessages]);
+
+  useEffect(() => {
+    if (!battle?.endsAt) {
+      setBattleTimeLeft(0);
+      return;
+    }
+    const tick = () => setBattleTimeLeft(Math.max(0, Math.ceil((battle.endsAt - Date.now()) / 1000)));
+    tick();
+    const interval = setInterval(tick, 500);
+    return () => clearInterval(interval);
+  }, [battle?.endsAt, battle?.battleId]);
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -266,7 +426,7 @@ export default function LiveRoom() {
         @keyframes popIn { 0% { transform: scale(0.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
       `}</style>
 
-      <div ref={videoContainerRef} style={s.video}>
+      <div ref={videoContainerRef} style={battle ? s.videoTopHalf : s.video}>
         {!videoReady && (
           <div style={{ textAlign: 'center', padding: 30 }}>
             <div style={{ fontSize: 64 }}>📺</div>
@@ -275,6 +435,33 @@ export default function LiveRoom() {
           </div>
         )}
       </div>
+      {battle && (
+        <div ref={opponentVideoRef} style={s.videoBottomHalf}>
+          <div style={s.opponentLabel}>{battle.opponent?.host?.display_name || battle.opponent?.host?.username}</div>
+        </div>
+      )}
+
+      {battle && (
+        <div style={s.battleBar}>
+          <div style={s.battleScoreRow}>
+            <span>🔥 {battle.mySide === 'a' ? battle.scoreA : battle.scoreB}</span>
+            <span style={s.battleTimer}>{Math.floor(battleTimeLeft / 60)}:{String(battleTimeLeft % 60).padStart(2, '0')}</span>
+            <span>{battle.mySide === 'a' ? battle.scoreB : battle.scoreA} 🔥</span>
+          </div>
+          <div style={s.battleFillTrack}>
+            <div style={{
+              ...s.battleFill,
+              width: `${(() => {
+                const mine = battle.mySide === 'a' ? battle.scoreA : battle.scoreB;
+                const theirs = battle.mySide === 'a' ? battle.scoreB : battle.scoreA;
+                const total = mine + theirs || 1;
+                return Math.round((mine / total) * 100);
+              })()}%`
+            }} />
+          </div>
+        </div>
+      )}
+      {battleResult && <div style={s.battleResultBanner}>{battleResult}</div>}
 
       <div style={s.topBar}>
         <Link href="/discover" style={s.closeBtn}>✕</Link>
@@ -295,6 +482,17 @@ export default function LiveRoom() {
 
       {error && <div style={s.errorBanner}>{error}</div>}
       {giftAlert && <div style={s.giftAlert}>{giftAlert}</div>}
+      {outgoingInvite && !battle && <div style={s.errorBanner}>⚔️ Battle invite sent — waiting for a response…</div>}
+
+      {incomingInvite && isHost && !battle && (
+        <div style={s.inviteBanner}>
+          <div style={{ fontWeight: 700, marginBottom: 6 }}>🔥 {incomingInvite.fromHost?.display_name || incomingInvite.fromHost?.username} wants to battle!</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => respondToInvite(true)} style={s.acceptBtn}>Accept</button>
+            <button onClick={() => respondToInvite(false)} style={s.declineBtn}>Decline</button>
+          </div>
+        </div>
+      )}
 
       <div style={s.heartLayer}>
         {floatingHearts.map((h) => (
@@ -315,6 +513,21 @@ export default function LiveRoom() {
           <div style={s.railIcon}>🏆</div>
           <div style={s.railCount}>Top</div>
         </button>
+        {isHost && !battle && (
+          <button onClick={openBattlePicker} style={s.railBtn}>
+            <div style={s.railIcon}>⚔️</div>
+            <div style={s.railCount}>Battle</div>
+          </button>
+        )}
+        {isHost && battle && (
+          <button onClick={async () => {
+            const token = localStorage.getItem('accessToken');
+            await fetch(`${API}/live/${id}/battle/end`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } }).catch(() => {});
+          }} style={s.railBtn}>
+            <div style={s.railIcon}>⚔️</div>
+            <div style={s.railCount}>End</div>
+          </button>
+        )}
         {isHost && (
           <button onClick={endLive} disabled={ending} style={s.railBtn}>
             <div style={s.railIcon}>⏹</div>
@@ -352,6 +565,27 @@ export default function LiveRoom() {
         </div>
       )}
 
+      {showBattlePicker && (
+        <div style={s.battlePickerOverlay} onClick={() => setShowBattlePicker(false)}>
+          <div style={s.battlePickerPanel} onClick={(e) => e.stopPropagation()}>
+            <div style={{ fontWeight: 800, marginBottom: 10 }}>⚔️ Challenge a live streamer</div>
+            {challengeableRooms.length === 0 ? (
+              <div style={{ color: '#999', fontSize: 13 }}>No other streamers are live right now.</div>
+            ) : (
+              <div style={{ maxHeight: 320, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {challengeableRooms.map((r) => (
+                  <button key={r.id} onClick={() => startChallenge(r.id)} style={s.challengeRow}>
+                    <span style={{ flex: 1, textAlign: 'left' }}>{r.host?.display_name || r.host?.username} — {r.title}</span>
+                    <span style={{ color: '#999', fontSize: 12 }}>👁 {r.viewer_count}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            <button onClick={() => setShowBattlePicker(false)} style={{ ...s.declineBtn, marginTop: 12, width: '100%' }}>Cancel</button>
+          </div>
+        </div>
+      )}
+
       <div style={s.chatOverlay}>
         <div ref={chatContainerRef} style={s.chatFeed}>
           {chatMessages.slice(-30).map((m, i) => (
@@ -379,6 +613,21 @@ const s = {
   centerPage: { minHeight: '100vh', background: '#0a0a12', color: '#fff', display: 'grid', placeItems: 'center', fontFamily: 'sans-serif' },
   page: { position: 'relative', height: '100vh', maxWidth: 480, margin: '0 auto', background: '#000', overflow: 'hidden', fontFamily: 'sans-serif', color: '#fff' },
   video: { position: 'absolute', inset: 0, background: '#0a0a12', display: 'grid', placeItems: 'center', overflow: 'hidden' },
+  videoTopHalf: { position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: '#0a0a12', display: 'grid', placeItems: 'center', overflow: 'hidden', borderBottom: '2px solid #FF6B9D' },
+  videoBottomHalf: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', background: '#0a0a12', display: 'grid', placeItems: 'center', overflow: 'hidden' },
+  opponentLabel: { position: 'absolute', bottom: 8, left: 8, background: 'rgba(0,0,0,0.5)', color: '#fff', fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 8, zIndex: 1 },
+  battleBar: { position: 'absolute', top: '50%', left: 0, right: 0, transform: 'translateY(-50%)', zIndex: 5, padding: '0 16px' },
+  battleScoreRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#fff', fontWeight: 800, fontSize: 14, textShadow: '0 1px 4px rgba(0,0,0,0.8)', marginBottom: 4 },
+  battleTimer: { background: 'rgba(0,0,0,0.6)', borderRadius: 10, padding: '2px 10px', fontSize: 12 },
+  battleFillTrack: { height: 6, background: 'rgba(255,255,255,0.25)', borderRadius: 4, overflow: 'hidden' },
+  battleFill: { height: '100%', background: '#FF6B9D' },
+  battleResultBanner: { position: 'absolute', top: '42%', left: '50%', transform: 'translate(-50%,-50%)', background: 'rgba(0,0,0,0.8)', color: '#fff', fontWeight: 800, fontSize: 18, padding: '14px 24px', borderRadius: 16, zIndex: 6, animation: 'popIn 0.3s ease-out' },
+  inviteBanner: { position: 'absolute', top: 70, left: 12, right: 12, background: 'rgba(20,20,35,0.95)', border: '1px solid #FF6B9D', borderRadius: 12, padding: 12, zIndex: 5 },
+  acceptBtn: { background: '#35df70', color: '#06110a', border: 0, borderRadius: 10, padding: '8px 16px', fontWeight: 700, cursor: 'pointer', flex: 1 },
+  declineBtn: { background: 'rgba(255,255,255,0.15)', color: '#fff', border: 0, borderRadius: 10, padding: '8px 16px', fontWeight: 700, cursor: 'pointer', flex: 1 },
+  battlePickerOverlay: { position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 7, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  battlePickerPanel: { width: '85%', maxHeight: '70%', background: '#161625', border: '1px solid #333', borderRadius: 16, padding: 16 },
+  challengeRow: { display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,0.06)', border: 0, borderRadius: 10, padding: 10, color: '#fff', cursor: 'pointer', fontSize: 13 },
   topBar: { position: 'absolute', top: 0, left: 0, right: 0, padding: '16px 12px', display: 'flex', alignItems: 'center', gap: 10, background: 'linear-gradient(rgba(0,0,0,0.6), transparent)', zIndex: 3 },
   closeBtn: { color: '#fff', textDecoration: 'none', fontSize: 20, width: 32, height: 32, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.4)', borderRadius: '50%' },
   hostChip: { display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(0,0,0,0.35)', borderRadius: 20, padding: '6px 10px', flex: 1, minWidth: 0 },
