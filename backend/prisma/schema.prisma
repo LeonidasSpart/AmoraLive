@@ -93,9 +93,12 @@ model GiftCatalog {
   description String?
   image_url   String
   animation_url String?
+  sound_url   String?
   coin_price  Int
   rarity      String
   category    String
+  glyph       String?  // maps to a vector icon in the frontend GiftIcon component
+  sort_order  Int      @default(0)
   is_active   Boolean  @default(true)
   available_from DateTime?
   available_to   DateTime?
