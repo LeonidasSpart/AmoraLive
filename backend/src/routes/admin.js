@@ -90,8 +90,8 @@ module.exports = (prisma, io) => {
         totalRevenue,
         pendingReports
       ] = await Promise.all([
-        prisma.user.count(),
-        prisma.user.count({ where: { online_status: 'online' } }),
+        prisma.user.count({ where: { deleted_at: null } }),
+        prisma.user.count({ where: { deleted_at: null, online_status: 'online' } }),
         prisma.liveRoom.count(),
         prisma.liveRoom.count({ where: { status: 'live' } }),
         prisma.giftTransaction.count({ where: { status: 'completed' } }),
