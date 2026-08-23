@@ -75,6 +75,7 @@ model User {
   dailyRewardStatus DailyRewardStatus?
   dailyRewardClaims DailyRewardClaim[]
   xpTransactions    XpTransaction[]
+  missionProgress   MissionProgress[]
 }
 
 model Session {
@@ -501,4 +502,26 @@ model XpTransaction {
   created_at DateTime @default(now())
 
   @@index([user_id, reason, created_at])
+}
+
+// One row per (user, mission, period). period_key is "lifetime" for
+// lifetime missions, "daily:2026-08-23" for daily, "weekly:2026-W34" for
+// weekly — new rows are created automatically as new periods begin, which
+// is what makes daily/weekly missions reset without any cron job. The
+// mission catalog itself (title, target, reward) lives in
+// src/data/missions.js, not the database — same pattern as GiftCatalog's
+// starter data and membership.js's PLANS.
+model MissionProgress {
+  id           String    @id @default(uuid())
+  user_id      String
+  user         User      @relation(fields: [user_id], references: [id])
+  mission_key  String
+  period_key   String
+  progress     Int       @default(0)
+  completed_at DateTime?
+  claimed_at   DateTime?
+  updated_at   DateTime  @updatedAt
+
+  @@unique([user_id, mission_key, period_key])
+  @@index([user_id, period_key])
 }
