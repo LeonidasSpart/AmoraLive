@@ -1,5 +1,6 @@
 // backend/src/routes/messages.js
 const auth = require('../middleware/auth');
+const { incrementMissionProgress } = require('../lib/missions');
 
 module.exports = (prisma, io) => {
   const router = require('express').Router();
@@ -112,6 +113,10 @@ module.exports = (prisma, io) => {
           payload: { senderId: currentUserId, senderName: message.sender.display_name || message.sender.username, preview: (content || '').slice(0, 120) }
         }
       }).catch(err => console.error('Failed to create message notification:', err.message));
+
+      prisma.$transaction((tx) => incrementMissionProgress(tx, currentUserId, 'messages_sent', 1))
+        .catch(err => console.error('Mission progress (messages_sent) failed:', err.message));
+
       // Emit to recipient via socket
       io.to(`user-${userId}`).emit('private-message', message);
       res.status(201).json(message);
