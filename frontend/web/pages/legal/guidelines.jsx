@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import Layout from '../../components/Layout';
 
-const AMORA_LOGO = '/images/amora-logo.png';
+const AMORA_LOGO = '/brand/amora-logo.png';
 
 const sections = [
   { id: 'welcome', number: '01', title: 'Our Community' },
