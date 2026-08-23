@@ -56,7 +56,7 @@ module.exports = (prisma, io) => {
       const rooms = await prisma.liveRoom.findMany({
         where,
         orderBy,
-        take: Math.min(Number(limit), 100),
+        take: sort === 'trending' || !sort ? Math.min(Number(limit) * 3, 150) : Math.min(Number(limit), 100),
         include: {
           host: {
             select: {
@@ -71,7 +71,20 @@ module.exports = (prisma, io) => {
         }
       });
 
-      res.json(rooms);
+      // Real trending score, not just current viewer count — a room with
+      // fewer viewers right now but heavy recent gifting activity should
+      // still be able to outrank one that's merely been running longest
+      // with a big but static audience. Over-fetch by 3x above and re-sort
+      // here since Prisma can't order by a computed expression directly.
+      const result = (sort === 'trending' || !sort)
+        ? rooms
+            .map((r) => ({ ...r, _score: r.viewer_count * 3 + r.gift_count * 2 + r.like_count }))
+            .sort((a, b) => b._score - a._score)
+            .slice(0, Math.min(Number(limit), 100))
+            .map(({ _score, ...r }) => r)
+        : rooms;
+
+      res.json(result);
     } catch (e) {
       console.error('Error fetching live rooms:', e);
       res.status(500).json({ error: e.message });
