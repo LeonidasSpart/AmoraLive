@@ -53,10 +53,16 @@ module.exports = (prisma) => {
     };
   }
 
-  async function createSession(user) {
+  async function createSession(user, req) {
     const refreshToken = signRefreshToken(user);
     await prisma.session.create({
-      data: { user_id: user.id, refresh_token: refreshToken, expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) }
+      data: {
+        user_id: user.id,
+        refresh_token: refreshToken,
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        device_info: req?.headers['user-agent']?.slice(0, 255) || null,
+        ip_address: (req?.headers['x-forwarded-for']?.split(',')[0].trim() || req?.ip || null)
+      }
     });
     return {
       accessToken: signAccessToken(user),
@@ -113,7 +119,7 @@ module.exports = (prisma) => {
     const user = await prisma.user.findFirst({ where: { OR: [{ email: identifier.toLowerCase() }, { username: identifier }] } });
     if (!user || !(await bcrypt.compare(password, user.password_hash))) return res.status(401).json({ error: 'Invalid credentials.' });
     if (!user.is_active) return res.status(403).json({ error: 'Account suspended.' });
-    const session = await createSession(user);
+    const session = await createSession(user, req);
     res.json(session);
   });
 
@@ -177,7 +183,7 @@ module.exports = (prisma) => {
         if (!existing.is_active) {
           return res.redirect(isMobile ? 'amora://auth-callback?error=account_suspended' : `${appUrl()}/login?error=account_suspended`);
         }
-        const session = await createSession(existing);
+        const session = await createSession(existing, req);
         const params = new URLSearchParams({ accessToken: session.accessToken, refreshToken: session.refreshToken, userId: existing.id, role: existing.role });
         return res.redirect(isMobile ? `amora://auth-callback?${params}` : `${appUrl()}/auth/google-complete?${params}`);
       }
@@ -206,7 +212,7 @@ module.exports = (prisma) => {
       const passwordHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12);
       const user = await prisma.user.create({ data: { email: decoded.email, username, password_hash: passwordHash, date_of_birth: dateOfBirth, display_name: decoded.name, age_verified: true, is_verified: true } });
       await prisma.wallet.create({ data: { user_id: user.id, balance: 0 } });
-      res.status(201).json(await createSession(user));
+      res.status(201).json(await createSession(user, req));
     } catch (e) {
       res.status(400).json({ error: 'Unable to complete Google registration. Username may already be taken.' });
     }
