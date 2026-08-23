@@ -23,7 +23,12 @@ module.exports = (prisma, io) => {
         GROUP BY u.id, m.id
         ORDER BY m.created_at DESC
       `;
-      res.json(conversations);
+      // Postgres COUNT(*) comes back as a BigInt via $queryRaw, and
+      // JSON.stringify (which res.json() uses internally) cannot
+      // serialize BigInt at all — every call here was throwing before
+      // ever reaching the response. Converting to a plain Number is safe;
+      // an unread count will never come close to Number.MAX_SAFE_INTEGER.
+      res.json(conversations.map((c) => ({ ...c, unread_count: Number(c.unread_count) })));
     } catch (e) {
       console.error('Error fetching conversations:', e);
       res.status(500).json({ error: e.message });
