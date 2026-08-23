@@ -72,6 +72,9 @@ model User {
   swipesReceived   Swipe[]           @relation("swipeTarget")
   videoMatchesAsA  VideoMatchSession[] @relation("videoMatchUserA")
   videoMatchesAsB  VideoMatchSession[] @relation("videoMatchUserB")
+  dailyRewardStatus DailyRewardStatus?
+  dailyRewardClaims DailyRewardClaim[]
+  xpTransactions    XpTransaction[]
 }
 
 model Session {
@@ -447,4 +450,49 @@ model AuditLog {
   details     Json?
   ip          String?
   timestamp   DateTime @default(now())
+}
+
+// Daily login rewards. current_streak/best_streak/last_claim_date live on
+// this row (one per user) rather than being recomputed from history every
+// time, so streak logic stays a simple server-side comparison against
+// last_claim_date instead of scanning DailyRewardClaim rows on every check.
+model DailyRewardStatus {
+  user_id        String   @id
+  user           User     @relation(fields: [user_id], references: [id])
+  current_streak Int      @default(0)
+  best_streak    Int      @default(0)
+  // Stored as a UTC calendar date (midnight), not a timestamp — comparing
+  // calendar days rather than 24h windows is what makes this timezone-safe
+  // and immune to "claimed at 11:59pm, blocked again at 12:01am" edge cases.
+  last_claim_date DateTime?
+  updated_at     DateTime @updatedAt
+}
+
+// Immutable log of every claim — used for "claim history" in the UI and as
+// an audit trail. Never mutated after creation.
+model DailyRewardClaim {
+  id          String   @id @default(uuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id])
+  day_number  Int      // 1-7 within the current streak cycle (see route)
+  coins       Int
+  is_milestone Boolean @default(false) // true for the day-7/day-30 bonus claims
+  claimed_at  DateTime @default(now())
+
+  @@index([user_id, claimed_at])
+}
+
+// Immutable XP earning log. User.xp/level are the fast-access denormalized
+// values everything else reads (profile display, etc.) — this table is the
+// audit trail behind them and what daily-cap anti-farming checks query.
+model XpTransaction {
+  id         String   @id @default(uuid())
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id])
+  amount     Int
+  reason     String   // 'went_live' | 'live_duration' | 'gift_received' | 'battle_participation' | 'battle_win'
+  metadata   Json?
+  created_at DateTime @default(now())
+
+  @@index([user_id, reason, created_at])
 }
