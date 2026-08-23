@@ -464,5 +464,85 @@ module.exports = (prisma, io) => {
     }
   });
 
+  // ---------- Withdrawals ----------
+  router.get('/withdrawals', auth, adminCheck, async (req, res) => {
+    const { status = 'pending', page = 1, limit = 20 } = req.query;
+    const skip = (page - 1) * limit;
+    try {
+      const where = status ? { status } : {};
+      const [withdrawals, total] = await Promise.all([
+        prisma.withdrawal.findMany({
+          where,
+          orderBy: { requested_at: 'desc' },
+          skip: Number(skip),
+          take: Number(limit),
+          include: { user: { select: { username: true, display_name: true, email: true } } }
+        }),
+        prisma.withdrawal.count({ where })
+      ]);
+      res.json({ withdrawals, total, page: Number(page), limit: Number(limit) });
+    } catch (e) {
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // Valid transitions: pending -> approved | rejected; approved -> paid.
+  // A rejection from "pending" refunds the held coins back to the
+  // creator's wallet; rejecting from any other state isn't allowed, which
+  // is what prevents a double refund if this is ever called twice.
+  router.patch('/withdrawals/:id', auth, adminCheck, async (req, res) => {
+    const { status, adminNote } = req.body;
+    if (!['approved', 'rejected', 'paid'].includes(status)) {
+      return res.status(400).json({ error: 'status must be approved, rejected, or paid.' });
+    }
+    try {
+      const withdrawal = await prisma.withdrawal.findUnique({ where: { id: req.params.id } });
+      if (!withdrawal) return res.status(404).json({ error: 'Withdrawal not found.' });
+
+      const validTransition =
+        (withdrawal.status === 'pending' && ['approved', 'rejected'].includes(status)) ||
+        (withdrawal.status === 'approved' && status === 'paid');
+      if (!validTransition) {
+        return res.status(409).json({ error: `Cannot move a withdrawal from "${withdrawal.status}" to "${status}".` });
+      }
+
+      const updated = await prisma.$transaction(async (tx) => {
+        if (status === 'rejected') {
+          await tx.wallet.update({
+            where: { user_id: withdrawal.user_id },
+            data: { balance: { increment: withdrawal.coins_amount } }
+          });
+        }
+        return tx.withdrawal.update({
+          where: { id: req.params.id },
+          data: { status, admin_note: adminNote || null, processed_by: req.user.id, processed_at: new Date() }
+        });
+      });
+
+      await prisma.notification.create({
+        data: {
+          user_id: withdrawal.user_id,
+          type: `withdrawal_${status}`,
+          payload: { withdrawalId: withdrawal.id, coins: withdrawal.coins_amount, usdCents: withdrawal.usd_cents }
+        }
+      }).catch(err => console.error('Failed to create withdrawal notification:', err.message));
+
+      await prisma.auditLog.create({
+        data: {
+          admin_id: req.user.id,
+          action: `withdrawal_${status}`,
+          target_type: 'withdrawal',
+          target_id: req.params.id,
+          details: { coins: withdrawal.coins_amount, usdCents: withdrawal.usd_cents, adminNote: adminNote || null }
+        }
+      }).catch(err => console.error('Failed to write audit log:', err.message));
+
+      res.json(updated);
+    } catch (e) {
+      console.error('Withdrawal review error:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   return router;
 };
