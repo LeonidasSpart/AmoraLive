@@ -1,483 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { apiFetch } from '../../lib/api';
+import { API, apiFetch } from '../../lib/api';
 import VerifiedBadge from '../../components/VerifiedBadge';
+import GiftIcon from '../../components/GiftIcon';
+import LuxuryGiftTray from '../../components/LuxuryGiftTray';
+import { io as createSocket } from 'socket.io-client';
 
 const GRADIENT = 'linear-gradient(135deg,#ff3f9d 0%,#ff5da8 35%,#9b35ff 100%)';
-
-const RARITY = {
-  common: '#a9a5b5',
-  uncommon: '#5de0ae',
-  rare: '#55b8ff',
-  epic: '#b875ff',
-  legendary: '#ffd45e',
-  mythic: '#ff5fc8'
-};
-
-function GiftTray({ userId, onSent }) {
-  const [gifts, setGifts] = useState([]);
-  const [category, setCategory] = useState('all');
-  const [selected, setSelected] = useState(null);
-  const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    let alive = true;
-    setLoading(true);
-
-    apiFetch('/gifts/catalog')
-      .then(async (res) => {
-        if (!res.ok) throw new Error('Could not load gifts');
-        return res.json();
-      })
-      .then((data) => {
-        if (alive) setGifts(Array.isArray(data) ? data : []);
-      })
-      .catch(() => {
-        if (alive) setGifts([]);
-      })
-      .finally(() => {
-        if (alive) setLoading(false);
-      });
-
-    return () => { alive = false; };
-  }, []);
-
-  const categories = useMemo(() => {
-    const values = gifts
-      .map((g) => String(g.category || '').toLowerCase())
-      .filter(Boolean);
-
-    return ['all', ...Array.from(new Set(values))];
-  }, [gifts]);
-
-  const visible = category === 'all'
-    ? gifts
-    : gifts.filter((g) => String(g.category || '').toLowerCase() === category);
-
-  const sendGift = async () => {
-    if (!selected || sending || !userId) return;
-
-    setSending(true);
-    setMessage('');
-
-    try {
-      const res = await apiFetch('/gifts/send', {
-        method: 'POST',
-        body: JSON.stringify({
-          giftId: selected.id,
-          receiverId: userId,
-          quantity
-        })
-      });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Unable to send gift');
-
-      const sentGift = {
-        ...selected,
-        quantity,
-        transaction: data.transaction || data
-      };
-
-      setMessage(`✦ ${quantity} × ${selected.name} sent`);
-      setSelected(null);
-      setQuantity(1);
-
-      if (onSent) onSent(sentGift);
-    } catch (err) {
-      setMessage(err.message || 'Unable to send gift');
-    } finally {
-      setSending(false);
-    }
-  };
-
-  return (
-    <div className="giftTray">
-      <div className="trayTop">
-        <div>
-          <span className="eyebrow">AMORA PRIVATE COLLECTION</span>
-          <strong>Send something unforgettable</strong>
-        </div>
-        <button className="trayClose" type="button" onClick={() => onSent?.({ closeOnly: true })}>
-          ×
-        </button>
-      </div>
-
-      <div className="categoryBar">
-        {categories.map((item) => (
-          <button
-            type="button"
-            key={item}
-            onClick={() => setCategory(item)}
-            className={category === item ? 'category active' : 'category'}
-          >
-            {item === 'all'
-              ? 'All'
-              : item.charAt(0).toUpperCase() + item.slice(1)}
-          </button>
-        ))}
-      </div>
-
-      {loading ? (
-        <div className="giftLoading">Curating your collection…</div>
-      ) : (
-        <div className="giftScroller">
-          {visible.map((gift) => {
-            const accent = RARITY[gift.rarity] || RARITY.rare;
-            const active = selected?.id === gift.id;
-
-            return (
-              <button
-                type="button"
-                key={gift.id}
-                className={`gift ${active ? 'selected' : ''}`}
-                style={{ '--accent': accent }}
-                onClick={() => {
-                  setSelected(gift);
-                  setQuantity(1);
-                  setMessage('');
-                }}
-              >
-                <span className="rarity">{gift.rarity || 'rare'}</span>
-
-                <span className="giftArt">
-                  {gift.image_url ? (
-                    <img src={gift.image_url} alt="" />
-                  ) : (
-                    <span>{gift.glyph || '✦'}</span>
-                  )}
-                </span>
-
-                <span className="giftName">{gift.name}</span>
-                <span className="giftPrice">
-                  ◉ {Number(gift.coin_price || 0).toLocaleString()}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {selected && (
-        <div className="selectedGift">
-          <div className="selectedArt">
-            {selected.image_url ? (
-              <img src={selected.image_url} alt="" />
-            ) : (
-              <span>{selected.glyph || '✦'}</span>
-            )}
-          </div>
-
-          <div className="selectedInfo">
-            <strong>{selected.name}</strong>
-            <span>{selected.description || 'A premium Amora gesture.'}</span>
-
-            <div className="quantity">
-              <button
-                type="button"
-                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-              >
-                −
-              </button>
-              <b>{quantity}</b>
-              <button
-                type="button"
-                onClick={() => setQuantity((q) => Math.min(100, q + 1))}
-              >
-                +
-              </button>
-              <em>
-                ◉ {(Number(selected.coin_price || 0) * quantity).toLocaleString()}
-              </em>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            className="sendGift"
-            disabled={sending}
-            onClick={sendGift}
-          >
-            {sending ? 'Sending…' : 'Send Gift'}
-          </button>
-        </div>
-      )}
-
-      {message && <div className="giftMessage">{message}</div>}
-
-      <style jsx>{`
-        .giftTray {
-          border-top: 1px solid rgba(255,255,255,.08);
-          background:
-            radial-gradient(circle at 15% 0%, rgba(255,65,175,.1), transparent 28%),
-            linear-gradient(145deg,#151020,#0b0912);
-          padding: 16px;
-        }
-
-        .trayTop {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .eyebrow {
-          display: block;
-          color: #d6a2ff;
-          font-size: 8px;
-          font-weight: 900;
-          letter-spacing: .2em;
-          margin-bottom: 4px;
-        }
-
-        .trayTop strong {
-          color: #fff;
-          font-size: 14px;
-        }
-
-        .trayClose {
-          width: 30px;
-          height: 30px;
-          border-radius: 50%;
-          border: 1px solid rgba(255,255,255,.1);
-          background: rgba(255,255,255,.05);
-          color: #aaa;
-          font-size: 20px;
-          cursor: pointer;
-        }
-
-        .categoryBar {
-          display: flex;
-          gap: 6px;
-          overflow-x: auto;
-          margin: 13px 0 10px;
-          padding-bottom: 3px;
-        }
-
-        .category {
-          border: 1px solid rgba(255,255,255,.08);
-          background: rgba(255,255,255,.035);
-          color: #81788d;
-          padding: 6px 10px;
-          border-radius: 999px;
-          white-space: nowrap;
-          font-size: 9px;
-          cursor: pointer;
-        }
-
-        .category.active {
-          color: #fff;
-          border-color: rgba(255,77,181,.55);
-          background: ${GRADIENT};
-        }
-
-        .giftScroller {
-          display: flex;
-          gap: 9px;
-          overflow-x: auto;
-          padding: 3px 2px 9px;
-          scrollbar-width: thin;
-        }
-
-        .gift {
-          --accent: #b875ff;
-          position: relative;
-          flex: 0 0 92px;
-          height: 126px;
-          padding: 8px;
-          border: 1px solid rgba(255,255,255,.07);
-          border-bottom: 2px solid var(--accent);
-          border-radius: 15px;
-          background: linear-gradient(160deg,rgba(255,255,255,.065),rgba(255,255,255,.015));
-          color: #fff;
-          cursor: pointer;
-          text-align: center;
-          overflow: hidden;
-        }
-
-        .gift.selected {
-          border-color: var(--accent);
-          box-shadow: 0 0 25px color-mix(in srgb,var(--accent) 22%,transparent);
-          transform: translateY(-2px);
-        }
-
-        .rarity {
-          display: block;
-          color: var(--accent);
-          font-size: 7px;
-          text-transform: uppercase;
-          letter-spacing: .1em;
-          font-weight: 900;
-        }
-
-        .giftArt {
-          height: 68px;
-          display: grid;
-          place-items: center;
-        }
-
-        .giftArt img {
-          width: 60px;
-          height: 60px;
-          object-fit: contain;
-          filter: drop-shadow(0 7px 13px color-mix(in srgb,var(--accent) 30%,transparent));
-          transition: transform .2s ease;
-        }
-
-        .gift:hover .giftArt img {
-          transform: scale(1.1) rotate(-2deg);
-        }
-
-        .giftArt > span {
-          font-size: 37px;
-          color: var(--accent);
-          text-shadow: 0 0 18px color-mix(in srgb,var(--accent) 55%,transparent);
-        }
-
-        .giftName {
-          display: block;
-          font-size: 9px;
-          font-weight: 800;
-          overflow: hidden;
-          white-space: nowrap;
-          text-overflow: ellipsis;
-        }
-
-        .giftPrice {
-          display: block;
-          margin-top: 3px;
-          color: #9d94a8;
-          font-size: 8px;
-        }
-
-        .selectedGift {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          margin-top: 8px;
-          padding: 10px;
-          border: 1px solid rgba(255,255,255,.08);
-          border-radius: 17px;
-          background: rgba(255,255,255,.035);
-        }
-
-        .selectedArt {
-          width: 58px;
-          height: 58px;
-          flex: 0 0 58px;
-          display: grid;
-          place-items: center;
-          border-radius: 16px;
-          background: rgba(255,80,190,.08);
-        }
-
-        .selectedArt img {
-          width: 48px;
-          height: 48px;
-          object-fit: contain;
-        }
-
-        .selectedArt > span {
-          font-size: 32px;
-          color: #ff6bc4;
-        }
-
-        .selectedInfo {
-          min-width: 0;
-          flex: 1;
-        }
-
-        .selectedInfo strong {
-          display: block;
-          color: #fff;
-          font-size: 12px;
-        }
-
-        .selectedInfo > span {
-          display: block;
-          color: #777080;
-          font-size: 9px;
-          margin-top: 3px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .quantity {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          margin-top: 7px;
-        }
-
-        .quantity button {
-          width: 22px;
-          height: 22px;
-          border-radius: 7px;
-          border: 1px solid rgba(255,255,255,.1);
-          background: #17121f;
-          color: #fff;
-          cursor: pointer;
-        }
-
-        .quantity b {
-          font-size: 10px;
-          min-width: 12px;
-          text-align: center;
-        }
-
-        .quantity em {
-          margin-left: 5px;
-          color: #ffd86b;
-          font-size: 9px;
-          font-style: normal;
-          font-weight: 800;
-        }
-
-        .sendGift {
-          border: 0;
-          border-radius: 11px;
-          padding: 10px 12px;
-          color: #fff;
-          background: ${GRADIENT};
-          font-weight: 900;
-          font-size: 10px;
-          cursor: pointer;
-          white-space: nowrap;
-          box-shadow: 0 7px 22px rgba(255,50,170,.2);
-        }
-
-        .sendGift:disabled { opacity: .55; cursor: default; }
-        .giftLoading, .giftMessage {
-          color: #81788d;
-          font-size: 10px;
-          padding: 10px 2px;
-        }
-
-        .giftMessage {
-          color: #ff9bd4;
-          text-align: center;
-        }
-
-        @media(max-width:600px) {
-          .selectedGift {
-            flex-wrap: wrap;
-          }
-          .selectedInfo {
-            min-width: calc(100% - 70px);
-          }
-          .sendGift {
-            width: 100%;
-          }
-        }
-      `}</style>
-    </div>
-  );
-}
 
 export default function ChatRoom() {
   const router = useRouter();
@@ -492,8 +22,10 @@ export default function ChatRoom() {
   const [socket, setSocket] = useState(null);
   const [showGifts, setShowGifts] = useState(false);
   const [giftBurst, setGiftBurst] = useState(null);
+  const [socketReady, setSocketReady] = useState(false);
 
   const typingTimer = useRef(null);
+  const seenGiftEvents = useRef(new Set());
   const messagesEndRef = useRef(null);
 
   const currentUserId = useMemo(
@@ -530,60 +62,107 @@ export default function ChatRoom() {
     const token = localStorage.getItem('accessToken');
     if (!token) return null;
 
-    const ws = new WebSocket('wss://api.amoramatch.one/ws');
+    const realtime = createSocket(API, {
+      transports: ['websocket'],
+      withCredentials: true,
+      reconnection: true,
+      reconnectionAttempts: 6
+    });
 
-    ws.onopen = () => {
-      ws.send(JSON.stringify({ type: 'authenticate', token }));
+    realtime.on('connect', () => {
+      realtime.emit('authenticate', token, (ack) => {
+        if (ack?.ok) {
+          setSocketReady(true);
+          setError('');
+        } else {
+          setSocketReady(false);
+          setError('Realtime authentication failed. Please sign in again.');
+        }
+      });
+    });
+
+    realtime.on('disconnect', () => {
+      setSocketReady(false);
+    });
+
+    realtime.on('connect_error', () => {
+      setSocketReady(false);
+      setError('Realtime connection unavailable. Trying again…');
+    });
+
+    const showGift = (transaction) => {
+      if (!transaction?.id) return;
+      if (seenGiftEvents.current.has(transaction.id)) return;
+
+      seenGiftEvents.current.add(transaction.id);
+      const gift = transaction.gift || transaction;
+
+      setGiftBurst({
+        ...gift,
+        quantity: transaction.quantity || 1,
+        coin_cost: transaction.coin_cost || 0,
+        from: transaction.sender
+      });
+
+      window.setTimeout(() => {
+        setGiftBurst(null);
+      }, 3200);
     };
 
-    ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
+    realtime.on('gift-received', showGift);
+    realtime.on('gift-sent', showGift);
 
-        if (data.type === 'private-message' || data.type === 'private-message-sent') {
-          const message = data.message;
-          if (!message?.id) return;
+    realtime.on('private-message', (message) => {
+      if (!message?.id) return;
 
-          setMessages((prev) =>
-            prev.some((m) => m.id === message.id)
-              ? prev
-              : [...prev, message]
-          );
-        }
+      setMessages((prev) =>
+        prev.some((item) => item.id === message.id)
+          ? prev
+          : [...prev, message]
+      );
+    });
 
-        if (data.type === 'typing') setIsTyping(Boolean(data.isTyping));
+    realtime.on('private-message-sent', (message) => {
+      if (!message?.id) return;
 
-        if (data.type === 'read-receipt') {
-          setMessages((prev) =>
-            prev.map((m) =>
-              m.sender_id === data.from
-                ? { ...m, read_at: new Date().toISOString() }
-                : m
-            )
-          );
-        }
-      } catch (err) {
-        console.error('Realtime message error:', err);
+      setMessages((prev) =>
+        prev.some((item) => item.id === message.id)
+          ? prev
+          : [...prev, message]
+      );
+    });
+
+    realtime.on('typing', ({ from, isTyping: typing }) => {
+      if (String(from) === String(userId)) {
+        setIsTyping(Boolean(typing));
       }
-    };
+    });
 
-    ws.onerror = () => {
-      setError('Realtime connection unavailable. Messages can still be reloaded.');
-    };
+    realtime.on('read-receipt', ({ from }) => {
+      setMessages((prev) =>
+        prev.map((message) =>
+          String(message.sender_id) === String(from)
+            ? { ...message, read_at: new Date().toISOString() }
+            : message
+        )
+      );
+    });
 
-    setSocket(ws);
-    return ws;
+    setSocket(realtime);
+    return realtime;
   };
 
   useEffect(() => {
     if (!userId) return;
 
+    seenGiftEvents.current.clear();
     fetchMessages();
-    const ws = connectSocket();
+    const realtime = connectSocket();
 
     return () => {
       if (typingTimer.current) clearTimeout(typingTimer.current);
-      if (ws) ws.close();
+      setSocketReady(false);
+      if (realtime) realtime.disconnect();
     };
   }, [userId]);
 
@@ -597,41 +176,39 @@ export default function ChatRoom() {
     const text = input.trim();
     if (!text) return;
 
-    if (!socket || socket.readyState !== WebSocket.OPEN) {
+    if (!socket || !socketReady || !socket.connected) {
       setError('Realtime connection is not ready.');
       return;
     }
 
-    socket.send(JSON.stringify({
-      type: 'private-message',
+    socket.emit('private-message', {
       receiverId: userId,
       content: text
-    }));
+    });
 
     setInput('');
+    setError('');
   };
 
   const handleTyping = (e) => {
     const value = e.target.value;
     setInput(value);
 
-    if (!socket || socket.readyState !== WebSocket.OPEN) return;
+    if (!socket || !socketReady || !socket.connected) return;
 
-    socket.send(JSON.stringify({
-      type: 'typing',
+    socket.emit('typing', {
       receiverId: userId,
       isTyping: true
-    }));
+    });
 
     if (typingTimer.current) clearTimeout(typingTimer.current);
 
     typingTimer.current = setTimeout(() => {
-      if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
-          type: 'typing',
+      if (socket.connected) {
+        socket.emit('typing', {
           receiverId: userId,
           isTyping: false
-        }));
+        });
       }
     }, 1800);
   };
@@ -643,12 +220,15 @@ export default function ChatRoom() {
     }
 
     if (payload?.gift) {
-      setGiftBurst(payload.gift);
-      setTimeout(() => setGiftBurst(null), 2800);
+      const transactionId = payload.transaction?.id;
+      if (!transactionId || !seenGiftEvents.current.has(transactionId)) {
+        if (transactionId) seenGiftEvents.current.add(transactionId);
+
+        setGiftBurst(payload.gift);
+        window.setTimeout(() => setGiftBurst(null), 3200);
+      }
     }
 
-    // Refresh messages because the backend can create gift-related notifications
-    // independently from the realtime message stream.
     setShowGifts(false);
   };
 
@@ -727,7 +307,7 @@ export default function ChatRoom() {
             <VerifiedBadge user={otherUser} size={15} />
           </div>
           <div className={isTyping ? 'typing' : 'status'}>
-            {isTyping ? 'typing…' : 'Private conversation'}
+            {isTyping ? 'typing…' : socketReady ? 'Private conversation • Online' : 'Connecting securely…'}
           </div>
         </div>
 
@@ -801,9 +381,10 @@ export default function ChatRoom() {
       </main>
 
       {showGifts && (
-        <GiftTray
-          userId={userId}
+        <LuxuryGiftTray
+          receiverId={userId}
           onSent={handleGiftSent}
+          onClose={() => setShowGifts(false)}
         />
       )}
 
@@ -811,16 +392,18 @@ export default function ChatRoom() {
         <div className="giftBurst" aria-live="polite">
           <div className="burstGlow" />
           <div className="burstArt">
-            {giftBurst.image_url ? (
-              <img src={giftBurst.image_url} alt="" />
-            ) : (
-              <span>{giftBurst.glyph || '✦'}</span>
-            )}
+            <GiftIcon
+              name={giftBurst.name}
+              glyph={giftBurst.glyph}
+              rarity={giftBurst.rarity}
+              size={96}
+              animated
+            />
           </div>
           <div className="burstText">
             <span>GIFT SENT</span>
             <strong>{giftBurst.name}</strong>
-            <small>✦ A little luxury, delivered.</small>
+            <small>×{giftBurst.quantity || 1} • ✦ A little luxury, delivered.</small>
           </div>
         </div>
       )}
