@@ -167,21 +167,36 @@ export default function Wallet() {
       }
     }, [
       React.createElement('div', { key: 'label', style: { color: '#aaa', fontSize: '14px' } }, 'Available Coins'),
-      React.createElement('div', { key: 'amount', style: { color: '#FFD700', fontSize: '36px', fontWeight: 'bold', marginTop: '4px' } }, balance),
-      React.createElement('button', {
-        key: 'buy',
-        onClick: () => setShowPackages(!showPackages),
-        style: {
-          marginTop: '12px',
-          padding: '8px 24px',
-          borderRadius: '6px',
-          border: 'none',
-          background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
-          color: '#fff',
-          cursor: 'pointer',
-          fontWeight: 'bold'
-        }
-      }, showPackages ? 'Hide Packages' : 'Buy Coins')
+      React.createElement('div', { key: 'action-row', style: { display: 'flex', gap: '10px', marginTop: '12px', justifyContent: 'center', flexWrap: 'wrap' } }, [
+        React.createElement('button', {
+          key: 'buy',
+          onClick: () => setShowPackages(!showPackages),
+          style: {
+            padding: '8px 24px',
+            borderRadius: '6px',
+            border: 'none',
+            background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
+            color: '#fff',
+            cursor: 'pointer',
+            fontWeight: 'bold'
+          }
+        }, showPackages ? 'Hide Packages' : 'Buy Coins'),
+        React.createElement(Link, {
+          key: 'withdraw',
+          href: '/withdraw',
+          style: {
+            padding: '8px 24px',
+            borderRadius: '6px',
+            border: '1px solid #333',
+            background: 'transparent',
+            color: '#fff',
+            textDecoration: 'none',
+            fontWeight: 'bold',
+            display: 'inline-flex',
+            alignItems: 'center'
+          }
+        }, 'Withdraw')
+      ])
     ]),
 
     // Coin packages (when toggled)
