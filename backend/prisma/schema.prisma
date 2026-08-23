@@ -84,6 +84,8 @@ model User {
   stories           Story[]
   storyViews        StoryView[]
   storyReactions    StoryReaction[]
+  mutedUsers        Mute[]           @relation("muter")
+  mutedBy           Mute[]           @relation("mutedBy")
 }
 
 model Session {
@@ -431,14 +433,31 @@ model Block {
   @@id([blocker_id, blocked_id])
 }
 
+// Distinct from Block: muting hides someone's content from you (currently
+// wired into live chat) without them knowing, without preventing them from
+// following/messaging you, and without the mutual-block effect where
+// neither side can interact. Block remains the tool for actual safety
+// concerns; mute is for "I just don't want to see this."
+model Mute {
+  muter_id   String
+  muted_id   String
+  created_at DateTime @default(now())
+
+  muter      User     @relation("muter", fields: [muter_id], references: [id])
+  muted      User     @relation("mutedBy", fields: [muted_id], references: [id])
+
+  @@id([muter_id, muted_id])
+}
+
 model Report {
   id          String   @id @default(uuid())
   reporter_id String
-  reported_id String
-  target_type String
+  reported_id String   // the user held accountable — always resolved server-side (message sender, stream host, etc), never trusted from the client
+  target_type String   // "user" | "message" | "livestream" | "content"
+  target_id   String?  // the specific message/room/story id being reported, when target_type isn't "user"
   category    String
   description String?
-  status      String   @default("pending")
+  status      String   @default("pending") // "pending" | "reviewing" | "resolved" | "dismissed"
   created_at  DateTime @default(now())
   reviewed_at DateTime?
   action_taken String?
