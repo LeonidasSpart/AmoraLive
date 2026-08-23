@@ -39,6 +39,10 @@ function buildCategory(category, items) {
     name,
     coin_price: PRICE_BAND[i],
     rarity: RARITY_BAND[i],
+    // Mythic-tier gifts (the top 2 of every 10-item category) are reserved
+    // for VIP members and above — a real, enforced entitlement (see
+    // gifts.js), not just a visual flex.
+    min_tier: RARITY_BAND[i] === 'mythic' ? 'vip' : 'free',
     category,
     glyph: GLYPH_MAP[name] || 'giftBox',
     sort_order: i,
