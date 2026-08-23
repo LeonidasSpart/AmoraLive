@@ -7,6 +7,7 @@
 // are durable and the result can be looked back on later.
 
 const auth = require('../middleware/auth');
+const { awardXp } = require('../lib/xp');
 
 const INVITE_TTL_MS = 30 * 1000;
 const DEFAULT_DURATION_SECS = 180;
@@ -58,6 +59,38 @@ module.exports = (prisma, io) => {
       winnerRoomId,
       reason: reason || 'time_up'
     });
+
+    // XP for both participants + a winner bonus, kept in its own
+    // transaction outside the battle-ending one above so a rewards issue
+    // can never prevent a battle from actually ending.
+    try {
+      const [roomA, roomB] = await Promise.all([
+        prisma.liveRoom.findUnique({ where: { id: battle.room_a_id }, select: { host_id: true } }),
+        prisma.liveRoom.findUnique({ where: { id: battle.room_b_id }, select: { host_id: true } })
+      ]);
+      const participants = [
+        { userId: roomA?.host_id, isWinner: winnerRoomId === battle.room_a_id },
+        { userId: roomB?.host_id, isWinner: winnerRoomId === battle.room_b_id }
+      ].filter((p) => p.userId);
+
+      for (const p of participants) {
+        const amount = 30 + (p.isWinner ? 50 : 0);
+        const xpResult = await prisma.$transaction((tx) =>
+          awardXp(tx, {
+            userId: p.userId,
+            amount,
+            reason: p.isWinner ? 'battle_win' : 'battle_participation',
+            metadata: { battleId },
+            dailyCap: 400
+          })
+        );
+        if (xpResult?.leveledUp) {
+          io.to(`user-${p.userId}`).emit('level-up', { newLevel: xpResult.newLevel, badge: xpResult.newBadge });
+        }
+      }
+    } catch (xpErr) {
+      console.error('XP award (battle) failed:', xpErr.message);
+    }
 
     return ended;
   }
