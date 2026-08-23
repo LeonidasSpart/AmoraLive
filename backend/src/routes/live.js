@@ -2,6 +2,7 @@
 const auth = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 const { awardXp } = require('../lib/xp');
+const { incrementMissionProgress } = require('../lib/missions');
 
 module.exports = (prisma, io) => {
   const router = require('express').Router();
@@ -218,6 +219,7 @@ module.exports = (prisma, io) => {
         xpResult = await prisma.$transaction((tx) =>
           awardXp(tx, { userId: req.user.id, amount: 20, reason: 'went_live', metadata: { roomId: room.id }, dailyCap: 60 })
         );
+        await prisma.$transaction((tx) => incrementMissionProgress(tx, req.user.id, 'streams_started', 1));
       } catch (xpErr) {
         console.error('XP award (went_live) failed:', xpErr.message);
       }
@@ -312,6 +314,14 @@ module.exports = (prisma, io) => {
       const updated = participant?.left_at === null
         ? room
         : await prisma.liveRoom.update({ where: { id }, data: { viewer_count: { increment: 1 } } });
+
+      // Mission progress only for a genuinely new join by a viewer — not a
+      // no-op re-join (already active) and not the host joining their own
+      // room (that's tracked separately via 'streams_started').
+      if (updated !== room && participant?.role !== 'host') {
+        prisma.$transaction((tx) => incrementMissionProgress(tx, userId, 'streams_joined', 1))
+          .catch((err) => console.error('Mission progress (streams_joined) failed:', err.message));
+      }
 
       // Broadcast viewer count update
       io.to(`live-${id}`).emit('viewer-count', { count: updated.viewer_count });
@@ -416,6 +426,7 @@ module.exports = (prisma, io) => {
               dailyCap: 300
             })
           );
+          await prisma.$transaction((tx) => incrementMissionProgress(tx, room.host_id, 'live_minutes', minutesLive));
         } catch (xpErr) {
           console.error('XP award (live_duration) failed:', xpErr.message);
         }
