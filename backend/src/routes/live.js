@@ -295,7 +295,7 @@ module.exports = (prisma, io) => {
       // Check if room exists
       const room = await prisma.liveRoom.findUnique({
         where: { id },
-        select: { id: true, status: true, viewer_count: true }
+        select: { id: true, status: true, viewer_count: true, peak_viewer_count: true }
       });
       if (!room || room.status !== 'live') {
         return res.status(400).json({ error: 'Room is not live' });
@@ -314,6 +314,14 @@ module.exports = (prisma, io) => {
       const updated = participant?.left_at === null
         ? room
         : await prisma.liveRoom.update({ where: { id }, data: { viewer_count: { increment: 1 } } });
+
+      // viewer_count decreases as people leave, so it can never answer
+      // "what was the highest it ever reached" — peak_viewer_count is a
+      // separate ratchet that only ever goes up.
+      if (updated !== room && updated.viewer_count > (room.peak_viewer_count || 0)) {
+        prisma.liveRoom.update({ where: { id }, data: { peak_viewer_count: updated.viewer_count } })
+          .catch((err) => console.error('Peak viewer update failed:', err.message));
+      }
 
       // Mission progress only for a genuinely new join by a viewer — not a
       // no-op re-join (already active) and not the host joining their own
