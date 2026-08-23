@@ -56,6 +56,7 @@ export default function Layout({ children }) {
     { href: '/video-match', label: 'Match', icon: '❤️' },
     { href: '/events', label: 'Events', icon: '🏆' },
     { href: '/rewards', label: 'Rewards', icon: '🎁' },
+    { href: '/missions', label: 'Missions', icon: '🎯' },
     { href: '/membership', label: 'VIP', icon: '💎' },
     { href: '/chat', label: 'Chat', icon: '💬' },
   ];
