@@ -1,6 +1,7 @@
 // backend/src/routes/users.js
 const auth = require('../middleware/auth');
 const { computeLevel } = require('../lib/xp');
+const { incrementMissionProgress } = require('../lib/missions');
 const multer = require('multer');
 const path = require('path');
 const bcrypt = require('bcrypt');
@@ -63,6 +64,16 @@ module.exports = (prisma) => {
         }
       });
       const { password_hash, ...safeUser } = updated;
+
+      // Profile-completion mission: bio + photo + at least one interest.
+      // Photo upload happens on a different endpoint, so this checks the
+      // current stored state after this update, not just what was just
+      // submitted in this particular request.
+      if (updated.bio && updated.profile_photo && updated.interests?.length > 0) {
+        prisma.$transaction((tx) => incrementMissionProgress(tx, req.user.id, 'profile_completed', 1))
+          .catch(err => console.error('Mission progress (profile_completed) failed:', err.message));
+      }
+
       res.json(safeUser);
     } catch (e) {
       res.status(400).json({ error: e.message });
@@ -354,6 +365,9 @@ module.exports = (prisma) => {
         data: { user_id: userId, type: 'new_follower', payload: { followerId: req.user.id } }
       }).catch(err => console.error('Failed to create follow notification:', err.message));
 
+      prisma.$transaction((tx) => incrementMissionProgress(tx, req.user.id, 'follows_made', 1))
+        .catch(err => console.error('Mission progress (follows_made) failed:', err.message));
+
       const count = await prisma.follow.count({ where: { following_id: userId } });
       res.json({ following: true, followerCount: count });
     } catch (e) {
@@ -453,6 +467,13 @@ module.exports = (prisma) => {
       const url = result.data.ufsUrl || result.data.url;
 
       await prisma.user.update({ where: { id: req.user.id }, data: { profile_photo: url } });
+
+      const current = await prisma.user.findUnique({ where: { id: req.user.id }, select: { bio: true, interests: true } });
+      if (current?.bio && current.interests?.length > 0) {
+        prisma.$transaction((tx) => incrementMissionProgress(tx, req.user.id, 'profile_completed', 1))
+          .catch(err => console.error('Mission progress (profile_completed) failed:', err.message));
+      }
+
       res.json({ url });
     } catch (e) {
       console.error('Photo upload error:', e);
