@@ -9,67 +9,73 @@ datasource db {
 }
 
 model User {
-  id                    String   @id @default(uuid())
-  email                 String   @unique
-  username              String   @unique
-  password_hash         String
-  display_name          String
-  date_of_birth         DateTime
-  age_verified          Boolean  @default(false)
-  is_active             Boolean  @default(true)
-  deleted_at            DateTime?
-  is_verified           Boolean  @default(false)
-  role                  String   @default("user")
-  bio                   String?
-  location              Json?
-  interests             String[]
-  languages             String[]
-  relationship_intent   String?
-  profile_photo         String?
-  cover_photo           String?
-  online_status         String   @default("offline")
-  last_seen             DateTime @default(now())
-  level                 Int      @default(0)
-  xp                    Int      @default(0)
-  membership_tier       String   @default("free")
-  badges                String[]
+  id              String   @id @default(uuid())
+  email           String   @unique
+  username        String   @unique
+  password_hash   String
+  display_name    String
+  date_of_birth   DateTime
+  age_verified    Boolean  @default(false)
+  is_active       Boolean  @default(true)
+  deleted_at      DateTime? // set by admin Delete — distinct from is_active,
+                            // which Suspend also uses. Deleted accounts are
+                            // excluded from the admin user list by default;
+                            // this is a soft delete (data is kept intact),
+                            // not a hard row delete, since a real delete
+                            // would cascade-fail against gifts/messages/
+                            // wallet/live-room history without a much
+                            // larger schema change.
+  is_verified     Boolean  @default(false)
+  role            String   @default("user") // "user", "admin", "superadmin"
+  bio             String?
+  location        Json?
+  interests       String[]
+  languages       String[]
+  relationship_intent String?
+  profile_photo   String?
+  cover_photo     String?
+  online_status   String   @default("offline")
+  last_seen       DateTime @default(now())
+  level           Int      @default(0)
+  xp              Int      @default(0)
+  membership_tier String   @default("free")
+  badges          String[]
   notification_preferences Json?
-  privacy_settings      Json?
-  created_at            DateTime @default(now())
-  updated_at            DateTime @updatedAt
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
-  sessions              Session[]
-  wallet                Wallet?
-  liveRooms             LiveRoom[]      @relation("host")
-  sentGifts             GiftTransaction[] @relation("sender")
-  receivedGifts         GiftTransaction[] @relation("receiver")
-  messages              Message[]       @relation("sender")
-  receivedMessages      Message[]       @relation("receiver")
-  cosmetics             UserCosmetic[]
-  callHistory           CallHistory[]   @relation("caller")
-  receivedCalls         CallHistory[]   @relation("receiver")
-  eventScores           EventScore[]
-  notifications         Notification[]
-  reports               Report[]        @relation("reporter")
-  reported              Report[]        @relation("reported")
-  blocks                Block[]         @relation("blocker")
-  blocked               Block[]         @relation("blocked")
-  followers             Follow[]        @relation("follower")
-  following             Follow[]        @relation("following")
-  matches               Match[]         @relation("user1")
-  matched               Match[]         @relation("user2")
-  purchases             Purchase[]
-  memberships           Membership[]
-  roomParticipants      RoomParticipant[]
-  liveChatMessages      LiveChatMessage[]
-  swipesGiven           Swipe[]           @relation("swiper")
-  swipesReceived        Swipe[]           @relation("swipeTarget")
-  videoMatchesAsA       VideoMatchSession[] @relation("videoMatchUserA")
-  videoMatchesAsB       VideoMatchSession[] @relation("videoMatchUserB")
-  dailyRewardStatus     DailyRewardStatus?
-  dailyRewardClaims     DailyRewardClaim[]
-  xpTransactions        XpTransaction[]
-  missionProgress       MissionProgress[]
+  sessions         Session[]
+  wallet           Wallet?
+  liveRooms        LiveRoom[]      @relation("host")
+  sentGifts        GiftTransaction[] @relation("sender")
+  receivedGifts    GiftTransaction[] @relation("receiver")
+  messages         Message[]       @relation("sender")
+  receivedMessages Message[]       @relation("receiver")
+  cosmetics        UserCosmetic[]
+  callHistory      CallHistory[]   @relation("caller")
+  receivedCalls    CallHistory[]   @relation("receiver")
+  eventScores      EventScore[]
+  notifications    Notification[]
+  reports          Report[]        @relation("reporter")
+  reported         Report[]        @relation("reported")
+  blocks           Block[]         @relation("blocker")
+  blocked          Block[]         @relation("blocked")
+  followers        Follow[]        @relation("follower")
+  following        Follow[]        @relation("following")
+  matches          Match[]         @relation("user1")
+  matched          Match[]         @relation("user2")
+  purchases        Purchase[]
+  memberships      Membership[]
+  roomParticipants RoomParticipant[]
+  liveChatMessages LiveChatMessage[]
+  swipesGiven      Swipe[]           @relation("swiper")
+  swipesReceived   Swipe[]           @relation("swipeTarget")
+  videoMatchesAsA  VideoMatchSession[] @relation("videoMatchUserA")
+  videoMatchesAsB  VideoMatchSession[] @relation("videoMatchUserB")
+  dailyRewardStatus DailyRewardStatus?
+  dailyRewardClaims DailyRewardClaim[]
+  xpTransactions    XpTransaction[]
+  missionProgress   MissionProgress[]
 }
 
 model Session {
@@ -94,91 +100,98 @@ model Wallet {
 }
 
 model GiftCatalog {
-  id             String   @id @default(uuid())
-  name           String
-  description    String?
-  image_url      String
-  animation_url  String?
-  sound_url      String?
-  coin_price     Int
-  rarity         String
-  category       String
-  glyph          String?
-  min_tier       String   @default("free")
-  sort_order     Int      @default(0)
-  is_active      Boolean  @default(true)
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  image_url   String
+  animation_url String?
+  sound_url   String?
+  coin_price  Int
+  rarity      String
+  category    String
+  glyph       String?  // maps to a vector icon in the frontend GiftIcon component
+  min_tier    String   @default("free") // "free" | "premium" | "vip" | "svip" — gates who can send this gift
+  sort_order  Int      @default(0)
+  is_active   Boolean  @default(true)
   available_from DateTime?
   available_to   DateTime?
-  created_at     DateTime @default(now())
+  created_at  DateTime @default(now())
 
   giftTransactions GiftTransaction[]
 }
 
 model GiftTransaction {
-  id             String   @id @default(uuid())
-  sender_id      String
-  receiver_id    String?
-  room_id        String?
-  gift_id        String
-  quantity       Int      @default(1)
-  coin_cost      Int
-  platform_share Float    @default(0.20)
-  status         String   @default("pending")
-  tx_id           String   @unique
-  created_at      DateTime @default(now())
+  id            String   @id @default(uuid())
+  sender_id     String
+  receiver_id   String?
+  room_id       String?
+  gift_id       String
+  quantity      Int      @default(1)
+  coin_cost     Int
+  platform_share Float   @default(0.20)
+  status        String   @default("pending")
+  tx_id         String   @unique
+  created_at    DateTime @default(now())
 
-  sender   User        @relation("sender", fields: [sender_id], references: [id])
-  receiver User?       @relation("receiver", fields: [receiver_id], references: [id])
-  room     LiveRoom?   @relation(fields: [room_id], references: [id])
-  gift     GiftCatalog @relation(fields: [gift_id], references: [id])
+  sender        User     @relation("sender", fields: [sender_id], references: [id])
+  receiver      User?    @relation("receiver", fields: [receiver_id], references: [id])
+  room          LiveRoom? @relation(fields: [room_id], references: [id])
+  gift          GiftCatalog @relation(fields: [gift_id], references: [id])
 }
 
 model CoinPackage {
-  id              String   @id @default(uuid())
-  name            String
-  price_cents     Int
-  coins_amount    Int
-  bonus_coins     Int      @default(0)
-  is_promotion    Boolean  @default(false)
-  is_active       Boolean  @default(true)
-  region          String?
-  platform        String
+  id          String   @id @default(uuid())
+  name        String
+  price_cents Int
+  coins_amount Int
+  bonus_coins Int      @default(0)
+  is_promotion Boolean @default(false)
+  is_active   Boolean  @default(true)
+  region      String?
+  platform    String
   stripe_price_id String?
-  apple_product_id String?
-  google_product_id String?
-  created_at      DateTime @default(now())
+  apple_product_id  String? // App Store Connect in-app purchase product ID
+  google_product_id String? // Play Console in-app product ID
+  created_at  DateTime @default(now())
 
-  purchases Purchase[]
+  purchases   Purchase[]
 }
 
 model Purchase {
-  id             String   @id @default(uuid())
-  user_id        String
-  package_id     String
-  price_paid     Int
-  platform       String
-  purchase_token String   @unique
-  status         String   @default("pending")
-  created_at     DateTime @default(now())
-  verified_at    DateTime?
+  id            String   @id @default(uuid())
+  user_id       String
+  package_id    String
+  price_paid    Int
+  platform      String
+  // Unique so the exact same Apple transaction / Google purchase token /
+  // Stripe session can never credit a wallet twice, even under retries or
+  // a client resubmitting the same receipt.
+  purchase_token String  @unique
+  status        String   @default("pending")
+  created_at    DateTime @default(now())
+  verified_at   DateTime?
 
-  user    User        @relation(fields: [user_id], references: [id])
-  package CoinPackage @relation(fields: [package_id], references: [id])
+  user          User     @relation(fields: [user_id], references: [id])
+  package       CoinPackage @relation(fields: [package_id], references: [id])
 }
 
 model Membership {
-  id                       String   @id @default(uuid())
-  user_id                  String   @unique
-  tier                     String
-  start_date               DateTime @default(now())
-  end_date                 DateTime
-  auto_renew               Boolean  @default(false)
-  stripe_subscription_id   String?
-  last_bonus_period_end    DateTime?
-  created_at               DateTime @default(now())
-  updated_at               DateTime @updatedAt
+  id              String   @id @default(uuid())
+  user_id         String   @unique
+  tier            String
+  start_date      DateTime @default(now())
+  end_date        DateTime
+  auto_renew      Boolean  @default(false)
+  stripe_subscription_id String?
+  // Tracks which billing period's monthly bonus coins have already been
+  // granted, keyed to Stripe's current_period_end for that cycle. Stripe
+  // can and does redeliver the same webhook event on retry, so without
+  // this a retried event would credit the bonus twice.
+  last_bonus_period_end DateTime?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 
-  user User @relation(fields: [user_id], references: [id])
+  user            User     @relation(fields: [user_id], references: [id])
 }
 
 model Cosmetic {
@@ -192,17 +205,17 @@ model Cosmetic {
   is_active     Boolean  @default(true)
   created_at    DateTime @default(now())
 
-  purchases UserCosmetic[]
+  purchases     UserCosmetic[]
 }
 
 model UserCosmetic {
-  user_id      String
-  user         User     @relation(fields: [user_id], references: [id])
-  cosmetic_id  String
-  cosmetic     Cosmetic @relation(fields: [cosmetic_id], references: [id])
-  purchased_at DateTime @default(now())
-  expires_at   DateTime?
-  is_equipped  Boolean  @default(false)
+  user_id       String
+  user          User     @relation(fields: [user_id], references: [id])
+  cosmetic_id   String
+  cosmetic      Cosmetic @relation(fields: [cosmetic_id], references: [id])
+  purchased_at  DateTime @default(now())
+  expires_at    DateTime?
+  is_equipped   Boolean  @default(false)
 
   @@id([user_id, cosmetic_id])
 }
@@ -215,109 +228,113 @@ model Event {
   starts_at   DateTime
   ends_at     DateTime
   event_type  String
-  teams       String[]
+  teams       String[] // e.g. ["Dragon", "Slayer"] — the pickable sides
   is_active   Boolean  @default(true)
   created_at  DateTime @default(now())
 
-  scores EventScore[]
+  scores      EventScore[]
 }
 
 model EventScore {
-  user_id               String
-  event_id              String
-  team_side              String
-  total_gifts_sent      Int      @default(0)
-  total_gifts_received  Int      @default(0)
-  rank_position         Int?
-  updated_at            DateTime @updatedAt
+  user_id       String
+  event_id      String
+  team_side     String
+  total_gifts_sent Int   @default(0)
+  total_gifts_received Int @default(0)
+  rank_position Int?
+  updated_at    DateTime @updatedAt
 
-  user  User  @relation(fields: [user_id], references: [id])
-  event Event @relation(fields: [event_id], references: [id])
+  user          User     @relation(fields: [user_id], references: [id])
+  event         Event    @relation(fields: [event_id], references: [id])
 
   @@id([user_id, event_id])
 }
 
 model LiveRoom {
-  id                String   @id @default(uuid())
-  host_id           String
-  title             String
-  category          String
-  status            String   @default("live")
-  start_time        DateTime @default(now())
-  end_time          DateTime?
-  viewer_count      Int      @default(0)
-  peak_viewer_count Int      @default(0)
-  gift_count        Int      @default(0)
-  like_count        Int      @default(0)
-  stream_key        String
-  thumbnail_url     String?
-  settings          Json?
-  active_battle_id  String?
-  created_at        DateTime @default(now())
-  updated_at        DateTime @updatedAt
+  id          String   @id @default(uuid())
+  host_id     String
+  title       String
+  category    String
+  status      String   @default("live")
+  start_time  DateTime @default(now())
+  end_time    DateTime?
+  viewer_count Int     @default(0)
+  peak_viewer_count Int @default(0) // highest viewer_count ever reached this stream — viewer_count itself decreases as people leave, so this is the only source for "Peak Viewers" in Creator Studio
+  gift_count  Int      @default(0)
+  like_count  Int      @default(0)
+  stream_key  String
+  thumbnail_url String?
+  settings    Json?
+  active_battle_id String? // set while this room is in a PK battle
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
 
-  host         User              @relation("host", fields: [host_id], references: [id])
+  host        User     @relation("host", fields: [host_id], references: [id])
   participants RoomParticipant[]
-  messages     LiveChatMessage[]
-  gifts        GiftTransaction[]
-  battlesAsA   PkBattle[]         @relation("battleRoomA")
-  battlesAsB   PkBattle[]         @relation("battleRoomB")
+  messages    LiveChatMessage[]
+  gifts       GiftTransaction[]
+  battlesAsA  PkBattle[] @relation("battleRoomA")
+  battlesAsB  PkBattle[] @relation("battleRoomB")
 }
 
+// PK ("player kill" / head-to-head) battle between two live hosts. Viewers
+// on either side gift into that side's room as normal — gifts.js tallies
+// the coin value into score_a/score_b for whichever room is in an active
+// battle. Highest score when the timer runs out wins.
 model PkBattle {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
   room_a_id      String
   room_b_id      String
-  status         String   @default("active")
-  duration_secs  Int      @default(180)
-  score_a        Int      @default(0)
-  score_b        Int      @default(0)
+  status         String    @default("active") // active | ended
+  duration_secs  Int       @default(180)
+  score_a        Int       @default(0)
+  score_b        Int       @default(0)
   winner_room_id String?
-  started_at     DateTime @default(now())
+  started_at     DateTime  @default(now())
   ended_at       DateTime?
 
-  room_a LiveRoom @relation("battleRoomA", fields: [room_a_id], references: [id])
-  room_b LiveRoom @relation("battleRoomB", fields: [room_b_id], references: [id])
+  room_a         LiveRoom  @relation("battleRoomA", fields: [room_a_id], references: [id])
+  room_b         LiveRoom  @relation("battleRoomB", fields: [room_b_id], references: [id])
 }
 
 model RoomParticipant {
-  room_id   String
-  user_id   String
-  role      String
-  joined_at DateTime @default(now())
-  left_at   DateTime?
+  room_id     String
+  user_id     String
+  role        String
+  joined_at   DateTime @default(now())
+  left_at     DateTime?
 
-  room LiveRoom @relation(fields: [room_id], references: [id])
-  user User     @relation(fields: [user_id], references: [id])
+  room        LiveRoom @relation(fields: [room_id], references: [id])
+  user        User     @relation(fields: [user_id], references: [id])
 
   @@id([room_id, user_id])
 }
 
 model LiveChatMessage {
-  id         String   @id @default(uuid())
-  room_id    String
-  user_id    String
-  message    String
-  is_pinned  Boolean  @default(false)
-  created_at DateTime @default(now())
+  id          String   @id @default(uuid())
+  room_id     String
+  user_id     String
+  message     String
+  is_pinned   Boolean  @default(false)
+  created_at  DateTime @default(now())
 
-  room LiveRoom @relation(fields: [room_id], references: [id])
-  user User     @relation(fields: [user_id], references: [id])
+  room        LiveRoom @relation(fields: [room_id], references: [id])
+  user        User     @relation(fields: [user_id], references: [id])
 }
 
 model Message {
-  id           String   @id @default(uuid())
-  sender_id    String
-  receiver_id  String
-  content      String
-  type         String   @default("text")
-  media_urls   Json?
-  read_at      DateTime?
+  id          String   @id @default(uuid())
+  sender_id   String
+  receiver_id String
+  content     String
+  type        String   @default("text")
+  media_urls  Json?
+  read_at     DateTime?
   delivered_at DateTime?
-  created_at   DateTime @default(now())
+  created_at  DateTime @default(now())
 
-  sender   User @relation("sender", fields: [sender_id], references: [id])
-  receiver User @relation("receiver", fields: [receiver_id], references: [id])
+  sender      User     @relation("sender", fields: [sender_id], references: [id])
+  receiver    User     @relation("receiver", fields: [receiver_id], references: [id])
 }
 
 model CallHistory {
@@ -330,17 +347,17 @@ model CallHistory {
   started_at    DateTime @default(now())
   ended_at      DateTime?
 
-  caller   User @relation("caller", fields: [caller_id], references: [id])
-  receiver User @relation("receiver", fields: [receiver_id], references: [id])
+  caller        User     @relation("caller", fields: [caller_id], references: [id])
+  receiver      User     @relation("receiver", fields: [receiver_id], references: [id])
 }
 
 model Follow {
-  follower_id  String
-  following_id String
-  created_at   DateTime @default(now())
+  follower_id   String
+  following_id  String
+  created_at    DateTime @default(now())
 
-  follower  User @relation("follower", fields: [follower_id], references: [id])
-  following User @relation("following", fields: [following_id], references: [id])
+  follower      User     @relation("follower", fields: [follower_id], references: [id])
+  following     User     @relation("following", fields: [following_id], references: [id])
 
   @@id([follower_id, following_id])
 }
@@ -349,81 +366,87 @@ model Match {
   user1_id   String
   user2_id   String
   created_at DateTime @default(now())
-  source     String   @default("browse")
+  source     String   @default("browse") // "browse" | "video_match"
 
-  user1 User @relation("user1", fields: [user1_id], references: [id])
-  user2 User @relation("user2", fields: [user2_id], references: [id])
+  user1      User     @relation("user1", fields: [user1_id], references: [id])
+  user2      User     @relation("user2", fields: [user2_id], references: [id])
 
   @@id([user1_id, user2_id])
 }
 
+// One row per swipe decision. Used to (a) stop showing already-swiped
+// people in /matches/next, and (b) detect mutual likes so a Match is only
+// created when BOTH sides have liked each other.
 model Swipe {
   swiper_id  String
   target_id  String
-  decision   String
-  source     String   @default("browse")
+  decision   String   // "like" | "pass"
+  source     String   @default("browse") // "browse" | "video_match"
   created_at DateTime @default(now())
 
-  swiper User @relation("swiper", fields: [swiper_id], references: [id])
-  target User @relation("swipeTarget", fields: [target_id], references: [id])
+  swiper     User     @relation("swiper", fields: [swiper_id], references: [id])
+  target     User     @relation("swipeTarget", fields: [target_id], references: [id])
 
   @@id([swiper_id, target_id])
 }
 
+// A short, live 1:1 video "first impression" session (10-20s) that two
+// online users are randomly paired into. If both like each other once the
+// video window ends, it becomes a real Match with an open chat.
 model VideoMatchSession {
-  id               String   @id @default(uuid())
-  user_a_id        String
-  user_b_id        String
-  room_name        String   @unique
-  status           String   @default("active")
-  duration_secs    Int      @default(15)
-  user_a_decision  String?
-  user_b_decision  String?
-  ended_reason     String?
-  started_at       DateTime @default(now())
-  decided_at       DateTime?
+  id              String    @id @default(uuid())
+  user_a_id       String
+  user_b_id       String
+  room_name       String    @unique
+  status          String    @default("active") // active | deciding | matched | ended
+  duration_secs   Int       @default(15)
+  user_a_decision String?   // like | pass
+  user_b_decision String?
+  ended_reason    String?   // completed | disconnect | timeout
+  started_at      DateTime  @default(now())
+  decided_at      DateTime?
 
-  user_a User @relation("videoMatchUserA", fields: [user_a_id], references: [id])
-  user_b User @relation("videoMatchUserB", fields: [user_b_id], references: [id])
+  user_a          User      @relation("videoMatchUserA", fields: [user_a_id], references: [id])
+  user_b          User      @relation("videoMatchUserB", fields: [user_b_id], references: [id])
 }
 
 model Block {
-  blocker_id String
-  blocked_id String
-  reason     String?
-  created_at DateTime @default(now())
+  blocker_id    String
+  blocked_id    String
+  reason        String?
+  created_at    DateTime @default(now())
 
-  blocker User @relation("blocker", fields: [blocker_id], references: [id])
-  blocked User @relation("blocked", fields: [blocked_id], references: [id])
+  blocker       User     @relation("blocker", fields: [blocker_id], references: [id])
+  blocked       User     @relation("blocked", fields: [blocked_id], references: [id])
 
   @@id([blocker_id, blocked_id])
 }
 
 model Report {
-  id           String   @id @default(uuid())
-  reporter_id  String
-  reported_id  String
-  target_type  String
-  category     String
-  description  String?
-  status       String   @default("pending")
-  created_at   DateTime @default(now())
-  reviewed_at  DateTime?
+  id          String   @id @default(uuid())
+  reporter_id String
+  reported_id String
+  target_type String
+  category    String
+  description String?
+  status      String   @default("pending")
+  created_at  DateTime @default(now())
+  reviewed_at DateTime?
   action_taken String?
 
-  reporter User @relation("reporter", fields: [reporter_id], references: [id])
-  reported User @relation("reported", fields: [reported_id], references: [id])
+  reporter    User     @relation("reporter", fields: [reporter_id], references: [id])
+  reported    User     @relation("reported", fields: [reported_id], references: [id])
 }
 
 model Notification {
-  id         String   @id @default(uuid())
-  user_id    String
-  type       String
-  payload    Json?
-  is_read    Boolean  @default(false)
-  created_at DateTime @default(now())
+  id          String   @id @default(uuid())
+  user_id     String
+  type        String
+  payload     Json?
+  is_read     Boolean  @default(false)
+  created_at  DateTime @default(now())
 
-  user User @relation(fields: [user_id], references: [id])
+  user        User     @relation(fields: [user_id], references: [id])
 }
 
 model AuditLog {
@@ -437,49 +460,68 @@ model AuditLog {
   timestamp   DateTime @default(now())
 }
 
+// Daily login rewards. current_streak/best_streak/last_claim_date live on
+// this row (one per user) rather than being recomputed from history every
+// time, so streak logic stays a simple server-side comparison against
+// last_claim_date instead of scanning DailyRewardClaim rows on every check.
 model DailyRewardStatus {
-  user_id         String   @id
-  user            User     @relation(fields: [user_id], references: [id])
-  current_streak  Int      @default(0)
-  best_streak     Int      @default(0)
+  user_id        String   @id
+  user           User     @relation(fields: [user_id], references: [id])
+  current_streak Int      @default(0)
+  best_streak    Int      @default(0)
+  // Stored as a UTC calendar date (midnight), not a timestamp — comparing
+  // calendar days rather than 24h windows is what makes this timezone-safe
+  // and immune to "claimed at 11:59pm, blocked again at 12:01am" edge cases.
   last_claim_date DateTime?
-  updated_at      DateTime @updatedAt
+  updated_at     DateTime @updatedAt
 }
 
+// Immutable log of every claim — used for "claim history" in the UI and as
+// an audit trail. Never mutated after creation.
 model DailyRewardClaim {
-  id           String   @id @default(uuid())
-  user_id      String
-  user         User     @relation(fields: [user_id], references: [id])
-  day_number   Int
-  coins        Int
-  is_milestone Boolean  @default(false)
-  claimed_at   DateTime @default(now())
+  id          String   @id @default(uuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id])
+  day_number  Int      // 1-7 within the current streak cycle (see route)
+  coins       Int
+  is_milestone Boolean @default(false) // true for the day-7/day-30 bonus claims
+  claimed_at  DateTime @default(now())
 
   @@index([user_id, claimed_at])
 }
 
+// Immutable XP earning log. User.xp/level are the fast-access denormalized
+// values everything else reads (profile display, etc.) — this table is the
+// audit trail behind them and what daily-cap anti-farming checks query.
 model XpTransaction {
   id         String   @id @default(uuid())
   user_id    String
   user       User     @relation(fields: [user_id], references: [id])
   amount     Int
-  reason     String
+  reason     String   // 'went_live' | 'live_duration' | 'gift_received' | 'battle_participation' | 'battle_win'
   metadata   Json?
   created_at DateTime @default(now())
 
   @@index([user_id, reason, created_at])
 }
 
+// One row per (user, mission, period). period_key is "lifetime" for
+// lifetime missions, "daily:2026-08-23" for daily, "weekly:2026-W34" for
+// weekly — new rows are created automatically as new periods begin, which
+// is what makes daily/weekly missions reset without any cron job. The
+// mission catalog itself (title, target, reward) lives in
+// src/data/missions.js, not the database — same pattern as GiftCatalog's
+// starter data and membership.js's PLANS.
 model MissionProgress {
-  id           String   @id @default(uuid())
+  id           String    @id @default(uuid())
   user_id      String
-  user         User     @relation(fields: [user_id], references: [id])
+  user         User      @relation(fields: [user_id], references: [id])
   mission_key  String
   period_key   String
-  progress     Int      @default(0)
+  progress     Int       @default(0)
   completed_at DateTime?
   claimed_at   DateTime?
-  updated_at   DateTime @updatedAt
+  updated_at   DateTime  @updatedAt
 
   @@unique([user_id, mission_key, period_key])
   @@index([user_id, period_key])
