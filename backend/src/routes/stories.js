@@ -3,6 +3,7 @@ const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 const { UTApi } = require('uploadthing/server');
+const { deleteUploadThingFile } = require('../lib/media');
 
 const utapi = process.env.UPLOADTHING_TOKEN ? new UTApi() : null;
 
@@ -261,7 +262,7 @@ module.exports = (prisma, io) => {
   // ---------- DELETE /stories/:id ----------
   router.delete('/:id', auth, async (req, res) => {
     try {
-      const story = await prisma.story.findUnique({ where: { id: req.params.id }, select: { user_id: true } });
+      const story = await prisma.story.findUnique({ where: { id: req.params.id }, select: { user_id: true, media_url: true } });
       if (!story) return res.status(404).json({ error: 'Story not found' });
       if (story.user_id !== req.user.id) return res.status(403).json({ error: 'Only the story owner can delete it.' });
 
@@ -270,6 +271,12 @@ module.exports = (prisma, io) => {
         prisma.storyReaction.deleteMany({ where: { story_id: req.params.id } }),
         prisma.story.delete({ where: { id: req.params.id } })
       ]);
+
+      // Cleanup happens after the DB delete succeeds, and never blocks the
+      // response — a failed UploadThing call shouldn't make the story
+      // reappear or the delete look like it failed.
+      deleteUploadThingFile(utapi, story.media_url);
+
       res.json({ success: true });
     } catch (e) {
       res.status(500).json({ error: 'Unable to delete story.', code: 'DELETE_FAILED' });
