@@ -53,6 +53,7 @@ export default function Layout({ children }) {
   const navItems = [
     { href: '/discover', label: 'Discover', icon: '📺' },
     { href: '/go-live', label: 'Go Live', icon: '🔴' },
+    { href: '/studio', label: 'Studio', icon: '📊' },
     { href: '/video-match', label: 'Match', icon: '❤️' },
     { href: '/events', label: 'Events', icon: '🏆' },
     { href: '/rewards', label: 'Rewards', icon: '🎁' },
