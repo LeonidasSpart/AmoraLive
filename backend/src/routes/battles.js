@@ -62,6 +62,30 @@ module.exports = (prisma, io) => {
     return ended;
   }
 
+  // Battle end-timers are only ever held in memory (setTimeout). Every
+  // server restart — including a normal redeploy — wipes them, so any
+  // battle that was active at that moment never gets its scheduled
+  // endBattle() call and is stuck "active" in the database forever, with
+  // both rooms' active_battle_id still pointing at it. On boot, sweep for
+  // exactly that case and end them immediately.
+  (async () => {
+    try {
+      const stale = await prisma.pkBattle.findMany({ where: { status: 'active' } });
+      for (const battle of stale) {
+        const deadline = new Date(battle.started_at).getTime() + battle.duration_secs * 1000;
+        if (Date.now() >= deadline) {
+          await endBattle(battle.id, 'server_restart_cleanup');
+        } else {
+          // Still genuinely mid-battle when the server restarted — resume
+          // its timer for the remaining time instead of leaving it stuck.
+          battleTimers.set(battle.id, setTimeout(() => endBattle(battle.id, 'time_up'), deadline - Date.now()));
+        }
+      }
+    } catch (err) {
+      console.error('Stale battle cleanup failed:', err.message);
+    }
+  })();
+
   router.get('/:id/battle', async (req, res) => {
     try {
       const room = await loadLiveRoom(req.params.id);
