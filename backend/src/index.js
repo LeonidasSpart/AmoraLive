@@ -511,6 +511,9 @@ const giftRoutes =
 const dailyRewardRoutes =
   require('./routes/dailyRewards')(prisma);
 
+const missionRoutes =
+  require('./routes/missions')(prisma);
+
 const walletRoutes =
   require('./routes/wallet')(prisma);
 
@@ -544,6 +547,7 @@ app.use('/live', liveRoutes);
 app.use('/live', battleRoutes);
 app.use('/gifts', giftRoutes);
 app.use('/daily-rewards', dailyRewardRoutes);
+app.use('/missions', missionRoutes);
 app.use('/wallet', walletRoutes);
 app.use('/wallet/iap', iapRoutes);
 app.use('/membership', membershipRoutes);
