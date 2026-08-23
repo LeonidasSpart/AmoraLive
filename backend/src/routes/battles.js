@@ -8,6 +8,7 @@
 
 const auth = require('../middleware/auth');
 const { awardXp } = require('../lib/xp');
+const { incrementMissionProgress } = require('../lib/missions');
 
 const INVITE_TTL_MS = 30 * 1000;
 const DEFAULT_DURATION_SECS = 180;
@@ -87,6 +88,7 @@ module.exports = (prisma, io) => {
         if (xpResult?.leveledUp) {
           io.to(`user-${p.userId}`).emit('level-up', { newLevel: xpResult.newLevel, badge: xpResult.newBadge });
         }
+        await prisma.$transaction((tx) => incrementMissionProgress(tx, p.userId, 'battles_participated', 1));
       }
     } catch (xpErr) {
       console.error('XP award (battle) failed:', xpErr.message);
