@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Luxury Car">
+<defs>
+ <radialGradient id="bg"><stop stop-color="#ff4fb3" stop-opacity=".22"/><stop offset=".55" stop-color="#7c3aed" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+ <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff8cf"/><stop offset=".18" stop-color="#ffd95a"/><stop offset=".45" stop-color="#fff0a0"/><stop offset=".7" stop-color="#c88712"/><stop offset="1" stop-color="#fff4b2"/></linearGradient>
+ <linearGradient id="pink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".22" stop-color="#ff4fb3"/><stop offset=".65" stop-color="#7c3aed"/><stop offset="1" stop-color="#ffb4df"/></linearGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".8"/><stop offset=".25" stop-color="#fff" stop-opacity=".18"/><stop offset=".55" stop-color="#ff4fb3" stop-opacity=".28"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+ <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="13" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="15" flood-color="#000" flood-opacity=".55"/></filter>
+</defs>
+<circle cx="256" cy="256" r="230" fill="url(#bg)"/>
+<g filter="url(#shadow)">
+<path d="M94 291l32-70c10-22 29-35 53-35h113c31 0 55 14 72 40l36 65z" fill="url(#glass)" stroke="#fff" stroke-opacity=".45" stroke-width="4"/>
+<path d="M143 219h72l-16 52h-84zM224 219h70l31 52H211z" fill="#111827" stroke="#fff" stroke-opacity=".2" stroke-width="3"/>
+<path d="M83 292h347v43H83z" fill="url(#pink)" opacity=".95"/>
+<circle cx="145" cy="342" r="35" fill="#0b0b12" stroke="url(#metal)" stroke-width="9"/><circle cx="367" cy="342" r="35" fill="#0b0b12" stroke="url(#metal)" stroke-width="9"/>
+<circle cx="145" cy="342" r="11" fill="#fff2a6"/><circle cx="367" cy="342" r="11" fill="#fff2a6"/>
+<path d="M104 293h305" stroke="#fff" stroke-opacity=".55" stroke-width="5"/>
+</g>
+<g fill="#fff"><circle cx="88" cy="132" r="3" opacity=".8"/><circle cx="414" cy="158" r="4" opacity=".7"/><circle cx="110" cy="390" r="2.5" opacity=".6"/><circle cx="394" cy="378" r="3" opacity=".7"/></g>
+</svg>

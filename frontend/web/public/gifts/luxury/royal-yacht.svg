@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Royal Yacht">
+<defs>
+ <radialGradient id="bg"><stop stop-color="#7dd3fc" stop-opacity=".22"/><stop offset=".55" stop-color="#6366f1" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+ <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff8cf"/><stop offset=".18" stop-color="#ffd95a"/><stop offset=".45" stop-color="#fff0a0"/><stop offset=".7" stop-color="#c88712"/><stop offset="1" stop-color="#fff4b2"/></linearGradient>
+ <linearGradient id="pink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".22" stop-color="#7dd3fc"/><stop offset=".65" stop-color="#6366f1"/><stop offset="1" stop-color="#ffb4df"/></linearGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".8"/><stop offset=".25" stop-color="#fff" stop-opacity=".18"/><stop offset=".55" stop-color="#7dd3fc" stop-opacity=".28"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+ <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="13" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="15" flood-color="#000" flood-opacity=".55"/></filter>
+</defs>
+<circle cx="256" cy="256" r="230" fill="url(#bg)"/>
+<g filter="url(#shadow)">
+<path d="M103 316h307l-44 52H148z" fill="url(#metal)" stroke="#fff" stroke-opacity=".45" stroke-width="4"/>
+<path d="M166 309V193h103l51 116z" fill="url(#glass)" stroke="#fff" stroke-opacity=".45" stroke-width="4"/>
+<path d="M269 193V127l51 65" fill="url(#pink)" stroke="#fff" stroke-opacity=".45" stroke-width="4"/>
+<path d="M190 219h67M190 249h82M190 279h97" stroke="#fff" stroke-opacity=".5" stroke-width="5"/>
+<path d="M75 383c53-19 108-19 161 0s108 19 161 0 108-19 161 0" fill="none" stroke="#7dd3fc" stroke-opacity=".6" stroke-width="7"/>
+</g>
+<g fill="#fff"><circle cx="88" cy="132" r="3" opacity=".8"/><circle cx="414" cy="158" r="4" opacity=".7"/><circle cx="110" cy="390" r="2.5" opacity=".6"/><circle cx="394" cy="378" r="3" opacity=".7"/></g>
+</svg>

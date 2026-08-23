@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Diamond Heart">
+<defs>
+ <radialGradient id="bg"><stop stop-color="#ff4fb3" stop-opacity=".22"/><stop offset=".55" stop-color="#8b5cf6" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+ <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff8cf"/><stop offset=".18" stop-color="#ffd95a"/><stop offset=".45" stop-color="#fff0a0"/><stop offset=".7" stop-color="#c88712"/><stop offset="1" stop-color="#fff4b2"/></linearGradient>
+ <linearGradient id="pink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".22" stop-color="#ff4fb3"/><stop offset=".65" stop-color="#8b5cf6"/><stop offset="1" stop-color="#ffb4df"/></linearGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".8"/><stop offset=".25" stop-color="#fff" stop-opacity=".18"/><stop offset=".55" stop-color="#ff4fb3" stop-opacity=".28"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+ <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="13" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="15" flood-color="#000" flood-opacity=".55"/></filter>
+</defs>
+<circle cx="256" cy="256" r="230" fill="url(#bg)"/>
+<g filter="url(#shadow)">
+<path d="M256 390C222 350 115 292 115 190c0-48 36-79 78-79 30 0 51 16 63 42 12-26 33-42 63-42 42 0 78 31 78 79 0 102-107 160-141 200z" fill="url(#pink)" opacity=".94"/>
+<path d="M256 365C227 330 145 285 145 202c0-28 20-47 48-47 27 0 46 19 63 48 17-29 36-48 63-48 28 0 48 19 48 47 0 83-82 128-111 163z" fill="url(#glass)" stroke="#fff" stroke-opacity=".38" stroke-width="3"/>
+<path d="M181 151l75 63 75-63" fill="none" stroke="#fff" stroke-opacity=".65" stroke-width="5"/>
+<path d="M256 214v120M181 151l75 63 75-63M145 202l111 132 111-132" fill="none" stroke="#fff" stroke-opacity=".2" stroke-width="3"/>
+<circle cx="204" cy="179" r="8" fill="#fff" opacity=".9"/>
+</g>
+<g fill="#fff"><circle cx="88" cy="132" r="3" opacity=".8"/><circle cx="414" cy="158" r="4" opacity=".7"/><circle cx="110" cy="390" r="2.5" opacity=".6"/><circle cx="394" cy="378" r="3" opacity=".7"/></g>
+</svg>

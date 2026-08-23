@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Golden Phoenix">
+<defs>
+ <radialGradient id="bg"><stop stop-color="#ffd45a" stop-opacity=".22"/><stop offset=".55" stop-color="#f97316" stop-opacity=".08"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+ <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff8cf"/><stop offset=".18" stop-color="#ffd95a"/><stop offset=".45" stop-color="#fff0a0"/><stop offset=".7" stop-color="#c88712"/><stop offset="1" stop-color="#fff4b2"/></linearGradient>
+ <linearGradient id="pink" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff"/><stop offset=".22" stop-color="#ffd45a"/><stop offset=".65" stop-color="#f97316"/><stop offset="1" stop-color="#ffb4df"/></linearGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".8"/><stop offset=".25" stop-color="#fff" stop-opacity=".18"/><stop offset=".55" stop-color="#ffd45a" stop-opacity=".28"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+ <filter id="glow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="13" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+ <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="15" flood-color="#000" flood-opacity=".55"/></filter>
+</defs>
+<circle cx="256" cy="256" r="230" fill="url(#bg)"/>
+<g filter="url(#shadow)">
+<path d="M256 94c-16 52-3 77 26 103 38-24 75-22 117 8-39 5-66 20-85 48 49 7 74 37 78 79-41-28-76-31-109-14 4 35-6 60-27 79-21-19-31-44-27-79-33-17-68-14-109 14 4-42 29-72 78-79-19-28-46-43-85-48 42-30 79-32 117-8 29-26 42-51 26-103z" fill="url(#metal)" stroke="#fff" stroke-opacity=".45" stroke-width="4"/>
+<path d="M256 158c-22 57-21 107 0 174 21-67 22-117 0-174z" fill="url(#pink)" opacity=".8"/>
+<path d="M157 212c37 17 65 42 83 76M355 212c-37 17-65 42-83 76" fill="none" stroke="#fff" stroke-opacity=".4" stroke-width="5"/>
+</g>
+<g fill="#fff"><circle cx="88" cy="132" r="3" opacity=".8"/><circle cx="414" cy="158" r="4" opacity=".7"/><circle cx="110" cy="390" r="2.5" opacity=".6"/><circle cx="394" cy="378" r="3" opacity=".7"/></g>
+</svg>
