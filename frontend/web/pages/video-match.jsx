@@ -4,10 +4,11 @@ import { useRouter } from 'next/router';
 
 const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 
-// Phases: idle -> connecting -> queued -> paired -> deciding -> result
+// Phases: intro -> connecting -> queued -> paired -> deciding -> result
 export default function VideoMatch() {
   const router = useRouter();
-  const [phase, setPhase] = useState('connecting');
+  const [phase, setPhase] = useState('intro');
+  const [socketReady, setSocketReady] = useState(false);
   const [error, setError] = useState('');
   const [peerPreview, setPeerPreview] = useState(null);
   const [remainingMs, setRemainingMs] = useState(0);
@@ -119,7 +120,10 @@ export default function VideoMatch() {
             setPhase('idle');
             return;
           }
-          joinQueue();
+          // No longer auto-joins the queue here — the person needs to see
+          // what this feature actually does and explicitly choose to
+          // start before their camera goes live to a stranger.
+          setSocketReady(true);
         });
       });
 
@@ -192,6 +196,21 @@ export default function VideoMatch() {
 
       {error && <div style={s.error}>{error}</div>}
 
+      {phase === 'intro' && (
+        <div style={s.introWrap}>
+          <div style={{ fontSize: 48 }}>🎥❤️</div>
+          <h2 style={s.introTitle}>Video Match</h2>
+          <p style={s.introText}>
+            You'll be randomly paired with another online member for a quick 15-second live video intro.
+            If you both tap ❤️ before time runs out, it's a match and you can start chatting.
+          </p>
+          <p style={s.introText}>Your camera and mic turn on only once you're paired — not before.</p>
+          <button style={s.primaryBtn} onClick={joinQueue} disabled={!socketReady}>
+            {socketReady ? 'Start Matching' : 'Connecting…'}
+          </button>
+        </div>
+      )}
+
       {phase === 'connecting' && <div style={s.centerMsg}>Connecting…</div>}
       {phase === 'queued' && (
         <div style={s.centerMsg}>
@@ -259,6 +278,9 @@ const s = {
   timer: { padding: '6px 16px', borderRadius: 20, color: '#fff', fontWeight: 'bold' },
   error: { color: '#ff6b6b', textAlign: 'center', marginTop: 12 },
   centerMsg: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#aaa', gap: 12, textAlign: 'center' },
+  introWrap: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, textAlign: 'center', padding: '0 24px' },
+  introTitle: { color: '#fff', fontSize: 22, margin: 0 },
+  introText: { color: '#999', fontSize: 14, lineHeight: 1.5, maxWidth: 340, margin: 0 },
   pulse: { width: 60, height: 60, borderRadius: '50%', border: '3px solid #FF6B9D', borderTopColor: 'transparent', animation: 'amora-spin 1s linear infinite' },
   videoStage: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', position: 'relative', marginTop: 20 },
   remoteBox: { width: '100%', maxWidth: 600, aspectRatio: '4 / 3', background: '#000', borderRadius: 16, overflow: 'hidden', border: '2px solid #333', position: 'relative' },
