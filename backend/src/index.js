@@ -10,6 +10,7 @@ const helmet = require('helmet');
 const jwt = require('jsonwebtoken');
 const { WebSocketServer } = require('ws');
 const Stripe = require('stripe');
+const { grantMonthlyBonusIfDue } = require('./lib/membership');
 
 const app = express();
 const server = http.createServer(app);
@@ -269,42 +270,53 @@ app.post(
             subscription.current_period_end * 1000
           );
 
-          await prisma.membership.upsert({
-            where: {
-              user_id: session.metadata.userId
-            },
+          await prisma.$transaction(async (tx) => {
+            await tx.membership.upsert({
+              where: {
+                user_id: session.metadata.userId
+              },
 
-            create: {
-              user_id: session.metadata.userId,
+              create: {
+                user_id: session.metadata.userId,
+                tier: session.metadata.tier,
+                start_date: new Date(),
+                end_date: endDate,
+                auto_renew:
+                  !subscription.cancel_at_period_end,
+                stripe_subscription_id:
+                  subscription.id
+              },
+
+              update: {
+                tier: session.metadata.tier,
+                start_date: new Date(),
+                end_date: endDate,
+                auto_renew:
+                  !subscription.cancel_at_period_end,
+                stripe_subscription_id:
+                  subscription.id
+              }
+            });
+
+            await tx.user.update({
+              where: {
+                id: session.metadata.userId
+              },
+
+              data: {
+                membership_tier:
+                  session.metadata.tier
+              }
+            });
+
+            // "Bonus coins monthly" is an advertised VIP/SVIP benefit —
+            // grant the first period's bonus right away rather than
+            // waiting for the first renewal.
+            await grantMonthlyBonusIfDue(tx, {
+              userId: session.metadata.userId,
               tier: session.metadata.tier,
-              start_date: new Date(),
-              end_date: endDate,
-              auto_renew:
-                !subscription.cancel_at_period_end,
-              stripe_subscription_id:
-                subscription.id
-            },
-
-            update: {
-              tier: session.metadata.tier,
-              start_date: new Date(),
-              end_date: endDate,
-              auto_renew:
-                !subscription.cancel_at_period_end,
-              stripe_subscription_id:
-                subscription.id
-            }
-          });
-
-          await prisma.user.update({
-            where: {
-              id: session.metadata.userId
-            },
-
-            data: {
-              membership_tier:
-                session.metadata.tier
-            }
+              periodEnd: endDate
+            });
           });
         }
       }
@@ -329,47 +341,56 @@ app.post(
           ].includes(subscription.status);
 
           if (active) {
-            await prisma.membership.upsert({
-              where: {
-                user_id: userId
-              },
+            const periodEnd = new Date(
+              subscription.current_period_end * 1000
+            );
 
-              create: {
-                user_id: userId,
+            await prisma.$transaction(async (tx) => {
+              await tx.membership.upsert({
+                where: {
+                  user_id: userId
+                },
+
+                create: {
+                  user_id: userId,
+                  tier: tier || 'premium',
+                  start_date: new Date(),
+                  end_date: periodEnd,
+                  auto_renew:
+                    !subscription.cancel_at_period_end,
+                  stripe_subscription_id:
+                    subscription.id
+                },
+
+                update: {
+                  tier: tier || undefined,
+                  end_date: periodEnd,
+                  auto_renew:
+                    !subscription.cancel_at_period_end,
+                  stripe_subscription_id:
+                    subscription.id
+                }
+              });
+
+              await tx.user.update({
+                where: {
+                  id: userId
+                },
+
+                data: {
+                  membership_tier:
+                    tier || 'premium'
+                }
+              });
+
+              // Renewal reached — grant this billing period's bonus if it
+              // hasn't already been paid out (idempotent against Stripe
+              // redelivering this same webhook event).
+              await grantMonthlyBonusIfDue(tx, {
+                userId,
                 tier: tier || 'premium',
-                start_date: new Date(),
-                end_date: new Date(
-                  subscription.current_period_end *
-                    1000
-                ),
-                auto_renew:
-                  !subscription.cancel_at_period_end,
-                stripe_subscription_id:
-                  subscription.id
-              },
-
-              update: {
-                tier: tier || undefined,
-                end_date: new Date(
-                  subscription.current_period_end *
-                    1000
-                ),
-                auto_renew:
-                  !subscription.cancel_at_period_end,
-                stripe_subscription_id:
-                  subscription.id
-              }
-            });
-
-            await prisma.user.update({
-              where: {
-                id: userId
-              },
-
-              data: {
-                membership_tier:
-                  tier || 'premium'
-              }
+                periodEnd
+              });
             });
           }
         }
