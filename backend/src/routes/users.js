@@ -98,6 +98,7 @@ module.exports = (prisma) => {
           is_verified: true,
           membership_tier: true,
           level: true,
+          badges: true,
           location: true,
           interests: true,
           is_active: true,
@@ -107,7 +108,16 @@ module.exports = (prisma) => {
       if (!user || !user.is_active) {
         return res.status(404).json({ error: 'User not found' });
       }
-      res.json(user);
+
+      // Cheap, valuable to know from a profile view: are they live right
+      // now, and where — powers a "Watch Live" button instead of making
+      // the visitor separately go check Discover.
+      const liveRoom = await prisma.liveRoom.findFirst({
+        where: { host_id: req.params.userId, status: 'live' },
+        select: { id: true }
+      });
+
+      res.json({ ...user, isLive: !!liveRoom, liveRoomId: liveRoom?.id || null });
     } catch (e) {
       res.status(500).json({ error: e.message });
     }
