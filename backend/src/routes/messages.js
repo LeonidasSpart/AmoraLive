@@ -1,9 +1,55 @@
 // backend/src/routes/messages.js
 const auth = require('../middleware/auth');
 const { incrementMissionProgress } = require('../lib/missions');
+const multer = require('multer');
+const path = require('path');
+const { UTApi } = require('uploadthing/server');
+
+const utapi = process.env.UPLOADTHING_TOKEN ? new UTApi() : null;
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 30 * 1024 * 1024 }, // 30MB — enough headroom for a short video, not just photos
+  fileFilter: (req, file, cb) => {
+    const allowed = /jpeg|jpg|png|webp|gif|mp4|mov|webm/;
+    const extOk = allowed.test(path.extname(file.originalname).toLowerCase());
+    const mimeOk = /^(image|video)\//.test(file.mimetype);
+    if (extOk && mimeOk) return cb(null, true);
+    cb(new Error('Only image or video files are allowed'));
+  }
+});
 
 module.exports = (prisma, io) => {
   const router = require('express').Router();
+
+  // ---------- POST /messages/upload ----------
+  // Uploads a photo/video for a chat message and returns just the URL —
+  // no side effects, no message created here. The frontend uploads first,
+  // then sends the actual message (via the private-message socket event,
+  // same as text) with that URL in media_urls. This is what the chat
+  // composer's attach (+) button was missing entirely before — the
+  // backend already supported media messages end-to-end, there was just
+  // no way to get a file turned into a URL to send.
+  router.post('/upload', auth, upload.single('media'), async (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'A photo or video is required.', code: 'MEDIA_REQUIRED' });
+    if (!utapi) return res.status(503).json({ error: 'Media storage is not configured.', code: 'STORAGE_NOT_CONFIGURED' });
+
+    try {
+      const mediaType = req.file.mimetype.startsWith('video/') ? 'video' : 'image';
+      const ext = path.extname(req.file.originalname).toLowerCase() || (mediaType === 'video' ? '.mp4' : '.jpg');
+      const filename = `chat-${req.user.id}-${Date.now()}${ext}`;
+      const file = new File([req.file.buffer], filename, { type: req.file.mimetype });
+
+      const result = await utapi.uploadFiles(file);
+      if (result.error) throw new Error(result.error.message || 'Upload failed');
+      const url = result.data.ufsUrl || result.data.url;
+
+      res.json({ url, type: mediaType });
+    } catch (e) {
+      console.error('Chat media upload error:', e);
+      res.status(500).json({ error: 'Unable to upload media.', code: 'UPLOAD_FAILED' });
+    }
+  });
 
   // GET /messages/conversations – list of chats with last message and unread count
   router.get('/conversations', auth, async (req, res) => {
