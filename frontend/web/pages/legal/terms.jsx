@@ -300,7 +300,7 @@ export default function Terms() {
                     Privacy Policy
                   </Link>
 
-                  <Link href="/legal/community-guidelines">
+                  <Link href="/legal/guidelines">
                     Community Guidelines
                   </Link>
 
@@ -1045,7 +1045,7 @@ export default function Terms() {
                     Privacy
                   </Link>
 
-                  <Link href="/legal/community-guidelines">
+                  <Link href="/legal/guidelines">
                     Community
                   </Link>
 

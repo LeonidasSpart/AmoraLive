@@ -343,7 +343,7 @@ export default function Privacy() {
                     Terms of Service
                   </Link>
 
-                  <Link href="/legal/community-guidelines">
+                  <Link href="/legal/guidelines">
                     Community Guidelines
                   </Link>
 
@@ -1503,7 +1503,7 @@ export default function Privacy() {
                     Terms
                   </Link>
 
-                  <Link href="/legal/community-guidelines">
+                  <Link href="/legal/guidelines">
                     Community
                   </Link>
 
