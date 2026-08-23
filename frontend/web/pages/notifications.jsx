@@ -20,6 +20,8 @@ function describe(notification) {
       return { icon: '🎁', text: `Daily reward claimed: +${p.coins || 0} coins (${p.streak || 1}-day streak)`, href: '/rewards' };
     case 'membership_bonus':
       return { icon: '💎', text: `Your ${(p.tier || '').toUpperCase()} monthly bonus arrived: +${p.coins || 0} coins!`, href: '/wallet' };
+    case 'mission_claimed':
+      return { icon: '🎯', text: `Mission complete: ${p.title || 'a mission'} — +${p.coins || 0} coins${p.xp ? `, +${p.xp} XP` : ''}`, href: '/missions' };
     default:
       return { icon: '🔔', text: notification.type?.replace(/_/g, ' ') || 'Notification', href: null };
   }
