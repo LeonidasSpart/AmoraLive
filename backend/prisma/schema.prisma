@@ -32,6 +32,7 @@ model User {
   interests       String[]
   languages       String[]
   relationship_intent String?
+  gender          String?
   profile_photo   String?
   cover_photo     String?
   online_status   String   @default("offline")
@@ -41,6 +42,10 @@ model User {
   membership_tier String   @default("free")
   badges          String[]
   notification_preferences Json?
+  // { gender, show_me: string[], minAge, maxAge } — all optional; unset
+  // means "no filter" so this stays fully backward compatible for every
+  // existing account.
+  dating_preferences Json?
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
