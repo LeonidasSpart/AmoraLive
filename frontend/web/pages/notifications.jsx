@@ -9,7 +9,9 @@ function describe(notification) {
   const p = notification.payload || {};
   switch (notification.type) {
     case 'new_match':
-      return { icon: '❤️', text: 'You have a new match!', href: p.peerId ? `/chat/${p.peerId}` : '/discover' };
+      return { icon: '❤️', text: 'You have a new match!', href: '/matches' };
+    case 'super_liked':
+      return { icon: '⭐', text: `${p.fromName || 'Someone'} super liked you!`, href: '/matches' };
     case 'new_message':
       return { icon: '💬', text: `${p.senderName || 'Someone'} sent you a message: "${p.preview || ''}"`, href: p.senderId ? `/chat/${p.senderId}` : '/chat' };
     case 'gift_received':
