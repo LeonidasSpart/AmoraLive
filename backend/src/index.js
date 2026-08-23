@@ -517,6 +517,9 @@ const missionRoutes =
 const creatorStudioRoutes =
   require('./routes/creatorStudio')(prisma);
 
+const discoverRoutes =
+  require('./routes/discover')(prisma);
+
 const walletRoutes =
   require('./routes/wallet')(prisma);
 
@@ -552,6 +555,7 @@ app.use('/gifts', giftRoutes);
 app.use('/daily-rewards', dailyRewardRoutes);
 app.use('/missions', missionRoutes);
 app.use('/creator-studio', creatorStudioRoutes);
+app.use('/discover', discoverRoutes);
 app.use('/wallet', walletRoutes);
 app.use('/wallet/iap', iapRoutes);
 app.use('/membership', membershipRoutes);
