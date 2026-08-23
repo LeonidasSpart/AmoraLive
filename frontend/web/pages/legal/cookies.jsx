@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
 
-const AMORA_LOGO = '/images/amora-logo.png';
+const AMORA_LOGO = '/brand/amora-logo.png';
 
 const cookieCategories = [
   {
