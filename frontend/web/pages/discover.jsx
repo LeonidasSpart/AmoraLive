@@ -109,12 +109,14 @@ export default function Discover() {
     return () => clearTimeout(searchTimer.current);
   }, [searchQuery]);
 
-  const toggleFollow = async (userId) => {
+  const toggleFollow = async (userId, currentlyFollowing) => {
     setFollowBusy(userId);
     try {
-      const res = await apiFetch(`/users/${userId}/follow`, { method: 'POST' });
+      const res = await apiFetch(`/users/${userId}/${currentlyFollowing ? 'unfollow' : 'follow'}`, { method: 'POST' });
       if (res.ok) {
-        setCreators((prev) => prev.map((c) => (c.id === userId ? { ...c, _justFollowed: true } : c)));
+        const applyUpdate = (list) => list.map((c) => (c.id === userId ? { ...c, isFollowing: !currentlyFollowing } : c));
+        setCreators((prev) => applyUpdate(prev));
+        setSearchResults((prev) => (prev ? { ...prev, creators: applyUpdate(prev.creators || []) } : prev));
       }
     } catch {} finally {
       setFollowBusy(null);
@@ -298,14 +300,14 @@ export default function Discover() {
       React.createElement('div', { key: 'actions', style: { display: 'flex', gap: '8px', marginTop: '6px', width: '100%' } }, [
         React.createElement('button', {
           key: 'follow',
-          onClick: () => toggleFollow(creator.id),
-          disabled: followBusy === creator.id || creator._justFollowed,
+          onClick: () => toggleFollow(creator.id, creator.isFollowing),
+          disabled: followBusy === creator.id,
           style: {
             flex: 1, padding: '6px 0', borderRadius: '8px', border: 'none', fontSize: '12px', cursor: 'pointer',
-            background: creator._justFollowed ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
+            background: creator.isFollowing ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
             color: '#fff'
           }
-        }, creator._justFollowed ? 'Following' : 'Follow'),
+        }, creator.isFollowing ? 'Following' : 'Follow'),
         React.createElement(Link, { key: 'msg', href: `/chat/${creator.id}`, style: { flex: 1, textDecoration: 'none' } },
           React.createElement('div', { style: { padding: '6px 0', borderRadius: '8px', border: '1px solid #333', fontSize: '12px', color: '#ccc', textAlign: 'center' } }, 'Message')
         )
