@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { apiFetch } from '../../lib/api';
 import VerifiedBadge from '../../components/VerifiedBadge';
 import GiftIcon from '../../components/GiftIcon';
+import ProfileFrame from '../../components/ProfileFrame';
 
 const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 
@@ -526,7 +527,9 @@ export default function LiveRoom() {
       <div style={s.topBar}>
         <Link href="/discover" style={s.closeBtn}>✕</Link>
         <div style={s.hostChip}>
-          <div style={s.hostAvatar}>{(room.host?.display_name || room.host?.username || '?')[0]?.toUpperCase()}</div>
+          <ProfileFrame tier={room.host?.membership_tier} size={34}>
+            <div style={s.hostAvatar}>{(room.host?.display_name || room.host?.username || '?')[0]?.toUpperCase()}</div>
+          </ProfileFrame>
           <div>
             <div style={{ fontWeight: 700, fontSize: 14 }}>{room.host?.display_name || room.host?.username}<VerifiedBadge user={room.host} size={13} /></div>
             <div style={{ fontSize: 11, color: '#ccc' }}>#{room.category}</div>
