@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { apiFetch, clearSession } from '../lib/api';
+import CookieBanner from './CookieBanner';
 
 export default function Layout({ children }) {
   const router = useRouter();
