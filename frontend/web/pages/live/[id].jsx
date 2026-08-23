@@ -527,13 +527,15 @@ export default function LiveRoom() {
       <div style={s.topBar}>
         <Link href="/discover" style={s.closeBtn}>✕</Link>
         <div style={s.hostChip}>
-          <ProfileFrame tier={room.host?.membership_tier} size={34}>
-            <div style={s.hostAvatar}>{(room.host?.display_name || room.host?.username || '?')[0]?.toUpperCase()}</div>
-          </ProfileFrame>
-          <div>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>{room.host?.display_name || room.host?.username}<VerifiedBadge user={room.host} size={13} /></div>
-            <div style={{ fontSize: 11, color: '#ccc' }}>#{room.category}</div>
-          </div>
+          <Link href={`/creator/${room.host?.id}`} style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', color: 'inherit', flex: 1, minWidth: 0 }}>
+            <ProfileFrame tier={room.host?.membership_tier} size={34}>
+              <div style={s.hostAvatar}>{(room.host?.display_name || room.host?.username || '?')[0]?.toUpperCase()}</div>
+            </ProfileFrame>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 14 }}>{room.host?.display_name || room.host?.username}<VerifiedBadge user={room.host} size={13} /></div>
+              <div style={{ fontSize: 11, color: '#ccc' }}>#{room.category}</div>
+            </div>
+          </Link>
           {!isHost && (
             <button onClick={toggleFollow} disabled={followBusy} style={isFollowing ? s.followingBtn : s.followBtn}>
               {isFollowing ? 'Following' : '+ Follow'}
