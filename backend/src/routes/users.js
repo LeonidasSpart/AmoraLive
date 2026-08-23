@@ -6,6 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const { UTApi } = require('uploadthing/server');
+const { deleteUploadThingFile } = require('../lib/media');
 
 // Media storage is UploadThing (not AWS S3) — one API token, no IAM
 // policies or permission boundaries to manage. UTApi reads
@@ -378,7 +379,7 @@ module.exports = (prisma) => {
       prisma.$transaction((tx) => incrementMissionProgress(tx, req.user.id, 'follows_made', 1))
         .catch(err => console.error('Mission progress (follows_made) failed:', err.message));
 
-      const count = await prisma.follow.count({ where: { following_id: userId } });
+      const count = await prisma.follow.count({ where: { following_id: userId, follower: { deleted_at: null } } });
       res.json({ following: true, followerCount: count });
     } catch (e) {
       res.status(500).json({ error: e.message });
@@ -389,7 +390,7 @@ module.exports = (prisma) => {
     const { userId } = req.params;
     try {
       await prisma.follow.deleteMany({ where: { follower_id: req.user.id, following_id: userId } });
-      const count = await prisma.follow.count({ where: { following_id: userId } });
+      const count = await prisma.follow.count({ where: { following_id: userId, follower: { deleted_at: null } } });
       res.json({ following: false, followerCount: count });
     } catch (e) {
       res.status(500).json({ error: e.message });
@@ -401,7 +402,7 @@ module.exports = (prisma) => {
     try {
       const [isFollowing, followerCount] = await Promise.all([
         prisma.follow.findUnique({ where: { follower_id_following_id: { follower_id: req.user.id, following_id: userId } } }),
-        prisma.follow.count({ where: { following_id: userId } })
+        prisma.follow.count({ where: { following_id: userId, follower: { deleted_at: null } } })
       ]);
       res.json({ following: Boolean(isFollowing), followerCount });
     } catch (e) {
@@ -476,7 +477,16 @@ module.exports = (prisma) => {
       // versions only returned `url`, so fall back to it if present.
       const url = result.data.ufsUrl || result.data.url;
 
+      // Fetch the old photo before overwriting so it can be cleaned up
+      // from UploadThing after — otherwise every re-upload just leaves
+      // the previous file orphaned there forever.
+      const before = await prisma.user.findUnique({ where: { id: req.user.id }, select: { profile_photo: true } });
+
       await prisma.user.update({ where: { id: req.user.id }, data: { profile_photo: url } });
+
+      if (before?.profile_photo && before.profile_photo !== url) {
+        deleteUploadThingFile(utapi, before.profile_photo);
+      }
 
       const current = await prisma.user.findUnique({ where: { id: req.user.id }, select: { bio: true, interests: true } });
       if (current?.bio && current.interests?.length > 0) {
