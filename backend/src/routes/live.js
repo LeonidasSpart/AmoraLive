@@ -1,6 +1,7 @@
 // backend/src/routes/live.js
 const auth = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
+const { awardXp } = require('../lib/xp');
 
 module.exports = (prisma, io) => {
   const router = require('express').Router();
@@ -209,6 +210,21 @@ module.exports = (prisma, io) => {
         }
       });
 
+      // Flat XP for starting a stream, capped at 3 successful awards/day
+      // (60 / 20) — a separate transaction from room creation so a reward
+      // bookkeeping issue can never block the actual "go live" action.
+      let xpResult = null;
+      try {
+        xpResult = await prisma.$transaction((tx) =>
+          awardXp(tx, { userId: req.user.id, amount: 20, reason: 'went_live', metadata: { roomId: room.id }, dailyCap: 60 })
+        );
+      } catch (xpErr) {
+        console.error('XP award (went_live) failed:', xpErr.message);
+      }
+      if (xpResult?.leveledUp) {
+        io.to(`user-${req.user.id}`).emit('level-up', { newLevel: xpResult.newLevel, badge: xpResult.newBadge });
+      }
+
       // Notify followers via WebSocket (optional)
       io.to('global').emit('new-room', room);
 
@@ -352,7 +368,7 @@ module.exports = (prisma, io) => {
       // Check if user is host or admin
       const room = await prisma.liveRoom.findUnique({
         where: { id },
-        select: { host_id: true, status: true }
+        select: { host_id: true, status: true, start_time: true }
       });
       if (!room || room.status !== 'live') {
         return res.status(400).json({ error: 'Room is not live' });
@@ -382,6 +398,31 @@ module.exports = (prisma, io) => {
           end_time: new Date()
         }
       });
+
+      // Duration-based XP goes to the host regardless of who ended the
+      // stream (host or an admin) — capped at 120 XP for any single
+      // stream and 300 XP/day total, so rapid start/stop spam can't farm
+      // unlimited levels.
+      const minutesLive = Math.max(0, Math.round((ended.end_time.getTime() - room.start_time.getTime()) / 60000));
+      let xpResult = null;
+      if (minutesLive > 0) {
+        try {
+          xpResult = await prisma.$transaction((tx) =>
+            awardXp(tx, {
+              userId: room.host_id,
+              amount: Math.min(120, minutesLive * 2),
+              reason: 'live_duration',
+              metadata: { roomId: id, minutesLive },
+              dailyCap: 300
+            })
+          );
+        } catch (xpErr) {
+          console.error('XP award (live_duration) failed:', xpErr.message);
+        }
+      }
+      if (xpResult?.leveledUp) {
+        io.to(`user-${room.host_id}`).emit('level-up', { newLevel: xpResult.newLevel, badge: xpResult.newBadge });
+      }
 
       // Notify room that it ended
       io.to(`live-${id}`).emit('room-ended', { roomId: id });
