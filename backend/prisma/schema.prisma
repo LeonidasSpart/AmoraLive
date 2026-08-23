@@ -86,6 +86,7 @@ model User {
   storyReactions    StoryReaction[]
   mutedUsers        Mute[]           @relation("muter")
   mutedBy           Mute[]           @relation("mutedBy")
+  withdrawals       Withdrawal[]
 }
 
 model Session {
@@ -486,6 +487,30 @@ model AuditLog {
   details     Json?
   ip          String?
   timestamp   DateTime @default(now())
+}
+
+// Coins are deducted from Wallet.balance immediately on request (so the
+// same coins can never be withdrawn twice or spent on a gift while a
+// withdrawal is pending), then held here until an admin processes it. If
+// rejected, the coins are refunded back to the wallet. This system does
+// NOT itself move real money anywhere — no payout provider is configured
+// or invented here. "paid" only means an admin has confirmed they sent
+// the money through whatever channel they actually use (bank transfer,
+// PayPal, etc) outside this app; wiring a real payout API (e.g. PayPal
+// Payouts, Stripe Connect) is a separate integration this doesn't include.
+model Withdrawal {
+  id             String    @id @default(uuid())
+  user_id        String
+  user           User      @relation(fields: [user_id], references: [id])
+  coins_amount   Int
+  usd_cents      Int       // computed at request time from the payout rate below — locked in even if the rate changes later
+  payout_method  String    // "paypal" | "bank_transfer" | "other"
+  payout_details String    // e.g. PayPal email or bank info as entered — see note in routes/wallet.js about why this isn't encrypted here
+  status         String    @default("pending") // "pending" | "approved" | "rejected" | "paid"
+  admin_note     String?
+  processed_by   String?
+  requested_at   DateTime  @default(now())
+  processed_at   DateTime?
 }
 
 // Daily login rewards. current_streak/best_streak/last_claim_date live on
