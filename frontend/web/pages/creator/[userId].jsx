@@ -218,7 +218,7 @@ const s = {
   modal: { background: '#161625', border: '1px solid #2a2a3e', borderRadius: 16, padding: 20, width: '100%', maxWidth: 340, color: '#fff' },
   reportSelect: { width: '100%', padding: 10, borderRadius: 8, background: '#0f0f1a', border: '1px solid #333', color: '#fff' },
   cancelReportBtn: { flex: 1, padding: 10, borderRadius: 10, border: '1px solid #444', background: 'transparent', color: '#ccc', cursor: 'pointer' },
-  submitReportBtn: { flex: 1, padding: 10, borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', color: '#fff', fontWeight: 700, cursor: 'pointer' }
+  submitReportBtn: { flex: 1, padding: 10, borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', color: '#fff', fontWeight: 700, cursor: 'pointer' },
   liveBanner: { display: 'block', background: 'rgba(255,0,60,0.15)', border: '1px solid #ff3060', color: '#ff6b8a', borderRadius: 10, padding: '10px 16px', fontWeight: 700, fontSize: 13, textDecoration: 'none', marginBottom: 16, textAlign: 'center' },
   bio: { color: '#ccc', fontSize: 14, lineHeight: 1.5, marginBottom: 12 },
   chipRow: { display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
