@@ -11,38 +11,78 @@ const RARITY_GLOW = {
 };
 
 const FALLBACK = {
-  common: ['#d5d2df','#706b7e'],
-  uncommon: ['#8af5c6','#2eaf7b'],
-  rare: ['#a9e2ff','#347bd6'],
-  epic: ['#e4b9ff','#7d36d8'],
-  legendary: ['#fff5a7','#d89412'],
-  mythic: ['#ffd0ec','#a735ff']
+  common: ['#d5d2df', '#706b7e'],
+  uncommon: ['#8af5c6', '#2eaf7b'],
+  rare: ['#a9e2ff', '#347bd6'],
+  epic: ['#e4b9ff', '#7d36d8'],
+  legendary: ['#fff5a7', '#d89412'],
+  mythic: ['#ffd0ec', '#a735ff']
 };
 
-export default function GiftIcon({ name, glyph, rarity='common', size=64, animated=false }) {
+export default function GiftIcon({
+  name,
+  glyph,
+  rarity = 'common',
+  size = 64,
+  animated = false
+}) {
   const file = LUXURY_GIFT_ART[name];
   const r = String(rarity || 'common').toLowerCase();
-  const [a,b] = FALLBACK[r] || FALLBACK.common;
+  const [a] = FALLBACK[r] || FALLBACK.common;
 
   if (file) {
     return (
-      <div style={{
-        width:size,height:size,display:'grid',placeItems:'center',position:'relative',
-        borderRadius:'22%',background:`radial-gradient(circle,${RARITY_GLOW[r] || RARITY_GLOW.common},transparent 72%)`,
-        animation:animated ? 'luxuryFloat 2.2s ease-in-out infinite' : 'none'
-      }}>
-        <img src={`/gifts/luxury/${file}`} alt="" style={{
-          width:'100%',height:'100%',objectFit:'contain',
-          filter:`drop-shadow(0 10px 16px ${RARITY_GLOW[r] || RARITY_GLOW.common})`
-        }} />
-        {(r==='legendary'||r==='mythic') && <span style={{
-          position:'absolute',inset:'7%',borderRadius:'25%',border:`1px solid ${a}55`,
-          boxShadow:`0 0 22px ${a}33`,pointerEvents:'none'
-        }} />}
+      <div
+        style={{
+          width: size,
+          height: size,
+          display: 'grid',
+          placeItems: 'center',
+          position: 'relative',
+          borderRadius: '22%',
+          background: `radial-gradient(circle, ${
+            RARITY_GLOW[r] || RARITY_GLOW.common
+          }, transparent 72%)`,
+          animation: animated
+            ? 'luxuryGiftFloat 2.2s ease-in-out infinite'
+            : 'none'
+        }}
+      >
+        <img
+          src={`/gifts/luxury/${file}`}
+          alt={name || 'Gift'}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'contain',
+            filter: `drop-shadow(0 10px 16px ${
+              RARITY_GLOW[r] || RARITY_GLOW.common
+            })`
+          }}
+        />
+
+        {(r === 'legendary' || r === 'mythic') && (
+          <span
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              inset: '7%',
+              borderRadius: '25%',
+              border: `1px solid ${a}55`,
+              boxShadow: `0 0 22px ${a}33`,
+              pointerEvents: 'none'
+            }}
+          />
+        )}
+
         <style jsx>{`
-          @keyframes luxuryFloat {
-            0%,100% { transform:translateY(0) scale(1); }
-            50% { transform:translateY(-4px) scale(1.035); }
+          @keyframes luxuryGiftFloat {
+            0%, 100% {
+              transform: translateY(0) scale(1);
+            }
+            50% {
+              transform: translateY(-4px) scale(1.035);
+            }
           }
         `}</style>
       </div>
@@ -50,11 +90,20 @@ export default function GiftIcon({ name, glyph, rarity='common', size=64, animat
   }
 
   return (
-    <div style={{
-      width:size,height:size,display:'grid',placeItems:'center',borderRadius:'22%',
-      background:`radial-gradient(circle,${a}25,transparent 70%)`,
-      color:a,fontSize:size*.48,fontWeight:900
-    }}>
+    <div
+      style={{
+        width: size,
+        height: size,
+        display: 'grid',
+        placeItems: 'center',
+        borderRadius: '22%',
+        background: `radial-gradient(circle, ${a}25, transparent 70%)`,
+        color: a,
+        fontSize: size * 0.48,
+        fontWeight: 900
+      }}
+      aria-label={name || 'Gift'}
+    >
       {glyph || '✦'}
     </div>
   );

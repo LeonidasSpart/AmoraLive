@@ -1,4 +1,4 @@
-export const LUXURY_GIFT_ART = {
+const LUXURY_GIFT_ART = {
   "Eternal Rose": "diamond-rose.svg",
   "Romantic Rose": "diamond-rose.svg",
   "Rose": "diamond-rose.svg",
@@ -27,3 +27,5 @@ export const LUXURY_GIFT_ART = {
   "Amora Throne": "amora-throne.svg",
   "Royal Throne": "amora-throne.svg"
 };
+
+module.exports = { LUXURY_GIFT_ART };
