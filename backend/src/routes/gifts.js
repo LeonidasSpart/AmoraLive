@@ -1,5 +1,6 @@
 const auth = require('../middleware/auth');
 const crypto = require('crypto');
+const { awardXp } = require('../lib/xp');
 
 module.exports = (prisma, io) => {
   const router = require('express').Router();
@@ -117,6 +118,18 @@ module.exports = (prisma, io) => {
           data: { balance: { increment: receiverShare }, lifetime_earned: { increment: receiverShare } }
         });
 
+        // 1 XP per 20 coins received, capped at 500 XP/day from gifting —
+        // real coins were still spent to generate this, so it's lower-risk
+        // than most XP sources, but a daily cap keeps a self-gifting loop
+        // between two accounts from being a level-farming shortcut.
+        const xpResult = await awardXp(tx, {
+          userId: receiver.id,
+          amount: Math.floor(totalCost / 20),
+          reason: 'gift_received',
+          metadata: { giftId: gift.id, coinCost: totalCost },
+          dailyCap: 500
+        });
+
         const transaction = await tx.giftTransaction.create({
           data: {
             sender_id: req.user.id,
@@ -182,13 +195,17 @@ module.exports = (prisma, io) => {
             payload: { transactionId: transaction.id, giftId: gift.id, giftName: gift.name, quantity: qty, coinCost: totalCost, roomId: room?.id || null }
           }
         });
-        return { transaction, activeEventId: activeEvent?.id || null, battleUpdate };
+        return { transaction, activeEventId: activeEvent?.id || null, battleUpdate, xpResult };
       });
 
-      const { transaction: result, activeEventId, battleUpdate } = txResult;
+      const { transaction: result, activeEventId, battleUpdate, xpResult } = txResult;
       if (result.room_id) io.to(`live-${result.room_id}`).emit('gift-animation', result);
       io.to(`user-${result.receiver_id}`).emit('gift-received', result);
       io.to(`user-${result.sender_id}`).emit('gift-sent', result);
+
+      if (xpResult?.leveledUp) {
+        io.to(`user-${result.receiver_id}`).emit('level-up', { newLevel: xpResult.newLevel, badge: xpResult.newBadge });
+      }
 
       if (battleUpdate) {
         io.to(`live-${battleUpdate.room_a_id}`).to(`live-${battleUpdate.room_b_id}`).emit('battle:score', {
