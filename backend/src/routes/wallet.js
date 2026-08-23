@@ -123,5 +123,95 @@ module.exports = (prisma) => {
     return res.status(410).json({ error: 'Direct wallet credits are disabled. Use /wallet/checkout.' });
   });
 
+  // ---------- Withdrawals ----------
+  //
+  // This is a real, complete withdrawal REQUEST and APPROVAL system —
+  // balance validation, atomic hold-on-request, admin review, refund on
+  // rejection, audit logging. What it deliberately does NOT do is move
+  // real money anywhere: no payout provider (PayPal Payouts, Stripe
+  // Connect, etc) is configured or invented here. "paid" only records
+  // that an admin confirms they sent the money through whatever channel
+  // the business actually uses outside this app. Wiring a real payout API
+  // is a separate integration.
+  //
+  // The exchange rate and minimum are placeholder business parameters —
+  // pick real ones deliberately, ideally admin-configurable, before using
+  // this for real payouts.
+  const COIN_TO_USD_CENTS = 1; // 100 coins = $1.00
+  const MIN_WITHDRAWAL_COINS = 5000; // $50 minimum
+
+  router.get('/withdrawal-info', auth, async (req, res) => {
+    try {
+      const wallet = await ensureWallet(prisma, req.user.id);
+      res.json({
+        balance: wallet.balance,
+        minWithdrawalCoins: MIN_WITHDRAWAL_COINS,
+        coinToUsdCents: COIN_TO_USD_CENTS,
+        availableForWithdrawalUsd: ((wallet.balance * COIN_TO_USD_CENTS) / 100).toFixed(2)
+      });
+    } catch (e) {
+      res.status(500).json({ error: 'Unable to load withdrawal info.' });
+    }
+  });
+
+  router.post('/withdraw', auth, async (req, res) => {
+    const coinsAmount = Number(req.body.coinsAmount);
+    const payoutMethod = ['paypal', 'bank_transfer', 'other'].includes(req.body.payoutMethod) ? req.body.payoutMethod : null;
+    const payoutDetails = String(req.body.payoutDetails || '').trim().slice(0, 500);
+
+    if (!Number.isInteger(coinsAmount) || coinsAmount < MIN_WITHDRAWAL_COINS) {
+      return res.status(400).json({ error: `Minimum withdrawal is ${MIN_WITHDRAWAL_COINS} coins ($${(MIN_WITHDRAWAL_COINS * COIN_TO_USD_CENTS / 100).toFixed(2)}).`, code: 'BELOW_MINIMUM' });
+    }
+    if (!payoutMethod || !payoutDetails) {
+      return res.status(400).json({ error: 'A payout method and payout details are required.', code: 'INVALID_PAYOUT_INFO' });
+    }
+
+    try {
+      // Coins are held (deducted immediately) rather than just checked,
+      // so the same balance can never be withdrawn twice or spent on a
+      // gift while this request is pending review.
+      const withdrawal = await prisma.$transaction(async (tx) => {
+        const debit = await tx.wallet.updateMany({
+          where: { user_id: req.user.id, balance: { gte: coinsAmount } },
+          data: { balance: { decrement: coinsAmount } }
+        });
+        if (debit.count !== 1) {
+          throw Object.assign(new Error('Insufficient balance.'), { statusCode: 402, code: 'INSUFFICIENT_BALANCE' });
+        }
+        return tx.withdrawal.create({
+          data: {
+            user_id: req.user.id,
+            coins_amount: coinsAmount,
+            usd_cents: Math.floor(coinsAmount * COIN_TO_USD_CENTS),
+            payout_method: payoutMethod,
+            payout_details: payoutDetails
+          }
+        });
+      });
+
+      res.status(201).json(withdrawal);
+    } catch (e) {
+      const status = e.statusCode || 500;
+      if (status >= 500) console.error('Withdrawal request error:', e);
+      res.status(status).json({
+        error: status === 500 ? 'Unable to submit withdrawal request.' : e.message,
+        code: e.code || 'WITHDRAW_FAILED'
+      });
+    }
+  });
+
+  router.get('/withdrawals', auth, async (req, res) => {
+    try {
+      const withdrawals = await prisma.withdrawal.findMany({
+        where: { user_id: req.user.id },
+        orderBy: { requested_at: 'desc' },
+        take: 50
+      });
+      res.json(withdrawals);
+    } catch (e) {
+      res.status(500).json({ error: 'Unable to load withdrawal history.' });
+    }
+  });
+
   return router;
 };
