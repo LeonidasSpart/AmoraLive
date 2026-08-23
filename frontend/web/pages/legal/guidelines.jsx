@@ -219,7 +219,7 @@ export default function Guidelines() {
                 <div className="logo-light">
 
                   <AmoraLogo
-                    className="hero-amora-logo"
+                    className="amora-logo"
                     alt="AmoraLive official logo"
                   />
 
