@@ -14,6 +14,12 @@ function describe(notification) {
       return { icon: '💬', text: `${p.senderName || 'Someone'} sent you a message: "${p.preview || ''}"`, href: p.senderId ? `/chat/${p.senderId}` : '/chat' };
     case 'gift_received':
       return { icon: '🎁', text: `You received ${p.quantity || 1}x ${p.giftName || 'a gift'}!`, href: '/wallet' };
+    case 'level_up':
+      return { icon: '⭐', text: `Level up! You're now Level ${p.newLevel}${p.badge ? ` — earned the "${p.badge}" badge` : ''}`, href: '/profile' };
+    case 'daily_reward_claimed':
+      return { icon: '🎁', text: `Daily reward claimed: +${p.coins || 0} coins (${p.streak || 1}-day streak)`, href: '/rewards' };
+    case 'membership_bonus':
+      return { icon: '💎', text: `Your ${(p.tier || '').toUpperCase()} monthly bonus arrived: +${p.coins || 0} coins!`, href: '/wallet' };
     default:
       return { icon: '🔔', text: notification.type?.replace(/_/g, ' ') || 'Notification', href: null };
   }
