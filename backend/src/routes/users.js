@@ -1,5 +1,6 @@
 // backend/src/routes/users.js
 const auth = require('../middleware/auth');
+const { computeLevel } = require('../lib/xp');
 const multer = require('multer');
 const path = require('path');
 const bcrypt = require('bcrypt');
@@ -147,6 +148,40 @@ module.exports = (prisma) => {
       res.json({ success: true, message: 'Password updated successfully' });
     } catch (e) {
       res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ---------- GET /users/me/xp-progress ----------
+  router.get('/me/xp-progress', auth, async (req, res) => {
+    try {
+      const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { xp: true, level: true, badges: true } });
+      if (!user) return res.status(404).json({ error: 'User not found' });
+      const progress = computeLevel(user.xp);
+      res.json({
+        xp: user.xp,
+        level: user.level,
+        badges: user.badges,
+        xpIntoLevel: progress.xpIntoLevel,
+        xpForNextLevel: progress.xpForNextLevel,
+        progressPct: progress.progressPct
+      });
+    } catch (e) {
+      res.status(500).json({ error: e.message, code: 'XP_PROGRESS_FAILED' });
+    }
+  });
+
+  // ---------- GET /users/me/xp-history ----------
+  router.get('/me/xp-history', auth, async (req, res) => {
+    const limit = Math.min(Number(req.query.limit) || 30, 100);
+    try {
+      const history = await prisma.xpTransaction.findMany({
+        where: { user_id: req.user.id },
+        orderBy: { created_at: 'desc' },
+        take: limit
+      });
+      res.json(history);
+    } catch (e) {
+      res.status(500).json({ error: e.message, code: 'XP_HISTORY_FAILED' });
     }
   });
 
