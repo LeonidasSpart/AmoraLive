@@ -15,6 +15,8 @@ export default function ChatRoom() {
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
+  const [uploadingMedia, setUploadingMedia] = useState(false);
+  const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [otherUser, setOtherUser] = useState(null);
@@ -190,6 +192,43 @@ export default function ChatRoom() {
     setError('');
   };
 
+  const handleAttachClick = () => {
+    if (uploadingMedia) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ''; // allow picking the same file again later
+    if (!file) return;
+
+    if (!socket || !socketReady || !socket.connected) {
+      setError('Realtime connection is not ready.');
+      return;
+    }
+
+    setUploadingMedia(true);
+    setError('');
+    try {
+      const form = new FormData();
+      form.append('media', file);
+      const res = await apiFetch('/messages/upload', { method: 'POST', body: form });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Unable to upload that file.');
+
+      socket.emit('private-message', {
+        receiverId: userId,
+        content: '',
+        type: data.type,
+        media_urls: [data.url]
+      });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploadingMedia(false);
+    }
+  };
+
   const handleTyping = (e) => {
     const value = e.target.value;
     setInput(value);
@@ -296,23 +335,25 @@ export default function ChatRoom() {
       <header className="chatHeader">
         <Link href="/chat" className="back">‹</Link>
 
-        <div className="headerAvatar">
-          {avatar ? <img src={avatar} alt="" /> : <span>👤</span>}
-          <i />
-        </div>
+        <Link href={`/creator/${userId}`} className="headerIdentity" aria-label="View profile">
+          <div className="headerAvatar">
+            {avatar ? <img src={avatar} alt="" /> : <span>👤</span>}
+            <i />
+          </div>
 
-        <div className="headerInfo">
-          <div className="name">
-            {displayName}
-            <VerifiedBadge user={otherUser} size={15} />
+          <div className="headerInfo">
+            <div className="name">
+              {displayName}
+              <VerifiedBadge user={otherUser} size={15} />
+            </div>
+            <div className={isTyping ? 'typing' : 'status'}>
+              {isTyping ? 'typing…' : socketReady ? 'Private conversation • Online' : 'Connecting securely…'}
+            </div>
           </div>
-          <div className={isTyping ? 'typing' : 'status'}>
-            {isTyping ? 'typing…' : socketReady ? 'Private conversation • Online' : 'Connecting securely…'}
-          </div>
-        </div>
+        </Link>
 
         <div className="headerActions">
-          <Link href={`/profile/${userId}`} className="headerButton" aria-label="Profile">
+          <Link href={`/creator/${userId}`} className="headerButton" aria-label="View profile">
             ♡
           </Link>
           <button type="button" className="headerButton" aria-label="Call">
@@ -354,6 +395,12 @@ export default function ChatRoom() {
                 )}
 
                 <div className={mine ? 'bubble mineBubble' : 'bubble'}>
+                  {msg.media_urls?.[0] && msg.type === 'video' && (
+                    <video src={msg.media_urls[0]} controls className="messageMedia" />
+                  )}
+                  {msg.media_urls?.[0] && msg.type !== 'video' && (
+                    <img src={msg.media_urls[0]} alt="" className="messageMedia" />
+                  )}
                   {msg.content && <div className="messageText">{msg.content}</div>}
 
                   <div className="messageMeta">
@@ -418,9 +465,16 @@ export default function ChatRoom() {
           ♢
         </button>
 
-        <button type="button" className="composerIcon" aria-label="Attach">
-          ＋
+        <button type="button" className="composerIcon" aria-label="Attach" onClick={handleAttachClick} disabled={uploadingMedia}>
+          {uploadingMedia ? '…' : '＋'}
         </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*,video/*"
+          onChange={handleFileSelected}
+          style={{ display: 'none' }}
+        />
 
         <input
           type="text"
@@ -505,6 +559,16 @@ export default function ChatRoom() {
           flex: 0 0 auto;
           display: grid;
           place-items: center;
+        }
+
+        .headerIdentity {
+          flex: 1;
+          min-width: 0;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          text-decoration: none;
+          color: inherit;
         }
 
         .headerAvatar {
@@ -637,6 +701,14 @@ export default function ChatRoom() {
           overflow-wrap: anywhere;
           line-height: 1.45;
           font-size: 13px;
+        }
+
+        .messageMedia {
+          display: block;
+          width: 100%;
+          max-width: 240px;
+          border-radius: 12px;
+          margin-bottom: 6px;
         }
 
         .messageMeta {
