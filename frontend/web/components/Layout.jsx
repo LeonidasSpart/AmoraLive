@@ -11,6 +11,7 @@ function Icon({ name, size = 20 }) {
     live: <><circle cx="12" cy="12" r="8"/><path d="M9.5 9.5 15 12l-5.5 2.5v-5Z"/><path d="M7 3.5 5.5 5M17 3.5 18.5 5"/></>,
     studio: <><path d="M5 19V10M12 19V5M19 19v-7"/><path d="M3 19h18"/></>,
     match: <path d="M20 8.5c0 5.5-8 10-8 10s-8-4.5-8-10a4.5 4.5 0 0 1 8-2.7 4.5 4.5 0 0 1 8 2.7Z"/>,
+    matches: <><rect x="4" y="8" width="12" height="14" rx="2" transform="rotate(-8 10 15)"/><rect x="8" y="5" width="12" height="14" rx="2"/></>,
     events: <path d="m12 3 2.4 4.8 5.3.8-3.8 3.7.9 5.2-4.8-2.5-4.8 2.5.9-5.2-3.8-3.7 5.3-.8L12 3Z"/>,
     rewards: <><path d="M7 8h10v11H7z"/><path d="M9 8V5.5a3 3 0 0 1 6 0V8M5 10h14"/><path d="M10 12h4M10 15h4"/></>,
     missions: <><path d="M5 4h14v16H5z"/><path d="m8 9 1.5 1.5L12 8M8 14l1.5 1.5L12 13"/></>,
@@ -79,6 +80,7 @@ export default function Layout({ children }) {
     { href: '/missions', label: 'Missions', icon: 'missions' },
     { href: '/membership', label: 'VIP', icon: 'vip' },
     { href: '/chat', label: 'Chat', icon: 'chat' },
+    { href: '/matches', label: 'Matches', icon: 'matches' },
   ];
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
   const bottomItems = [navItems[0], navItems[3], navItems[1], navItems[8], { href: '/profile', label: 'Profile', icon: 'user' }];
