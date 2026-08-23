@@ -14,6 +14,20 @@ const publicCreatorSelect = {
   bio: true, is_verified: true, membership_tier: true, level: true, created_at: true
 };
 
+// Every creator card the frontend renders needs to know whether the
+// current viewer already follows them — without this, every card just
+// silently defaults to showing "Follow" regardless of actual state,
+// which is exactly what was happening before this existed.
+async function attachFollowStatus(prisma, viewerId, creators) {
+  if (creators.length === 0) return creators;
+  const following = await prisma.follow.findMany({
+    where: { follower_id: viewerId, following_id: { in: creators.map((c) => c.id) } },
+    select: { following_id: true }
+  });
+  const followingSet = new Set(following.map((f) => f.following_id));
+  return creators.map((c) => ({ ...c, isFollowing: followingSet.has(c.id) }));
+}
+
 module.exports = (prisma) => {
   const router = require('express').Router();
 
@@ -46,7 +60,7 @@ module.exports = (prisma) => {
           select: publicCreatorSelect
         })
       ]);
-      res.json({ rooms, creators });
+      res.json({ rooms, creators: await attachFollowStatus(prisma, req.user.id, creators) });
     } catch (e) {
       console.error('Discover search error:', e);
       res.status(500).json({ error: 'Search failed', code: 'SEARCH_FAILED' });
@@ -66,7 +80,7 @@ module.exports = (prisma) => {
           take: limit,
           select: publicCreatorSelect
         });
-        return res.json(creators);
+        return res.json(await attachFollowStatus(prisma, req.user.id, creators));
       }
 
       if (type === 'rising') {
@@ -77,7 +91,7 @@ module.exports = (prisma) => {
         const weekAgo = new Date(Date.now() - 7 * 86400000);
         const grouped = await prisma.follow.groupBy({
           by: ['following_id'],
-          where: { created_at: { gte: weekAgo } },
+          where: { created_at: { gte: weekAgo }, follower: { deleted_at: null } },
           _count: { following_id: true },
           orderBy: { _count: { following_id: 'desc' } },
           take: limit
@@ -87,14 +101,14 @@ module.exports = (prisma) => {
           select: publicCreatorSelect
         });
         const byId = Object.fromEntries(creators.map((c) => [c.id, c]));
-        return res.json(
-          grouped.map((g) => byId[g.following_id]).filter(Boolean).map((c, i) => ({ ...c, newFollowersThisWeek: grouped[i]?._count.following_id || 0 }))
-        );
+        const shaped = grouped.map((g) => byId[g.following_id]).filter(Boolean).map((c, i) => ({ ...c, newFollowersThisWeek: grouped[i]?._count.following_id || 0 }));
+        return res.json(await attachFollowStatus(prisma, req.user.id, shaped));
       }
 
       // popular = highest all-time follower count
       const grouped = await prisma.follow.groupBy({
         by: ['following_id'],
+        where: { follower: { deleted_at: null } },
         _count: { following_id: true },
         orderBy: { _count: { following_id: 'desc' } },
         take: limit
@@ -104,7 +118,8 @@ module.exports = (prisma) => {
         select: publicCreatorSelect
       });
       const byId = Object.fromEntries(creators.map((c) => [c.id, c]));
-      res.json(grouped.map((g) => ({ ...byId[g.following_id], followerCount: g._count.following_id })).filter((c) => c.id));
+      const shaped = grouped.map((g) => ({ ...byId[g.following_id], followerCount: g._count.following_id })).filter((c) => c.id);
+      res.json(await attachFollowStatus(prisma, req.user.id, shaped));
     } catch (e) {
       console.error('Creator discovery error:', e);
       res.status(500).json({ error: 'Unable to load creators', code: 'CREATORS_LOAD_FAILED' });
