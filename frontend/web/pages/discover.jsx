@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Layout from '../components/Layout';
 import { apiFetch } from '../lib/api';
 import VerifiedBadge from '../components/VerifiedBadge';
+import Stories from '../components/Stories';
 
 export default function Discover() {
   const [rooms, setRooms] = useState([]);
@@ -315,6 +316,8 @@ export default function Discover() {
 
   return React.createElement(Layout, null,
     React.createElement('div', null, [
+      React.createElement(Stories, { key: 'stories' }),
+
       // Search bar
       React.createElement('input', {
         key: 'search',
