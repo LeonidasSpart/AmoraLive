@@ -24,6 +24,12 @@ function describe(notification) {
       return { icon: '💎', text: `Your ${(p.tier || '').toUpperCase()} monthly bonus arrived: +${p.coins || 0} coins!`, href: '/wallet' };
     case 'mission_claimed':
       return { icon: '🎯', text: `Mission complete: ${p.title || 'a mission'} — +${p.coins || 0} coins${p.xp ? `, +${p.xp} XP` : ''}`, href: '/missions' };
+    case 'withdrawal_approved':
+      return { icon: '✅', text: `Your withdrawal of ${p.coins || 0} coins ($${((p.usdCents || 0) / 100).toFixed(2)}) was approved.`, href: '/wallet' };
+    case 'withdrawal_rejected':
+      return { icon: '❌', text: `Your withdrawal of ${p.coins || 0} coins was rejected — the coins were refunded.`, href: '/wallet' };
+    case 'withdrawal_paid':
+      return { icon: '💵', text: `Your withdrawal of $${((p.usdCents || 0) / 100).toFixed(2)} has been paid.`, href: '/wallet' };
     default:
       return { icon: '🔔', text: notification.type?.replace(/_/g, ' ') || 'Notification', href: null };
   }
