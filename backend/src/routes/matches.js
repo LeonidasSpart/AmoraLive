@@ -1,5 +1,6 @@
 // backend/src/routes/matches.js
 const auth = require('../middleware/auth');
+const { incrementMissionProgress } = require('../lib/missions');
 
 const publicProfileSelect = {
   id: true,
@@ -92,6 +93,11 @@ module.exports = (prisma) => {
         { user_id: targetUserId, type: 'new_match', payload: { peerId: userId, source } }
       ]
     }).catch(err => console.error('Failed to create match notifications:', err.message));
+
+    prisma.$transaction(async (tx) => {
+      await incrementMissionProgress(tx, userId, 'matches_made', 1);
+      await incrementMissionProgress(tx, targetUserId, 'matches_made', 1);
+    }).catch(err => console.error('Mission progress (matches_made) failed:', err.message));
 
     return { matched: true, matchId: `${match.user1_id}_${match.user2_id}`, targetUserId };
   }
