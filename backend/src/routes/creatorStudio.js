@@ -27,8 +27,8 @@ module.exports = (prisma) => {
         giftRows
       ] = await Promise.all([
         prisma.user.findUnique({ where: { id: userId }, select: { xp: true, level: true, badges: true, membership_tier: true } }),
-        prisma.follow.count({ where: { following_id: userId } }),
-        prisma.follow.count({ where: { following_id: userId, created_at: { gte: weekAgo } } }),
+        prisma.follow.count({ where: { following_id: userId, follower: { deleted_at: null } } }),
+        prisma.follow.count({ where: { following_id: userId, created_at: { gte: weekAgo }, follower: { deleted_at: null } } }),
         prisma.liveRoom.findMany({ where: { host_id: userId, status: 'ended' }, select: { start_time: true, end_time: true } }),
         prisma.liveRoom.aggregate({ where: { host_id: userId }, _max: { peak_viewer_count: true } }),
         prisma.giftTransaction.count({ where: { receiver_id: userId, status: 'completed' } }),
