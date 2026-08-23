@@ -259,6 +259,7 @@ model LiveRoom {
   start_time  DateTime @default(now())
   end_time    DateTime?
   viewer_count Int     @default(0)
+  peak_viewer_count Int @default(0) // highest viewer_count ever reached this stream — viewer_count itself decreases as people leave, so this is the only source for "Peak Viewers" in Creator Studio
   gift_count  Int      @default(0)
   like_count  Int      @default(0)
   stream_key  String
