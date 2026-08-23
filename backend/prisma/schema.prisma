@@ -17,6 +17,14 @@ model User {
   date_of_birth   DateTime
   age_verified    Boolean  @default(false)
   is_active       Boolean  @default(true)
+  deleted_at      DateTime? // set by admin Delete — distinct from is_active,
+                            // which Suspend also uses. Deleted accounts are
+                            // excluded from the admin user list by default;
+                            // this is a soft delete (data is kept intact),
+                            // not a hard row delete, since a real delete
+                            // would cascade-fail against gifts/messages/
+                            // wallet/live-room history without a much
+                            // larger schema change.
   is_verified     Boolean  @default(false)
   role            String   @default("user") // "user", "admin", "superadmin"
   bio             String?
