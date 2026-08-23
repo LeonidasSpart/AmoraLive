@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import { apiFetch, clearSession } from '../lib/api';
 import VerifiedBadge from '../components/VerifiedBadge';
+import ProfileFrame from '../components/ProfileFrame';
 
 export default function Profile() {
   const router = useRouter();
@@ -266,19 +267,21 @@ export default function Profile() {
   );
 
   sidebarChildren.push(
-    React.createElement('div', {
-      key: 'photo',
-      style: {
-        position: 'relative',
-        width: '180px',
-        height: '180px',
-        borderRadius: '50%',
-        background: '#2a2a3e',
-        margin: '0 auto 20px',
-        overflow: 'hidden',
-        border: '3px solid #FF6B9D'
-      }
-    }, photoChildren)
+    React.createElement('div', { key: 'photo-wrap', style: { textAlign: 'center', marginBottom: '20px' } },
+      React.createElement(ProfileFrame, { tier: user.membership_tier, size: 192 },
+        React.createElement('div', {
+          style: {
+            position: 'relative',
+            width: '180px',
+            height: '180px',
+            borderRadius: '50%',
+            background: '#2a2a3e',
+            overflow: 'hidden',
+            border: '3px solid #FF6B9D'
+          }
+        }, photoChildren)
+      )
+    )
   );
 
   sidebarChildren.push(
