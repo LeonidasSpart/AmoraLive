@@ -2,9 +2,7 @@
 //
 // Wraps an avatar with a tier-based glowing ring. Distinct from
 // VerifiedBadge (the small checkmark) — this is the "profile frame"
-// benefit specifically promised to VIP/SVIP members. Renders as a plain
-// pass-through (no frame) for free/premium, so it's always safe to wrap
-// any avatar with this regardless of the user's tier.
+// benefit specifically promised to VIP/SVIP members.
 import React from 'react';
 
 const FRAME_STYLES = {
@@ -14,7 +12,20 @@ const FRAME_STYLES = {
 
 export default function ProfileFrame({ tier, size = 80, children }) {
   const style = FRAME_STYLES[tier];
-  if (!style) return children;
+
+  // Free/premium still needs a sized wrapper, not a bare pass-through —
+  // any child sized with width/height: '100%' (relying on this wrapper to
+  // define that 100%) would otherwise inherit its size from whatever
+  // ancestor actually has dimensions, which can blow up to fill the
+  // entire viewport. This bit every non-VIP/SVIP user, invisibly, until a
+  // percentage-sized child (Stories' avatar ring) finally exposed it.
+  if (!style) {
+    return (
+      <div style={{ width: size, height: size, display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+        {children}
+      </div>
+    );
+  }
 
   const padding = Math.max(3, Math.round(size * 0.045));
 
@@ -38,3 +49,4 @@ export default function ProfileFrame({ tier, size = 80, children }) {
     </div>
   );
 }
+
