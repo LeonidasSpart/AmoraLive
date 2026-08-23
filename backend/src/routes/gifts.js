@@ -2,6 +2,7 @@ const auth = require('../middleware/auth');
 const crypto = require('crypto');
 const { awardXp } = require('../lib/xp');
 const { meetsMinTier } = require('../lib/membership');
+const { incrementMissionProgress } = require('../lib/missions');
 
 module.exports = (prisma, io) => {
   const router = require('express').Router();
@@ -140,6 +141,9 @@ module.exports = (prisma, io) => {
           metadata: { giftId: gift.id, coinCost: totalCost },
           dailyCap: 500
         });
+
+        await incrementMissionProgress(tx, req.user.id, 'gifts_sent', 1);
+        await incrementMissionProgress(tx, receiver.id, 'gifts_received', 1);
 
         const transaction = await tx.giftTransaction.create({
           data: {
