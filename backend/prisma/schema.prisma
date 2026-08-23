@@ -109,6 +109,7 @@ model GiftCatalog {
   rarity      String
   category    String
   glyph       String?  // maps to a vector icon in the frontend GiftIcon component
+  min_tier    String   @default("free") // "free" | "premium" | "vip" | "svip" — gates who can send this gift
   sort_order  Int      @default(0)
   is_active   Boolean  @default(true)
   available_from DateTime?
@@ -181,6 +182,11 @@ model Membership {
   end_date        DateTime
   auto_renew      Boolean  @default(false)
   stripe_subscription_id String?
+  // Tracks which billing period's monthly bonus coins have already been
+  // granted, keyed to Stripe's current_period_end for that cycle. Stripe
+  // can and does redeliver the same webhook event on retry, so without
+  // this a retried event would credit the bonus twice.
+  last_bonus_period_end DateTime?
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
