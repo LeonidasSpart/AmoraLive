@@ -22,6 +22,7 @@ function Icon({ name, size = 20 }) {
     wallet: <><path d="M4 6h14a2 2 0 0 1 2 2v11H5a2 2 0 0 1-2-2V7a1 1 0 0 1 1-1Z"/><path d="M3 8V6a2 2 0 0 1 2-2h11"/><path d="M16 13h4"/></>,
     user: <><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></>,
     logout: <><path d="M10 5H5v14h5M14 8l4 4-4 4M18 12H9"/></>,
+    safety: <><path d="M12 3 4.5 6v6c0 4.5 3 7.5 7.5 9 4.5-1.5 7.5-4.5 7.5-9V6L12 3Z"/><path d="m9 12 2 2 4-4"/></>,
   };
   return <svg {...common}>{paths[name] || paths.user}</svg>;
 }
@@ -81,6 +82,7 @@ export default function Layout({ children }) {
     { href: '/membership', label: 'VIP', icon: 'vip' },
     { href: '/chat', label: 'Chat', icon: 'chat' },
     { href: '/matches', label: 'Matches', icon: 'matches' },
+    { href: '/safety', label: 'Safety', icon: 'safety' },
   ];
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
   const bottomItems = [navItems[0], navItems[3], navItems[1], navItems[8], { href: '/profile', label: 'Profile', icon: 'user' }];
