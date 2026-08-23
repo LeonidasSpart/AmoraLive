@@ -262,10 +262,10 @@ module.exports = (prisma, io) => {
   });
 
   router.post('/gifts', auth, adminCheck, async (req, res) => {
-    const { name, description, image_url, animation_url, sound_url, coin_price, rarity, category, glyph, sort_order, is_active } = req.body;
+    const { name, description, image_url, animation_url, sound_url, coin_price, rarity, category, glyph, min_tier, sort_order, is_active } = req.body;
     try {
       const gift = await prisma.giftCatalog.create({
-        data: { name, description, image_url: image_url || '', animation_url, sound_url, coin_price, rarity, category, glyph, sort_order: sort_order ?? 0, is_active: is_active ?? true }
+        data: { name, description, image_url: image_url || '', animation_url, sound_url, coin_price, rarity, category, glyph, min_tier: min_tier || 'free', sort_order: sort_order ?? 0, is_active: is_active ?? true }
       });
       res.status(201).json(gift);
     } catch (e) {
@@ -275,11 +275,11 @@ module.exports = (prisma, io) => {
 
   router.patch('/gifts/:giftId', auth, adminCheck, async (req, res) => {
     const { giftId } = req.params;
-    const { name, description, image_url, animation_url, sound_url, coin_price, rarity, category, glyph, sort_order, is_active } = req.body;
+    const { name, description, image_url, animation_url, sound_url, coin_price, rarity, category, glyph, min_tier, sort_order, is_active } = req.body;
     try {
       const updated = await prisma.giftCatalog.update({
         where: { id: giftId },
-        data: { name, description, image_url, animation_url, sound_url, coin_price, rarity, category, glyph, sort_order, is_active }
+        data: { name, description, image_url, animation_url, sound_url, coin_price, rarity, category, glyph, min_tier, sort_order, is_active }
       });
       res.json(updated);
     } catch (e) {
