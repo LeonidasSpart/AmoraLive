@@ -42,9 +42,23 @@ export default function LiveRoom() {
   const [showBattlePicker, setShowBattlePicker] = useState(false);
   const [challengeableRooms, setChallengeableRooms] = useState([]);
   const [giftAlert, setGiftAlert] = useState(null);
+  const [shareToast, setShareToast] = useState('');
+  const [videoFilter, setVideoFilter] = useState('none');
+  const [showFilters, setShowFilters] = useState(false);
+
+  const FILTER_PRESETS = {
+    none: { label: 'Normal', css: 'none' },
+    warm: { label: 'Warm', css: 'saturate(1.3) sepia(0.15) brightness(1.05)' },
+    cool: { label: 'Cool', css: 'saturate(1.1) hue-rotate(-10deg) brightness(1.02) contrast(1.05)' },
+    vivid: { label: 'Vivid', css: 'saturate(1.6) contrast(1.15)' },
+    bw: { label: 'B&W', css: 'grayscale(1) contrast(1.1)' },
+    vintage: { label: 'Vintage', css: 'sepia(0.4) contrast(0.9) brightness(1.05) saturate(0.8)' },
+    soft: { label: 'Soft', css: 'brightness(1.08) contrast(0.92) saturate(0.95)' }
+  };
 
   const chatContainerRef = useRef(null);
   const videoContainerRef = useRef(null);
+  const localVideoElRef = useRef(null);
   const opponentVideoRef = useRef(null);
   const livekitRoomRef = useRef(null);
   const opponentLivekitRoomRef = useRef(null);
@@ -305,7 +319,15 @@ export default function LiveRoom() {
           livekitRoom.on(LK.RoomEvent.TrackUnsubscribed, (track) => track.detach().forEach((el) => el.remove()));
           await livekitRoom.connect(tokenData.url, tokenData.token);
           if (tokenData.role === 'host') {
-            const tracks = await LK.createLocalTracks({ audio: true, video: true });
+            // Requesting a portrait-friendly capture (instead of the
+            // browser's landscape default) means less gets cropped away
+            // when objectFit:cover fits it into this portrait player —
+            // that cropping is what was showing as an overly "zoomed in"
+            // picture before.
+            const tracks = await LK.createLocalTracks({
+              audio: true,
+              video: { aspectRatio: 9 / 16, resolution: { width: 720, height: 1280 } }
+            });
             for (const track of tracks) {
               await livekitRoom.localParticipant.publishTrack(track);
               if (track.kind === 'video') {
@@ -315,6 +337,7 @@ export default function LiveRoom() {
                 element.style.objectFit = 'cover';
                 element.style.transform = 'scaleX(-1)';
                 videoContainerRef.current?.appendChild(element);
+                localVideoElRef.current = element;
                 setVideoReady(true);
               }
             }
@@ -356,6 +379,12 @@ export default function LiveRoom() {
     const interval = setInterval(tick, 500);
     return () => clearInterval(interval);
   }, [battle?.endsAt, battle?.battleId]);
+
+  useEffect(() => {
+    if (localVideoElRef.current) {
+      localVideoElRef.current.style.filter = FILTER_PRESETS[videoFilter]?.css || 'none';
+    }
+  }, [videoFilter]);
 
   const sendMessage = (e) => {
     e.preventDefault();
@@ -403,6 +432,25 @@ export default function LiveRoom() {
     }
   };
 
+  const shareRoom = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const title = room?.title ? `${room.title} — live on Amora` : 'Live on Amora';
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text: title, url });
+      } catch {} // user cancelled the native share sheet — not an error
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareToast('Link copied — share it anywhere!');
+      setTimeout(() => setShareToast(''), 2500);
+    } catch {
+      setShareToast(url);
+      setTimeout(() => setShareToast(''), 4000);
+    }
+  };
+
   const endLive = async () => {
     if (!confirm('End this live stream now?')) return;
     setEnding(true);
@@ -423,14 +471,22 @@ export default function LiveRoom() {
   if (!room) return <div style={s.centerPage}><div><p style={{ color: '#ff6b6b' }}>{error || 'Room not found'}</p><Link href="/discover" style={{ color: '#FF6B9D' }}>← Back</Link></div></div>;
 
   return (
-    <div style={s.stage}>
+    <div style={s.stage} className="amora-live-stage">
     <div style={s.page}>
       <style>{`
         @keyframes floatUp { 0% { transform: translateY(0) scale(0.6); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-420px) scale(1.1); opacity: 0; } }
         @keyframes popIn { 0% { transform: scale(0.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        /* 100vh doesn't account for Safari's dynamic address bar, which was
+           pushing the chat/composer below the visible viewport on iOS. A
+           plain inline style can't express "use dvh if supported, else vh"
+           as one property, so that fallback lives here instead. */
+        .amora-live-stage { height: 100vh; }
+        @supports (height: 100dvh) {
+          .amora-live-stage { height: 100dvh; }
+        }
       `}</style>
 
-      <div ref={videoContainerRef} style={battle ? s.videoTopHalf : s.video}>
+      <div ref={videoContainerRef} style={battle ? s.videoLeftHalf : s.video}>
         {!videoReady && (
           <div style={{ textAlign: 'center', padding: 30 }}>
             <div style={{ fontSize: 64 }}>📺</div>
@@ -440,7 +496,7 @@ export default function LiveRoom() {
         )}
       </div>
       {battle && (
-        <div ref={opponentVideoRef} style={s.videoBottomHalf}>
+        <div ref={opponentVideoRef} style={s.videoRightHalf}>
           <div style={s.opponentLabel}>{battle.opponent?.host?.display_name || battle.opponent?.host?.username}</div>
         </div>
       )}
@@ -522,6 +578,16 @@ export default function LiveRoom() {
           <div style={s.railIcon}>🏆</div>
           <div style={s.railCount}>Top</div>
         </button>
+        <button onClick={shareRoom} style={s.railBtn}>
+          <div style={s.railIcon}>📤</div>
+          <div style={s.railCount}>Share</div>
+        </button>
+        {isHost && (
+          <button onClick={() => setShowFilters((v) => !v)} style={s.railBtn}>
+            <div style={s.railIcon}>🎨</div>
+            <div style={s.railCount}>Filter</div>
+          </button>
+        )}
         {isHost && !battle && (
           <button onClick={openBattlePicker} style={s.railBtn}>
             <div style={s.railIcon}>⚔️</div>
@@ -543,6 +609,22 @@ export default function LiveRoom() {
           </button>
         )}
       </div>
+
+      {shareToast && <div style={s.shareToast}>{shareToast}</div>}
+
+      {showFilters && (
+        <div style={s.filterPicker}>
+          {Object.entries(FILTER_PRESETS).map(([key, preset]) => (
+            <button
+              key={key}
+              onClick={() => setVideoFilter(key)}
+              style={{ ...s.filterChip, ...(videoFilter === key ? s.filterChipActive : {}) }}
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {showLeaderboard && (
         <div style={s.leaderboardPanel}>
@@ -666,13 +748,13 @@ const s = {
   // landscape tablet or desktop, `calc(100vh * 9 / 16)` becomes the smaller
   // number and the box centers with black bars on the sides — no JS or
   // media queries needed, this is a pure CSS "contain" calculation.
-  stage: { position: 'fixed', inset: 0, width: '100vw', height: '100vh', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  stage: { position: 'fixed', inset: 0, width: '100vw', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   page: { position: 'relative', height: '100%', width: 'calc(100vh * 9 / 16)', maxWidth: '100vw', flexShrink: 0, background: '#000', overflow: 'hidden', fontFamily: 'sans-serif', color: '#fff' },
   video: { position: 'absolute', inset: 0, background: '#0a0a12', display: 'grid', placeItems: 'center', overflow: 'hidden' },
-  videoTopHalf: { position: 'absolute', top: 0, left: 0, right: 0, height: '50%', background: '#0a0a12', display: 'grid', placeItems: 'center', overflow: 'hidden', borderBottom: '2px solid #FF6B9D' },
-  videoBottomHalf: { position: 'absolute', bottom: 0, left: 0, right: 0, height: '50%', background: '#0a0a12', display: 'grid', placeItems: 'center', overflow: 'hidden' },
+  videoLeftHalf: { position: 'absolute', top: 0, bottom: 0, left: 0, width: '50%', background: '#0a0a12', display: 'grid', placeItems: 'center', overflow: 'hidden', borderRight: '2px solid #FF6B9D' },
+  videoRightHalf: { position: 'absolute', top: 0, bottom: 0, right: 0, width: '50%', background: '#0a0a12', display: 'grid', placeItems: 'center', overflow: 'hidden' },
   opponentLabel: { position: 'absolute', bottom: 8, left: 8, background: 'rgba(0,0,0,0.5)', color: '#fff', fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 8, zIndex: 1 },
-  battleBar: { position: 'absolute', top: '50%', left: 0, right: 0, transform: 'translateY(-50%)', zIndex: 5, padding: '0 16px' },
+  battleBar: { position: 'absolute', top: 64, left: 0, right: 0, zIndex: 5, padding: '0 16px' },
   battleScoreRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: '#fff', fontWeight: 800, fontSize: 14, textShadow: '0 1px 4px rgba(0,0,0,0.8)', marginBottom: 4 },
   battleTimer: { background: 'rgba(0,0,0,0.6)', borderRadius: 10, padding: '2px 10px', fontSize: 12 },
   battleFillTrack: { height: 6, background: 'rgba(255,255,255,0.25)', borderRadius: 4, overflow: 'hidden' },
@@ -694,6 +776,10 @@ const s = {
   errorBanner: { position: 'absolute', top: 66, left: 12, right: 12, background: 'rgba(90,20,20,0.85)', color: '#f88', padding: '8px 12px', borderRadius: 8, fontSize: 13, zIndex: 4, textAlign: 'center' },
   giftAlert: { position: 'absolute', top: 100, left: '50%', transform: 'translateX(-50%)', background: 'rgba(255,209,102,0.95)', color: '#3a2a00', padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 800, zIndex: 4, animation: 'popIn 0.25s ease-out', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 8 },
   giftAlertBig: { top: '38%', transform: 'translate(-50%, -50%)', padding: '16px 28px', borderRadius: 24, fontSize: 16, background: 'linear-gradient(135deg, #ffd700, #ff9d00)' },
+  shareToast: { position: 'absolute', top: 100, left: '50%', transform: 'translateX(-50%)', background: 'rgba(30,30,45,0.95)', color: '#fff', padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 700, zIndex: 4, animation: 'popIn 0.25s ease-out', maxWidth: '80%', textAlign: 'center' },
+  filterPicker: { position: 'absolute', left: 12, right: 70, bottom: 150, zIndex: 4, background: 'rgba(15,15,26,0.92)', border: '1px solid #333', borderRadius: 14, padding: 12, display: 'flex', gap: 8, overflowX: 'auto' },
+  filterChip: { background: 'rgba(255,255,255,0.08)', border: '1px solid #333', color: '#ccc', borderRadius: 16, padding: '8px 14px', fontSize: 12, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 },
+  filterChipActive: { background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', color: '#fff', border: 'none', fontWeight: 700 },
   heartLayer: { position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 3 },
   heart: { position: 'absolute', bottom: 100, fontSize: 26, animation: 'floatUp 2.2s ease-out forwards' },
   rightRail: { position: 'absolute', right: 10, bottom: 150, display: 'flex', flexDirection: 'column', gap: 18, alignItems: 'center', zIndex: 3 },
