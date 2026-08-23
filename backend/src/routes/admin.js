@@ -114,16 +114,19 @@ module.exports = (prisma, io) => {
 
   // ---------- User Management ----------
   router.get('/users', auth, adminCheck, async (req, res) => {
-    const { page = 1, limit = 20, search = '' } = req.query;
+    const { page = 1, limit = 20, search = '', includeDeleted = 'false' } = req.query;
     const skip = (page - 1) * limit;
     try {
-      const where = search ? {
-        OR: [
-          { username: { contains: search, mode: 'insensitive' } },
-          { email: { contains: search, mode: 'insensitive' } },
-          { display_name: { contains: search, mode: 'insensitive' } }
-        ]
-      } : {};
+      const where = {
+        ...(includeDeleted === 'true' ? {} : { deleted_at: null }),
+        ...(search ? {
+          OR: [
+            { username: { contains: search, mode: 'insensitive' } },
+            { email: { contains: search, mode: 'insensitive' } },
+            { display_name: { contains: search, mode: 'insensitive' } }
+          ]
+        } : {})
+      };
       const [users, total] = await Promise.all([
         prisma.user.findMany({
           where,
@@ -160,7 +163,7 @@ module.exports = (prisma, io) => {
     try {
       await prisma.user.update({
         where: { id: userId },
-        data: { is_active: false }
+        data: { is_active: false, deleted_at: new Date() }
       });
       res.json({ success: true });
     } catch (e) {
