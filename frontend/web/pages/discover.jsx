@@ -276,19 +276,20 @@ export default function Discover() {
         gap: '8px'
       }
     }, [
-      React.createElement('div', {
-        key: 'avatar',
-        style: {
-          width: '64px', height: '64px', borderRadius: '50%', background: '#2a2a3e',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', fontSize: '28px'
-        }
-      }, creator.profile_photo
-        ? React.createElement('img', { src: creator.profile_photo, alt: creator.display_name, style: { width: '100%', height: '100%', objectFit: 'cover' } })
-        : '👤'
+      React.createElement(Link, { key: 'avatar-link', href: `/creator/${creator.id}`, style: { textDecoration: 'none' } },
+        React.createElement('div', {
+          style: {
+            width: '64px', height: '64px', borderRadius: '50%', background: '#2a2a3e',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', fontSize: '28px'
+          }
+        }, creator.profile_photo
+          ? React.createElement('img', { src: creator.profile_photo, alt: creator.display_name, style: { width: '100%', height: '100%', objectFit: 'cover' } })
+          : '👤'
+        )
       ),
-      React.createElement('div', {
-        key: 'name',
-        style: { display: 'flex', alignItems: 'center', color: '#fff', fontWeight: 600, fontSize: '14px' }
+      React.createElement(Link, {
+        key: 'name-link', href: `/creator/${creator.id}`,
+        style: { display: 'flex', alignItems: 'center', color: '#fff', fontWeight: 600, fontSize: '14px', textDecoration: 'none' }
       }, [creator.display_name || creator.username, React.createElement(VerifiedBadge, { key: 'b', user: creator, size: 12 })]),
       creator.bio && React.createElement('p', { key: 'bio', style: { color: '#888', fontSize: '12px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' } }, creator.bio),
       creator.followerCount != null && React.createElement('span', { key: 'followers', style: { color: '#666', fontSize: '11px' } }, `${creator.followerCount} followers`),
