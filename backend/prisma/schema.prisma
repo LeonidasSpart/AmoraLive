@@ -81,6 +81,9 @@ model User {
   dailyRewardClaims DailyRewardClaim[]
   xpTransactions    XpTransaction[]
   missionProgress   MissionProgress[]
+  stories           Story[]
+  storyViews        StoryView[]
+  storyReactions    StoryReaction[]
 }
 
 model Session {
@@ -336,6 +339,7 @@ model Message {
   media_urls  Json?
   read_at     DateTime?
   delivered_at DateTime?
+  story_id    String?  // set when this message is a reply to a Story — lets the chat UI show "Replied to your story"
   created_at  DateTime @default(now())
 
   sender      User     @relation("sender", fields: [sender_id], references: [id])
@@ -530,4 +534,51 @@ model MissionProgress {
 
   @@unique([user_id, mission_key, period_key])
   @@index([user_id, period_key])
+}
+
+// Stories: photo/video posts that expire 24h after posting. expires_at is
+// set at creation time and everything (feed, viewing, discovery) filters
+// on it — nothing needs a cleanup job to "delete" an expired story, it
+// just stops being returned. The owner can still see their own expired
+// stories via GET /stories/mine (the archive), which is the only place
+// expires_at is ignored.
+model Story {
+  id          String   @id @default(uuid())
+  user_id     String
+  user        User     @relation(fields: [user_id], references: [id])
+  media_url   String
+  media_type  String   // "photo" | "video"
+  caption     String?
+  privacy     String   @default("public") // "public" | "followers" | "private"
+  created_at  DateTime @default(now())
+  expires_at  DateTime
+
+  views       StoryView[]
+  reactions   StoryReaction[]
+
+  @@index([user_id, created_at])
+  @@index([expires_at])
+}
+
+model StoryView {
+  story_id   String
+  viewer_id  String
+  viewed_at  DateTime @default(now())
+
+  story      Story    @relation(fields: [story_id], references: [id])
+  viewer     User     @relation(fields: [viewer_id], references: [id])
+
+  @@id([story_id, viewer_id])
+}
+
+model StoryReaction {
+  story_id   String
+  user_id    String
+  emoji      String
+  created_at DateTime @default(now())
+
+  story      Story    @relation(fields: [story_id], references: [id])
+  user       User     @relation(fields: [user_id], references: [id])
+
+  @@id([story_id, user_id])
 }
