@@ -61,6 +61,20 @@ export default function CreatorProfile() {
     }
   };
 
+  const [showReport, setShowReport] = useState(false);
+  const [reportCategory, setReportCategory] = useState('harassment');
+  const [reportSent, setReportSent] = useState(false);
+
+  const submitReport = async () => {
+    try {
+      const res = await apiFetch('/safety/report', {
+        method: 'POST',
+        body: JSON.stringify({ targetType: 'user', targetId: userId, category: reportCategory })
+      });
+      if (res.ok) setReportSent(true);
+    } catch {}
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -117,9 +131,33 @@ export default function CreatorProfile() {
                 {followInfo?.following ? 'Following' : '+ Follow'}
               </button>
               <Link href={`/chat/${profile.id}`} style={s.messageBtn}>Message</Link>
+              <button onClick={() => setShowReport(true)} style={s.reportBtn}>⚑</button>
             </div>
           )}
         </div>
+
+        {showReport && (
+          <div style={s.modalOverlay} onClick={() => { setShowReport(false); setReportSent(false); }}>
+            <div style={s.modal} onClick={(e) => e.stopPropagation()}>
+              {reportSent ? (
+                <p style={{ textAlign: 'center', color: '#8f8' }}>Report submitted. Our team will review it.</p>
+              ) : (
+                <>
+                  <h3 style={{ marginTop: 0 }}>Report {profile.display_name || profile.username}</h3>
+                  <select value={reportCategory} onChange={(e) => setReportCategory(e.target.value)} style={s.reportSelect}>
+                    {['harassment', 'spam', 'nudity_or_sexual_content', 'hate_speech', 'violence', 'scam_or_fraud', 'underage', 'impersonation', 'other'].map((c) => (
+                      <option key={c} value={c}>{c.replace(/_/g, ' ')}</option>
+                    ))}
+                  </select>
+                  <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
+                    <button onClick={() => setShowReport(false)} style={s.cancelReportBtn}>Cancel</button>
+                    <button onClick={submitReport} style={s.submitReportBtn}>Submit Report</button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
 
         {profile.isLive && (
           <Link href={`/live/${profile.liveRoomId}`} style={s.liveBanner}>
@@ -175,6 +213,12 @@ const s = {
   followBtn: { background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', color: '#fff', border: 'none', borderRadius: 10, padding: '8px 18px', fontWeight: 700, fontSize: 13, cursor: 'pointer' },
   followingBtn: { background: 'rgba(255,255,255,0.1)', color: '#fff', border: '1px solid #444', borderRadius: 10, padding: '8px 18px', fontSize: 13, cursor: 'pointer' },
   messageBtn: { background: 'rgba(255,255,255,0.08)', color: '#fff', border: '1px solid #333', borderRadius: 10, padding: '8px 18px', fontSize: 13, textDecoration: 'none', display: 'flex', alignItems: 'center' },
+  reportBtn: { background: 'rgba(255,255,255,0.08)', color: '#ff8080', border: '1px solid #333', borderRadius: 10, padding: '8px 12px', fontSize: 14, cursor: 'pointer' },
+  modalOverlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 },
+  modal: { background: '#161625', border: '1px solid #2a2a3e', borderRadius: 16, padding: 20, width: '100%', maxWidth: 340, color: '#fff' },
+  reportSelect: { width: '100%', padding: 10, borderRadius: 8, background: '#0f0f1a', border: '1px solid #333', color: '#fff' },
+  cancelReportBtn: { flex: 1, padding: 10, borderRadius: 10, border: '1px solid #444', background: 'transparent', color: '#ccc', cursor: 'pointer' },
+  submitReportBtn: { flex: 1, padding: 10, borderRadius: 10, border: 'none', background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', color: '#fff', fontWeight: 700, cursor: 'pointer' }
   liveBanner: { display: 'block', background: 'rgba(255,0,60,0.15)', border: '1px solid #ff3060', color: '#ff6b8a', borderRadius: 10, padding: '10px 16px', fontWeight: 700, fontSize: 13, textDecoration: 'none', marginBottom: 16, textAlign: 'center' },
   bio: { color: '#ccc', fontSize: 14, lineHeight: 1.5, marginBottom: 12 },
   chipRow: { display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 },
