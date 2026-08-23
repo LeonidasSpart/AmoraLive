@@ -18,6 +18,7 @@ export default function LiveRoom() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [chatMessages, setChatMessages] = useState([]);
+  const mutedIdsRef = useRef(new Set());
   const [messageInput, setMessageInput] = useState('');
   const [viewerCount, setViewerCount] = useState(0);
   const [likeCount, setLikeCount] = useState(0);
@@ -177,6 +178,11 @@ export default function LiveRoom() {
         const hostIsMe = data.host?.id === currentUserId;
         setIsHost(hostIsMe);
         setViewerCount(data.viewer_count || 0);
+
+        apiFetch('/safety/muted')
+          .then((r) => (r.ok ? r.json() : []))
+          .then((muted) => { mutedIdsRef.current = new Set(muted.map((u) => u.id)); })
+          .catch(() => {});
         setLikeCount(data.like_count || 0);
         setGiftCount(data.gift_count || 0);
         setChatMessages(data.messages || []);
@@ -211,7 +217,10 @@ export default function LiveRoom() {
           });
         });
 
-        socket.on('new-chat', (msg) => active && setChatMessages((prev) => [...prev, msg]));
+        socket.on('new-chat', (msg) => {
+          if (!active || mutedIdsRef.current.has(msg.user?.id)) return;
+          setChatMessages((prev) => [...prev, msg]);
+        });
         socket.on('viewer-count', (payload) => active && setViewerCount(payload.count));
         socket.on('like-count', (payload) => {
           if (!active) return;
