@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { apiFetch, clearSession } from '../lib/api';
-import CookieBanner from './CookieBanner';
 
 export default function Layout({ children }) {
   const router = useRouter();
@@ -56,6 +55,8 @@ export default function Layout({ children }) {
     { href: '/go-live', label: 'Go Live', icon: '🔴' },
     { href: '/video-match', label: 'Match', icon: '❤️' },
     { href: '/events', label: 'Events', icon: '🏆' },
+    { href: '/rewards', label: 'Rewards', icon: '🎁' },
+    { href: '/membership', label: 'VIP', icon: '💎' },
     { href: '/chat', label: 'Chat', icon: '💬' },
   ];
 
