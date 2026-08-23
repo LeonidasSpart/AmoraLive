@@ -402,3 +402,118 @@ button { -webkit-tap-highlight-color: transparent; }
   .amora-auth-body { padding: 24px 20px 22px; }
 }
 .amora-auth-shell { display: none !important; }
+
+/* ================================================================
+   AMORALIVE 2026 RESPONSIVE PREMIUM SHELL
+   Additive layer for desktop, iPad/tablet and mobile.
+   ================================================================ */
+:root { --amora-header-height: 70px; --amora-safe-bottom: env(safe-area-inset-bottom, 0px); }
+body { overflow-x: hidden; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+img, video, canvas { max-width: 100%; }
+button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+.amora-app-shell { position: relative; isolation: isolate; background: radial-gradient(circle at 5% 0%, rgba(255,63,157,.075), transparent 28%), radial-gradient(circle at 95% 10%, rgba(155,53,255,.075), transparent 30%), var(--amora-bg); }
+.amora-app-header { background: rgba(7,6,22,.82); box-shadow: 0 12px 45px rgba(0,0,0,.14); }
+.amora-app-header-inner { min-height: var(--amora-header-height); width: min(1440px, calc(100% - 36px)); gap: 14px; }
+.amora-app-brand { gap: 10px; min-width: max-content; }
+.amora-app-brand img { width: 40px; height: 40px; box-shadow: 0 8px 28px rgba(255,63,157,.2); }
+.amora-app-brand-name { font-size: 14px; font-weight: 900; letter-spacing: -.02em; background: var(--amora-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.amora-app-nav { gap: 3px; min-width: 0; }
+.amora-app-nav a { min-height: 40px; gap: 7px; padding: 8px 10px; transition: transform .2s ease, background .2s ease, color .2s ease; }
+.amora-app-nav a:hover { transform: translateY(-1px); }
+.amora-app-nav a svg, .amora-app-actions svg { flex: 0 0 auto; }
+.amora-app-actions { gap: 7px; }
+.amora-icon-action { position: relative; width: 38px; height: 38px; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; background: rgba(255,255,255,.035); transition: transform .2s ease, border-color .2s ease, background .2s ease; }
+.amora-icon-action:hover { transform: translateY(-1px); border-color: rgba(255,107,157,.28); background: rgba(255,63,157,.07); }
+.amora-wallet-link { gap: 7px; padding: 0 11px; border: 1px solid rgba(255,214,107,.12); border-radius: 12px; background: rgba(255,214,107,.045); font-weight: 800; min-height: 38px; }
+.amora-wallet-link svg { color: #ffd66b; }
+.amora-profile-link { width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(255,107,157,.38); background: rgba(255,63,157,.08); }
+.amora-profile-link svg { color: #ff8abf; }
+.amora-logout-button { display: inline-flex; align-items: center; gap: 7px; min-height: 38px; padding: 0 9px; border-radius: 10px; }
+.amora-logout-button:hover { color: #fff; background: rgba(255,255,255,.04); }
+.amora-app-main { width: min(1440px, calc(100% - 36px)); padding: clamp(18px, 2.2vw, 30px) 0 38px; }
+.amora-app-footer { align-items: center; padding: 22px 20px calc(22px + var(--amora-safe-bottom)); gap: 18px 30px; background: rgba(7,6,22,.86); }
+.amora-app-footer-brand { display: inline-flex; align-items: center; gap: 8px; color: #ddd7e9; }
+.amora-app-footer-brand img { width: 24px; height: 24px; object-fit: contain; }
+.amora-app-footer-links { display: flex; flex-wrap: wrap; gap: 16px; }
+.amora-app-footer-links a:hover { color: #fff; }
+.amora-app-footer-copy { color: #5f5a70; font-size: 11px; }
+.amora-mobile-bottom-nav { display: none; }
+.amora-app-main > * { min-width: 0; }
+@media (max-width: 1180px) {
+  .amora-app-header-inner, .amora-app-main { width: min(100% - 28px, 1440px); }
+  .amora-app-nav a { padding-inline: 8px; }
+  .amora-app-nav a span { display: none; }
+}
+@media (max-width: 920px) {
+  .amora-app-header-inner { min-height: 64px; }
+  .amora-app-brand-name { display: none; }
+  .amora-app-nav { overflow-x: auto; scrollbar-width: none; }
+  .amora-app-nav::-webkit-scrollbar { display: none; }
+  .amora-app-actions .amora-logout-button, .amora-admin-link { display: none; }
+  .amora-app-actions { margin-left: auto; }
+}
+@media (max-width: 760px) {
+  :root { --amora-header-height: 62px; }
+  .amora-app-header-inner { width: calc(100% - 20px); gap: 8px; }
+  .amora-app-brand img { width: 37px; height: 37px; }
+  .amora-app-nav { display: none; }
+  .amora-app-actions { gap: 5px; }
+  .amora-icon-action { width: 36px; height: 36px; }
+  .amora-wallet-link { width: 36px; height: 36px; padding: 0; justify-content: center; border-radius: 11px; }
+  .amora-wallet-link span { display: none; }
+  .amora-profile-link { width: 36px; height: 36px; }
+  .amora-app-main { width: calc(100% - 20px); padding: 12px 0 calc(88px + var(--amora-safe-bottom)); }
+  .amora-app-footer { display: none; }
+  .amora-mobile-bottom-nav { position: fixed; left: 8px; right: 8px; bottom: calc(8px + var(--amora-safe-bottom)); z-index: 200; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; padding: 7px; border: 1px solid rgba(255,255,255,.10); border-radius: 20px; background: rgba(14,10,29,.88); backdrop-filter: blur(22px); -webkit-backdrop-filter: blur(22px); box-shadow: 0 18px 55px rgba(0,0,0,.45), 0 0 35px rgba(255,63,157,.08); }
+  .amora-mobile-bottom-nav a { min-width: 0; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-radius: 14px; color: #777287; text-decoration: none; font-size: 9px; font-weight: 800; transition: .2s ease; }
+  .amora-mobile-bottom-nav a.is-active { color: #fff; background: linear-gradient(135deg, rgba(255,63,157,.18), rgba(155,53,255,.18)); box-shadow: inset 0 0 0 1px rgba(255,107,157,.13); }
+  .amora-mobile-bottom-nav a.is-active svg { color: #ff75b2; filter: drop-shadow(0 0 8px rgba(255,63,157,.5)); }
+}
+@media (max-width: 430px) {
+  .amora-app-main { width: calc(100% - 14px); }
+  .amora-app-header-inner { width: calc(100% - 14px); }
+  .amora-icon-action { width: 34px; height: 34px; }
+  .amora-wallet-link, .amora-profile-link { width: 34px; height: 34px; }
+  .amora-mobile-bottom-nav { left: 5px; right: 5px; border-radius: 18px; }
+}
+@media (hover: none) and (pointer: coarse) { .amora-btn, .amora-app-nav a, .amora-icon-action { min-height: 44px; } }
+@media (prefers-reduced-motion: no-preference) { .amora-app-shell::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: -1; background: radial-gradient(circle at 50% -10%, rgba(255,255,255,.035), transparent 35%); } }
+
+/* Daily rewards */
+.amora-rewards-page { min-height: 100%; }
+.amora-rewards-hero { position: relative; overflow: hidden; min-height: 300px; display: grid; grid-template-columns: minmax(0,1fr) 280px; align-items: center; gap: 30px; padding: clamp(26px,5vw,54px); border: 1px solid rgba(255,255,255,.09); border-radius: 30px; background: linear-gradient(135deg, rgba(255,63,157,.11), rgba(155,53,255,.09) 55%, rgba(255,255,255,.025)); box-shadow: 0 25px 80px rgba(0,0,0,.24); }
+.amora-rewards-hero::after { content:""; position:absolute; width:420px; height:420px; right:-160px; top:-180px; border-radius:50%; background:rgba(255,63,157,.16); filter:blur(70px); }
+.amora-rewards-hero h1 { position:relative; z-index:1; margin:12px 0 12px; font-size:clamp(38px,5vw,68px); line-height:.98; letter-spacing:-.055em; }
+.amora-rewards-hero p { position:relative; z-index:1; max-width:680px; margin:0; color:var(--amora-muted); line-height:1.7; }
+.amora-kicker { color:#ff78b4; font-size:9px; font-weight:900; letter-spacing:2px; }
+.amora-reward-hero-stats { position:relative; z-index:1; display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; }
+.amora-reward-hero-stats div { min-width:120px; padding:13px 15px; border:1px solid rgba(255,255,255,.08); border-radius:15px; background:rgba(255,255,255,.035); }
+.amora-reward-hero-stats strong,.amora-reward-hero-stats span { display:block; }
+.amora-reward-hero-stats strong { color:#fff; font-size:20px; }
+.amora-reward-hero-stats span { margin-top:3px; color:#777185; font-size:10px; }
+.amora-reward-orb { position:relative; z-index:1; width:220px; height:220px; justify-self:center; display:grid; place-items:center; border-radius:50%; background:radial-gradient(circle at 35% 30%, #ff8bc3, #9b35ff 48%, #24103e 70%); box-shadow:0 0 90px rgba(255,63,157,.24), inset 0 0 45px rgba(255,255,255,.15); }
+.amora-reward-orb::before,.amora-reward-orb::after { content:""; position:absolute; inset:-16px; border:1px solid rgba(255,107,157,.22); border-radius:50%; }
+.amora-reward-orb::after { inset:-35px; border-color:rgba(155,53,255,.16); }
+.amora-reward-orb span { font-size:62px; color:#fff; text-shadow:0 0 35px rgba(255,255,255,.55); }
+.amora-reward-panel,.amora-reward-history { margin-top:20px; padding:26px; border:1px solid rgba(255,255,255,.08); border-radius:24px; background:rgba(255,255,255,.025); }
+.amora-reward-panel-head { display:flex; align-items:center; justify-content:space-between; gap:20px; }
+.amora-reward-panel h2,.amora-reward-history h2 { margin:7px 0 0; color:#fff; font-size:24px; letter-spacing:-.03em; }
+.amora-reward-calendar { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:9px; margin-top:22px; }
+.amora-reward-day { min-height:116px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:4px; border:1px solid rgba(255,255,255,.07); border-radius:17px; background:rgba(7,6,22,.5); text-align:center; }
+.amora-reward-day span { color:#696274; font-size:8px; font-weight:900; letter-spacing:1.3px; }
+.amora-reward-day strong { color:#eee; font-size:20px; }
+.amora-reward-day small { color:#777185; font-size:9px; }
+.amora-reward-day.is-next { border-color:rgba(255,107,157,.45); background:linear-gradient(145deg,rgba(255,63,157,.13),rgba(155,53,255,.11)); box-shadow:0 0 30px rgba(255,63,157,.08); transform:translateY(-2px); }
+.amora-reward-day.is-next span { color:#ff78b4; }
+.amora-reward-day.is-milestone strong { color:#ffd66b; }
+.amora-reward-message { margin-top:16px; padding:13px 16px; border-radius:14px; border:1px solid rgba(88,255,180,.16); background:rgba(88,255,180,.06); color:#9ff3ca; font-size:12px; }
+.amora-reward-message.is-error { border-color:rgba(255,80,120,.2); background:rgba(255,80,120,.06); color:#ff9fb5; }
+.amora-reward-history-list { margin-top:18px; overflow:hidden; border:1px solid rgba(255,255,255,.07); border-radius:16px; }
+.amora-reward-history-row { display:flex; align-items:center; justify-content:space-between; gap:15px; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.06); }
+.amora-reward-history-row:last-child { border-bottom:0; }
+.amora-reward-history-row div { display:flex; flex-direction:column; gap:3px; }
+.amora-reward-history-row strong { color:#eee; font-size:12px; }
+.amora-reward-history-row span { color:#6f697c; font-size:10px; }
+.amora-reward-history-row b { color:#ffd66b; font-size:12px; }
+@media (max-width:900px) { .amora-rewards-hero { grid-template-columns:1fr; } .amora-reward-orb { position:absolute; right:-55px; bottom:-75px; width:190px; height:190px; opacity:.35; } .amora-reward-calendar { grid-template-columns:repeat(4,1fr); } }
+@media (max-width:560px) { .amora-rewards-hero { min-height:0; padding:24px 20px 28px; border-radius:22px; } .amora-reward-hero-stats { display:grid; grid-template-columns:repeat(3,1fr); } .amora-reward-hero-stats div { min-width:0; padding:11px 8px; } .amora-reward-hero-stats strong { font-size:17px; } .amora-reward-hero-stats span { font-size:8px; } .amora-reward-panel,.amora-reward-history { padding:18px 14px; border-radius:19px; } .amora-reward-panel-head { align-items:stretch; flex-direction:column; } .amora-reward-panel-head .amora-btn { width:100%; } .amora-reward-calendar { grid-template-columns:repeat(2,1fr); } .amora-reward-day { min-height:95px; } }
