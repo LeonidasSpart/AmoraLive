@@ -1,6 +1,7 @@
 const auth = require('../middleware/auth');
 const crypto = require('crypto');
 const { awardXp } = require('../lib/xp');
+const { meetsMinTier } = require('../lib/membership');
 
 module.exports = (prisma, io) => {
   const router = require('express').Router();
@@ -81,6 +82,16 @@ module.exports = (prisma, io) => {
       const txResult = await prisma.$transaction(async (tx) => {
         const gift = await tx.giftCatalog.findFirst({ where: { id: giftId, is_active: true } });
         if (!gift) throw Object.assign(new Error('Gift not found'), { statusCode: 404, code: 'GIFT_NOT_FOUND' });
+
+        if (gift.min_tier && gift.min_tier !== 'free') {
+          const sender = await tx.user.findUnique({ where: { id: req.user.id }, select: { membership_tier: true } });
+          if (!meetsMinTier(sender?.membership_tier, gift.min_tier)) {
+            throw Object.assign(
+              new Error(`This gift requires ${gift.min_tier.toUpperCase()} membership or higher.`),
+              { statusCode: 403, code: 'MEMBERSHIP_REQUIRED' }
+            );
+          }
+        }
 
         let receiver = null;
         let room = null;
