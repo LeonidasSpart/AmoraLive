@@ -1,9 +1,10 @@
-// pages/chat.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { apiFetch } from '../lib/api';
 import VerifiedBadge from '../components/VerifiedBadge';
+
+const GRADIENT = 'linear-gradient(135deg,#ff3f9d 0%,#ff5da8 35%,#9b35ff 100%)';
 
 export default function ChatList() {
   const router = useRouter();
@@ -11,229 +12,177 @@ export default function ChatList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const fetchConversations = async () => {
+  const fetchConversations = async (silent = false) => {
     if (!localStorage.getItem('accessToken')) {
       router.push('/login');
       return;
     }
-    setLoading(true);
+
+    if (!silent) setLoading(true);
     setError('');
+
     try {
       const res = await apiFetch('/messages/conversations');
       if (!res.ok) throw new Error('Failed to load conversations');
       const data = await res.json();
-      setConversations(data || []);
+      setConversations(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Unable to load messages');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchConversations();
-    // WebSocket connection for real-time updates
-    // ... (we'll add socket integration later)
+    const timer = window.setInterval(() => fetchConversations(true), 15000);
+    return () => window.clearInterval(timer);
   }, []);
 
   const timeAgo = (date) => {
-    const diff = Date.now() - new Date(date).getTime();
+    if (!date) return '';
+    const diff = Math.max(0, Date.now() - new Date(date).getTime());
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return 'Just now';
-    if (mins < 60) return `${mins}m ago`;
+    if (mins < 60) return `${mins}m`;
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    return new Date(date).toLocaleDateString();
+    if (hrs < 24) return `${hrs}h`;
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return `${days}d`;
+    return new Date(date).toLocaleDateString([], { day: 'numeric', month: 'short' });
   };
 
   if (loading) {
-    return React.createElement('div', {
-      style: {
-        minHeight: '100vh',
-        background: '#0f0f1a',
-        color: '#fff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'sans-serif'
-      }
-    }, 'Loading chats...');
+    return (
+      <div className="state">
+        <div className="orb">✦</div>
+        <span>Opening your private messages…</span>
+        <style jsx>{`
+          .state { min-height:100vh; display:grid; place-items:center; align-content:center; gap:12px; color:#918899; background:#08070e; }
+          .orb { color:#ff65bb; font-size:38px; text-shadow:0 0 30px #ff4eb6; }
+        `}</style>
+      </div>
+    );
   }
 
-  if (error) {
-    return React.createElement('div', {
-      style: {
-        minHeight: '100vh',
-        background: '#0f0f1a',
-        color: '#fff',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'sans-serif'
-      }
-    }, [
-      React.createElement('p', { key: 'msg', style: { color: '#ff6b6b' } }, `Error: ${error}`),
-      React.createElement('button', {
-        key: 'retry',
-        onClick: fetchConversations,
-        style: {
-          marginTop: '20px',
-          padding: '8px 24px',
-          borderRadius: '6px',
-          border: 'none',
-          background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
-          color: '#fff',
-          cursor: 'pointer'
+  return (
+    <div className="page">
+      <header className="header">
+        <div>
+          <span className="eyebrow">AMORA PRIVATE</span>
+          <h1>Messages</h1>
+          <p>Private conversations, beautifully kept.</p>
+        </div>
+        <Link href="/discover" className="back">Discover</Link>
+      </header>
+
+      {error && (
+        <div className="error">
+          <span>{error}</span>
+          <button onClick={() => fetchConversations()}>Retry</button>
+        </div>
+      )}
+
+      <main className="list">
+        {conversations.length === 0 ? (
+          <div className="empty">
+            <div className="emptyIcon">♡</div>
+            <h2>No conversations yet</h2>
+            <p>Start a match and say hello.</p>
+            <Link href="/discover" className="cta">Discover people</Link>
+          </div>
+        ) : (
+          conversations.map((conv) => (
+            <Link key={conv.id} href={`/chat/${conv.id}`} className="conversation">
+              <div className={`avatar ${conv.unread_count > 0 ? 'unread' : ''}`}>
+                {conv.profile_photo ? <img src={conv.profile_photo} alt="" /> : <span>👤</span>}
+                <i />
+              </div>
+
+              <div className="details">
+                <div className="topline">
+                  <span className={conv.unread_count > 0 ? 'name unreadName' : 'name'}>
+                    {conv.display_name || conv.username}
+                    <VerifiedBadge user={conv} size={13} />
+                  </span>
+                  <time>{timeAgo(conv.last_message_time)}</time>
+                </div>
+                <div className="preview">
+                  <span>
+                    {conv.last_message
+                      ? conv.last_message
+                      : 'Sent a photo or video'}
+                  </span>
+                  {Number(conv.unread_count) > 0 && (
+                    <b>{Number(conv.unread_count)}</b>
+                  )}
+                </div>
+              </div>
+            </Link>
+          ))
+        )}
+      </main>
+
+      <style jsx>{`
+        .page {
+          min-height:100vh;
+          color:#fff;
+          background:
+            radial-gradient(circle at 8% 0%,rgba(255,55,170,.10),transparent 28%),
+            radial-gradient(circle at 92% 25%,rgba(133,65,255,.10),transparent 30%),
+            #08070e;
+          padding:24px max(14px,calc((100vw - 900px)/2));
+          box-sizing:border-box;
         }
-      }, 'Retry')
-    ]);
-  }
-
-  return React.createElement('div', {
-    style: {
-      minHeight: '100vh',
-      background: '#0f0f1a',
-      color: '#fff',
-      fontFamily: 'sans-serif',
-      padding: '20px'
-    }
-  }, [
-    React.createElement('header', {
-      key: 'header',
-      style: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        paddingBottom: '16px',
-        borderBottom: '1px solid #222'
-      }
-    }, [
-      React.createElement('h1', { key: 'title', style: { color: '#fff', fontSize: '24px', margin: 0 } }, 'Messages'),
-      React.createElement(Link, {
-        key: 'back',
-        href: '/discover',
-        style: { color: '#888', textDecoration: 'none' }
-      }, '← Back')
-    ]),
-    conversations.length === 0
-      ? React.createElement('div', {
-          key: 'empty',
-          style: {
-            textAlign: 'center',
-            padding: '60px 0',
-            color: '#666'
-          }
-        }, [
-          React.createElement('p', { key: 'msg', style: { fontSize: '18px' } }, 'No conversations yet'),
-          React.createElement('p', { key: 'sub', style: { fontSize: '14px' } }, 'Start a match and say hello!')
-        ])
-      : React.createElement('div', {
-          key: 'list',
-          style: { marginTop: '16px' }
-        }, conversations.map(conv =>
-          React.createElement(Link, {
-            key: conv.id,
-            href: `/chat/${conv.id}`,
-            style: { textDecoration: 'none' }
-          }, [
-            React.createElement('div', {
-              style: {
-                display: 'flex',
-                alignItems: 'center',
-                padding: '12px 16px',
-                background: '#1a1a2e',
-                borderRadius: '8px',
-                marginBottom: '8px',
-                transition: 'background 0.2s',
-                cursor: 'pointer',
-                border: conv.unread_count > 0 ? '1px solid #FF6B9D' : 'none'
-              },
-              onMouseEnter: (e) => e.currentTarget.style.background = '#2a2a3e',
-              onMouseLeave: (e) => e.currentTarget.style.background = '#1a1a2e'
-            }, [
-              React.createElement('div', {
-                key: 'avatar',
-                style: {
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '50%',
-                  background: '#2a2a3e',
-                  marginRight: '14px',
-                  overflow: 'hidden',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '20px',
-                  flexShrink: 0
-                }
-              }, conv.profile_photo
-                ? React.createElement('img', {
-                    src: conv.profile_photo,
-                    alt: conv.display_name || conv.username,
-                    style: { width: '100%', height: '100%', objectFit: 'cover' }
-                  })
-                : '👤'
-              ),
-              React.createElement('div', {
-                key: 'info',
-                style: { flex: 1, overflow: 'hidden' }
-              }, [
-                React.createElement('div', {
-                  key: 'name',
-                  style: {
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'baseline'
-                  }
-                }, [
-                  React.createElement('span', {
-                    key: 'name',
-                    style: {
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      color: '#fff',
-                      fontWeight: conv.unread_count > 0 ? 'bold' : 'normal',
-                      fontSize: '16px'
-                    }
-                  }, [conv.display_name || conv.username, React.createElement(VerifiedBadge, { key: 'badge', user: conv, size: 13 })]),
-                  conv.last_message_time && React.createElement('span', {
-                    style: { color: '#666', fontSize: '12px' }
-                  }, timeAgo(conv.last_message_time))
-                ]),
-                React.createElement('div', {
-                  key: 'last-msg',
-                  style: {
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginTop: '2px'
-                  }
-                }, [
-                  React.createElement('span', {
-                    style: {
-                      color: '#888',
-                      fontSize: '14px',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      maxWidth: '200px'
-                    }
-                  }, conv.last_message || ''),
-                  conv.unread_count > 0 && React.createElement('span', {
-                    style: {
-                      background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
-                      color: '#fff',
-                      borderRadius: '50%',
-                      padding: '2px 8px',
-                      fontSize: '12px',
-                      fontWeight: 'bold'
-                    }
-                  }, conv.unread_count)
-                ])
-              ])
-            ])
-          ])
-        ))
-  ]);
+        .header {
+          display:flex;
+          align-items:flex-end;
+          justify-content:space-between;
+          gap:18px;
+          padding:8px 0 20px;
+          border-bottom:1px solid rgba(255,255,255,.08);
+        }
+        .eyebrow { color:#d9a4ff; font-size:8px; letter-spacing:.24em; font-weight:900; }
+        h1 { margin:4px 0 2px; font-size:28px; letter-spacing:-.02em; }
+        .header p { margin:0; color:#756d7f; font-size:11px; }
+        .back { color:#b6adbb; text-decoration:none; border:1px solid rgba(255,255,255,.09); border-radius:12px; padding:9px 12px; background:rgba(255,255,255,.035); }
+        .list { padding:14px 0 30px; }
+        .conversation {
+          display:flex; align-items:center; gap:13px; padding:12px;
+          margin:8px 0; border:1px solid rgba(255,255,255,.07);
+          border-radius:18px; text-decoration:none; color:inherit;
+          background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.018));
+          transition:transform .16s ease,border-color .16s ease,background .16s ease;
+        }
+        .conversation:hover { transform:translateY(-1px); border-color:rgba(255,91,187,.28); background:rgba(255,255,255,.055); }
+        .avatar { position:relative; width:52px; height:52px; flex:0 0 52px; overflow:hidden; display:grid; place-items:center; border-radius:50%; background:#211b2b; border:2px solid rgba(255,255,255,.07); }
+        .avatar.unread { border-color:rgba(255,82,185,.75); box-shadow:0 0 22px rgba(255,60,180,.15); }
+        .avatar img { width:100%; height:100%; object-fit:cover; }
+        .avatar i { position:absolute; right:0; bottom:1px; width:10px; height:10px; border-radius:50%; background:#5ce795; border:2px solid #100c16; }
+        .details { min-width:0; flex:1; }
+        .topline,.preview { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+        .name { min-width:0; display:inline-flex; align-items:center; gap:5px; color:#eee9f0; font-size:15px; font-weight:700; }
+        .unreadName { color:#fff; }
+        time { flex:0 0 auto; color:#696172; font-size:9px; }
+        .preview { margin-top:4px; color:#7d7485; font-size:11px; }
+        .preview > span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .preview b { flex:0 0 auto; min-width:20px; height:20px; display:grid; place-items:center; padding:0 5px; box-sizing:border-box; border-radius:999px; background:${GRADIENT}; color:#fff; font-size:9px; }
+        .empty { text-align:center; padding:18vh 10px 10vh; color:#786f80; }
+        .emptyIcon { color:#ff67bd; font-size:46px; text-shadow:0 0 30px rgba(255,60,180,.35); }
+        .empty h2 { color:#eee8f2; margin:8px 0 4px; font-size:20px; }
+        .empty p { margin:0 0 18px; font-size:11px; }
+        .cta { display:inline-block; padding:10px 16px; border-radius:12px; color:#fff; text-decoration:none; background:${GRADIENT}; }
+        .error { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:14px; padding:10px 12px; border:1px solid rgba(255,80,120,.25); border-radius:12px; color:#ff9ab5; background:rgba(255,50,100,.06); font-size:11px; }
+        .error button { border:0; border-radius:9px; padding:7px 10px; color:#fff; background:${GRADIENT}; cursor:pointer; }
+        @media(max-width:600px) {
+          .page { padding:16px 10px max(20px,env(safe-area-inset-bottom)); }
+          .header { align-items:center; }
+          h1 { font-size:24px; }
+          .header p { font-size:10px; }
+          .back { padding:8px 10px; font-size:11px; }
+          .conversation { padding:11px 10px; border-radius:16px; }
+        }
+      `}</style>
+    </div>
+  );
 }
