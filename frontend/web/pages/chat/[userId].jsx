@@ -607,12 +607,14 @@ export default function ChatRoom() {
           gap: 6px;
           font-weight: 850;
           font-size: 14px;
+          text-decoration: none;
         }
 
         .status, .typing {
           margin-top: 3px;
           color: #706878;
           font-size: 10px;
+          text-decoration: none;
         }
 
         .typing { color: #ff69bd; }
