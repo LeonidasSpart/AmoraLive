@@ -127,6 +127,8 @@ export const api = {
   },
   resendVerification: (email: string) =>
     request('/auth/resend-verification', { method: 'POST', body: JSON.stringify({ email }) }),
+  changePassword: (currentPassword: string, newPassword: string) =>
+    request('/auth/change-password', { method: 'POST', body: JSON.stringify({ currentPassword, newPassword }) }),
   logout: async () => {
     const refreshToken = await getRefreshToken();
     await request('/auth/logout', { method: 'POST', body: JSON.stringify({ refreshToken }) }).catch(() => {});
@@ -174,7 +176,17 @@ export const api = {
     request('/wallet/iap/apple/verify', { method: 'POST', body: JSON.stringify({ packageId, receiptData }) }),
   verifyGooglePurchase: (packageId: string, purchaseToken: string) =>
     request('/wallet/iap/google/verify', { method: 'POST', body: JSON.stringify({ packageId, purchaseToken }) }),
-  membership: () => request('/membership/me')
+  membership: () => request('/membership/me'),
+  securityOverview: () => request('/safety/security/overview'),
+  securityEvents: () => request('/safety/security/events'),
+  sessions: () => request('/safety/sessions'),
+  revokeSession: (sessionId: string) => request(`/safety/sessions/${sessionId}`, { method: 'DELETE' }),
+  revokeOtherSessions: async () => {
+    const refreshToken = await getRefreshToken();
+    return request('/safety/sessions/revoke-others', { method: 'POST', body: JSON.stringify({ currentRefreshToken: refreshToken }) });
+  },
+  privacy: () => request('/users/me/privacy'),
+  updatePrivacy: (body: unknown) => request('/users/me/privacy', { method: 'PATCH', body: JSON.stringify(body) })
 };
 
 export { API_URL, ApiError };
