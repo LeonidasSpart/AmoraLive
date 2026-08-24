@@ -15,7 +15,9 @@ const RARITY_GLOW = {
   rare: 'rgba(85,184,255,.22)',
   epic: 'rgba(184,117,255,.25)',
   legendary: 'rgba(255,212,94,.32)',
-  mythic: 'rgba(255,95,200,.34)'
+  mythic: 'rgba(255,95,200,.34)',
+  royal: 'rgba(255,216,107,.42)',
+  eternal: 'rgba(184,117,255,.48)'
 };
 
 const FALLBACK = {
@@ -24,7 +26,9 @@ const FALLBACK = {
   rare: ['#a9e2ff', '#347bd6'],
   epic: ['#e4b9ff', '#7d36d8'],
   legendary: ['#fff5a7', '#d89412'],
-  mythic: ['#ffd0ec', '#a735ff']
+  mythic: ['#ffd0ec', '#a735ff'],
+  royal: ['#fff6bb', '#e2a72f'],
+  eternal: ['#f1d4ff', '#7b32ff']
 };
 
 const NAME_ART = {
@@ -72,7 +76,7 @@ const GLYPH_ART = {
   lightning: '/gifts/solar-flare.svg', flame: '/gifts/phoenix-rising.svg', phoenix: '/gifts/luxury/golden-phoenix.svg', dragon: '/gifts/dragon-s-egg.svg',
   sword: '/gifts/legendary-sword.svg', confetti: '/gifts/fireworks.svg', balloon: '/gifts/balloon.svg', cupcake: '/gifts/cupcake.svg',
   iceCream: '/gifts/ice-cream.svg', music: '/gifts/music-note.svg', butterfly: '/gifts/butterfly.svg', teddyBear: '/gifts/teddy-bear.svg',
-  giftBox: '/gifts/gift-box.svg', partyPopper: '/gifts/fireworks.svg'
+  giftBox: '/gifts/gift-box.svg', partyPopper: '/gifts/fireworks.svg', yacht: '/gifts/luxury/royal-yacht.svg', goldenPhoenix: '/gifts/luxury/golden-phoenix.svg'
 };
 
 export default function GiftIcon({ name, glyph, rarity = 'common', size = 64, animated = false }) {
