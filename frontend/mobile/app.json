@@ -8,10 +8,17 @@
     "userInterfaceStyle": "dark",
     "android": {
       "package": "one.amoramatch.app",
-      "permissions": ["CAMERA", "RECORD_AUDIO", "MODIFY_AUDIO_SETTINGS", "READ_EXTERNAL_STORAGE"],
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "MODIFY_AUDIO_SETTINGS",
+        "READ_EXTERNAL_STORAGE"
+      ],
       "adaptiveIcon": {
         "backgroundColor": "#090713"
-      }
+      },
+      "versionCode": 1,
+      "backgroundColor": "#070511"
     },
     "ios": {
       "bundleIdentifier": "one.amoramatch.app",
@@ -20,7 +27,9 @@
         "NSCameraUsageDescription": "Amora uses your camera for live video matches, live rooms, and profile photos.",
         "NSMicrophoneUsageDescription": "Amora uses your microphone for live video matches and live rooms.",
         "NSPhotoLibraryUsageDescription": "Amora needs access to your photos so you can set a profile picture."
-      }
+      },
+      "buildNumber": "1",
+      "backgroundColor": "#070511"
     },
     "plugins": [
       "expo-router",
@@ -36,6 +45,14 @@
     ],
     "extra": {
       "apiUrl": "https://api.amoramatch.one"
-    }
+    },
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#070511"
+    },
+    "backgroundColor": "#070511",
+    "primaryColor": "#ff4fa3"
   }
 }
