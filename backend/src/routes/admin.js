@@ -1,6 +1,10 @@
 // backend/src/routes/admin.js
 const auth = require('../middleware/auth');
 const adminMiddleware = require('../middleware/admin');
+const { UTApi } = require('uploadthing/server');
+const { findOrphanedFiles } = require('../lib/orphanMedia');
+
+const utapi = process.env.UPLOADTHING_TOKEN ? new UTApi() : null;
 
 module.exports = (prisma, io) => {
   const router = require('express').Router();
@@ -541,6 +545,54 @@ module.exports = (prisma, io) => {
     } catch (e) {
       console.error('Withdrawal review error:', e);
       res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ---------- Orphaned media (UploadThing) ----------
+  // The cleanup added this session (deleting the UploadThing file when a
+  // story/photo is removed) only prevents *new* orphans. Anything deleted
+  // or replaced before that fix existed is still sitting in UploadThing,
+  // unreferenced, accumulating storage cost — this is how an admin can
+  // actually find and clear that out.
+  router.get('/media/orphans', auth, adminCheck, async (req, res) => {
+    if (!utapi) return res.status(503).json({ error: 'Media storage is not configured.', code: 'STORAGE_NOT_CONFIGURED' });
+    try {
+      const result = await findOrphanedFiles(prisma, utapi);
+      res.json(result);
+    } catch (e) {
+      console.error('Orphan media scan error:', e);
+      res.status(500).json({ error: 'Unable to scan for orphaned media.', code: 'ORPHAN_SCAN_FAILED' });
+    }
+  });
+
+  router.post('/media/orphans/delete', auth, adminCheck, async (req, res) => {
+    if (!utapi) return res.status(503).json({ error: 'Media storage is not configured.', code: 'STORAGE_NOT_CONFIGURED' });
+    const keys = Array.isArray(req.body.keys) ? req.body.keys.filter((k) => typeof k === 'string' && k) : [];
+    if (keys.length === 0) return res.status(400).json({ error: 'At least one file key is required.' });
+
+    try {
+      // Re-verify against the database right before deleting rather than
+      // trusting whatever list the client sends back — a file could have
+      // been referenced by something new in the time between the scan
+      // request and this delete request.
+      const current = await findOrphanedFiles(prisma, utapi);
+      const stillOrphaned = new Set(current.orphans.map((f) => f.key));
+      const safeKeys = keys.filter((k) => stillOrphaned.has(k));
+
+      if (safeKeys.length === 0) {
+        return res.json({ success: true, deletedCount: 0, skipped: keys.length });
+      }
+
+      await utapi.deleteFiles(safeKeys);
+
+      await prisma.auditLog.create({
+        data: { admin_id: req.user.id, action: 'orphan_media_deleted', target_type: 'uploadthing', target_id: safeKeys.join(','), details: { count: safeKeys.length } }
+      }).catch(err => console.error('Failed to write audit log:', err.message));
+
+      res.json({ success: true, deletedCount: safeKeys.length, skipped: keys.length - safeKeys.length });
+    } catch (e) {
+      console.error('Orphan media delete error:', e);
+      res.status(500).json({ error: 'Unable to delete selected files.', code: 'ORPHAN_DELETE_FAILED' });
     }
   });
 
