@@ -125,6 +125,17 @@ export const api = {
     await storeSession(session);
     return session;
   },
+  appleNative: (body: unknown) => request('/auth/apple/native', { method: 'POST', body: JSON.stringify(body) }),
+  socialExchange: async (code: string) => {
+    const result = await request('/auth/social/exchange', { method: 'POST', body: JSON.stringify({ code }) });
+    if (result.accessToken) await storeSession(result);
+    return result;
+  },
+  socialComplete: async (body: unknown) => {
+    const session = await request('/auth/social/complete', { method: 'POST', body: JSON.stringify(body) });
+    await storeSession(session);
+    return session;
+  },
   resendVerification: (email: string) =>
     request('/auth/resend-verification', { method: 'POST', body: JSON.stringify({ email }) }),
   changePassword: (currentPassword: string, newPassword: string) =>
@@ -189,4 +200,4 @@ export const api = {
   updatePrivacy: (body: unknown) => request('/users/me/privacy', { method: 'PATCH', body: JSON.stringify(body) })
 };
 
-export { API_URL, ApiError };
+export { ApiError };
