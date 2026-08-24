@@ -105,7 +105,7 @@ export default function Profile() {
     { label: "Membership & VIP", onPress: () => router.push("/wallet") },
     { label: "My level & rewards", onPress: () => {} },
     { label: "My outfits & profile effects", onPress: () => {} },
-    { label: "Privacy & safety", onPress: () => {} },
+    { label: "Security Center", onPress: () => router.push("/security") },
     { label: "Delete my account", onPress: deleteAccount, danger: true },
     { label: "Terms & policies", onPress: () => {} },
     { label: "Log out", onPress: logout, danger: true }

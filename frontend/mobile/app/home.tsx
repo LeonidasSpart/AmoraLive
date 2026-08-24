@@ -1,5 +1,8 @@
 import { router } from "expo-router";
+import { useEffect, useState } from "react";
 import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
+import { api } from "../src/api/client";
+import LuxuryGiftCard from "../src/LuxuryGiftCard";
 import { theme } from "../src/theme";
 
 const actions = [
@@ -8,6 +11,8 @@ const actions = [
 ] as const;
 
 export default function Home() {
+  const [gifts, setGifts] = useState<any[]>([]);
+  useEffect(() => { api.gifts().then((data) => setGifts(Array.isArray(data) ? data.slice(0, 10) : [])).catch(() => {}); }, []);
   return <ScrollView style={s.page} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
     <View style={s.top}><View><Text style={s.eyebrow}>MEANINGFUL CONNECTIONS</Text><Text style={s.brand}>AMORA</Text></View><Pressable style={s.coinPill} onPress={() => router.push("/wallet")}><Text style={s.coinIcon}>🪙</Text><Text style={s.coinText}>0</Text></Pressable></View>
 
@@ -20,6 +25,9 @@ export default function Home() {
 
     <View style={s.sectionHead}><Text style={s.sectionTitle}>Your Amora world</Text><Text style={s.sectionHint}>Everything in one place</Text></View>
     <View style={s.grid}>{actions.map(([icon,title,path]) => <Pressable key={title} style={s.box} onPress={() => router.push(path as any)}><View style={s.boxIcon}><Text style={s.icon}>{icon}</Text></View><Text style={s.boxTitle}>{title}</Text><Text style={s.boxSub}>{title === "Live" ? "Watch & join" : title === "Coins & Gifts" ? "Premium moments" : "Open"}</Text></Pressable>)}</View>
+
+    <View style={s.sectionHead}><Text style={s.sectionTitle}>Amora Luxury</Text><Text style={s.sectionHint}>3D collection</Text></View>
+    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingHorizontal: 18 }} style={{ marginHorizontal: -18 }}><>{gifts.map((item) => <LuxuryGiftCard key={item.id} gift={item} onPress={() => router.push("/wallet")} />)}</></ScrollView>
 
     <View style={s.luxuryBanner}><View><Text style={s.luxuryKicker}>PRIVATE COLLECTION</Text><Text style={s.luxuryTitle}>Gifts that feel alive.</Text><Text style={s.luxuryText}>3D luxury gifts, live animations and premium moments.</Text></View><Text style={s.luxuryGem}>✦</Text></View>
   </ScrollView>;
