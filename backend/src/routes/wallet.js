@@ -1,6 +1,7 @@
 const auth = require('../middleware/auth');
 const Stripe = require('stripe');
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 
 module.exports = (prisma) => {
   const router = require('express').Router();
@@ -115,6 +116,181 @@ module.exports = (prisma) => {
     } catch (e) {
       console.error('Coin checkout error:', e);
       res.status(500).json({ error: 'Unable to create checkout session' });
+    }
+  });
+
+  // ---------- Native IAP verification (Apple / Google) ----------
+  //
+  // The mobile app already correctly uses react-native-iap as its primary
+  // purchase path (Stripe web-checkout is only a fallback for
+  // environments where native IAP isn't linked, like Expo Go) — Apple's
+  // App Store Review Guidelines section 3.1.1 require digital goods
+  // (coins) be sold through native IAP, not a third-party processor, so
+  // that architecture is correct. What was missing entirely: these two
+  // server-side verification endpoints the app calls after a native
+  // purchase completes. Without them, a purchase could charge real money
+  // on Apple's/Google's side and never actually credit the wallet.
+  //
+  // Both endpoints are idempotent via Purchase.purchase_token (unique) —
+  // calling verify twice with the same receipt/token (e.g. a retry after
+  // a dropped response) returns success without crediting coins again.
+
+  async function creditWalletForPurchase({ userId, pkg, platform, purchaseToken }) {
+    const existing = await prisma.purchase.findUnique({ where: { purchase_token: purchaseToken } });
+    if (existing) {
+      const wallet = await prisma.wallet.findUnique({ where: { user_id: userId } });
+      return { alreadyProcessed: true, balance: wallet?.balance || 0, coinsAwarded: 0 };
+    }
+
+    const totalCoins = pkg.coins_amount + (pkg.bonus_coins || 0);
+    const wallet = await prisma.$transaction(async (tx) => {
+      await tx.purchase.create({
+        data: {
+          user_id: userId,
+          package_id: pkg.id,
+          price_paid: pkg.price_cents,
+          platform,
+          purchase_token: purchaseToken,
+          status: 'completed',
+          verified_at: new Date()
+        }
+      });
+      const w = await tx.wallet.upsert({
+        where: { user_id: userId },
+        create: { user_id: userId, balance: totalCoins, lifetime_earned: totalCoins },
+        update: { balance: { increment: totalCoins }, lifetime_earned: { increment: totalCoins } }
+      });
+      await tx.notification.create({
+        data: { user_id: userId, type: 'purchase_completed', payload: { coins: totalCoins, platform } }
+      }).catch(() => {});
+      return w;
+    });
+
+    return { alreadyProcessed: false, balance: wallet.balance, coinsAwarded: totalCoins };
+  }
+
+  router.post('/iap/apple/verify', auth, async (req, res) => {
+    const { packageId, receiptData } = req.body;
+    if (!packageId || !receiptData) {
+      return res.status(400).json({ error: 'packageId and receiptData are required.' });
+    }
+    if (!process.env.APPLE_SHARED_SECRET) {
+      return res.status(503).json({ error: 'Apple in-app purchases are not configured on this server.', code: 'APPLE_IAP_NOT_CONFIGURED' });
+    }
+
+    try {
+      const pkg = await prisma.coinPackage.findUnique({ where: { id: packageId } });
+      if (!pkg || !pkg.is_active) return res.status(404).json({ error: 'Package not found.' });
+      if (!pkg.apple_product_id) return res.status(400).json({ error: 'This package has no Apple product configured.', code: 'NO_APPLE_PRODUCT' });
+
+      const verifyWithApple = async (url) => {
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 'receipt-data': receiptData, password: process.env.APPLE_SHARED_SECRET, 'exclude-old-transactions': true })
+        });
+        return resp.json();
+      };
+
+      // Apple's rule, not a guess: a sandbox receipt sent to the
+      // production endpoint comes back with status 21007, meaning "retry
+      // this exact receipt against the sandbox endpoint instead."
+      let result = await verifyWithApple('https://buy.itunes.apple.com/verifyReceipt');
+      if (result.status === 21007) {
+        result = await verifyWithApple('https://sandbox.itunes.apple.com/verifyReceipt');
+      }
+      if (result.status !== 0) {
+        return res.status(400).json({ error: `Apple could not verify this receipt (status ${result.status}).`, code: 'APPLE_VERIFY_FAILED' });
+      }
+
+      const transactions = result.latest_receipt_info || result.receipt?.in_app || [];
+      const matching = transactions
+        .filter((t) => t.product_id === pkg.apple_product_id)
+        .sort((a, b) => Number(b.purchase_date_ms) - Number(a.purchase_date_ms))[0];
+      if (!matching) {
+        return res.status(400).json({ error: 'No transaction for this product was found in the receipt.', code: 'NO_MATCHING_TRANSACTION' });
+      }
+
+      const result2 = await creditWalletForPurchase({
+        userId: req.user.id,
+        pkg,
+        platform: 'ios',
+        purchaseToken: matching.transaction_id
+      });
+      res.json({ success: true, ...result2 });
+    } catch (e) {
+      console.error('Apple IAP verification error:', e);
+      res.status(500).json({ error: 'Unable to verify this purchase.', code: 'APPLE_VERIFY_ERROR' });
+    }
+  });
+
+  async function getGooglePlayAccessToken() {
+    const keyJson = process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY;
+    if (!keyJson) return null;
+    const key = JSON.parse(keyJson);
+    const now = Math.floor(Date.now() / 1000);
+    const assertion = jwt.sign(
+      {
+        iss: key.client_email,
+        scope: 'https://www.googleapis.com/auth/androidpublisher',
+        aud: 'https://oauth2.googleapis.com/token',
+        iat: now,
+        exp: now + 3600
+      },
+      key.private_key,
+      { algorithm: 'RS256' }
+    );
+
+    const resp = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion })
+    });
+    const data = await resp.json();
+    return data.access_token || null;
+  }
+
+  router.post('/iap/google/verify', auth, async (req, res) => {
+    const { packageId, purchaseToken } = req.body;
+    if (!packageId || !purchaseToken) {
+      return res.status(400).json({ error: 'packageId and purchaseToken are required.' });
+    }
+    if (!process.env.GOOGLE_PLAY_SERVICE_ACCOUNT_KEY || !process.env.GOOGLE_PLAY_PACKAGE_NAME) {
+      return res.status(503).json({ error: 'Google Play in-app purchases are not configured on this server.', code: 'GOOGLE_IAP_NOT_CONFIGURED' });
+    }
+
+    try {
+      const pkg = await prisma.coinPackage.findUnique({ where: { id: packageId } });
+      if (!pkg || !pkg.is_active) return res.status(404).json({ error: 'Package not found.' });
+      if (!pkg.google_product_id) return res.status(400).json({ error: 'This package has no Google Play product configured.', code: 'NO_GOOGLE_PRODUCT' });
+
+      const accessToken = await getGooglePlayAccessToken();
+      if (!accessToken) return res.status(503).json({ error: 'Unable to authenticate with Google Play.', code: 'GOOGLE_AUTH_FAILED' });
+
+      const verifyUrl = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${process.env.GOOGLE_PLAY_PACKAGE_NAME}/purchases/products/${pkg.google_product_id}/tokens/${purchaseToken}`;
+      const verifyResp = await fetch(verifyUrl, { headers: { Authorization: `Bearer ${accessToken}` } });
+      const verifyData = await verifyResp.json();
+
+      // purchaseState: 0 = purchased, 1 = canceled, 2 = pending
+      if (!verifyResp.ok || verifyData.purchaseState !== 0) {
+        return res.status(400).json({ error: 'Google Play could not verify this purchase.', code: 'GOOGLE_VERIFY_FAILED' });
+      }
+
+      const result2 = await creditWalletForPurchase({ userId: req.user.id, pkg, platform: 'android', purchaseToken });
+
+      // Google requires purchases to be acknowledged within 3 days or it
+      // auto-refunds them — fire-and-forget so a slow/failed ack never
+      // blocks the coins already being credited above.
+      fetch(`${verifyUrl}:acknowledge`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({})
+      }).catch((err) => console.error('Google Play purchase acknowledgment failed:', err.message));
+
+      res.json({ success: true, ...result2 });
+    } catch (e) {
+      console.error('Google IAP verification error:', e);
+      res.status(500).json({ error: 'Unable to verify this purchase.', code: 'GOOGLE_VERIFY_ERROR' });
     }
   });
 
