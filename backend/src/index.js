@@ -11,6 +11,7 @@ const jwt = require('jsonwebtoken');
 const { WebSocketServer } = require('ws');
 const Stripe = require('stripe');
 const { grantMonthlyBonusIfDue } = require('./lib/membership');
+const { incrementMissionProgress } = require('./lib/missions');
 
 const app = express();
 const server = http.createServer(app);
@@ -815,61 +816,87 @@ io.on('connection', (socket) => {
     async (data) => {
       const {
         receiverId,
-        content,
+        content = '',
         type = 'text',
         media_urls = []
-      } = data;
+      } = data || {};
 
-      const senderId =
-        socket.userId;
+      const senderId = socket.userId;
 
-      if (!senderId) {
-        console.warn(
-          'private-message: sender not authenticated'
-        );
-
+      if (!senderId || !receiverId || (!String(content).trim() && (!Array.isArray(media_urls) || media_urls.length === 0))) {
         return;
       }
 
       try {
-        const message =
-          await prisma.message.create({
-            data: {
-              sender_id: senderId,
-              receiver_id: receiverId,
-              content,
-              type,
-              media_urls
-            },
+        // Socket messages must follow the same block rule as the REST route.
+        const block = await prisma.block.findFirst({
+          where: {
+            OR: [
+              { blocker_id: senderId, blocked_id: receiverId },
+              { blocker_id: receiverId, blocked_id: senderId }
+            ]
+          }
+        });
 
-            include: {
-              sender: {
-                select: {
-                  id: true,
-                  username: true,
-                  display_name: true,
-                  profile_photo: true
-                }
+        if (block) {
+          socket.emit('message-error', {
+            code: 'MESSAGING_BLOCKED',
+            error: 'You cannot message this user'
+          });
+          return;
+        }
+
+        const message = await prisma.message.create({
+          data: {
+            sender_id: senderId,
+            receiver_id: receiverId,
+            content: String(content || ''),
+            type,
+            media_urls: Array.isArray(media_urls) ? media_urls : []
+          },
+          include: {
+            sender: {
+              select: {
+                id: true,
+                username: true,
+                display_name: true,
+                profile_photo: true,
+                is_verified: true,
+                membership_tier: true
               }
             }
-          });
+          }
+        });
 
-        io.to(
-          `user-${receiverId}`
-        ).emit(
-          'private-message',
-          message
-        );
+        await prisma.notification.create({
+          data: {
+            user_id: receiverId,
+            type: 'new_message',
+            payload: {
+              senderId,
+              senderName: message.sender.display_name || message.sender.username,
+              preview: String(content || '').slice(0, 120)
+            }
+          }
+        }).catch((err) => {
+          console.error('Socket message notification failed:', err.message);
+        });
 
-        socket.emit(
-          'private-message-sent',
-          message
-        );
+        // Keep the mission counter identical to REST-sent messages.
+        prisma.$transaction((tx) =>
+          incrementMissionProgress(tx, senderId, 'messages_sent', 1)
+        ).catch((err) => {
+          console.error('Socket message mission progress failed:', err.message);
+        });
+
+        io.to(`user-${receiverId}`).emit('private-message', message);
+        socket.emit('private-message-sent', message);
       } catch (err) {
-        console.error(
-          'Socket private message error:',
-          err
-        );
+        console.error('Socket private message error:', err);
+        socket.emit('message-error', {
+          code: 'MESSAGE_SEND_FAILED',
+          error: 'Unable to send message'
+        });
       }
     }
   );
