@@ -517,3 +517,77 @@ button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
 .amora-reward-history-row b { color:#ffd66b; font-size:12px; }
 @media (max-width:900px) { .amora-rewards-hero { grid-template-columns:1fr; } .amora-reward-orb { position:absolute; right:-55px; bottom:-75px; width:190px; height:190px; opacity:.35; } .amora-reward-calendar { grid-template-columns:repeat(4,1fr); } }
 @media (max-width:560px) { .amora-rewards-hero { min-height:0; padding:24px 20px 28px; border-radius:22px; } .amora-reward-hero-stats { display:grid; grid-template-columns:repeat(3,1fr); } .amora-reward-hero-stats div { min-width:0; padding:11px 8px; } .amora-reward-hero-stats strong { font-size:17px; } .amora-reward-hero-stats span { font-size:8px; } .amora-reward-panel,.amora-reward-history { padding:18px 14px; border-radius:19px; } .amora-reward-panel-head { align-items:stretch; flex-direction:column; } .amora-reward-panel-head .amora-btn { width:100%; } .amora-reward-calendar { grid-template-columns:repeat(2,1fr); } .amora-reward-day { min-height:95px; } }
+
+/* ================================================================
+   AMORA LUXURY LIVE SYSTEM
+   Presentation-only upgrade: glass depth, 3D cards, richer motion and
+   device-safe responsive behavior. API/data/transaction logic is unchanged.
+   ================================================================ */
+:root {
+  --amora-surface-lux: rgba(19, 13, 38, .78);
+  --amora-glass: rgba(255,255,255,.055);
+  --amora-gold: #ffd86b;
+  --amora-shadow-3d: 0 26px 70px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.07);
+}
+
+body {
+  background:
+    radial-gradient(circle at 8% 8%, rgba(255,63,157,.10), transparent 25%),
+    radial-gradient(circle at 92% 14%, rgba(155,53,255,.10), transparent 28%),
+    linear-gradient(180deg, #070616 0%, #09071a 46%, #060511 100%);
+}
+
+.amora-app-shell { position: relative; min-height: 100svh; isolation: isolate; }
+.amora-app-shell::after {
+  content: ""; position: fixed; inset: 0; pointer-events:none; z-index:-2;
+  background: radial-gradient(circle at 50% -12%, rgba(255,255,255,.035), transparent 34%),
+              linear-gradient(115deg, transparent 0 35%, rgba(255,255,255,.012) 50%, transparent 65%);
+}
+.amora-app-header { background: rgba(8,6,20,.72) !important; border-bottom-color: rgba(255,255,255,.09) !important; box-shadow: 0 12px 40px rgba(0,0,0,.18); }
+.amora-app-header-inner { min-height: 72px !important; }
+.amora-app-brand { position:relative; padding:5px 9px 5px 5px; border:1px solid rgba(255,255,255,.08); border-radius:17px; background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.015)); box-shadow:var(--amora-shadow-3d); }
+.amora-app-brand img { filter: drop-shadow(0 6px 16px rgba(255,63,157,.35)); }
+.amora-app-brand-name { font-weight:900; letter-spacing:-.02em; }
+.amora-app-nav a { border-radius:12px !important; transition:transform .2s ease,background .2s ease,color .2s ease,box-shadow .2s ease !important; }
+.amora-app-nav a:hover { transform:translateY(-1px); background:rgba(255,255,255,.04); }
+.amora-app-nav a.is-active { background:linear-gradient(135deg,rgba(255,63,157,.14),rgba(155,53,255,.14)); box-shadow:inset 0 0 0 1px rgba(255,107,157,.10), 0 8px 25px rgba(255,63,157,.06); }
+.amora-icon-action,.amora-wallet-link,.amora-profile-link { box-shadow:inset 0 1px rgba(255,255,255,.08),0 8px 22px rgba(0,0,0,.22); }
+.amora-wallet-link { color:#fff !important; }
+.amora-app-main { position:relative; }
+
+/* Premium discover/live cards. These classes are attached to existing
+   elements without changing their data flow. */
+.amora-live-card-3d { border:1px solid rgba(255,255,255,.09) !important; border-radius:22px !important; background:linear-gradient(145deg,rgba(255,255,255,.075),rgba(255,255,255,.018)) !important; box-shadow:0 20px 50px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.06) !important; transform-style:preserve-3d; }
+.amora-live-thumb-3d { border-radius:22px 22px 0 0 !important; background:radial-gradient(circle at 50% 15%,rgba(255,63,157,.2),transparent 42%),#17112b !important; }
+.amora-live-card-3d img { transition:transform .45s ease,filter .45s ease; }
+.amora-live-card-3d:hover img { transform:scale(1.045); filter:saturate(1.08) contrast(1.03); }
+.amora-live-avatar-3d { border:1px solid rgba(255,255,255,.12) !important; box-shadow:0 6px 20px rgba(0,0,0,.28); }
+.amora-creator-card-3d { border:1px solid rgba(255,255,255,.09) !important; border-radius:22px !important; background:linear-gradient(145deg,rgba(255,255,255,.065),rgba(255,255,255,.018)) !important; box-shadow:0 18px 45px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.06); }
+.amora-discover-search { border-color:rgba(255,255,255,.10) !important; background:rgba(255,255,255,.045) !important; border-radius:16px !important; box-shadow:inset 0 1px rgba(255,255,255,.06),0 10px 35px rgba(0,0,0,.18); }
+.amora-discover-tabs { border-bottom-color:rgba(255,255,255,.07) !important; }
+
+/* Landing page: more depth without changing the content. */
+.amora-logo-card { transform-style:preserve-3d; perspective:1200px; }
+.amora-logo-card::after { content:""; position:absolute; inset:10px; border-radius:25px; border:1px solid rgba(255,255,255,.05); pointer-events:none; transform:translateZ(18px); }
+.amora-preview-brand { box-shadow:0 22px 55px rgba(0,0,0,.45),inset 0 1px rgba(255,255,255,.06); transform:translateZ(22px); }
+.amora-chip { box-shadow:0 12px 28px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.05); transform:translateZ(18px); }
+.amora-feature { background:linear-gradient(145deg,rgba(255,255,255,.06),rgba(255,255,255,.018)); box-shadow:0 24px 55px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.06); transition:transform .25s ease,box-shadow .25s ease,border-color .25s ease; }
+.amora-feature:hover { transform:translateY(-5px); border-color:rgba(255,107,157,.22); box-shadow:0 30px 65px rgba(0,0,0,.34),0 0 35px rgba(255,63,157,.06); }
+
+@media (max-width:760px) {
+  .amora-app-header-inner { min-height:62px !important; }
+  .amora-app-brand { border-radius:14px; padding:3px; }
+  .amora-app-brand-name { display:none; }
+  .amora-mobile-bottom-nav { background:rgba(10,7,23,.90) !important; border-color:rgba(255,255,255,.12) !important; box-shadow:0 20px 65px rgba(0,0,0,.55),0 0 35px rgba(255,63,157,.08) !important; }
+}
+
+@media (max-width:560px) {
+  .amora-hero { padding-top:46px !important; }
+  .amora-grid { grid-template-columns:1fr !important; }
+  .amora-chip-row { grid-template-columns:1fr !important; }
+  .amora-cta { padding:34px 20px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .amora-feature,.amora-live-card-3d,.amora-live-card-3d img { transition:none !important; }
+}
