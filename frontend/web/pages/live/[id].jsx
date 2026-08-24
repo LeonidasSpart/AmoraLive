@@ -55,7 +55,13 @@ export default function LiveRoom() {
     vivid: { label: 'Vivid', css: 'saturate(1.6) contrast(1.15)' },
     bw: { label: 'B&W', css: 'grayscale(1) contrast(1.1)' },
     vintage: { label: 'Vintage', css: 'sepia(0.4) contrast(0.9) brightness(1.05) saturate(0.8)' },
-    soft: { label: 'Soft', css: 'brightness(1.08) contrast(0.92) saturate(0.95)' }
+    soft: { label: 'Soft', css: 'brightness(1.08) contrast(0.92) saturate(0.95)' },
+    dramatic: { label: 'Dramatic', css: 'contrast(1.35) saturate(1.25) brightness(0.95)' },
+    moody: { label: 'Moody', css: 'saturate(0.7) brightness(0.85) hue-rotate(-15deg) contrast(1.1)' },
+    bright: { label: 'Bright', css: 'brightness(1.2) saturate(0.9) contrast(0.98)' },
+    noir: { label: 'Noir', css: 'grayscale(1) contrast(1.4) brightness(0.9)' },
+    sepia: { label: 'Sepia', css: 'sepia(0.85) contrast(1.05) brightness(1.02)' },
+    sunset: { label: 'Sunset', css: 'saturate(1.4) hue-rotate(-8deg) sepia(0.2) brightness(1.03)' }
   };
 
   const chatContainerRef = useRef(null);
@@ -496,7 +502,12 @@ export default function LiveRoom() {
         }
       `}</style>
 
-      <div ref={videoContainerRef} style={battle ? s.videoLeftHalf : s.video}>
+      <div
+        ref={videoContainerRef}
+        style={{ ...(battle ? s.videoLeftHalf : s.video), cursor: 'pointer' }}
+        onClick={sendLike}
+        aria-label="Tap to like"
+      >
         {!videoReady && (
           <div style={{ textAlign: 'center', padding: 30 }}>
             <div style={{ fontSize: 64 }}>📺</div>
@@ -723,16 +734,36 @@ export default function LiveRoom() {
           {chatMessages.slice(-30).map((m, i) => (
             <div key={m.id || i} style={{ ...s.chatLine, color: m.system ? '#ffd166' : '#fff', display: 'flex', alignItems: 'flex-start', gap: 6 }}>
               {!m.system && (
-                <div style={s.chatAvatar}>
-                  {m.user?.profile_photo ? (
-                    <img src={m.user.profile_photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-                  ) : (
-                    (m.user?.display_name || m.user?.username || m.username || '?')[0]?.toUpperCase()
-                  )}
-                </div>
+                m.user?.id ? (
+                  <Link href={`/creator/${m.user.id}`} onClick={(e) => e.stopPropagation()} style={s.chatAvatar}>
+                    {m.user?.profile_photo ? (
+                      <img src={m.user.profile_photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                    ) : (
+                      (m.user?.display_name || m.user?.username || m.username || '?')[0]?.toUpperCase()
+                    )}
+                  </Link>
+                ) : (
+                  <div style={s.chatAvatar}>
+                    {m.user?.profile_photo ? (
+                      <img src={m.user.profile_photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
+                    ) : (
+                      (m.user?.display_name || m.user?.username || m.username || '?')[0]?.toUpperCase()
+                    )}
+                  </div>
+                )
               )}
               <span>
-                {!m.system && <strong>{m.user?.display_name || m.user?.username || m.username || ''}<VerifiedBadge user={m.user} size={11} />: </strong>}
+                {!m.system && (
+                  <strong>
+                    {m.user?.id ? (
+                      <Link href={`/creator/${m.user.id}`} onClick={(e) => e.stopPropagation()} style={s.chatNameLink}>
+                        {m.user?.display_name || m.user?.username || m.username || ''}
+                      </Link>
+                    ) : (
+                      m.user?.display_name || m.user?.username || m.username || ''
+                    )}
+                    <VerifiedBadge user={m.user} size={11} />: </strong>
+                )}
                 {m.message}
               </span>
             </div>
@@ -813,7 +844,8 @@ const s = {
   chatOverlay: { position: 'absolute', left: 0, right: 0, bottom: 0, padding: '10px 12px 16px', background: 'linear-gradient(transparent, rgba(0,0,0,0.75) 60%)', zIndex: 2 },
   chatFeed: { maxHeight: 130, overflowY: 'auto', marginBottom: 8, display: 'flex', flexDirection: 'column', gap: 4 },
   chatLine: { fontSize: 13, lineHeight: 1.3, textShadow: '0 1px 3px rgba(0,0,0,0.6)' },
-  chatAvatar: { width: 20, height: 20, minWidth: 20, borderRadius: '50%', background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, overflow: 'hidden', flexShrink: 0, marginTop: 1 },
+  chatAvatar: { width: 20, height: 20, minWidth: 20, borderRadius: '50%', background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, overflow: 'hidden', flexShrink: 0, marginTop: 1, textDecoration: 'none', color: '#fff' },
+  chatNameLink: { color: 'inherit', textDecoration: 'none' },
   composer: { display: 'flex', gap: 8 },
   composerInput: { flex: 1, background: 'rgba(255,255,255,0.15)', border: 0, borderRadius: 20, color: '#fff', padding: '10px 14px', fontSize: 13 },
   sendBtn: { background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', color: '#fff', border: 0, borderRadius: 20, padding: '0 18px', fontWeight: 700, cursor: 'pointer' }
