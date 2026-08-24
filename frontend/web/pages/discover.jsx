@@ -139,6 +139,7 @@ export default function Discover() {
       style: { textDecoration: 'none' }
     }, [
       React.createElement('div', {
+        className: 'amora-live-card-3d',
         style: {
           background: '#1a1a2e',
           borderRadius: '12px',
@@ -157,6 +158,7 @@ export default function Discover() {
         }
       }, [
         React.createElement('div', {
+          className: 'amora-live-thumb-3d',
           style: {
             position: 'relative',
             height: '140px',
@@ -217,6 +219,7 @@ export default function Discover() {
             style: { display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }
           }, [
             React.createElement('div', {
+              className: 'amora-live-avatar-3d',
               style: {
                 width: '28px',
                 height: '28px',
@@ -268,6 +271,7 @@ export default function Discover() {
   const renderCreatorCard = (creator) =>
     React.createElement('div', {
       key: creator.id,
+      className: 'amora-creator-card-3d',
       style: {
         background: '#1a1a2e',
         borderRadius: '12px',
@@ -327,6 +331,7 @@ export default function Discover() {
         placeholder: '🔍 Search creators and live streams…',
         value: searchQuery,
         onChange: (e) => setSearchQuery(e.target.value),
+        className: 'amora-discover-search',
         style: {
           width: '100%',
           padding: '12px 16px',
@@ -358,6 +363,7 @@ export default function Discover() {
       // Tabs
       React.createElement('nav', {
         key: 'tabs',
+        className: 'amora-discover-tabs',
         style: {
           display: 'flex',
           gap: '8px',
