@@ -42,6 +42,7 @@ export default function AdminLayout({ children }) {
         ['/admin/gifts', 'Gifts'],
         ['/admin/wallet', 'Coins'],
         ['/admin/withdrawals', 'Withdrawals'],
+        ['/admin/media', 'Media'],
         ['/admin/reports', 'Reports'],
         ['/admin/packages', 'Packages'],
         ['/admin/settings', 'Settings']
