@@ -134,6 +134,7 @@ export const api = {
   },
   me: () => request('/users/me'),
   updateProfile: (body: unknown) => request('/users/me', { method: 'PATCH', body: JSON.stringify(body) }),
+  deleteAccount: () => request('/users/me', { method: 'DELETE' }),
   uploadPhoto: (formData: FormData) => uploadFile('/users/me/photos', formData),
   nextMatch: () => request('/matches/next'),
   acceptMatch: (targetUserId: string) => request('/matches/accept', { method: 'POST', body: JSON.stringify({ targetUserId }) }),
