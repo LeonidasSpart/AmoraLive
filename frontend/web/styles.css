@@ -131,6 +131,13 @@ button { -webkit-tap-highlight-color: transparent; }
 .amora-divider::before, .amora-divider::after { content: ""; height: 1px; background: var(--amora-border); flex: 1; }
 .amora-google { width: 100%; min-height: 54px; background: #fff; color: #17131f; border: 0; border-radius: 14px; font-weight: 800; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease; }
 .amora-google:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(0,0,0,.18); }
+.amora-social-stack { display: grid; gap: 10px; margin-bottom: 12px; }
+.amora-social { width: 100%; min-height: 54px; border: 0; border-radius: 14px; font-weight: 800; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.amora-social:hover { transform: translateY(-1px); box-shadow: 0 12px 30px rgba(0,0,0,.18); }
+.amora-social:disabled { cursor: wait; opacity: .65; transform: none; }
+.amora-social-symbol { font-size: 22px; line-height: 1; }
+.amora-apple { background: #050505; color: #fff; }
+.amora-facebook { background: #1877f2; color: #fff; }
 .amora-auth-bottom { text-align: center; color: #8f89a2; font-size: 13px; margin-top: 22px; }
 .amora-auth-bottom a { color: #ff79bd; text-decoration: none; font-weight: 800; }
 .amora-error { padding: 12px 14px; border-radius: 12px; background: rgba(255,55,90,.1); border: 1px solid rgba(255,55,90,.25); color: #ff9aab; margin-bottom: 16px; font-size: 13px; line-height: 1.45; }
