@@ -46,6 +46,12 @@ model User {
   // means "no filter" so this stays fully backward compatible for every
   // existing account.
   dating_preferences Json?
+  // { online_status_visible, profile_visible, show_age, show_location } —
+  // this field was referenced by GET/PATCH /users/me/privacy from before
+  // this session started, but was never actually declared here, so every
+  // call to those routes has been failing at the database level the whole
+  // time ("Failed to update privacy" / an empty-looking privacy screen).
+  privacy_settings Json?
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
