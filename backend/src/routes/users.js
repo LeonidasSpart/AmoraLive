@@ -5,10 +5,53 @@ const { incrementMissionProgress } = require('../lib/missions');
 const multer = require('multer');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const { UTApi } = require('uploadthing/server');
 const { deleteUploadThingFile } = require('../lib/media');
 const { logSecurityEvent } = require('../lib/security');
 const { createRateLimiter } = require('../middleware/security');
+
+function decryptOAuthToken(value) {
+  if (!value) return null;
+  const key = Buffer.from(String(process.env.OAUTH_TOKEN_ENCRYPTION_KEY || ''), 'hex');
+  if (key.length !== 32) return null;
+  try {
+    const [ivRaw, tagRaw, encryptedRaw] = String(value).split('.');
+    const decipher = crypto.createDecipheriv('aes-256-gcm', key, Buffer.from(ivRaw, 'base64url'));
+    decipher.setAuthTag(Buffer.from(tagRaw, 'base64url'));
+    return Buffer.concat([decipher.update(Buffer.from(encryptedRaw, 'base64url')), decipher.final()]).toString('utf8');
+  } catch {
+    return null;
+  }
+}
+
+function createAppleClientSecret(clientId) {
+  const privateKey = String(process.env.APPLE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
+  if (!privateKey || !process.env.APPLE_TEAM_ID || !process.env.APPLE_KEY_ID) return null;
+  return jwt.sign(
+    { iss: process.env.APPLE_TEAM_ID, iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + 5 * 60, aud: 'https://appleid.apple.com', sub: clientId },
+    privateKey,
+    { algorithm: 'ES256', keyid: process.env.APPLE_KEY_ID }
+  );
+}
+
+async function revokeAppleRefreshToken(refreshToken) {
+  if (!refreshToken) return;
+  const clientId = process.env.APPLE_NATIVE_CLIENT_ID || 'one.amoramatch.app';
+  const clientSecret = createAppleClientSecret(clientId);
+  if (!clientSecret) return;
+  await fetch('https://appleid.apple.com/auth/revoke', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      client_id: clientId,
+      client_secret: clientSecret,
+      token: refreshToken,
+      token_type_hint: 'refresh_token'
+    })
+  }).catch(() => {});
+}
 
 // Media storage is UploadThing (not AWS S3) — one API token, no IAM
 // policies or permission boundaries to manage. UTApi reads
@@ -304,13 +347,76 @@ module.exports = (prisma) => {
   // ---------- DELETE /users/me (soft delete) ----------
   router.delete('/me', auth, async (req, res) => {
     try {
-      await prisma.user.update({
+      const current = await prisma.user.findUnique({
         where: { id: req.user.id },
-        data: { is_active: false }
+        select: { id: true, profile_photo: true, cover_photo: true }
       });
+      const appleIdentity = await prisma.oAuthAccount.findFirst({
+        where: { user_id: req.user.id, provider: 'apple' },
+        select: { refresh_token_encrypted: true }
+      });
+      if (!current) return res.status(404).json({ error: 'Account not found.' });
+
+      const suffix = crypto.randomBytes(8).toString('hex');
+      await revokeAppleRefreshToken(decryptOAuthToken(appleIdentity?.refresh_token_encrypted));
+      await prisma.$transaction(async tx => {
+      await tx.storyReaction.deleteMany({ where: { OR: [{ user_id: req.user.id }, { story: { user_id: req.user.id } }] } });
+      await tx.storyView.deleteMany({ where: { OR: [{ viewer_id: req.user.id }, { story: { user_id: req.user.id } }] } });
+      await tx.story.deleteMany({ where: { user_id: req.user.id } });
+      await tx.message.deleteMany({ where: { OR: [{ sender_id: req.user.id }, { receiver_id: req.user.id }] } });
+      await tx.callHistory.deleteMany({ where: { OR: [{ caller_id: req.user.id }, { receiver_id: req.user.id }] } });
+      await tx.videoMatchSession.deleteMany({ where: { OR: [{ user_a_id: req.user.id }, { user_b_id: req.user.id }] } });
+      await tx.follow.deleteMany({ where: { OR: [{ follower_id: req.user.id }, { following_id: req.user.id }] } });
+      await tx.match.deleteMany({ where: { OR: [{ user1_id: req.user.id }, { user2_id: req.user.id }] } });
+      await tx.swipe.deleteMany({ where: { OR: [{ swiper_id: req.user.id }, { target_id: req.user.id }] } });
+      await tx.block.deleteMany({ where: { OR: [{ blocker_id: req.user.id }, { blocked_id: req.user.id }] } });
+      await tx.mute.deleteMany({ where: { OR: [{ muter_id: req.user.id }, { muted_id: req.user.id }] } });
+      await tx.roomParticipant.deleteMany({ where: { user_id: req.user.id } });
+      await tx.liveChatMessage.deleteMany({ where: { user_id: req.user.id } });
+      await tx.notification.deleteMany({ where: { user_id: req.user.id } });
+      await tx.dailyRewardStatus.deleteMany({ where: { user_id: req.user.id } });
+      await tx.dailyRewardClaim.deleteMany({ where: { user_id: req.user.id } });
+      await tx.xpTransaction.deleteMany({ where: { user_id: req.user.id } });
+      await tx.missionProgress.deleteMany({ where: { user_id: req.user.id } });
+      await tx.userCosmetic.deleteMany({ where: { user_id: req.user.id } });
+      await tx.eventScore.deleteMany({ where: { user_id: req.user.id } });
+        await tx.session.deleteMany({ where: { user_id: req.user.id } });
+        await tx.oAuthAccount.deleteMany({ where: { user_id: req.user.id } });
+        await tx.user.update({
+          where: { id: req.user.id },
+          data: {
+            email: `deleted-${suffix}@deleted.amora.live`,
+            username: `deleted_${suffix}`,
+            display_name: 'Deleted User',
+            password_hash: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12),
+            bio: null,
+            location: null,
+            interests: [],
+            languages: [],
+            relationship_intent: null,
+            gender: null,
+            profile_photo: null,
+            cover_photo: null,
+            online_status: 'offline',
+            privacy_settings: null,
+            dating_preferences: null,
+            notification_preferences: null,
+            is_active: false,
+            deleted_at: new Date()
+          }
+        });
+      });
+
+      await Promise.all(
+        [current.profile_photo, current.cover_photo]
+          .filter(Boolean)
+          .map(url => deleteUploadThingFile(url).catch(() => null))
+      );
+
       res.json({ success: true });
     } catch (e) {
-      res.status(400).json({ error: e.message });
+      console.error('Account deletion error:', e);
+      res.status(400).json({ error: 'Unable to delete the account.' });
     }
   });
 

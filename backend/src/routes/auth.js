@@ -19,6 +19,213 @@ module.exports = (prisma) => {
   const router = require('express').Router();
   const appUrl = () => (process.env.APP_URL || 'https://amoramatch.one').replace(/\/+$/, '');
   const googleRedirectUri = () => (process.env.GOOGLE_REDIRECT_URI || 'https://api.amoramatch.one/auth/google/callback').replace(/\/+$/, '');
+  const appleNativeClientId = () => process.env.APPLE_NATIVE_CLIENT_ID || 'one.amoramatch.app';
+  const appleWebClientId = () => process.env.APPLE_WEB_CLIENT_ID || process.env.APPLE_SERVICE_ID || '';
+  const appleRedirectUri = () => (process.env.APPLE_REDIRECT_URI || `${process.env.API_URL || 'https://api.amoramatch.one'}/auth/apple/callback`).replace(/\/+$/, '');
+  const facebookRedirectUri = () => (process.env.FACEBOOK_REDIRECT_URI || `${process.env.API_URL || 'https://api.amoramatch.one'}/auth/facebook/callback`).replace(/\/+$/, '');
+  const facebookGraphVersion = () => process.env.FACEBOOK_GRAPH_VERSION || 'v24.0';
+
+  const appleKeysCache = { keys: null, expiresAt: 0 };
+
+  function base64urlToBuffer(value) {
+    return Buffer.from(String(value).replace(/-/g, '+').replace(/_/g, '/'), 'base64');
+  }
+
+  async function getApplePublicKey(kid) {
+    if (!appleKeysCache.keys || appleKeysCache.expiresAt < Date.now()) {
+      const response = await fetch('https://appleid.apple.com/auth/keys');
+      if (!response.ok) throw new Error('Unable to load Apple signing keys');
+      const data = await response.json();
+      appleKeysCache.keys = data.keys || [];
+      appleKeysCache.expiresAt = Date.now() + 60 * 60 * 1000;
+    }
+    const jwk = appleKeysCache.keys.find(key => key.kid === kid && key.kty === 'RSA');
+    if (!jwk) throw new Error('Apple signing key not found');
+    return crypto.createPublicKey({ key: jwk, format: 'jwk' });
+  }
+
+  async function verifyAppleIdentityToken(identityToken, expectedNonce, audience) {
+    const parts = String(identityToken || '').split('.');
+    if (parts.length !== 3) throw new Error('Invalid Apple identity token');
+    const header = JSON.parse(base64urlToBuffer(parts[0]).toString('utf8'));
+    if (header.alg !== 'RS256' || !header.kid) throw new Error('Unsupported Apple identity token');
+    const publicKey = await getApplePublicKey(header.kid);
+    const decoded = jwt.verify(identityToken, publicKey, {
+      algorithms: ['RS256'],
+      issuer: 'https://appleid.apple.com',
+      audience: audience || [appleNativeClientId(), appleWebClientId()].filter(Boolean)
+    });
+
+    if (expectedNonce) {
+      const hashedNonce = crypto.createHash('sha256').update(String(expectedNonce)).digest('hex');
+      if (decoded.nonce !== hashedNonce && decoded.nonce !== expectedNonce) {
+        throw new Error('Apple nonce validation failed');
+      }
+    }
+    if (!decoded.sub || decoded.email_verified === false) throw new Error('Apple account email is not verified');
+    return decoded;
+  }
+
+  function createAppleClientSecret(clientId) {
+    const privateKey = String(process.env.APPLE_PRIVATE_KEY || '').replace(/\\n/g, '\n');
+    if (!privateKey || !process.env.APPLE_TEAM_ID || !process.env.APPLE_KEY_ID) {
+      throw new Error('Apple web authentication is not configured');
+    }
+    return jwt.sign(
+      { iss: process.env.APPLE_TEAM_ID, iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + 5 * 60, aud: 'https://appleid.apple.com', sub: clientId },
+      privateKey,
+      { algorithm: 'ES256', keyid: process.env.APPLE_KEY_ID }
+    );
+  }
+
+  function getOAuthEncryptionKey() {
+    const raw = String(process.env.OAUTH_TOKEN_ENCRYPTION_KEY || '');
+    if (!/^[a-f0-9]{64}$/i.test(raw)) throw new Error('OAUTH_TOKEN_ENCRYPTION_KEY must be a 32-byte hex key');
+    return Buffer.from(raw, 'hex');
+  }
+
+  function encryptOAuthToken(value) {
+    if (!value) return null;
+    const iv = crypto.randomBytes(12);
+    const cipher = crypto.createCipheriv('aes-256-gcm', getOAuthEncryptionKey(), iv);
+    const encrypted = Buffer.concat([cipher.update(String(value), 'utf8'), cipher.final()]);
+    const tag = cipher.getAuthTag();
+    return `${iv.toString('base64url')}.${tag.toString('base64url')}.${encrypted.toString('base64url')}`;
+  }
+
+  function decryptOAuthToken(value) {
+    if (!value) return null;
+    const [ivRaw, tagRaw, encryptedRaw] = String(value).split('.');
+    const decipher = crypto.createDecipheriv('aes-256-gcm', getOAuthEncryptionKey(), Buffer.from(ivRaw, 'base64url'));
+    decipher.setAuthTag(Buffer.from(tagRaw, 'base64url'));
+    return Buffer.concat([decipher.update(Buffer.from(encryptedRaw, 'base64url')), decipher.final()]).toString('utf8');
+  }
+
+  async function exchangeAppleAuthorizationCode(code, clientId, redirectUri) {
+    if (!code) return null;
+    const clientSecret = createAppleClientSecret(clientId);
+    const body = {
+      client_id: clientId,
+      client_secret: clientSecret,
+      code: String(code),
+      grant_type: 'authorization_code'
+    };
+    if (redirectUri) body.redirect_uri = redirectUri;
+    const response = await fetch('https://appleid.apple.com/auth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(body)
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error_description || 'Apple authorization code exchange failed');
+    return data;
+  }
+
+  async function revokeAppleRefreshToken(refreshToken, clientId) {
+    if (!refreshToken) return;
+    const clientSecret = createAppleClientSecret(clientId);
+    await fetch('https://appleid.apple.com/auth/revoke', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        token: refreshToken,
+        token_type_hint: 'refresh_token'
+      })
+    });
+  }
+
+  function createOAuthState(provider, platform) {
+    const nonce = crypto.randomBytes(32).toString('hex');
+    return jwt.sign(
+      { purpose: `${provider}_oauth_state`, state: crypto.randomBytes(24).toString('hex'), nonce, platform },
+      process.env.JWT_SECRET,
+      { expiresIn: '10m' }
+    );
+  }
+
+  function setOAuthStateCookie(res, provider, stateToken, sameSite = 'Lax') {
+    res.setHeader(
+      'Set-Cookie',
+      `amora_${provider}_state=${encodeURIComponent(stateToken)}; Max-Age=600; Path=/auth/${provider}; Secure; HttpOnly; SameSite=${sameSite}`
+    );
+  }
+
+  function readOAuthStateCookie(req, provider) {
+    const cookieHeader = String(req.headers.cookie || '');
+    const cookieMatch = cookieHeader.match(new RegExp(`(?:^|;\\s*)amora_${provider}_state=([^;]+)`));
+    return cookieMatch ? decodeURIComponent(cookieMatch[1]) : '';
+  }
+
+  function consumeOAuthState(provider, req, stateToken) {
+    const cookieState = readOAuthStateCookie(req, provider);
+    const state = jwt.verify(String(stateToken || ''), process.env.JWT_SECRET);
+    const cookie = jwt.verify(String(cookieState || ''), process.env.JWT_SECRET);
+    if (
+      state.purpose !== `${provider}_oauth_state` ||
+      cookie.purpose !== `${provider}_oauth_state` ||
+      state.state !== cookie.state ||
+      state.nonce !== cookie.nonce ||
+      state.platform !== cookie.platform
+    ) throw new Error(`Invalid ${provider} OAuth state`);
+    return state;
+  }
+
+  async function createOAuthHandoff({ provider, userId, providerAccountId, email, displayName, refreshTokenEncrypted }) {
+    const rawCode = crypto.randomBytes(40).toString('base64url');
+    const codeHash = crypto.createHash('sha256').update(rawCode).digest('hex');
+    await prisma.oAuthHandoff.create({
+      data: {
+        code_hash: codeHash,
+        provider,
+        user_id: userId || null,
+        provider_account_id: providerAccountId || null,
+        email: email || null,
+        display_name: displayName || null,
+        refresh_token_encrypted: refreshTokenEncrypted || null,
+        expires_at: new Date(Date.now() + 5 * 60 * 1000)
+      }
+    });
+    return rawCode;
+  }
+
+  async function findOrPrepareSocialUser({ provider, providerAccountId, email, displayName, req }) {
+    const existingIdentity = await prisma.oAuthAccount.findUnique({
+      where: { provider_provider_account_id: { provider, provider_account_id: providerAccountId } },
+      include: { user: true }
+    });
+    if (existingIdentity?.user) {
+      if (!existingIdentity.user.is_active) throw new Error('account_suspended');
+      return { userId: existingIdentity.user.id };
+    }
+
+    // Only auto-link when the provider itself returned a verified email.
+    // This prevents an untrusted provider identifier from silently taking
+    // over an existing password account.
+    if (email) {
+      const existingEmail = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+      if (existingEmail) {
+        await prisma.oAuthAccount.create({
+          data: {
+            user_id: existingEmail.id,
+            provider,
+            provider_account_id: providerAccountId,
+            email: email.toLowerCase()
+          }
+        });
+        return { userId: existingEmail.id };
+      }
+    }
+
+    return {
+      userId: null,
+      provider,
+      providerAccountId,
+      email: email ? email.toLowerCase() : null,
+      displayName: displayName || null
+    };
+  }
   const registerSchema = z.object({
     email: z.string().email(),
     username: z.string().min(3).max(20).regex(/^[a-zA-Z0-9_.-]+$/),
@@ -45,6 +252,86 @@ module.exports = (prisma) => {
       html: `<p>Welcome to AmoraLive.</p><p><a href="${verifyUrl}">Verify your email address</a></p><p>This link expires in 24 hours.</p>`
     });
     return true;
+  }
+
+  async function sendAccountDeletionEmail(user) {
+    if (!mailer) return false;
+    const token = jwt.sign(
+      { id: user.id, purpose: 'account_deletion' },
+      process.env.JWT_SECRET,
+      { expiresIn: '30m' }
+    );
+    const deleteUrl = `${appUrl()}/auth/delete-account?token=${encodeURIComponent(token)}`;
+    await mailer.sendMail({
+      from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
+      to: user.email,
+      subject: 'Confirm deletion of your AmoraLive account',
+      text: `Confirm account deletion: ${deleteUrl}`,
+      html: `<p>We received a request to delete your AmoraLive account.</p><p><a href="${deleteUrl}">Confirm permanent account deletion</a></p><p>This confirmation link expires in 30 minutes. If you did not request this, ignore this message.</p>`
+    });
+    return true;
+  }
+
+  async function anonymizeDeletedAccount(userId) {
+    const suffix = crypto.randomBytes(8).toString('hex');
+    const appleIdentity = await prisma.oAuthAccount.findFirst({
+      where: { user_id: userId, provider: 'apple' },
+      select: { refresh_token_encrypted: true }
+    });
+    if (appleIdentity?.refresh_token_encrypted) {
+      try {
+        await revokeAppleRefreshToken(decryptOAuthToken(appleIdentity.refresh_token_encrypted), appleNativeClientId());
+      } catch (e) {
+        console.warn('Apple token revocation during deletion failed:', e.message);
+      }
+    }
+    await prisma.$transaction(async tx => {
+      await tx.storyReaction.deleteMany({ where: { OR: [{ user_id: userId }, { story: { user_id: userId } }] } });
+      await tx.storyView.deleteMany({ where: { OR: [{ viewer_id: userId }, { story: { user_id: userId } }] } });
+      await tx.story.deleteMany({ where: { user_id: userId } });
+      await tx.message.deleteMany({ where: { OR: [{ sender_id: userId }, { receiver_id: userId }] } });
+      await tx.callHistory.deleteMany({ where: { OR: [{ caller_id: userId }, { receiver_id: userId }] } });
+      await tx.videoMatchSession.deleteMany({ where: { OR: [{ user_a_id: userId }, { user_b_id: userId }] } });
+      await tx.follow.deleteMany({ where: { OR: [{ follower_id: userId }, { following_id: userId }] } });
+      await tx.match.deleteMany({ where: { OR: [{ user1_id: userId }, { user2_id: userId }] } });
+      await tx.swipe.deleteMany({ where: { OR: [{ swiper_id: userId }, { target_id: userId }] } });
+      await tx.block.deleteMany({ where: { OR: [{ blocker_id: userId }, { blocked_id: userId }] } });
+      await tx.mute.deleteMany({ where: { OR: [{ muter_id: userId }, { muted_id: userId }] } });
+      await tx.roomParticipant.deleteMany({ where: { user_id: userId } });
+      await tx.liveChatMessage.deleteMany({ where: { user_id: userId } });
+      await tx.notification.deleteMany({ where: { user_id: userId } });
+      await tx.dailyRewardStatus.deleteMany({ where: { user_id: userId } });
+      await tx.dailyRewardClaim.deleteMany({ where: { user_id: userId } });
+      await tx.xpTransaction.deleteMany({ where: { user_id: userId } });
+      await tx.missionProgress.deleteMany({ where: { user_id: userId } });
+      await tx.userCosmetic.deleteMany({ where: { user_id: userId } });
+      await tx.eventScore.deleteMany({ where: { user_id: userId } });
+      await tx.session.deleteMany({ where: { user_id: userId } });
+      await tx.oAuthAccount.deleteMany({ where: { user_id: userId } });
+      await tx.user.update({
+        where: { id: userId },
+        data: {
+          email: `deleted-${suffix}@deleted.amoramatch.invalid`,
+          username: `deleted_${suffix}`,
+          display_name: 'Deleted User',
+          password_hash: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12),
+          bio: null,
+          location: null,
+          interests: [],
+          languages: [],
+          relationship_intent: null,
+          gender: null,
+          profile_photo: null,
+          cover_photo: null,
+          online_status: 'offline',
+          privacy_settings: null,
+          dating_preferences: null,
+          notification_preferences: null,
+          is_active: false,
+          deleted_at: new Date()
+        }
+      });
+    });
   }
 
   function sessionResponse(user) {
@@ -112,6 +399,39 @@ module.exports = (prisma) => {
       res.json({ success: true });
     } catch (e) {
       res.status(500).json({ error: 'Unable to send verification email' });
+    }
+  });
+
+
+  router.post('/request-account-deletion', async (req, res) => {
+    const email = String(req.body.email || '').trim().toLowerCase();
+    if (!email) return res.status(400).json({ error: 'Email address is required.' });
+
+    // Do not reveal whether an account exists.
+    const generic = { success: true, message: 'If an Amora account exists for that email, a deletion confirmation link has been sent.' };
+    try {
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (user && user.is_active) {
+        const sent = await sendAccountDeletionEmail(user);
+        if (!sent) return res.status(503).json({ error: 'Account deletion email is temporarily unavailable. Please use in-app deletion from Settings.' });
+      }
+      return res.json(generic);
+    } catch (e) {
+      console.error('Account deletion request error:', e);
+      return res.status(500).json({ error: 'Unable to process the deletion request.' });
+    }
+  });
+
+  router.get('/delete-account', async (req, res) => {
+    try {
+      const decoded = jwt.verify(String(req.query.token || ''), process.env.JWT_SECRET);
+      if (decoded.purpose !== 'account_deletion') throw new Error('Invalid token');
+      const user = await prisma.user.findUnique({ where: { id: decoded.id } });
+      if (!user || !user.is_active) return res.status(200).send('Your Amora account has already been deleted or is no longer active.');
+      await anonymizeDeletedAccount(user.id);
+      res.status(200).send('Your Amora account deletion request has been completed.');
+    } catch (e) {
+      res.status(400).send('This account deletion link is invalid or expired.');
     }
   });
 
@@ -201,13 +521,7 @@ module.exports = (prisma) => {
     const platform = req.query.platform === 'mobile' ? 'mobile' : 'web';
     const state = crypto.randomBytes(32).toString('hex');
     const stateToken = jwt.sign({ purpose: 'google_oauth_state', state, platform }, process.env.JWT_SECRET, { expiresIn: '10m' });
-    res.cookie('amora_google_state', stateToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      maxAge: 10 * 60 * 1000,
-      path: '/auth/google'
-    });
+    setOAuthStateCookie(res, 'google', stateToken);
     const params = new URLSearchParams({
       client_id: process.env.GOOGLE_CLIENT_ID,
       redirect_uri: googleRedirectUri(),
@@ -224,44 +538,47 @@ module.exports = (prisma) => {
     try {
       if (!req.query.code || !process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) throw new Error('Google authentication is not configured');
       const stateToken = String(req.query.state || '');
-      const cookieHeader = String(req.headers.cookie || '');
-      const cookieMatch = cookieHeader.match(/(?:^|;\s*)amora_google_state=([^;]+)/);
-      const cookieState = cookieMatch ? decodeURIComponent(cookieMatch[1]) : '';
-      const state = jwt.verify(stateToken, process.env.JWT_SECRET);
-      const cookieStateDecoded = jwt.verify(cookieState, process.env.JWT_SECRET);
-      if (state.purpose !== 'google_oauth_state' || cookieStateDecoded.purpose !== 'google_oauth_state' || state.state !== cookieStateDecoded.state) {
-        throw new Error('Invalid Google OAuth state');
-      }
+      const state = consumeOAuthState('google', req, stateToken);
       res.setHeader('Set-Cookie', 'amora_google_state=; Max-Age=0; Path=/auth/google; Secure; HttpOnly; SameSite=Lax');
       const isMobile = state.platform === 'mobile';
       const failureRedirect = isMobile ? 'amora://auth-callback?error=google_auth_failed' : `${appUrl()}/login?error=google_auth_failed`;
 
-      const tokenRes = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ code: String(req.query.code), client_id: process.env.GOOGLE_CLIENT_ID, client_secret: process.env.GOOGLE_CLIENT_SECRET, redirect_uri: googleRedirectUri(), grant_type: 'authorization_code' }) });
+      const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          code: String(req.query.code),
+          client_id: process.env.GOOGLE_CLIENT_ID,
+          client_secret: process.env.GOOGLE_CLIENT_SECRET,
+          redirect_uri: googleRedirectUri(),
+          grant_type: 'authorization_code'
+        })
+      });
       const tokens = await tokenRes.json();
       if (!tokenRes.ok) throw new Error(tokens.error_description || 'Google token exchange failed');
-      const profileRes = await fetch('https://openidconnect.googleapis.com/v1/userinfo', { headers: { Authorization: `Bearer ${tokens.access_token}` } });
+
+      const profileRes = await fetch('https://openidconnect.googleapis.com/v1/userinfo', {
+        headers: { Authorization: `Bearer ${tokens.access_token}` }
+      });
       const profile = await profileRes.json();
-      if (!profile.email || !profile.email_verified) throw new Error('Google email is not verified');
+      if (!profile.email || !profile.email_verified || !profile.sub) throw new Error('Google email is not verified');
 
-      const existing = await prisma.user.findUnique({ where: { email: profile.email.toLowerCase() } });
-      if (existing) {
-        if (!existing.is_active) {
-          return res.redirect(isMobile ? 'amora://auth-callback?error=account_suspended' : `${appUrl()}/login?error=account_suspended`);
-        }
-        const session = await createSession(existing, req);
-        const params = new URLSearchParams({ accessToken: session.accessToken, refreshToken: session.refreshToken, userId: existing.id, role: existing.role });
-        return res.redirect(isMobile ? `amora://auth-callback?${params}` : `${appUrl()}/auth/google-complete?${params}`);
-      }
+      const prepared = await findOrPrepareSocialUser({
+        provider: 'google',
+        providerAccountId: String(profile.sub),
+        email: profile.email.toLowerCase(),
+        displayName: profile.name || profile.email.split('@')[0],
+        req
+      });
 
-      const completion = jwt.sign({ purpose: 'google_signup', email: profile.email.toLowerCase(), name: profile.name || profile.email.split('@')[0] }, process.env.JWT_SECRET, { expiresIn: '10m' });
-      if (isMobile) {
-        return res.redirect(`amora://auth-callback?google=${encodeURIComponent(completion)}`);
-      }
-      res.redirect(`${appUrl()}/register?google=${encodeURIComponent(completion)}`);
+      const handoffCode = await createOAuthHandoff(prepared);
+      return res.redirect(
+        isMobile
+          ? `amora://auth-callback?provider=google&code=${encodeURIComponent(handoffCode)}`
+          : `${appUrl()}/auth/social-complete?provider=google&code=${encodeURIComponent(handoffCode)}`
+      );
     } catch (e) {
       console.error('Google OAuth error:', e);
-      // We don't know the platform if state verification itself failed, so
-      // fall back to the web login page rather than guessing a deep link.
       res.redirect(`${appUrl()}/login?error=google_auth_failed`);
     }
   });
@@ -280,6 +597,319 @@ module.exports = (prisma) => {
       res.status(201).json(await createSession(user, req));
     } catch (e) {
       res.status(400).json({ error: 'Unable to complete Google registration. Username may already be taken.' });
+    }
+  });
+
+
+  // ---------- Apple Sign in (native iOS) ----------
+  router.post('/apple/native', async (req, res) => {
+    try {
+      if (!process.env.JWT_SECRET) return res.status(503).json({ error: 'Apple authentication is not configured.' });
+      const identityToken = String(req.body.identityToken || '');
+      const nonce = req.body.nonce ? String(req.body.nonce) : '';
+      const authorizationCode = req.body.authorizationCode ? String(req.body.authorizationCode) : '';
+      if (!identityToken) return res.status(400).json({ error: 'Apple identity token is required.' });
+
+      const claims = await verifyAppleIdentityToken(identityToken, nonce, appleNativeClientId());
+      const providerAccountId = String(claims.sub);
+      const email = claims.email ? String(claims.email).toLowerCase() : null;
+      const displayName = String(req.body.displayName || '').trim() || null;
+      let refreshTokenEncrypted = null;
+      if (authorizationCode) {
+        try {
+          const tokenData = await exchangeAppleAuthorizationCode(authorizationCode, appleNativeClientId());
+          refreshTokenEncrypted = encryptOAuthToken(tokenData.refresh_token);
+        } catch (exchangeError) {
+          console.warn('Apple authorization-code exchange failed:', exchangeError.message);
+        }
+      }
+
+      const prepared = await findOrPrepareSocialUser({
+        provider: 'apple',
+        providerAccountId,
+        email,
+        displayName,
+        req
+      });
+
+      if (prepared.userId) {
+        if (refreshTokenEncrypted) {
+          await prisma.oAuthAccount.updateMany({
+            where: { user_id: prepared.userId, provider: 'apple', provider_account_id: providerAccountId },
+            data: { refresh_token_encrypted: refreshTokenEncrypted, email }
+          });
+        }
+        const user = await prisma.user.findUnique({ where: { id: prepared.userId } });
+        if (!user?.is_active) return res.status(403).json({ error: 'Account suspended.' });
+        const session = await createSession(user, req);
+        await logSecurityEvent(prisma, {
+          userId: user.id,
+          action: 'social_login_success',
+          targetType: 'user',
+          targetId: user.id,
+          details: { provider: 'apple', requestId: req.requestId, hasAuthorizationCode: Boolean(authorizationCode) },
+          ip: req.clientIp
+        });
+        return res.json(session);
+      }
+
+      const handoffCode = await createOAuthHandoff({ ...prepared, refreshTokenEncrypted });
+      res.json({
+        needsProfile: true,
+        provider: 'apple',
+        handoffCode
+      });
+    } catch (e) {
+      console.error('Apple native authentication error:', e);
+      if (e.message === 'account_suspended') return res.status(403).json({ error: 'Account suspended.' });
+      res.status(401).json({ error: 'Apple sign-in could not be verified.' });
+    }
+  });
+
+  // ---------- Apple Sign in (web + Android browser flow) ----------
+  router.get('/apple/start', (req, res) => {
+    try {
+      const clientId = appleWebClientId();
+      if (!clientId || !process.env.APPLE_TEAM_ID || !process.env.APPLE_KEY_ID || !process.env.APPLE_PRIVATE_KEY) {
+        return res.status(503).send('Apple web authentication is not configured');
+      }
+      const platform = req.query.platform === 'mobile' ? 'mobile' : 'web';
+      const stateToken = createOAuthState('apple', platform);
+      setOAuthStateCookie(res, 'apple', stateToken, 'None');
+      const params = new URLSearchParams({
+        client_id: clientId,
+        redirect_uri: appleRedirectUri(),
+        response_type: 'code id_token',
+        response_mode: 'form_post',
+        scope: 'name email',
+        state: stateToken,
+        nonce: jwt.decode(stateToken).nonce
+      });
+      res.redirect(`https://appleid.apple.com/auth/authorize?${params}`);
+    } catch (e) {
+      console.error('Apple web start error:', e);
+      res.status(503).send('Apple authentication is not configured');
+    }
+  });
+
+  router.post('/apple/callback', async (req, res) => {
+    const fallback = `${appUrl()}/login?error=apple_auth_failed`;
+    try {
+      const state = consumeOAuthState('apple', req, req.body.state);
+      const isMobile = state.platform === 'mobile';
+      const failureRedirect = isMobile ? 'amora://auth-callback?error=apple_auth_failed' : fallback;
+      if (!req.body.code) throw new Error('Missing Apple authorization code');
+
+      const clientId = appleWebClientId();
+      const clientSecret = createAppleClientSecret(clientId);
+      const tokenRes = await fetch('https://appleid.apple.com/auth/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          code: String(req.body.code),
+          grant_type: 'authorization_code',
+          redirect_uri: appleRedirectUri()
+        })
+      });
+      const tokenData = await tokenRes.json();
+      if (!tokenRes.ok || !tokenData.id_token) throw new Error(tokenData.error_description || 'Apple token exchange failed');
+
+      const claims = await verifyAppleIdentityToken(tokenData.id_token, state.nonce, clientId);
+      const providerAccountId = String(claims.sub);
+      const email = claims.email ? String(claims.email).toLowerCase() : null;
+      if (!email) throw new Error('Apple did not return an email address');
+
+      const prepared = await findOrPrepareSocialUser({
+        provider: 'apple',
+        providerAccountId,
+        email,
+        displayName: String(req.body.user ? (() => {
+          try {
+            const u = JSON.parse(String(req.body.user));
+            return [u.name?.firstName, u.name?.lastName].filter(Boolean).join(' ');
+          } catch { return ''; }
+        })() : '').trim() || null,
+        req
+      });
+
+      res.setHeader('Set-Cookie', `amora_apple_state=; Max-Age=0; Path=/auth/apple; Secure; HttpOnly; SameSite=None`);
+
+      const refreshTokenEncrypted = encryptOAuthToken(tokenData.refresh_token);
+      const handoffCode = await createOAuthHandoff({ ...prepared, refreshTokenEncrypted });
+      return res.redirect(isMobile
+        ? `amora://auth-callback?provider=apple&code=${encodeURIComponent(handoffCode)}`
+        : `${appUrl()}/auth/social-complete?provider=apple&code=${encodeURIComponent(handoffCode)}`
+      );
+    } catch (e) {
+      console.error('Apple web callback error:', e);
+      res.redirect(fallback);
+    }
+  });
+
+  // ---------- Facebook Login (web + mobile browser flow) ----------
+  router.get('/facebook/start', (req, res) => {
+    if (!process.env.FACEBOOK_APP_ID) return res.status(503).send('Facebook authentication is not configured');
+    const platform = req.query.platform === 'mobile' ? 'mobile' : 'web';
+    const stateToken = createOAuthState('facebook', platform);
+    setOAuthStateCookie(res, 'facebook', stateToken);
+    const params = new URLSearchParams({
+      client_id: process.env.FACEBOOK_APP_ID,
+      redirect_uri: facebookRedirectUri(),
+      response_type: 'code',
+      scope: 'email,public_profile',
+      state: stateToken
+    });
+    res.redirect(`https://www.facebook.com/${facebookGraphVersion()}/dialog/oauth?${params}`);
+  });
+
+  router.get('/facebook/callback', async (req, res) => {
+    const fallback = `${appUrl()}/login?error=facebook_auth_failed`;
+    try {
+      const state = consumeOAuthState('facebook', req, req.query.state);
+      const isMobile = state.platform === 'mobile';
+      const failureRedirect = isMobile ? 'amora://auth-callback?error=facebook_auth_failed' : fallback;
+      if (!req.query.code) throw new Error('Missing Facebook authorization code');
+
+      const version = facebookGraphVersion();
+      const tokenUrl = `https://graph.facebook.com/${version}/oauth/access_token`;
+      const tokenParams = new URLSearchParams({
+        client_id: process.env.FACEBOOK_APP_ID,
+        client_secret: process.env.FACEBOOK_APP_SECRET || '',
+        redirect_uri: facebookRedirectUri(),
+        code: String(req.query.code)
+      });
+      const tokenRes = await fetch(`${tokenUrl}?${tokenParams}`);
+      const tokenData = await tokenRes.json();
+      if (!tokenRes.ok || !tokenData.access_token) throw new Error(tokenData.error?.message || 'Facebook token exchange failed');
+
+      const profileUrl = `https://graph.facebook.com/${version}/me?fields=id,name,email`;
+      const profileRes = await fetch(profileUrl, { headers: { Authorization: `Bearer ${tokenData.access_token}` } });
+      const profile = await profileRes.json();
+      if (!profileRes.ok || !profile.id || !profile.email) throw new Error('Facebook did not return a usable verified email address');
+
+      const prepared = await findOrPrepareSocialUser({
+        provider: 'facebook',
+        providerAccountId: String(profile.id),
+        email: String(profile.email).toLowerCase(),
+        displayName: String(profile.name || '').trim() || null,
+        req
+      });
+
+      res.setHeader('Set-Cookie', `amora_facebook_state=; Max-Age=0; Path=/auth/facebook; Secure; HttpOnly; SameSite=Lax`);
+      const handoffCode = await createOAuthHandoff(prepared);
+      return res.redirect(isMobile
+        ? `amora://auth-callback?provider=facebook&code=${encodeURIComponent(handoffCode)}`
+        : `${appUrl()}/auth/social-complete?provider=facebook&code=${encodeURIComponent(handoffCode)}`
+      );
+    } catch (e) {
+      console.error('Facebook OAuth error:', e);
+      res.redirect(fallback);
+    }
+  });
+
+  // One-time browser/native handoff exchange. No access or refresh token is
+  // placed in the callback URL.
+  router.post('/social/exchange', async (req, res) => {
+    try {
+      const rawCode = String(req.body.code || '');
+      if (!rawCode) return res.status(400).json({ error: 'Missing social handoff code.' });
+      const codeHash = crypto.createHash('sha256').update(rawCode).digest('hex');
+      const handoff = await prisma.oAuthHandoff.findUnique({ where: { code_hash: codeHash } });
+      if (!handoff || handoff.consumed_at || handoff.expires_at < new Date()) {
+        return res.status(401).json({ error: 'This sign-in session has expired. Please try again.' });
+      }
+
+      if (handoff.user_id) {
+        const claimed = await prisma.oAuthHandoff.updateMany({
+          where: { id: handoff.id, consumed_at: null },
+          data: { consumed_at: new Date() }
+        });
+        if (claimed.count !== 1) return res.status(401).json({ error: 'This sign-in session has already been used.' });
+        const user = await prisma.user.findUnique({ where: { id: handoff.user_id } });
+        if (!user?.is_active) return res.status(403).json({ error: 'Account suspended.' });
+        if (handoff.provider === 'apple' && handoff.provider_account_id && handoff.refresh_token_encrypted) {
+          await prisma.oAuthAccount.upsert({
+            where: { provider_provider_account_id: { provider: 'apple', provider_account_id: handoff.provider_account_id } },
+            update: { refresh_token_encrypted: handoff.refresh_token_encrypted, email: handoff.email },
+            create: {
+              user_id: user.id,
+              provider: 'apple',
+              provider_account_id: handoff.provider_account_id,
+              email: handoff.email,
+              refresh_token_encrypted: handoff.refresh_token_encrypted
+            }
+          });
+        }
+        return res.json(await createSession(user, req));
+      }
+
+      const completionToken = jwt.sign(
+        { purpose: 'social_signup', handoffId: handoff.id, provider: handoff.provider },
+        process.env.JWT_SECRET,
+        { expiresIn: '10m' }
+      );
+      res.json({
+        needsProfile: true,
+        provider: handoff.provider,
+        completionToken
+      });
+    } catch (e) {
+      console.error('Social handoff exchange error:', e);
+      res.status(401).json({ error: 'Unable to complete social sign-in.' });
+    }
+  });
+
+  router.post('/social/complete', async (req, res) => {
+    try {
+      const decoded = jwt.verify(String(req.body.completionToken || ''), process.env.JWT_SECRET);
+      if (decoded.purpose !== 'social_signup') throw new Error('Invalid token');
+      const username = String(req.body.username || '').trim();
+      const dateOfBirth = new Date(req.body.dateOfBirth);
+      if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(username)) return res.status(400).json({ error: 'Invalid username' });
+      if (Number.isNaN(dateOfBirth.getTime()) || calculateAge(dateOfBirth) < 18) return res.status(403).json({ error: 'You must be 18 or older.' });
+
+      const handoff = await prisma.oAuthHandoff.findUnique({ where: { id: decoded.handoffId } });
+      if (!handoff || handoff.consumed_at || handoff.expires_at < new Date()) return res.status(401).json({ error: 'This registration session has expired.' });
+      if (!handoff.email) return res.status(400).json({ error: 'A verified email is required to create an Amora account.' });
+
+      const user = await prisma.$transaction(async tx => {
+        const claimed = await tx.oAuthHandoff.updateMany({
+          where: { id: handoff.id, consumed_at: null },
+          data: { consumed_at: new Date() }
+        });
+        if (claimed.count !== 1) throw new Error('Social registration session already used');
+
+        const created = await tx.user.create({
+          data: {
+            email: handoff.email,
+            username,
+            password_hash: await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12),
+            date_of_birth: dateOfBirth,
+            display_name: handoff.display_name || username,
+            age_verified: true,
+            is_verified: true
+          }
+        });
+        await tx.wallet.create({ data: { user_id: created.id, balance: 0 } });
+        await tx.oAuthAccount.create({
+          data: {
+            user_id: created.id,
+            provider: handoff.provider,
+            provider_account_id: handoff.provider_account_id,
+            email: handoff.email,
+            refresh_token_encrypted: handoff.refresh_token_encrypted
+          }
+        });
+        await tx.oAuthHandoff.update({ where: { id: handoff.id }, data: { user_id: created.id } });
+        return created;
+      });
+
+      res.status(201).json(await createSession(user, req));
+    } catch (e) {
+      console.error('Social registration error:', e);
+      res.status(400).json({ error: 'Unable to complete social registration. Username or email may already be in use.' });
     }
   });
 
