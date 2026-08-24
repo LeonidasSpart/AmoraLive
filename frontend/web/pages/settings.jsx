@@ -86,8 +86,8 @@ export default function Settings() {
       setError('Passwords do not match');
       return;
     }
-    if (newPassword.length < 8) {
-      setError('New password must be at least 8 characters');
+    if (newPassword.length < 10) {
+      setError('New password must be at least 10 characters');
       return;
     }
     setPasswordLoading(true);
@@ -100,10 +100,12 @@ export default function Settings() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to change password');
-      setSuccess('Password updated successfully');
+      clearSession();
+      setSuccess('Password updated successfully. Please sign in again.');
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
+      setTimeout(() => router.push('/login?passwordChanged=1'), 500);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -306,7 +308,7 @@ export default function Settings() {
           React.createElement('input', {
             key: 'new',
             type: 'password',
-            placeholder: 'New password (min 8 chars)',
+            placeholder: 'New password (min 10 chars)',
             value: newPassword,
             onChange: (e) => setNewPassword(e.target.value),
             required: true,

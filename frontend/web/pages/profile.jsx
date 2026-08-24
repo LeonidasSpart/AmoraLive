@@ -288,6 +288,9 @@ export default function Profile() {
                 <button className="secondary" onClick={() => router.push('/settings')}>
                   Settings
                 </button>
+                <button className="secondary" onClick={() => router.push('/safety')}>
+                  🛡️ Security
+                </button>
               </div>
             </div>
 

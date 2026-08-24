@@ -15,6 +15,7 @@ export default function SafetyCenter() {
   const [muted, setMuted] = useState([]);
   const [reports, setReports] = useState([]);
   const [sessions, setSessions] = useState([]);
+  const [security, setSecurity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -26,16 +27,18 @@ export default function SafetyCenter() {
     }
     setLoading(true);
     try {
-      const [blockedRes, mutedRes, reportsRes, sessionsRes] = await Promise.all([
+      const [blockedRes, mutedRes, reportsRes, sessionsRes, securityRes] = await Promise.all([
         apiFetch('/users/me/blocks'),
         apiFetch('/safety/muted'),
         apiFetch('/safety/my-reports'),
-        apiFetch('/safety/sessions')
+        apiFetch('/safety/sessions'),
+        apiFetch('/safety/security/overview')
       ]);
       if (blockedRes.ok) setBlocked((await blockedRes.json()).blocks || []);
       if (mutedRes.ok) setMuted(await mutedRes.json());
       if (reportsRes.ok) setReports(await reportsRes.json());
       if (sessionsRes.ok) setSessions(await sessionsRes.json());
+      if (securityRes.ok) setSecurity(await securityRes.json());
     } catch (e) {
       setError('Unable to load Safety Center.');
     } finally {
@@ -103,6 +106,17 @@ export default function SafetyCenter() {
     <Layout>
       <div style={s.wrap}>
         <h1 style={s.title}>🛡️ Safety Center</h1>
+        {security && (
+          <div style={s.securityCard}>
+            <div style={s.securityOrb}><strong>{security.score}</strong><span>/100</span></div>
+            <div style={{ flex: 1 }}>
+              <div style={s.securityKicker}>AMORA SECURITY</div>
+              <h2 style={s.securityTitle}>{security.score >= 90 ? 'Excellent protection' : security.score >= 75 ? 'Strong protection' : 'Protection needs attention'}</h2>
+              <p style={s.securityText}>{security.recommendations?.[0]}</p>
+              <div style={s.securityChips}><span>{security.emailVerified ? '✓ Email' : 'Review email'}</span><span>{security.activeSessions} device{security.activeSessions === 1 ? '' : 's'}</span><span>{security.privacyConfigured ? '✓ Privacy' : 'Review privacy'}</span></div>
+            </div>
+          </div>
+        )}
         {message && <div style={s.success}>{message}</div>}
         {error && <div style={s.error}>{error}</div>}
 
@@ -185,6 +199,15 @@ export default function SafetyCenter() {
 const s = {
   wrap: { maxWidth: 640, margin: '0 auto', padding: '24px 16px', color: '#fff' },
   title: { fontSize: 24, marginBottom: 16 },
+  securityCard: { display: 'flex', gap: 16, alignItems: 'center', padding: 18, marginBottom: 18, borderRadius: 22, border: '1px solid rgba(255,216,107,.2)', background: 'radial-gradient(circle at 85% 0%, rgba(155,53,255,.2), transparent 38%), linear-gradient(145deg,#171126,#0b0712)', boxShadow: '0 20px 60px rgba(0,0,0,.3)' },
+  securityOrb: { width: 76, height: 76, borderRadius: 38, border: '2px solid #ffd86b', background: 'rgba(255,216,107,.06)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: '0 0 auto' },
+  securityOrbStrong: { fontSize: 26 },
+  'securityOrb span': { color: '#9f96aa', fontSize: 9 },
+  securityKicker: { color: '#ffd86b', fontSize: 8, fontWeight: 900, letterSpacing: 2 },
+  securityTitle: { margin: '4px 0', color: '#fff', fontSize: 17 },
+  securityText: { margin: 0, color: '#aaa1b5', fontSize: 11, lineHeight: 1.5 },
+  securityChips: { display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 9 },
+  'securityChips span': { padding: '4px 7px', borderRadius: 999, background: 'rgba(255,255,255,.05)', color: '#cfc7d8', fontSize: 9 },
   success: { color: '#8f8', background: 'rgba(20,90,20,0.3)', padding: 10, borderRadius: 8, marginBottom: 16, fontSize: 14 },
   error: { color: '#ff6b6b', background: 'rgba(90,20,20,0.3)', padding: 10, borderRadius: 8, marginBottom: 16, fontSize: 14 },
   linkRow: { display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap' },

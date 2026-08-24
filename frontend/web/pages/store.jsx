@@ -102,7 +102,11 @@ export default function Store() {
     <Layout>
       <div style={s.page}>
         <div style={s.header}>
-          <h1 style={s.title}>Boutique</h1>
+          <div>
+            <div style={s.kicker}>AMORA • LUXURY VAULT</div>
+            <h1 style={s.title}>The Amora Boutique</h1>
+            <p style={s.subtitle}>Collect luminous profile effects, royal identities and premium cosmetics.</p>
+          </div>
           <div style={s.balance}>🪙 {balance}</div>
         </div>
 
@@ -193,7 +197,9 @@ export default function Store() {
 const s = {
   page: { maxWidth: 960, margin: '0 auto', padding: '24px 16px', fontFamily: 'sans-serif' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 },
-  title: { color: '#fff', fontSize: 28, margin: 0 },
+  kicker: { color: '#ffd86b', fontSize: 8, fontWeight: 900, letterSpacing: 2.5, marginBottom: 5 },
+  title: { color: '#fff', fontSize: 30, margin: 0 },
+  subtitle: { color: '#92889e', fontSize: 12, margin: '6px 0 0', maxWidth: 540 },
   balance: { color: '#ffd45c', fontWeight: 'bold', background: '#1a1a2e', padding: '8px 16px', borderRadius: 20 },
   tabs: { display: 'flex', gap: 8, marginBottom: 20 },
   tab: { background: 'transparent', border: '1px solid #333', color: '#aaa', padding: '8px 18px', borderRadius: 20, cursor: 'pointer' },
@@ -203,8 +209,8 @@ const s = {
   centerMsg: { color: '#888', textAlign: 'center', padding: '60px 0' },
   sectionTitle: { color: '#fff', fontSize: 18, marginBottom: 12 },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16 },
-  card: { background: '#161625', border: '1px solid #2a2a3e', borderRadius: 16, padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 },
-  imageWrap: { width: '100%', aspectRatio: '1 / 1', background: '#0f0f1a', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  card: { position: 'relative', overflow: 'hidden', background: 'radial-gradient(circle at 50% 0%, rgba(255,63,157,.12), transparent 42%), linear-gradient(145deg,#181126,#0d0915)', border: '1px solid rgba(255,255,255,.09)', borderRadius: 22, padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, boxShadow: '0 18px 45px rgba(0,0,0,.28), inset 0 1px rgba(255,255,255,.06)', transition: 'transform .25s ease, box-shadow .25s ease' },
+  imageWrap: { width: '100%', aspectRatio: '1 / 1', background: 'radial-gradient(circle, rgba(139,77,255,.18), rgba(7,5,17,.35) 65%)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', transform: 'perspective(700px) rotateX(2deg)', boxShadow: 'inset 0 1px rgba(255,255,255,.08), 0 12px 30px rgba(0,0,0,.2)' },
   image: { width: '100%', height: '100%', objectFit: 'cover' },
   cardName: { color: '#fff', fontWeight: 'bold', textAlign: 'center' },
   cardMeta: { color: '#888', fontSize: 12 },
