@@ -13,11 +13,25 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
+  const [facebookLoading, setFacebookLoading] = useState(false);
 
   const googleLogin = () => {
     setError('');
     setGoogleLoading(true);
     window.location.assign(`${API}/auth/google/start`);
+  };
+
+  const appleLogin = () => {
+    setError('');
+    setAppleLoading(true);
+    window.location.assign(`${API}/auth/apple/start`);
+  };
+
+  const facebookLogin = () => {
+    setError('');
+    setFacebookLoading(true);
+    window.location.assign(`${API}/auth/facebook/start`);
   };
 
   const handleSubmit = async (e) => {
@@ -58,9 +72,13 @@ export default function Login() {
         <div className="amora-error" role="alert">
           {router.query.error === 'google_auth_failed'
             ? 'Google sign-in could not be completed. Please try again.'
-            : router.query.error === 'account_suspended'
-              ? 'This account is currently suspended.'
-              : error}
+            : router.query.error === 'apple_auth_failed'
+              ? 'Apple sign-in could not be completed. Please try again.'
+              : router.query.error === 'facebook_auth_failed'
+                ? 'Facebook sign-in could not be completed. Please try again.'
+                : router.query.error === 'account_suspended'
+                  ? 'This account is currently suspended.'
+                  : error}
         </div>
       )}
 
@@ -86,6 +104,17 @@ export default function Login() {
       </form>
 
       <div className="amora-divider"><span>OR</span></div>
+
+      <div className="amora-social-stack">
+        <button className="amora-social amora-apple" type="button" onClick={appleLogin} disabled={appleLoading}>
+          <span className="amora-social-symbol" aria-hidden="true"></span>
+          {appleLoading ? 'Connecting to Apple…' : 'Continue with Apple'}
+        </button>
+        <button className="amora-social amora-facebook" type="button" onClick={facebookLogin} disabled={facebookLoading}>
+          <span className="amora-social-symbol" aria-hidden="true">f</span>
+          {facebookLoading ? 'Connecting to Facebook…' : 'Continue with Facebook'}
+        </button>
+      </div>
 
       <button className="amora-google" type="button" onClick={googleLogin} disabled={googleLoading}>
         <span className="amora-google-icon" aria-hidden="true">

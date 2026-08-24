@@ -16,6 +16,8 @@ export default function Register() {
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
+  const [facebookLoading, setFacebookLoading] = useState(false);
   const [googleToken, setGoogleToken] = useState('');
 
   const googleMode = Boolean(googleToken);
@@ -29,6 +31,18 @@ export default function Register() {
     setError('');
     setGoogleLoading(true);
     window.location.assign(`${API}/auth/google/start`);
+  };
+
+  const startApple = () => {
+    setError('');
+    setAppleLoading(true);
+    window.location.assign(`${API}/auth/apple/start`);
+  };
+
+  const startFacebook = () => {
+    setError('');
+    setFacebookLoading(true);
+    window.location.assign(`${API}/auth/facebook/start`);
   };
 
   const handleSubmit = async (e) => {
@@ -99,6 +113,17 @@ export default function Register() {
 
       {!googleMode && (
         <>
+          <div className="amora-social-stack">
+            <button className="amora-social amora-apple" type="button" onClick={startApple} disabled={appleLoading}>
+              <span className="amora-social-symbol" aria-hidden="true"></span>
+              {appleLoading ? 'Connecting to Apple…' : 'Continue with Apple'}
+            </button>
+            <button className="amora-social amora-facebook" type="button" onClick={startFacebook} disabled={facebookLoading}>
+              <span className="amora-social-symbol" aria-hidden="true">f</span>
+              {facebookLoading ? 'Connecting to Facebook…' : 'Continue with Facebook'}
+            </button>
+          </div>
+
           <button className="amora-google" type="button" onClick={startGoogle} disabled={googleLoading}>
             <span className="amora-google-icon" aria-hidden="true">
   <svg viewBox="0 0 24 24" role="img">
