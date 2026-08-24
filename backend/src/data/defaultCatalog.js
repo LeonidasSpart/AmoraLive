@@ -29,6 +29,7 @@ const GLYPH_MAP = {
   'Lightning': 'lightning', 'Fire': 'flame', 'Thunder': 'lightning', 'Phoenix': 'phoenix',
   'Dragon': 'dragon', 'Energy Blast': 'supernova', 'Golden Tiger': 'flame', 'Warrior': 'sword',
   'Crown of Power': 'crown', 'Legendary Sword': 'sword',
+  'Amora Royal Crown': 'crown', 'Eternal Amora': 'infinity', 'Celestial Palace': 'palace', 'Diamond Dragon': 'dragon', 'Royal Yacht': 'yacht', 'Amora Private Jet': 'jet', 'Imperial Phoenix': 'golden-phoenix', 'Amora Throne': 'throne',
   'Confetti': 'confetti', 'Balloon': 'balloon', 'Cupcake': 'cupcake', 'Ice Cream': 'iceCream',
   'Music': 'music', 'Butterfly': 'butterfly', 'Teddy Bear': 'teddyBear', 'Magic Box': 'giftBox',
   'Party Popper': 'partyPopper', 'Celebration': 'confetti'
@@ -58,7 +59,20 @@ const GIFTS = [
   ...buildCategory('luxury', ['Diamond', 'Diamond Crown', 'Gold Crown', 'Luxury Car', 'Private Jet', 'Gold Champagne', 'Diamond Ring', 'Treasure Chest', 'Golden Palace', 'Royal Throne']),
   ...buildCategory('cosmic', ['Galaxy', 'Moon', 'Planet', 'Cosmic Heart', 'Supernova', 'Black Hole', 'Cosmic Rose', 'Star Portal', 'Universe', 'Infinity']),
   ...buildCategory('power', ['Lightning', 'Fire', 'Thunder', 'Phoenix', 'Dragon', 'Energy Blast', 'Golden Tiger', 'Warrior', 'Crown of Power', 'Legendary Sword']),
-  ...buildCategory('fun', ['Confetti', 'Balloon', 'Cupcake', 'Ice Cream', 'Music', 'Butterfly', 'Teddy Bear', 'Magic Box', 'Party Popper', 'Celebration'])
+  ...buildCategory('fun', ['Confetti', 'Balloon', 'Cupcake', 'Ice Cream', 'Music', 'Butterfly', 'Teddy Bear', 'Magic Box', 'Party Popper', 'Celebration']),
+  ...[
+    ['Amora Royal Crown', 75000, 'royal', 'svip'],
+    ['Eternal Amora', 90000, 'eternal', 'svip'],
+    ['Celestial Palace', 120000, 'royal', 'svip'],
+    ['Diamond Dragon', 150000, 'mythic', 'svip'],
+    ['Royal Yacht', 180000, 'royal', 'svip'],
+    ['Amora Private Jet', 220000, 'royal', 'svip'],
+    ['Imperial Phoenix', 300000, 'eternal', 'svip'],
+    ['Amora Throne', 500000, 'eternal', 'svip']
+  ].map(([name, coin_price, rarity, min_tier], i) => ({
+    name, coin_price, rarity, min_tier, category: 'royal', glyph: GLYPH_MAP[name] || 'giftBox',
+    sort_order: i, description: 'Amora Royal Collection — limited luxury gift.', image_url: '', animation_url: null, sound_url: null
+  }))
 ];
 
 const COIN_PACKAGES = [
