@@ -75,6 +75,27 @@ export default function Profile() {
     }
   };
 
+  const deleteAccount = () => {
+    Alert.alert(
+      "Delete your Amora account?",
+      "This permanently removes your account and cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete", style: "destructive", onPress: async () => {
+            try {
+              await api.deleteAccount();
+              await api.logout();
+              router.replace("/auth");
+            } catch (e: any) {
+              setError(e.message || "Unable to delete your account.");
+            }
+          }
+        }
+      ]
+    );
+  };
+
   const logout = async () => {
     await api.logout();
     router.replace("/auth");
@@ -85,6 +106,7 @@ export default function Profile() {
     { label: "My level & rewards", onPress: () => {} },
     { label: "My outfits & profile effects", onPress: () => {} },
     { label: "Privacy & safety", onPress: () => {} },
+    { label: "Delete my account", onPress: deleteAccount, danger: true },
     { label: "Terms & policies", onPress: () => {} },
     { label: "Log out", onPress: logout, danger: true }
   ];
@@ -135,16 +157,16 @@ export default function Profile() {
 const s = StyleSheet.create({
   page: { flex: 1, backgroundColor: theme.bg, padding: 20 },
   back: { fontSize: 42, color: "#fff" },
-  hero: { alignItems: "center", padding: 20 },
+  hero: { alignItems: "center", padding: 24, borderRadius: 28, backgroundColor: theme.surface, borderWidth: 1, borderColor: "rgba(255,255,255,.09)", shadowColor: theme.pink, shadowOpacity: .12, shadowRadius: 28, shadowOffset: { width: 0, height: 14 } },
   avatarWrap: { position: "relative" },
-  avatar: { width: 96, height: 96, borderRadius: 48, backgroundColor: theme.purple, alignItems: "center", justifyContent: "center" },
-  avatarImage: { width: 96, height: 96, borderRadius: 48 },
+  avatar: { width: 104, height: 104, borderRadius: 52, backgroundColor: theme.purple, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "rgba(255,255,255,.22)" },
+  avatarImage: { width: 104, height: 104, borderRadius: 52, borderWidth: 2, borderColor: "rgba(255,255,255,.22)" },
   avatarText: { fontSize: 42, color: "#fff", fontWeight: "900" },
   cameraBadge: { position: "absolute", bottom: 0, right: 0, width: 32, height: 32, borderRadius: 16, backgroundColor: theme.pink, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: theme.bg },
   name: { color: "#fff", fontSize: 24, fontWeight: "900", marginTop: 12 },
   muted: { color: theme.muted, marginTop: 5 },
   error: { color: "#ff6b6b", textAlign: "center", marginBottom: 12 },
-  row: { backgroundColor: theme.surface, borderRadius: 15, padding: 18, marginBottom: 10, flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: theme.border },
+  row: { backgroundColor: theme.surface, borderRadius: 17, padding: 17, marginBottom: 10, flexDirection: "row", alignItems: "center", borderWidth: 1, borderColor: "rgba(255,255,255,.08)" },
   rowText: { color: "#fff", fontSize: 16, fontWeight: "700" },
   arrow: { color: theme.muted, fontSize: 28, marginLeft: "auto" }
 });

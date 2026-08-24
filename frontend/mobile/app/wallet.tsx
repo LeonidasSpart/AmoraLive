@@ -174,7 +174,13 @@ export default function Wallet() {
 
   const buy = (pkg: CoinPackage) => {
     if (nativeAvailable && nativeProductId(pkg)) return buyNative(pkg);
-    return buyViaWebCheckout(pkg);
+    // Stripe is intentionally kept as a development fallback only.
+    // Production iOS/Android builds must use the platform store for digital
+    // coins and gifts; the web client keeps its own Stripe flow.
+    if (__DEV__) return buyViaWebCheckout(pkg);
+    setError(Platform.OS === "ios"
+      ? "This coin package is not configured for the App Store yet."
+      : "This coin package is not configured for Google Play yet.");
   };
 
   if (loading) {
@@ -225,7 +231,7 @@ export default function Wallet() {
             </View>
           )}
           {!nativeAvailable && (Platform.OS === "ios" || Platform.OS === "android") && (
-            <Text style={s.hint}>Native store purchases aren't available in this build — using secure web checkout instead.</Text>
+            <Text style={s.hint}>{__DEV__ ? "Development build: web checkout fallback is enabled." : "Store purchases will be available once the platform product IDs are configured."}</Text>
           )}
 
           <Text style={s.section}>Recent activity</Text>
@@ -248,18 +254,18 @@ const s = StyleSheet.create({
   page: { flex: 1, backgroundColor: theme.bg, padding: 20 },
   back: { fontSize: 42, color: "#fff" },
   title: { fontSize: 30, fontWeight: "900", color: "#fff", marginBottom: 18 },
-  balance: { backgroundColor: "#24142b", borderRadius: 20, padding: 20, borderWidth: 1, borderColor: "#75405e" },
+  balance: { backgroundColor: "#1a1029", borderRadius: 24, padding: 22, borderWidth: 1, borderColor: "rgba(255,216,107,.22)", shadowColor: theme.pink, shadowOpacity: .13, shadowRadius: 30, shadowOffset: { width: 0, height: 14 } },
   muted: { color: theme.muted },
   amount: { fontSize: 30, fontWeight: "900", color: theme.gold, marginTop: 5 },
   error: { color: "#ff6b6b", marginTop: 10 },
   hint: { color: theme.muted, fontSize: 11, marginTop: 8, fontStyle: "italic" },
   section: { fontSize: 20, fontWeight: "900", color: "#fff", marginVertical: 16 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
-  pack: { width: "31%", backgroundColor: theme.surface, borderRadius: 16, padding: 14, alignItems: "center", borderWidth: 1, borderColor: theme.border, minHeight: 90, justifyContent: "center" },
+  pack: { width: "31%", backgroundColor: theme.surface, borderRadius: 18, padding: 14, alignItems: "center", borderWidth: 1, borderColor: "rgba(255,255,255,.08)", minHeight: 100, justifyContent: "center", shadowColor: "#000", shadowOpacity: .24, shadowRadius: 16, shadowOffset: { width: 0, height: 8 } },
   coin: { fontSize: 24 },
   qty: { color: "#fff", fontWeight: "900", fontSize: 16, marginVertical: 5 },
   price: { color: theme.orange, fontWeight: "800" },
-  txRow: { flexDirection: "row", justifyContent: "space-between", backgroundColor: theme.surface, borderRadius: 12, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: theme.border },
+  txRow: { flexDirection: "row", justifyContent: "space-between", backgroundColor: theme.surface, borderRadius: 15, padding: 14, marginBottom: 8, borderWidth: 1, borderColor: "rgba(255,255,255,.07)" },
   txDesc: { color: "#eee", flex: 1, fontSize: 13 },
   txAmount: { fontWeight: "900" }
 });
