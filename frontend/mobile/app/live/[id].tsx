@@ -474,12 +474,16 @@ export default function LiveRoom() {
         <View style={s.inviteBanner}><Text style={{ color: "#fff", fontSize: 13 }}>⚔️ Battle invite sent — waiting for a response…</Text></View>
       )}
       {!!giftShowcase && (
-        <Animated.View style={[s.giftShowcase, { opacity: giftShowcaseAnim, transform: [{ scale: giftShowcaseAnim.interpolate({ inputRange: [0, 1], outputRange: [0.62, 1] }) }, { translateY: giftShowcaseAnim.interpolate({ inputRange: [0, 1], outputRange: [35, 0] }) }] }]} pointerEvents="none">
-          <View style={s.giftHalo} />
-          <Image source={giftArt(giftShowcase)} style={s.giftShowcaseImage} />
-          <Text style={s.giftShowcaseEyebrow}>AMORA GIFT</Text>
-          <Text style={s.giftShowcaseName}>{giftShowcase.name}</Text>
-          <Text style={s.giftShowcaseMeta}>{giftShowcase.senderName} · {giftShowcase.coin_price || 0} coins{giftShowcase.quantity > 1 ? ` · ×${giftShowcase.quantity}` : ""}</Text>
+        <Animated.View style={[s.giftShowcase, { opacity: giftShowcaseAnim, transform: [{ perspective: 900 }, { scale: giftShowcaseAnim.interpolate({ inputRange: [0, 1], outputRange: [0.62, 1] }) }, { translateY: giftShowcaseAnim.interpolate({ inputRange: [0, 1], outputRange: [35, 0] }) }, { rotateY: giftShowcaseAnim.interpolate({ inputRange: [0, 1], outputRange: ["-10deg", "0deg"] }) }] }]} pointerEvents="none">
+          <View style={s.giftLuxuryCard}>
+            <View style={s.giftHalo} />
+            <View style={s.giftSparkle}><Text style={s.giftSparkleText}>✦</Text></View>
+            <Text style={s.giftRarity}>{String(giftShowcase.rarity || "PREMIUM").toUpperCase()}</Text>
+            <Image source={giftArt(giftShowcase)} style={s.giftShowcaseImage} />
+            <Text style={s.giftShowcaseEyebrow}>AMORA LUXURY GIFT</Text>
+            <Text style={s.giftShowcaseName}>{giftShowcase.name}</Text>
+            <Text style={s.giftShowcaseMeta}>{giftShowcase.senderName} · {giftShowcase.coin_price || 0} coins{giftShowcase.quantity > 1 ? ` · ×${giftShowcase.quantity}` : ""}</Text>
+          </View>
         </Animated.View>
       )}
       {!!giftAlert && (
@@ -653,7 +657,11 @@ const s = StyleSheet.create({
   acceptBtn: { flex: 1, backgroundColor: "#35df70", borderRadius: 10, paddingVertical: 8, alignItems: "center" },
   declineBtn: { flex: 1, backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 10, paddingVertical: 8, alignItems: "center" },
   giftAlert: { position: "absolute", top: 140, alignSelf: "center", backgroundColor: "rgba(15,10,28,0.92)", borderWidth: 1, borderColor: "rgba(255,105,190,.55)", borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, zIndex: 12 },
-  giftShowcase: { position: "absolute", left: 0, right: 0, top: "21%", alignItems: "center", zIndex: 20 },
+  giftShowcase: { position: "absolute", left: 0, right: 0, top: "18%", alignItems: "center", zIndex: 20 },
+  giftLuxuryCard: { width: 300, minHeight: 355, borderRadius: 30, borderWidth: 1, borderColor: "rgba(255,216,107,.30)", backgroundColor: "rgba(12,8,22,.88)", alignItems: "center", justifyContent: "center", overflow: "hidden", paddingVertical: 18, shadowColor: theme.pink, shadowOpacity: .55, shadowRadius: 45, shadowOffset: { width: 0, height: 20 } },
+  giftSparkle: { position: "absolute", right: 18, top: 18, width: 32, height: 32, borderRadius: 16, backgroundColor: "rgba(255,216,107,.12)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "rgba(255,216,107,.20)" },
+  giftSparkleText: { color: theme.gold, fontSize: 18 },
+  giftRarity: { color: theme.gold, fontSize: 8, fontWeight: "900", letterSpacing: 2.2, marginBottom: -4 },
   giftHalo: { position: "absolute", width: 290, height: 290, borderRadius: 145, backgroundColor: "rgba(255,63,157,.18)", borderWidth: 1, borderColor: "rgba(255,216,107,.24)", shadowColor: theme.pink, shadowOpacity: .9, shadowRadius: 55, shadowOffset: { width: 0, height: 0 } },
   giftShowcaseImage: { width: 235, height: 235, resizeMode: "contain" },
   giftShowcaseEyebrow: { color: theme.gold, fontSize: 10, letterSpacing: 3, fontWeight: "900", marginTop: -8 },
