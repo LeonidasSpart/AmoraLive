@@ -19,9 +19,10 @@ import { Room, RoomEvent, Track, RemoteTrack } from "livekit-client";
 import { VideoView } from "@livekit/react-native";
 import { theme } from "../../src/theme";
 import { api, API_URL, getUserId } from "../../src/api/client";
+import { giftArt } from "../../src/GiftArt";
 
 type ChatMessage = { id: string; message?: string; content?: string; user?: any; username?: string; system?: boolean };
-type Gift = { id: string; name: string; image_url: string; coin_price: number };
+type Gift = { id: string; name: string; image_url?: string | null; coin_price: number; glyph?: string | null; rarity?: string | null };
 type TopGifter = { user: { id: string; display_name: string; username: string }; totalCoins: number };
 type BattleState = {
   battleId: string;
@@ -73,6 +74,7 @@ export default function LiveRoom() {
   const [giftShowcase, setGiftShowcase] = useState<any | null>(null);
   const [hearts, setHearts] = useState<{ id: number; left: number }[]>([]);
   const [ending, setEnding] = useState(false);
+  const giftShowcaseAnim = useRef(new Animated.Value(0)).current;
 
   const [battle, setBattle] = useState<BattleState | null>(null);
   const [battleTimeLeft, setBattleTimeLeft] = useState(0);
@@ -86,6 +88,12 @@ export default function LiveRoom() {
   const livekitRoomRef = useRef<Room | null>(null);
   const opponentRoomRef = useRef<Room | null>(null);
   const listRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    if (!giftShowcase) return;
+    giftShowcaseAnim.setValue(0);
+    Animated.spring(giftShowcaseAnim, { toValue: 1, friction: 7, tension: 55, useNativeDriver: true }).start();
+  }, [giftShowcase]);
 
   const spawnHeart = () => {
     const newId = heartSeq++;
@@ -466,13 +474,13 @@ export default function LiveRoom() {
         <View style={s.inviteBanner}><Text style={{ color: "#fff", fontSize: 13 }}>⚔️ Battle invite sent — waiting for a response…</Text></View>
       )}
       {!!giftShowcase && (
-        <View style={s.giftShowcase} pointerEvents="none">
+        <Animated.View style={[s.giftShowcase, { opacity: giftShowcaseAnim, transform: [{ scale: giftShowcaseAnim.interpolate({ inputRange: [0, 1], outputRange: [0.62, 1] }) }, { translateY: giftShowcaseAnim.interpolate({ inputRange: [0, 1], outputRange: [35, 0] }) }] }]} pointerEvents="none">
           <View style={s.giftHalo} />
-          <Image source={{ uri: giftShowcase.image_url?.startsWith("/") ? `${API_URL}${giftShowcase.image_url}` : giftShowcase.image_url }} style={s.giftShowcaseImage} />
+          <Image source={giftArt(giftShowcase)} style={s.giftShowcaseImage} />
           <Text style={s.giftShowcaseEyebrow}>AMORA GIFT</Text>
           <Text style={s.giftShowcaseName}>{giftShowcase.name}</Text>
           <Text style={s.giftShowcaseMeta}>{giftShowcase.senderName} · {giftShowcase.coin_price || 0} coins{giftShowcase.quantity > 1 ? ` · ×${giftShowcase.quantity}` : ""}</Text>
-        </View>
+        </Animated.View>
       )}
       {!!giftAlert && (
         <View style={s.giftAlert}>
@@ -550,7 +558,7 @@ export default function LiveRoom() {
         <View style={s.giftPicker}>
           {gifts.map((g) => (
             <Pressable key={g.id} onPress={() => sendGift(g.id)} style={s.giftBtn}>
-              <Image source={{ uri: g.image_url?.startsWith("/") ? `${API_URL}${g.image_url}` : g.image_url }} style={s.giftImage} />
+              <Image source={giftArt(g)} style={s.giftImage} />
               <Text style={{ color: "#fff", fontSize: 11, fontWeight: "700" }} numberOfLines={1}>{g.name}</Text>
               <Text style={{ color: theme.gold, fontSize: 10 }}>🪙 {g.coin_price}</Text>
             </Pressable>
@@ -645,11 +653,11 @@ const s = StyleSheet.create({
   acceptBtn: { flex: 1, backgroundColor: "#35df70", borderRadius: 10, paddingVertical: 8, alignItems: "center" },
   declineBtn: { flex: 1, backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 10, paddingVertical: 8, alignItems: "center" },
   giftAlert: { position: "absolute", top: 140, alignSelf: "center", backgroundColor: "rgba(15,10,28,0.92)", borderWidth: 1, borderColor: "rgba(255,105,190,.55)", borderRadius: 20, paddingHorizontal: 16, paddingVertical: 8, zIndex: 12 },
-  giftShowcase: { position: "absolute", left: 0, right: 0, top: "24%", alignItems: "center", zIndex: 20 },
-  giftHalo: { position: "absolute", width: 260, height: 260, borderRadius: 130, backgroundColor: "rgba(255,63,157,.22)", shadowColor: theme.pink, shadowOpacity: .8, shadowRadius: 45, shadowOffset: { width: 0, height: 0 } },
-  giftShowcaseImage: { width: 210, height: 210, resizeMode: "contain" },
+  giftShowcase: { position: "absolute", left: 0, right: 0, top: "21%", alignItems: "center", zIndex: 20 },
+  giftHalo: { position: "absolute", width: 290, height: 290, borderRadius: 145, backgroundColor: "rgba(255,63,157,.18)", borderWidth: 1, borderColor: "rgba(255,216,107,.24)", shadowColor: theme.pink, shadowOpacity: .9, shadowRadius: 55, shadowOffset: { width: 0, height: 0 } },
+  giftShowcaseImage: { width: 235, height: 235, resizeMode: "contain" },
   giftShowcaseEyebrow: { color: theme.gold, fontSize: 10, letterSpacing: 3, fontWeight: "900", marginTop: -8 },
-  giftShowcaseName: { color: "#fff", fontSize: 25, fontWeight: "900", textShadowColor: "rgba(255,63,157,.7)", textShadowRadius: 14 },
+  giftShowcaseName: { color: "#fff", fontSize: 27, fontWeight: "900", textShadowColor: "rgba(255,63,157,.8)", textShadowRadius: 18, marginTop: 2 },
   giftShowcaseMeta: { color: "#e8dff1", fontSize: 12, marginTop: 4 },
   heartLayer: { ...StyleSheet.absoluteFillObject },
   rightRail: { position: "absolute", right: 10, bottom: 160, alignItems: "center", gap: 18 },
@@ -659,8 +667,8 @@ const s = StyleSheet.create({
   giftImage: { width: 48, height: 48, resizeMode: "contain" },
   railCount: { color: "#fff", fontSize: 11, fontWeight: "700" },
   leaderboardPanel: { position: "absolute", right: 66, bottom: 160, width: 200, backgroundColor: "rgba(15,15,26,0.92)", borderRadius: 14, padding: 14, borderWidth: 1, borderColor: "#333" },
-  giftPicker: { position: "absolute", left: 12, right: 66, bottom: 160, backgroundColor: "rgba(15,15,26,0.92)", borderRadius: 14, padding: 10, flexDirection: "row", flexWrap: "wrap", gap: 8, maxHeight: 220, borderWidth: 1, borderColor: "#333" },
-  giftBtn: { width: "22%", backgroundColor: "rgba(255,255,255,0.06)", borderRadius: 10, padding: 8, alignItems: "center", gap: 2 },
+  giftPicker: { position: "absolute", left: 10, right: 62, bottom: 158, backgroundColor: "rgba(13,9,25,0.96)", borderRadius: 22, padding: 11, flexDirection: "row", flexWrap: "wrap", gap: 8, maxHeight: 250, borderWidth: 1, borderColor: "rgba(255,255,255,.12)", shadowColor: "#000", shadowOpacity: .5, shadowRadius: 28, shadowOffset: { width: 0, height: 12 } },
+  giftBtn: { width: "22%", backgroundColor: "rgba(255,255,255,0.055)", borderRadius: 15, padding: 7, alignItems: "center", gap: 2, borderWidth: 1, borderColor: "rgba(255,255,255,.06)" },
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.6)", alignItems: "center", justifyContent: "center" },
   modalPanel: { width: "85%", maxHeight: "70%", backgroundColor: "#161625", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#333" },
   challengeRow: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "rgba(255,255,255,0.06)", borderRadius: 10, padding: 10, marginBottom: 8 },
