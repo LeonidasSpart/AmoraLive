@@ -56,18 +56,41 @@ module.exports = (prisma, io) => {
     try {
       const userId = req.user.id;
       // Get all users the current user has exchanged messages with
+      // Return exactly one row per conversation: the latest message.
+      // The previous GROUP BY m.id returned one row for every message, so
+      // the Messages page could contain repeated conversations and stale
+      // previews. DISTINCT ON is deterministic on PostgreSQL and keeps the
+      // response small even for long-running accounts.
       const conversations = await prisma.$queryRaw`
-        SELECT 
-          u.id, u.username, u.display_name, u.profile_photo, u.online_status,
-          u.is_verified, u.membership_tier,
-          m.id as last_message_id, m.content as last_message, m.created_at as last_message_time,
-          m.sender_id as last_sender_id,
-          (SELECT COUNT(*) FROM "Message" WHERE "receiver_id" = ${userId} AND "sender_id" = u.id AND "read_at" IS NULL) as unread_count
-        FROM "User" u
-        JOIN "Message" m ON (m."sender_id" = u.id AND m."receiver_id" = ${userId}) OR (m."receiver_id" = u.id AND m."sender_id" = ${userId})
-        WHERE u.id != ${userId}
-        GROUP BY u.id, m.id
-        ORDER BY m.created_at DESC
+        SELECT *
+        FROM (
+          SELECT DISTINCT ON (u.id)
+            u.id,
+            u.username,
+            u.display_name,
+            u.profile_photo,
+            u.online_status,
+            u.is_verified,
+            u.membership_tier,
+            m.id AS last_message_id,
+            m.content AS last_message,
+            m.created_at AS last_message_time,
+            m.sender_id AS last_sender_id,
+            (
+              SELECT COUNT(*)
+              FROM "Message" unread
+              WHERE unread."receiver_id" = ${userId}
+                AND unread."sender_id" = u.id
+                AND unread."read_at" IS NULL
+            ) AS unread_count
+          FROM "User" u
+          JOIN "Message" m
+            ON (m."sender_id" = u.id AND m."receiver_id" = ${userId})
+            OR (m."receiver_id" = u.id AND m."sender_id" = ${userId})
+          WHERE u.id != ${userId}
+          ORDER BY u.id, m.created_at DESC, m.id DESC
+        ) latest
+        ORDER BY latest.last_message_time DESC, latest.id;
       `;
       // Postgres COUNT(*) comes back as a BigInt via $queryRaw, and
       // JSON.stringify (which res.json() uses internally) cannot
