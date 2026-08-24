@@ -2,7 +2,7 @@
   "expo": {
     "name": "Amora",
     "slug": "amora",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "orientation": "portrait",
     "scheme": "amora",
     "userInterfaceStyle": "dark",
@@ -17,7 +17,7 @@
       "adaptiveIcon": {
         "backgroundColor": "#090713"
       },
-      "versionCode": 1,
+      "versionCode": 20,
       "backgroundColor": "#070511"
     },
     "ios": {
@@ -28,7 +28,7 @@
         "NSMicrophoneUsageDescription": "Amora uses your microphone for live video matches and live rooms.",
         "NSPhotoLibraryUsageDescription": "Amora needs access to your photos so you can set a profile picture."
       },
-      "buildNumber": "1",
+      "buildNumber": "20",
       "backgroundColor": "#070511"
     },
     "plugins": [
