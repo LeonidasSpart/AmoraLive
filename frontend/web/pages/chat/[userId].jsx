@@ -150,6 +150,10 @@ export default function ChatRoom() {
       );
     });
 
+    realtime.on('message-error', ({ error }) => {
+      setError(error || 'Unable to send message.');
+    });
+
     setSocket(realtime);
     return realtime;
   };
