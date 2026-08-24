@@ -3,8 +3,10 @@ const crypto = require('crypto');
 const { awardXp } = require('../lib/xp');
 const { meetsMinTier } = require('../lib/membership');
 const { incrementMissionProgress } = require('../lib/missions');
+const { createRateLimiter } = require('../middleware/security');
 
 module.exports = (prisma, io) => {
+  const giftSendRateLimiter = createRateLimiter({ windowMs: 60 * 1000, max: 180, keyPrefix: 'gift-send' });
   const router = require('express').Router();
 
   router.get('/catalog', async (req, res) => {
@@ -68,7 +70,7 @@ module.exports = (prisma, io) => {
   // gifting (direct-to-user and in live rooms alike).
   const RECEIVER_SHARE = 0.65;
 
-  router.post('/send', auth, async (req, res) => {
+  router.post('/send', giftSendRateLimiter, auth, async (req, res) => {
     const { giftId, receiverId, roomId, quantity = 1, idempotencyKey } = req.body;
     const qty = Number(quantity);
     if (!giftId || (!receiverId && !roomId) || !Number.isInteger(qty) || qty < 1 || qty > 100) {

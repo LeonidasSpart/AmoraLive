@@ -4,6 +4,8 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const { z } = require('zod');
 const { signAccessToken, signRefreshToken } = require('../lib');
+const auth = require('../middleware/auth');
+const { logSecurityEvent } = require('../lib/security');
 
 function calculateAge(dob) {
   const now = new Date();
@@ -117,10 +119,73 @@ module.exports = (prisma) => {
     const identifier = String(req.body.identifier || '').trim();
     const password = String(req.body.password || '');
     const user = await prisma.user.findFirst({ where: { OR: [{ email: identifier.toLowerCase() }, { username: identifier }] } });
-    if (!user || !(await bcrypt.compare(password, user.password_hash))) return res.status(401).json({ error: 'Invalid credentials.' });
-    if (!user.is_active) return res.status(403).json({ error: 'Account suspended.' });
+    if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+      await logSecurityEvent(prisma, {
+        action: 'login_failed',
+        targetType: 'auth',
+        targetId: crypto.createHash('sha256').update(identifier.toLowerCase()).digest('hex').slice(0, 24),
+        details: { reason: 'invalid_credentials', requestId: req.requestId },
+        ip: req.clientIp
+      });
+      return res.status(401).json({ error: 'Invalid credentials.' });
+    }
+    if (!user.is_active) {
+      await logSecurityEvent(prisma, {
+        userId: user.id,
+        action: 'login_blocked',
+        targetType: 'user',
+        targetId: user.id,
+        details: { reason: 'account_suspended', requestId: req.requestId },
+        ip: req.clientIp
+      });
+      return res.status(403).json({ error: 'Account suspended.' });
+    }
     const session = await createSession(user, req);
+    await logSecurityEvent(prisma, {
+      userId: user.id,
+      action: 'login_success',
+      targetType: 'user',
+      targetId: user.id,
+      details: { requestId: req.requestId, device: req.headers['user-agent']?.slice(0, 180) || null },
+      ip: req.clientIp
+    });
     res.json(session);
+  });
+
+  // ---------- Change password ----------
+  // Keeps password changes server-side, revokes every existing refresh session
+  // after success, and never stores or logs plaintext passwords.
+  router.post('/change-password', auth, async (req, res) => {
+    const currentPassword = String(req.body.currentPassword || '');
+    const newPassword = String(req.body.newPassword || '');
+    if (newPassword.length < 10) {
+      return res.status(400).json({ error: 'New password must be at least 10 characters.' });
+    }
+    if (newPassword === currentPassword) {
+      return res.status(400).json({ error: 'Choose a different password.' });
+    }
+
+    try {
+      const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+      if (!user) return res.status(404).json({ error: 'Account not found.' });
+      const valid = await bcrypt.compare(currentPassword, user.password_hash);
+      if (!valid) {
+        await logSecurityEvent(prisma, { userId: user.id, action: 'password_change_failed', targetType: 'user', targetId: user.id, details: { reason: 'invalid_current_password', requestId: req.requestId }, ip: req.clientIp });
+        return res.status(401).json({ error: 'Current password is incorrect.' });
+      }
+
+      const passwordHash = await bcrypt.hash(newPassword, 12);
+      await prisma.$transaction([
+        prisma.user.update({ where: { id: user.id }, data: { password_hash: passwordHash } }),
+        prisma.session.deleteMany({ where: { user_id: user.id } })
+      ]);
+
+      await logSecurityEvent(prisma, { userId: user.id, action: 'password_changed', targetType: 'user', targetId: user.id, details: { requestId: req.requestId, sessionsRevoked: true }, ip: req.clientIp });
+      res.json({ success: true, sessionsRevoked: true });
+    } catch (e) {
+      console.error('Password change error:', e);
+      res.status(500).json({ error: 'Unable to change password.' });
+    }
   });
 
   // Google OAuth: existing users can log in immediately. New users are returned

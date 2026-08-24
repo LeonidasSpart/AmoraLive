@@ -1,9 +1,60 @@
 // backend/src/routes/safety.js
 const auth = require('../middleware/auth');
+const { calculateAccountProtectionScore, logSecurityEvent } = require('../lib/security');
 const REPORT_CATEGORIES = ['harassment', 'spam', 'nudity_or_sexual_content', 'hate_speech', 'violence', 'scam_or_fraud', 'underage', 'impersonation', 'other'];
 
 module.exports = (prisma) => {
   const router = require('express').Router();
+
+  // ---------- Account Security Overview ----------
+  // This is an account-protection score, not a certification. It combines
+  // concrete protections already present in Amora and gives the user clear
+  // next steps without exposing internal anti-abuse rules.
+  router.get('/security/overview', auth, async (req, res) => {
+    try {
+      const [user, sessions, recentEvents] = await Promise.all([
+        prisma.user.findUnique({
+          where: { id: req.user.id },
+          select: { id: true, email: true, is_verified: true, age_verified: true, privacy_settings: true, updated_at: true }
+        }),
+        prisma.session.count({ where: { user_id: req.user.id, expires_at: { gt: new Date() } } }),
+        prisma.auditLog.findMany({
+          where: { target_type: 'user', target_id: req.user.id, details: { path: ['securityEvent'], equals: true } },
+          orderBy: { timestamp: 'desc' },
+          take: 12,
+          select: { id: true, action: true, details: true, timestamp: true }
+        }).catch(() => [])
+      ]);
+
+      if (!user) return res.status(404).json({ error: 'Account not found.' });
+      const protection = calculateAccountProtectionScore({ user, sessionCount: sessions });
+      res.json({
+        ...protection,
+        emailVerified: Boolean(user.is_verified),
+        ageVerified: Boolean(user.age_verified),
+        privacyConfigured: Boolean(user.privacy_settings),
+        activeSessions: sessions,
+        recentEvents
+      });
+    } catch (e) {
+      console.error('Security overview error:', e);
+      res.status(500).json({ error: 'Unable to load security overview.', code: 'SECURITY_OVERVIEW_FAILED' });
+    }
+  });
+
+  router.get('/security/events', auth, async (req, res) => {
+    try {
+      const events = await prisma.auditLog.findMany({
+        where: { target_type: 'user', target_id: req.user.id },
+        orderBy: { timestamp: 'desc' },
+        take: 50,
+        select: { id: true, action: true, details: true, timestamp: true }
+      });
+      res.json(events.filter((event) => event.details?.securityEvent === true));
+    } catch (e) {
+      res.status(500).json({ error: 'Unable to load security events.', code: 'SECURITY_EVENTS_FAILED' });
+    }
+  });
 
   // ---------- GET /safety/report-categories ----------
   router.get('/report-categories', (req, res) => res.json(REPORT_CATEGORIES));
@@ -138,6 +189,7 @@ module.exports = (prisma) => {
         return res.status(404).json({ error: 'Session not found.' });
       }
       await prisma.session.delete({ where: { id: req.params.sessionId } });
+      await logSecurityEvent(prisma, { userId: req.user.id, action: 'session_revoked', targetType: 'user', targetId: req.user.id, details: { sessionId: req.params.sessionId, requestId: req.requestId }, ip: req.clientIp });
       res.json({ success: true });
     } catch (e) {
       res.status(500).json({ error: 'Unable to revoke session.', code: 'REVOKE_FAILED' });
@@ -157,6 +209,7 @@ module.exports = (prisma) => {
           ...(currentRefreshToken ? { refresh_token: { not: currentRefreshToken } } : {})
         }
       });
+      await logSecurityEvent(prisma, { userId: req.user.id, action: 'sessions_revoked', targetType: 'user', targetId: req.user.id, details: { revokedCount: result.count, requestId: req.requestId }, ip: req.clientIp });
       res.json({ success: true, revokedCount: result.count });
     } catch (e) {
       res.status(500).json({ error: 'Unable to revoke sessions.', code: 'REVOKE_ALL_FAILED' });

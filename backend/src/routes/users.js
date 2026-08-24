@@ -7,11 +7,14 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const { UTApi } = require('uploadthing/server');
 const { deleteUploadThingFile } = require('../lib/media');
+const { logSecurityEvent } = require('../lib/security');
+const { createRateLimiter } = require('../middleware/security');
 
 // Media storage is UploadThing (not AWS S3) — one API token, no IAM
 // policies or permission boundaries to manage. UTApi reads
 // UPLOADTHING_TOKEN from the environment automatically.
 const utapi = process.env.UPLOADTHING_TOKEN ? new UTApi() : null;
+const passwordRateLimiter = createRateLimiter({ windowMs: 10 * 60 * 1000, max: 10, keyPrefix: 'password' });
 
 // Configure multer for memory storage
 const storage = multer.memoryStorage();
@@ -145,31 +148,39 @@ module.exports = (prisma) => {
   });
 
   // ---------- POST /users/me/change-password ----------
-  router.post('/me/change-password', auth, async (req, res) => {
-    const { currentPassword, newPassword } = req.body;
+  // Kept for web/admin compatibility. The security behavior matches
+  // /auth/change-password: stronger minimum, bcrypt hashing, session
+  // revocation and security audit logging.
+  router.post('/me/change-password', passwordRateLimiter, auth, async (req, res) => {
+    const currentPassword = String(req.body.currentPassword || '');
+    const newPassword = String(req.body.newPassword || '');
     if (!currentPassword || !newPassword) {
       return res.status(400).json({ error: 'Current and new password required' });
     }
-    if (newPassword.length < 8) {
-      return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    if (newPassword.length < 10) {
+      return res.status(400).json({ error: 'New password must be at least 10 characters' });
+    }
+    if (newPassword === currentPassword) {
+      return res.status(400).json({ error: 'Choose a different password' });
     }
     try {
-      const user = await prisma.user.findUnique({
-        where: { id: req.user.id },
-        select: { password_hash: true }
-      });
+      const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { password_hash: true } });
+      if (!user) return res.status(404).json({ error: 'User not found' });
       const match = await bcrypt.compare(currentPassword, user.password_hash);
       if (!match) {
+        await logSecurityEvent(prisma, { userId: req.user.id, action: 'password_change_failed', targetType: 'user', targetId: req.user.id, details: { reason: 'invalid_current_password', requestId: req.requestId }, ip: req.clientIp });
         return res.status(401).json({ error: 'Current password is incorrect' });
       }
       const hashed = await bcrypt.hash(newPassword, 12);
-      await prisma.user.update({
-        where: { id: req.user.id },
-        data: { password_hash: hashed }
-      });
-      res.json({ success: true, message: 'Password updated successfully' });
+      await prisma.$transaction([
+        prisma.user.update({ where: { id: req.user.id }, data: { password_hash: hashed } }),
+        prisma.session.deleteMany({ where: { user_id: req.user.id } })
+      ]);
+      await logSecurityEvent(prisma, { userId: req.user.id, action: 'password_changed', targetType: 'user', targetId: req.user.id, details: { requestId: req.requestId, sessionsRevoked: true }, ip: req.clientIp });
+      res.json({ success: true, message: 'Password updated successfully. Please sign in again.', sessionsRevoked: true });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error('Password update error:', e);
+      res.status(500).json({ error: 'Unable to change password' });
     }
   });
 
