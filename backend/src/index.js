@@ -464,6 +464,11 @@ app.use(
   })
 );
 
+// Apple Sign in with Apple uses response_mode=form_post.
+// Keep URL-encoded parsing scoped to normal request bodies; Stripe's raw
+// webhook remains registered above this middleware.
+app.use(express.urlencoded({ extended: false, limit: '100kb' }));
+
 // ---------- Normalize double slashes ----------
 app.use((req, res, next) => {
   // Browsers can preserve a trailing slash from
