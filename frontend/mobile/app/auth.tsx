@@ -12,8 +12,10 @@ import {
 } from "react-native";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
+import * as AppleAuthentication from "expo-apple-authentication";
+import * as Crypto from "expo-crypto";
 import { theme } from "../src/theme";
-import { api, API_URL } from "../src/api/client";
+import { api, API_URL, storeSession } from "../src/api/client";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -21,17 +23,14 @@ type Mode = "login" | "register";
 
 export default function Auth() {
   const [mode, setMode] = useState<Mode>("login");
-
-  // Shared fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  // Register-only fields
   const [username, setUsername] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState(""); // YYYY-MM-DD
-
+  const [dateOfBirth, setDateOfBirth] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [facebookLoading, setFacebookLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
 
@@ -65,8 +64,8 @@ export default function Auth() {
       setError("Fill in every field to create your account.");
       return;
     }
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+    if (password.length < 10) {
+      setError("Password must be at least 10 characters.");
       return;
     }
     if (!validDob(dateOfBirth)) {
@@ -93,59 +92,135 @@ export default function Auth() {
 
   const handleSubmit = () => (mode === "login" ? submitLogin() : submitRegister());
 
+  const finishBrowserSocial = async (provider: "google" | "apple" | "facebook", result: any) => {
+    if (result.type !== "success" || !result.url) {
+      if (result.type !== "cancel" && result.type !== "dismiss") {
+        setError(`${provider === "facebook" ? "Facebook" : provider === "apple" ? "Apple" : "Google"} sign-in could not be completed. Please try again.`);
+      }
+      return;
+    }
+
+    const { queryParams } = Linking.parse(result.url);
+    if (queryParams?.error) {
+      setError(
+        queryParams.error === "account_suspended"
+          ? "This account is currently suspended."
+          : `${provider === "facebook" ? "Facebook" : provider === "apple" ? "Apple" : "Google"} sign-in could not be completed. Please try again.`
+      );
+      return;
+    }
+
+    if (queryParams?.accessToken) {
+      await storeSession({
+        accessToken: String(queryParams.accessToken),
+        refreshToken: queryParams.refreshToken ? String(queryParams.refreshToken) : undefined,
+        user: { id: queryParams.userId ? String(queryParams.userId) : undefined }
+      });
+      router.replace("/home");
+      return;
+    }
+
+    if (queryParams?.code) {
+      router.push({
+        pathname: "/auth-social-complete",
+        params: {
+          code: String(queryParams.code),
+          provider
+        }
+      });
+      return;
+    }
+
+    setError(`${provider === "facebook" ? "Facebook" : provider === "apple" ? "Apple" : "Google"} sign-in could not be completed. Please try again.`);
+  };
+
   const continueWithGoogle = async () => {
     resetMessages();
     setGoogleLoading(true);
     try {
-      const redirectUrl = Linking.createURL("auth-callback"); // amora://auth-callback
+      const redirectUrl = Linking.createURL("auth-callback");
       const authUrl = `${API_URL}/auth/google/start?platform=mobile`;
       const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
-
-      if (result.type !== "success" || !result.url) {
-        if (result.type !== "cancel" && result.type !== "dismiss") {
-          setError("Google sign-in could not be completed. Please try again.");
-        }
-        return;
-      }
-
-      const { queryParams } = Linking.parse(result.url);
-
-      if (queryParams?.error) {
-        setError(
-          queryParams.error === "account_suspended"
-            ? "This account is currently suspended."
-            : "Google sign-in could not be completed. Please try again."
-        );
-        return;
-      }
-
-      // Existing user: backend already issued a session.
-      if (queryParams?.accessToken) {
-        const { storeSession } = await import("../src/api/client");
-        await storeSession({
-          accessToken: String(queryParams.accessToken),
-          refreshToken: queryParams.refreshToken ? String(queryParams.refreshToken) : undefined,
-          user: { id: queryParams.userId ? String(queryParams.userId) : undefined }
-        });
-        router.replace("/home");
-        return;
-      }
-
-      // New user: backend returned a short-lived completion token. Hand off
-      // to the finish-signup screen to collect username + date of birth.
-      if (queryParams?.google) {
-        router.push({
-          pathname: "/auth-google-complete",
-          params: { token: String(queryParams.google) }
-        });
-        return;
-      }
-
-      setError("Google sign-in could not be completed. Please try again.");
+      await finishBrowserSocial("google", result);
     } catch (e: any) {
       setError(e.message || "Google sign-in could not be completed. Please try again.");
     } finally {
       setGoogleLoading(false);
+    }
+  };
+
+  const continueWithFacebook = async () => {
+    resetMessages();
+    setFacebookLoading(true);
+    try {
+      const redirectUrl = Linking.createURL("auth-callback");
+      const authUrl = `${API_URL}/auth/facebook/start?platform=mobile`;
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
+      await finishBrowserSocial("facebook", result);
+    } catch (e: any) {
+      setError(e.message || "Facebook sign-in could not be completed. Please try again.");
+    } finally {
+      setFacebookLoading(false);
+    }
+  };
+
+  const continueWithApple = async () => {
+    resetMessages();
+    setAppleLoading(true);
+    try {
+      if (Platform.OS === "ios") {
+        const bytes = await Crypto.getRandomBytesAsync(32);
+        const nonce = Array.from(bytes).map((b) => b.toString(16).padStart(2, "0")).join("");
+        const credential = await AppleAuthentication.signInAsync({
+          requestedScopes: [
+            AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+            AppleAuthentication.AppleAuthenticationScope.EMAIL
+          ],
+          nonce
+        });
+
+        if (!credential.identityToken) throw new Error("Apple did not return a secure identity token.");
+
+        const displayName = [
+          credential.fullName?.givenName,
+          credential.fullName?.middleName,
+          credential.fullName?.familyName
+        ].filter(Boolean).join(" ");
+
+        const result = await api.appleNative({
+          identityToken: credential.identityToken,
+          authorizationCode: credential.authorizationCode,
+          nonce,
+          displayName
+        });
+
+        if (result.accessToken) {
+          await storeSession(result);
+          router.replace("/home");
+          return;
+        }
+
+        if (result.needsProfile && result.handoffCode) {
+          router.push({
+            pathname: "/auth-social-complete",
+            params: { code: String(result.handoffCode), provider: "apple" }
+          });
+          return;
+        }
+
+        throw new Error("Apple sign-in could not be completed.");
+      }
+
+      const redirectUrl = Linking.createURL("auth-callback");
+      const authUrl = `${API_URL}/auth/apple/start?platform=mobile`;
+      const result = await WebBrowser.openAuthSessionAsync(authUrl, redirectUrl);
+      await finishBrowserSocial("apple", result);
+    } catch (e: any) {
+      if (e?.code !== "ERR_REQUEST_CANCELED") {
+        setError(e.message || "Apple sign-in could not be completed. Please try again.");
+      }
+    } finally {
+      setAppleLoading(false);
     }
   };
 
@@ -157,22 +232,10 @@ export default function Auth() {
       </Text>
 
       <View style={s.tabs}>
-        <Pressable
-          style={[s.tab, mode === "login" && s.tabActive]}
-          onPress={() => {
-            setMode("login");
-            resetMessages();
-          }}
-        >
+        <Pressable style={[s.tab, mode === "login" && s.tabActive]} onPress={() => { setMode("login"); resetMessages(); }}>
           <Text style={[s.tabText, mode === "login" && s.tabTextActive]}>Sign in</Text>
         </Pressable>
-        <Pressable
-          style={[s.tab, mode === "register" && s.tabActive]}
-          onPress={() => {
-            setMode("register");
-            resetMessages();
-          }}
-        >
+        <Pressable style={[s.tab, mode === "register" && s.tabActive]} onPress={() => { setMode("register"); resetMessages(); }}>
           <Text style={[s.tabText, mode === "register" && s.tabTextActive]}>Create account</Text>
         </Pressable>
       </View>
@@ -192,67 +255,45 @@ export default function Auth() {
       />
 
       {mode === "register" && (
-        <TextInput
-          placeholder="Username (3-20 characters)"
-          placeholderTextColor="#8d849b"
-          style={s.input}
-          autoCapitalize="none"
-          autoCorrect={false}
-          value={username}
-          onChangeText={setUsername}
-        />
+        <TextInput placeholder="Username (3-20 characters)" placeholderTextColor="#8d849b" style={s.input} autoCapitalize="none" autoCorrect={false} value={username} onChangeText={setUsername} />
       )}
 
-      <TextInput
-        placeholder="Password"
-        placeholderTextColor="#8d849b"
-        style={s.input}
-        secureTextEntry
-        autoCapitalize="none"
-        value={password}
-        onChangeText={setPassword}
-      />
+      <TextInput placeholder="Password" placeholderTextColor="#8d849b" style={s.input} secureTextEntry autoCapitalize="none" value={password} onChangeText={setPassword} />
 
       {mode === "register" && (
-        <TextInput
-          placeholder="Date of birth (YYYY-MM-DD)"
-          placeholderTextColor="#8d849b"
-          style={s.input}
-          autoCapitalize="none"
-          value={dateOfBirth}
-          onChangeText={setDateOfBirth}
-        />
+        <TextInput placeholder="Date of birth (YYYY-MM-DD)" placeholderTextColor="#8d849b" style={s.input} autoCapitalize="none" value={dateOfBirth} onChangeText={setDateOfBirth} />
       )}
 
       <Pressable style={s.primary} onPress={handleSubmit} disabled={loading}>
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={s.primaryText}>
-            {mode === "login" ? "Sign in" : "Create account"}
-          </Text>
-        )}
+        {loading ? <ActivityIndicator color="#fff" /> : <Text style={s.primaryText}>{mode === "login" ? "Sign in" : "Create account"}</Text>}
       </Pressable>
 
       <Text style={s.or}>OR</Text>
 
-      <Pressable style={s.google} onPress={continueWithGoogle} disabled={googleLoading}>
-        {googleLoading ? (
-          <ActivityIndicator color="#17131f" />
-        ) : (
-          <Text style={s.googleText}>Continue with Google</Text>
-        )}
+      {Platform.OS === "ios" ? (
+        <AppleAuthentication.AppleAuthenticationButton
+          buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+          buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+          cornerRadius={15}
+          style={s.appleNative}
+          onPress={continueWithApple}
+        />
+      ) : (
+        <Pressable style={s.apple} onPress={continueWithApple} disabled={appleLoading}>
+          {appleLoading ? <ActivityIndicator color="#fff" /> : <Text style={s.appleText}>  Continue with Apple</Text>}
+        </Pressable>
+      )}
+
+      <Pressable style={s.facebook} onPress={continueWithFacebook} disabled={facebookLoading}>
+        {facebookLoading ? <ActivityIndicator color="#fff" /> : <Text style={s.facebookText}>f  Continue with Facebook</Text>}
       </Pressable>
 
-      <Pressable
-        onPress={() => {
-          setMode(mode === "login" ? "register" : "login");
-          resetMessages();
-        }}
-      >
-        <Text style={s.link}>
-          {mode === "login" ? "New to Amora? Create an account" : "Already have an account? Sign in"}
-        </Text>
+      <Pressable style={s.google} onPress={continueWithGoogle} disabled={googleLoading}>
+        {googleLoading ? <ActivityIndicator color="#17131f" /> : <Text style={s.googleText}>Continue with Google</Text>}
+      </Pressable>
+
+      <Pressable onPress={() => { setMode(mode === "login" ? "register" : "login"); resetMessages(); }}>
+        <Text style={s.link}>{mode === "login" ? "New to Amora? Create an account" : "Already have an account? Sign in"}</Text>
       </Pressable>
 
       <Text style={s.foot}>By continuing you accept the Terms and Privacy Policy.</Text>
@@ -274,9 +315,14 @@ const s = StyleSheet.create({
   input: { backgroundColor: theme.surface, borderWidth: 1, borderColor: theme.border, borderRadius: 15, padding: 16, color: theme.text, marginBottom: 12 },
   primary: { backgroundColor: theme.pink, borderRadius: 15, padding: 16, alignItems: "center" },
   primaryText: { color: "#fff", fontWeight: "800" },
-  google: { backgroundColor: "#fff", borderRadius: 15, padding: 16, alignItems: "center", marginTop: 10 },
+  appleNative: { width: "100%", height: 52, marginBottom: 10 },
+  apple: { backgroundColor: "#050505", borderRadius: 15, padding: 16, alignItems: "center", marginBottom: 10 },
+  appleText: { color: "#fff", fontWeight: "800" },
+  facebook: { backgroundColor: "#1877F2", borderRadius: 15, padding: 16, alignItems: "center", marginBottom: 10 },
+  facebookText: { color: "#fff", fontWeight: "800" },
+  google: { backgroundColor: "#fff", borderRadius: 15, padding: 16, alignItems: "center" },
   googleText: { color: "#17131f", fontWeight: "800" },
   or: { color: theme.muted, textAlign: "center", margin: 20 },
-  link: { color: theme.pink, textAlign: "center", fontWeight: "700", marginTop: 4 },
+  link: { color: theme.pink, textAlign: "center", fontWeight: "700", marginTop: 12 },
   foot: { color: "#777080", fontSize: 11, textAlign: "center", marginTop: 28 }
 });
