@@ -12,8 +12,10 @@ const { WebSocketServer } = require('ws');
 const Stripe = require('stripe');
 const { grantMonthlyBonusIfDue } = require('./lib/membership');
 const { incrementMissionProgress } = require('./lib/missions');
+const { requestSecurityMiddleware, createRateLimiter, noStore } = require('./middleware/security');
 
 const app = express();
+app.set('trust proxy', 1);
 const server = http.createServer(app);
 const prisma = new PrismaClient();
 
@@ -79,6 +81,7 @@ try {
 
 // ---------- Middleware ----------
 app.use(helmet());
+app.use(requestSecurityMiddleware);
 
 // ---------- CORS ----------
 const configuredCorsOrigins = (process.env.CORS_ORIGIN || '')
@@ -446,6 +449,14 @@ app.post(
   }
 );
 
+// ---------- API abuse protection ----------
+const apiRateLimiter = createRateLimiter({ windowMs: 60 * 1000, max: 600, keyPrefix: 'api' });
+const authRateLimiter = createRateLimiter({ windowMs: 10 * 60 * 1000, max: 40, keyPrefix: 'auth' });
+app.use(apiRateLimiter);
+
+// Authentication, wallet and safety responses must never be cached by a proxy.
+app.use(['/auth', '/wallet', '/safety'], noStore);
+
 // ---------- JSON body ----------
 app.use(
   express.json({
@@ -554,7 +565,7 @@ const notificationRoutes =
   require('./routes/notifications')(prisma, io);
 
 // ---------- Mount routes ----------
-app.use('/auth', authRoutes);
+app.use('/auth', authRateLimiter, authRoutes);
 app.use('/users', userRoutes);
 app.use('/live', liveRoutes);
 app.use('/live', battleRoutes);
@@ -579,7 +590,7 @@ app.use('/notifications', notificationRoutes);
 app.get('/', (req, res) => {
   res.json({
     name: 'AmoraLive API',
-    version: '1.0.0',
+    version: '2.0.0',
     status: 'running',
 
     endpoints: [
@@ -607,6 +618,7 @@ app.get('/health', (req, res) => {
 
 // ---------- Socket.IO handlers ----------
 io.on('connection', (socket) => {
+  let authAttempts = 0;
   console.log(
     'Socket.IO connection:',
     socket.id
@@ -628,11 +640,18 @@ io.on('connection', (socket) => {
   socket.on(
     'authenticate',
     async (token, ack) => {
+      authAttempts += 1;
+      if (authAttempts > 5) {
+        if (typeof ack === 'function') ack({ ok: false, error: 'Too many authentication attempts' });
+        return socket.disconnect(true);
+      }
       try {
         const decoded = jwt.verify(
           token,
           process.env.JWT_SECRET
         );
+
+        if (decoded.type === 'refresh') throw new Error('Refresh token is not valid for sockets');
 
         const user =
           await prisma.user.findUnique({
@@ -1036,6 +1055,7 @@ wsServer.on(
 
     ws.authenticated =
       false;
+    let authAttempts = 0;
 
     ws.on(
       'message',
@@ -1055,12 +1075,19 @@ wsServer.on(
           data.type ===
           'authenticate'
         ) {
+          authAttempts += 1;
+          if (authAttempts > 5) {
+            ws.close(1008, 'Too many authentication attempts');
+            return;
+          }
           try {
             const decoded =
               jwt.verify(
                 data.token,
                 process.env.JWT_SECRET
               );
+
+            if (decoded.type === 'refresh') throw new Error('Refresh token is not valid for WebSocket authentication');
 
             const user =
               await prisma.user.findUnique({
