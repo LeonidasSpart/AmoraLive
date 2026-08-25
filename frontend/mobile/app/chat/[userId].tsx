@@ -11,9 +11,8 @@ import {
   KeyboardAvoidingView,
   Platform
 } from "react-native";
-import * as SecureStore from "expo-secure-store";
 import { theme } from "../../src/theme";
-import { api, API_URL, getUserId } from "../../src/api/client";
+import { api, API_URL, getUserId, getValidAccessToken } from "../../src/api/client";
 
 type Message = {
   id: string;
@@ -57,7 +56,7 @@ export default function Chat() {
     let active = true;
     let socket: any;
     (async () => {
-      const token = await SecureStore.getItemAsync("accessToken");
+      const token = await getValidAccessToken();
       if (!token) return;
       const { io } = await import("socket.io-client");
       if (!active) return;
