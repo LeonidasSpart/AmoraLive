@@ -16,12 +16,42 @@ async function getRefreshToken() {
   return SecureStore.getItemAsync(REFRESH_KEY);
 }
 
+function tokenExpiresWithin(token: string, skewMs = 30_000) {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload || typeof globalThis.atob !== "function") return true;
+    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
+    const binary = globalThis.atob(padded);
+    const json = decodeURIComponent(
+      Array.from(binary)
+        .map((char) => `%${char.charCodeAt(0).toString(16).padStart(2, "0")}`)
+        .join("")
+    );
+    const exp = Number(JSON.parse(json)?.exp);
+    return !Number.isFinite(exp) || exp * 1000 <= Date.now() + skewMs;
+  } catch {
+    return true;
+  }
+}
+
+let refreshPromise: Promise<boolean> | null = null;
+
 export async function getUserId() {
   return SecureStore.getItemAsync(USER_KEY);
 }
 
+export async function getValidAccessToken() {
+  const accessToken = await getAccessToken();
+  if (!accessToken) return null;
+  if (!tokenExpiresWithin(accessToken)) return accessToken;
+
+  const refreshed = await tryRefresh();
+  return refreshed ? getAccessToken() : null;
+}
+
 export async function isLoggedIn() {
-  return Boolean(await getAccessToken());
+  return Boolean(await getValidAccessToken());
 }
 
 export async function storeSession(session: {
@@ -75,27 +105,38 @@ async function request(path: string, options: RequestInit = {}, retry = true): P
 }
 
 async function tryRefresh() {
-  const refreshToken = await getRefreshToken();
-  if (!refreshToken) return false;
-  try {
-    const res = await fetch(`${API_URL}/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken })
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok || !data.accessToken) {
-      await clearSession();
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = (async () => {
+    const refreshToken = await getRefreshToken();
+    if (!refreshToken) return false;
+
+    try {
+      const res = await fetch(`${API_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.accessToken) {
+        await clearSession();
+        return false;
+      }
+      await SecureStore.setItemAsync(ACCESS_KEY, data.accessToken);
+      if (data.refreshToken) await SecureStore.setItemAsync(REFRESH_KEY, data.refreshToken);
+      if (data.user?.id) await SecureStore.setItemAsync(USER_KEY, String(data.user.id));
+      return true;
+    } catch {
       return false;
     }
-    await SecureStore.setItemAsync(ACCESS_KEY, data.accessToken);
-    return true;
-  } catch {
-    return false;
-  }
+  })().finally(() => {
+    refreshPromise = null;
+  });
+
+  return refreshPromise;
 }
 
-async function uploadFile(path: string, formData: FormData): Promise<any> {
+async function uploadFile(path: string, formData: FormData, retry = true): Promise<any> {
   const accessToken = await getAccessToken();
   // Deliberately no Content-Type header here — fetch sets the correct
   // multipart/form-data boundary automatically. Setting it manually (as the
@@ -108,6 +149,11 @@ async function uploadFile(path: string, formData: FormData): Promise<any> {
     },
     body: formData
   });
+  if (response.status === 401 && retry) {
+    const refreshed = await tryRefresh();
+    if (refreshed) return uploadFile(path, formData, false);
+  }
+
   const data = await response.json().catch(() => ({}));
   if (!response.ok) throw new ApiError(data.error || `API ${response.status}`, response.status);
   return data;
