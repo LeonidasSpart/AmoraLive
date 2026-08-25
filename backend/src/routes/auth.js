@@ -360,6 +360,10 @@ module.exports = (prisma) => {
     };
   }
 
+  function isUniqueConstraintError(error) {
+    return error?.code === 'P2002';
+  }
+
   router.post('/register', async (req, res) => {
     const result = registerSchema.safeParse(req.body);
     if (!result.success) return res.status(400).json({ errors: result.error.issues });
@@ -369,14 +373,35 @@ module.exports = (prisma) => {
 
     try {
       const hashed = await bcrypt.hash(password, 12);
-      const user = await prisma.user.create({
-        data: { email: email.toLowerCase(), username, password_hash: hashed, date_of_birth: dateOfBirth, display_name: username, age_verified: true }
+      const user = await prisma.$transaction(async (tx) => {
+        const created = await tx.user.create({
+          data: {
+            email: email.toLowerCase(),
+            username,
+            password_hash: hashed,
+            date_of_birth: dateOfBirth,
+            display_name: username,
+            age_verified: true
+          }
+        });
+        await tx.wallet.create({ data: { user_id: created.id, balance: 0 } });
+        return created;
       });
-      await prisma.wallet.create({ data: { user_id: user.id, balance: 0 } });
-      const verificationSent = await sendVerificationEmail(user).catch(err => { console.error('Verification email failed:', err.message); return false; });
-      res.status(201).json({ id: user.id, message: verificationSent ? 'Verification email sent.' : 'Account created. Email verification is temporarily unavailable.' });
+
+      const verificationSent = await sendVerificationEmail(user).catch(err => {
+        console.error('Verification email failed:', err.message);
+        return false;
+      });
+      res.status(201).json({
+        id: user.id,
+        message: verificationSent ? 'Verification email sent.' : 'Account created. Email verification is temporarily unavailable.'
+      });
     } catch (e) {
-      res.status(400).json({ error: 'Email or username already exists.' });
+      console.error('Registration error:', e);
+      if (isUniqueConstraintError(e)) {
+        return res.status(409).json({ error: 'Email or username already exists.' });
+      }
+      return res.status(503).json({ error: 'Amora is temporarily unable to create your account. Please try again shortly.' });
     }
   });
 
@@ -592,11 +617,26 @@ module.exports = (prisma) => {
       if (!/^[a-zA-Z0-9_.-]{3,20}$/.test(username)) return res.status(400).json({ error: 'Invalid username' });
       if (Number.isNaN(dateOfBirth.getTime()) || calculateAge(dateOfBirth) < 18) return res.status(403).json({ error: 'You must be 18 or older.' });
       const passwordHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 12);
-      const user = await prisma.user.create({ data: { email: decoded.email, username, password_hash: passwordHash, date_of_birth: dateOfBirth, display_name: decoded.name, age_verified: true, is_verified: true } });
-      await prisma.wallet.create({ data: { user_id: user.id, balance: 0 } });
+      const user = await prisma.$transaction(async (tx) => {
+        const created = await tx.user.create({
+          data: {
+            email: decoded.email,
+            username,
+            password_hash: passwordHash,
+            date_of_birth: dateOfBirth,
+            display_name: decoded.name,
+            age_verified: true,
+            is_verified: true
+          }
+        });
+        await tx.wallet.create({ data: { user_id: created.id, balance: 0 } });
+        return created;
+      });
       res.status(201).json(await createSession(user, req));
     } catch (e) {
-      res.status(400).json({ error: 'Unable to complete Google registration. Username may already be taken.' });
+      console.error('Google registration error:', e);
+      if (isUniqueConstraintError(e)) return res.status(409).json({ error: 'Email or username already exists.' });
+      return res.status(503).json({ error: 'Google registration is temporarily unavailable. Please try again shortly.' });
     }
   });
 
@@ -909,7 +949,8 @@ module.exports = (prisma) => {
       res.status(201).json(await createSession(user, req));
     } catch (e) {
       console.error('Social registration error:', e);
-      res.status(400).json({ error: 'Unable to complete social registration. Username or email may already be in use.' });
+      if (isUniqueConstraintError(e)) return res.status(409).json({ error: 'Email or username already exists.' });
+      return res.status(503).json({ error: 'Social registration is temporarily unavailable. Please try again shortly.' });
     }
   });
 
@@ -922,9 +963,29 @@ module.exports = (prisma) => {
       if (!session || session.expires_at < new Date()) return res.status(401).json({ error: 'Invalid refresh token.' });
       const user = await prisma.user.findUnique({ where: { id: session.user_id } });
       if (!user?.is_active) return res.status(403).json({ error: 'Account suspended.' });
-      res.json({ accessToken: signAccessToken(user) });
-    } catch {
-      res.status(401).json({ error: 'Invalid refresh token.' });
+
+      // Rotate the refresh token on every successful refresh. Both clients
+      // already persist data.refreshToken when one is returned.
+      const nextRefreshToken = signRefreshToken(user);
+      const updated = await prisma.session.updateMany({
+        where: { id: session.id, refresh_token: refreshToken },
+        data: {
+          refresh_token: nextRefreshToken,
+          expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+        }
+      });
+      if (updated.count !== 1) return res.status(401).json({ error: 'Invalid refresh token.' });
+
+      res.json({
+        accessToken: signAccessToken(user),
+        refreshToken: nextRefreshToken,
+        user: { id: user.id, username: user.username, display_name: user.display_name, level: user.level, role: user.role, membership_tier: user.membership_tier }
+      });
+    } catch (e) {
+      console.error('Refresh token error:', e);
+      if (e?.code === 'P2002') return res.status(503).json({ error: 'Session refresh is temporarily unavailable. Please try again.' });
+      if (e?.name === 'JsonWebTokenError' || e?.name === 'TokenExpiredError') return res.status(401).json({ error: 'Invalid refresh token.' });
+      return res.status(503).json({ error: 'Session refresh is temporarily unavailable. Please try again.' });
     }
   });
 
