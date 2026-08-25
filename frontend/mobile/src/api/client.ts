@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import { getItem, setItem, deleteItem } from "../storage";
 import Constants from 'expo-constants';
 
 export const API_URL: string =
@@ -9,11 +9,11 @@ const REFRESH_KEY = 'refreshToken';
 const USER_KEY = 'userId';
 
 async function getAccessToken() {
-  return SecureStore.getItemAsync(ACCESS_KEY);
+  return getItem(ACCESS_KEY);
 }
 
 async function getRefreshToken() {
-  return SecureStore.getItemAsync(REFRESH_KEY);
+  return getItem(REFRESH_KEY);
 }
 
 function tokenExpiresWithin(token: string, skewMs = 30_000) {
@@ -38,7 +38,7 @@ function tokenExpiresWithin(token: string, skewMs = 30_000) {
 let refreshPromise: Promise<boolean> | null = null;
 
 export async function getUserId() {
-  return SecureStore.getItemAsync(USER_KEY);
+  return getItem(USER_KEY);
 }
 
 export async function getValidAccessToken() {
@@ -59,16 +59,16 @@ export async function storeSession(session: {
   refreshToken?: string;
   user?: { id?: string };
 }) {
-  if (session.accessToken) await SecureStore.setItemAsync(ACCESS_KEY, session.accessToken);
-  if (session.refreshToken) await SecureStore.setItemAsync(REFRESH_KEY, session.refreshToken);
-  if (session.user?.id) await SecureStore.setItemAsync(USER_KEY, session.user.id);
+  if (session.accessToken) await setItem(ACCESS_KEY, session.accessToken);
+  if (session.refreshToken) await setItem(REFRESH_KEY, session.refreshToken);
+  if (session.user?.id) await setItem(USER_KEY, session.user.id);
 }
 
 export async function clearSession() {
   await Promise.all([
-    SecureStore.deleteItemAsync(ACCESS_KEY),
-    SecureStore.deleteItemAsync(REFRESH_KEY),
-    SecureStore.deleteItemAsync(USER_KEY)
+    deleteItem(ACCESS_KEY),
+    deleteItem(REFRESH_KEY),
+    deleteItem(USER_KEY)
   ]);
 }
 
@@ -122,9 +122,9 @@ async function tryRefresh() {
         await clearSession();
         return false;
       }
-      await SecureStore.setItemAsync(ACCESS_KEY, data.accessToken);
-      if (data.refreshToken) await SecureStore.setItemAsync(REFRESH_KEY, data.refreshToken);
-      if (data.user?.id) await SecureStore.setItemAsync(USER_KEY, String(data.user.id));
+      await setItem(ACCESS_KEY, data.accessToken);
+      if (data.refreshToken) await setItem(REFRESH_KEY, data.refreshToken);
+      if (data.user?.id) await setItem(USER_KEY, String(data.user.id));
       return true;
     } catch {
       return false;
@@ -192,6 +192,7 @@ export const api = {
     await clearSession();
   },
   me: () => request('/users/me'),
+  user: (userId: string) => request(`/users/${userId}`),
   updateProfile: (body: unknown) => request('/users/me', { method: 'PATCH', body: JSON.stringify(body) }),
   deleteAccount: () => request('/users/me', { method: 'DELETE' }),
   uploadPhoto: (formData: FormData) => uploadFile('/users/me/photos', formData),
@@ -199,8 +200,9 @@ export const api = {
   acceptMatch: (targetUserId: string) => request('/matches/accept', { method: 'POST', body: JSON.stringify({ targetUserId }) }),
   skipMatch: (targetUserId: string) => request('/matches/skip', { method: 'POST', body: JSON.stringify({ targetUserId }) }),
   conversations: () => request('/messages/conversations'),
-  messages: (userId: string) => request(`/messages/${userId}`),
+  messages: (userId: string, limit = 50) => request(`/messages/${userId}?limit=${limit}`),
   sendMessage: (userId: string, content: string) => request(`/messages/${userId}`, { method: 'POST', body: JSON.stringify({ content }) }),
+  uploadMessageMedia: (formData: FormData) => uploadFile('/messages/upload', formData),
   wallet: () => request('/wallet/me'),
   walletTransactions: () => request('/wallet/transactions'),
   gifts: () => request('/gifts/catalog'),
@@ -234,6 +236,17 @@ export const api = {
   verifyGooglePurchase: (packageId: string, purchaseToken: string) =>
     request('/wallet/iap/google/verify', { method: 'POST', body: JSON.stringify({ packageId, purchaseToken }) }),
   membership: () => request('/membership/me'),
+  membershipPlans: () => request('/membership/plans'),
+  membershipCheckout: (tier: string) => request('/membership/checkout', { method: 'POST', body: JSON.stringify({ tier }) }),
+  membershipCancel: () => request('/membership/cancel', { method: 'POST' }),
+  dailyRewardStatus: () => request('/daily-rewards/status'),
+  dailyRewardHistory: () => request('/daily-rewards/history?limit=14'),
+  claimDailyReward: () => request('/daily-rewards/claim', { method: 'POST' }),
+  storeCatalog: () => request('/store/catalog'),
+  storeMy: () => request('/store/my'),
+  storePurchase: (cosmeticId: string) => request('/store/purchase', { method: 'POST', body: JSON.stringify({ cosmeticId }) }),
+  equipCosmetic: (cosmeticId: string) => request('/store/equip', { method: 'POST', body: JSON.stringify({ cosmeticId }) }),
+  unequipCosmetic: (cosmeticId: string) => request('/store/unequip', { method: 'POST', body: JSON.stringify({ cosmeticId }) }),
   securityOverview: () => request('/safety/security/overview'),
   securityEvents: () => request('/safety/security/events'),
   sessions: () => request('/safety/sessions'),
