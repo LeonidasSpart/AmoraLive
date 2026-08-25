@@ -14,11 +14,10 @@ import {
   Image,
   Modal
 } from "react-native";
-import * as SecureStore from "expo-secure-store";
 import { Room, RoomEvent, Track, RemoteTrack } from "livekit-client";
 import { VideoView } from "@livekit/react-native";
 import { theme } from "../../src/theme";
-import { api, API_URL, getUserId } from "../../src/api/client";
+import { api, API_URL, getUserId, getValidAccessToken } from "../../src/api/client";
 import { giftArt } from "../../src/GiftArt";
 
 type ChatMessage = { id: string; message?: string; content?: string; user?: any; username?: string; system?: boolean };
@@ -148,7 +147,7 @@ export default function LiveRoom() {
     let active = true;
 
     (async () => {
-      const token = await SecureStore.getItemAsync("accessToken");
+      const token = await getValidAccessToken();
       if (!token) {
         router.replace("/auth");
         return;
