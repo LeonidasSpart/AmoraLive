@@ -128,9 +128,11 @@ const uniqueAllowedCorsOrigins = [
   ...new Set([
     'https://amoramatch.one',
     'https://www.amoramatch.one',
-    ...configuredCorsOrigins
+    ...configuredCorsOrigins.filter((origin) => origin !== '*')
   ])
 ];
+
+const wildcardCorsEnabled = configuredCorsOrigins.includes('*');
 
 // ------------------------------------------------------------
 // Normalize an origin
@@ -252,7 +254,10 @@ function isAllowedCorsOrigin(origin) {
     return true;
   }
 
-  return false;
+  // A literal `*` in CORS_ORIGIN explicitly opts into wildcard access.
+  // The cors package reflects the request origin when credentials are used,
+  // so we do not send `Access-Control-Allow-Origin: *` with credentials.
+  return wildcardCorsEnabled;
 }
 
 // ------------------------------------------------------------
@@ -329,7 +334,9 @@ console.log(
 
 console.log(
   '🌐 Allowed production/configured origins:',
-  uniqueAllowedCorsOrigins
+  uniqueAllowedCorsOrigins,
+  'wildcard:',
+  wildcardCorsEnabled
 );
 
 console.log(
