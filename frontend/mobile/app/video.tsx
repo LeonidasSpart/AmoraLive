@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { router } from "expo-router";
 import { View, Text, Pressable, StyleSheet, ActivityIndicator } from "react-native";
-import * as SecureStore from "expo-secure-store";
 import { Room, RoomEvent, Track, RemoteTrack, LocalTrack } from "livekit-client";
 import { VideoView } from "@livekit/react-native";
 import { theme } from "../src/theme";
-import { API_URL } from "../src/api/client";
+import { API_URL, getValidAccessToken } from "../src/api/client";
 
 type Phase = "connecting" | "queued" | "paired" | "deciding" | "result";
 type PeerPreview = { age: number | null; location: string | null; interests: string[] };
@@ -86,7 +85,7 @@ export default function VideoMatch() {
     let socket: any;
 
     (async () => {
-      const token = await SecureStore.getItemAsync("accessToken");
+      const token = await getValidAccessToken();
       if (!token) {
         router.replace("/auth");
         return;

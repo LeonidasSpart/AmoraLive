@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { router } from "expo-router";
 import { View, Text, Pressable, StyleSheet, FlatList, ActivityIndicator } from "react-native";
-import * as SecureStore from "expo-secure-store";
 import { theme } from "../src/theme";
-import { api, API_URL } from "../src/api/client";
+import { api, API_URL, getValidAccessToken } from "../src/api/client";
 
 type EventScore = {
   user_id: string;
@@ -70,7 +69,7 @@ export default function Events() {
     if (!event) return;
     let active = true;
     (async () => {
-      const token = await SecureStore.getItemAsync("accessToken");
+      const token = await getValidAccessToken();
       if (!token) return;
       const { io } = await import("socket.io-client");
       if (!active) return;
