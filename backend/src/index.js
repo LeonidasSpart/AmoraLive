@@ -617,8 +617,14 @@ app.get('/', (req, res) => {
 });
 
 // ---------- Health check ----------
-app.get('/health', (req, res) => {
-  res.send('AmoraLive API running');
+app.get('/health', async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    return res.status(200).json({ ok: true, api: 'up', database: 'up' });
+  } catch (e) {
+    console.error('Health check database error:', e.message);
+    return res.status(503).json({ ok: false, api: 'up', database: 'down' });
+  }
 });
 
 // ---------- Socket.IO handlers ----------
@@ -1561,3 +1567,20 @@ server.listen(
     );
   }
 );
+
+
+async function shutdown(signal) {
+  console.log(`🛑 ${signal} received — shutting down gracefully`);
+  server.close(async () => {
+    try { await prisma.$disconnect(); } catch (e) { console.error('Prisma shutdown error:', e.message); }
+    try {
+      if (pub) await pub.quit();
+      if (sub) await sub.quit();
+    } catch (e) { console.error('Redis shutdown error:', e.message); }
+    process.exit(0);
+  });
+  setTimeout(() => process.exit(1), 10000).unref();
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
