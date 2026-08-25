@@ -1,214 +1,127 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { router } from "expo-router";
-import { View, Text, Pressable, StyleSheet, FlatList, ActivityIndicator } from "react-native";
+import { View, Text, Pressable, StyleSheet, FlatList, ActivityIndicator, Image } from "react-native";
 import { theme } from "../src/theme";
 import { api, API_URL, getValidAccessToken } from "../src/api/client";
+import AppShell from "../src/AppShell";
 
 type EventScore = {
-  user_id: string;
-  event_id: string;
-  team_side: string;
-  total_gifts_sent: number;
-  total_gifts_received: number;
-  user: { username: string; display_name: string };
+  user_id:string; event_id:string; team_side:string; total_gifts_sent:number; total_gifts_received:number;
+  user:{username:string;display_name:string;profile_photo?:string|null};
 };
 
-function formatTimeLeft(seconds: number) {
+function formatTimeLeft(seconds:number) {
   if (seconds <= 0) return "Ended";
-  const d = Math.floor(seconds / 86400);
-  const h = Math.floor((seconds % 86400) / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  if (d > 0) return `${d}d ${h}h left`;
-  if (h > 0) return `${h}h ${m}m left`;
-  return `${m}m left`;
+  const d=Math.floor(seconds/86400), h=Math.floor((seconds%86400)/3600), m=Math.floor((seconds%3600)/60);
+  if(d>0)return `${d}d ${h}h left`; if(h>0)return `${h}h ${m}m left`; return `${m}m left`;
 }
 
 export default function Events() {
-  const [event, setEvent] = useState<any>(null);
-  const [myTeam, setMyTeam] = useState<string | null>(null);
-  const [scores, setScores] = useState<EventScore[]>([]);
-  const [teamTotals, setTeamTotals] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(true);
-  const [joining, setJoining] = useState(false);
-  const [error, setError] = useState("");
-  const [timeLeft, setTimeLeft] = useState(0);
+  const [event,setEvent]=useState<any>(null),[myTeam,setMyTeam]=useState<string|null>(null),[scores,setScores]=useState<EventScore[]>([]);
+  const [teamTotals,setTeamTotals]=useState<Record<string,number>>({}),[loading,setLoading]=useState(true),[joining,setJoining]=useState(false),[error,setError]=useState(""),[timeLeft,setTimeLeft]=useState(0);
+  const socketRef=useRef<any>(null);
 
-  const socketRef = useRef<any>(null);
+  const load=useCallback(async()=>{
+    try{
+      const data=await api.activeEvent();
+      setEvent(data);setMyTeam(data.myTeam);setTimeLeft(data.timeLeft);
+      const board=await api.eventLeaderboard(data.id);
+      setScores(board.scores||[]);setTeamTotals(board.teamTotals||{});setError("");
+    }catch(e:any){
+      if(e.status===404)setEvent(null); else setError(e.message||"Unable to load the current event.");
+    }finally{setLoading(false);}
+  },[]);
 
-  const load = useCallback(async () => {
-    try {
-      const data = await api.activeEvent();
-      setEvent(data);
-      setMyTeam(data.myTeam);
-      setTimeLeft(data.timeLeft);
-      const board = await api.eventLeaderboard(data.id);
-      setScores(board.scores || []);
-      setTeamTotals(board.teamTotals || {});
-      setError("");
-    } catch (e: any) {
-      if (e.status === 404) {
-        setEvent(null);
-      } else {
-        setError(e.message || "Unable to load the current event.");
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  useEffect(()=>{load();},[load]);
+  useEffect(()=>{const timer=setInterval(()=>setTimeLeft(t=>Math.max(0,t-1)),1000);return()=>clearInterval(timer);},[]);
 
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  useEffect(() => {
-    const timer = setInterval(() => setTimeLeft((t) => Math.max(0, t - 1)), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  useEffect(() => {
-    if (!event) return;
-    let active = true;
-    (async () => {
-      const token = await getValidAccessToken();
-      if (!token) return;
-      const { io } = await import("socket.io-client");
-      if (!active) return;
-      const socket = io(API_URL, { transports: ["websocket"] });
-      socketRef.current = socket;
-      socket.on("connect", () => {
-        socket.emit("authenticate", token, (ack: any) => {
-          if (ack?.ok) socket.emit("join-event", event.id);
-        });
-      });
-      socket.on("leaderboard-update", (payload: any) => {
-        if (!active) return;
-        setScores(payload.scores || []);
-        setTeamTotals(payload.teamTotals || {});
-      });
+  useEffect(()=>{
+    if(!event?.id)return;
+    let active=true;
+    (async()=>{
+      const token=await getValidAccessToken();if(!token)return;
+      const {io}=await import("socket.io-client");if(!active)return;
+      const socket=io(API_URL,{transports:["websocket"],reconnection:true});
+      socketRef.current=socket;
+      socket.on("connect",()=>socket.emit("authenticate",token,(ack:any)=>{if(ack?.ok)socket.emit("join-event",event.id);}));
+      socket.on("leaderboard-update",(payload:any)=>{if(!active)return;setScores(payload.scores||[]);setTeamTotals(payload.teamTotals||{});});
     })();
-    return () => {
-      active = false;
-      socketRef.current?.disconnect();
-    };
-  }, [event?.id]);
+    return()=>{active=false;socketRef.current?.disconnect();socketRef.current=null;};
+  },[event?.id]);
 
-  const joinTeam = async (team: string) => {
-    if (!event) return;
-    setJoining(true);
-    setError("");
-    try {
-      await api.joinEventTeam(event.id, team);
-      setMyTeam(team);
-    } catch (e: any) {
-      setError(e.message || "Unable to join this team.");
-    } finally {
-      setJoining(false);
-    }
+  const joinTeam=async(team:string)=>{
+    if(!event)return;setJoining(true);setError("");
+    try{await api.joinEventTeam(event.id,team);setMyTeam(team);}
+    catch(e:any){setError(e.message||"Unable to join this team.");}
+    finally{setJoining(false);}
   };
 
-  const teamA = event?.teams?.[0];
-  const teamB = event?.teams?.[1];
-  const totalA = teamTotals[teamA] || 0;
-  const totalB = teamTotals[teamB] || 0;
-  const totalAll = totalA + totalB || 1;
+  const teamA=event?.teams?.[0],teamB=event?.teams?.[1],totalA=teamTotals[teamA]||0,totalB=teamTotals[teamB]||0,totalAll=totalA+totalB||1;
 
-  if (loading) {
-    return (
-      <View style={[s.page, { alignItems: "center", justifyContent: "center" }]}>
-        <ActivityIndicator color={theme.pink} />
-      </View>
-    );
-  }
+  if(loading)return <AppShell><View style={[s.page,s.center]}><ActivityIndicator color={theme.pink}/><Text style={s.muted}>Opening the event…</Text></View></AppShell>;
 
-  return (
+  return <AppShell>
     <View style={s.page}>
-      <Pressable onPress={() => router.back()}>
-        <Text style={s.back}>‹</Text>
-      </Pressable>
+      <View style={s.header}>
+        <Pressable style={s.backBtn} onPress={()=>router.back()}><Text style={s.back}>‹</Text></Pressable>
+        <View><Text style={s.kicker}>AMORA EVENTS</Text><Text style={s.headerTitle}>Team Battle</Text></View>
+      </View>
 
-      {!event ? (
-        <View style={[s.page, { alignItems: "center", justifyContent: "center", padding: 0 }]}>
-          <Text style={{ fontSize: 48 }}>🏆</Text>
-          <Text style={s.muted}>No live event right now. Check back soon!</Text>
-        </View>
-      ) : (
+      {!event ? <View style={[s.center,{flex:1}]}><Text style={s.trophy}>🏆</Text><Text style={s.emptyTitle}>No live event right now</Text><Text style={s.muted}>Check back soon for the next Amora battle.</Text></View> : (
         <FlatList
-          data={scores.slice(0, 30)}
-          keyExtractor={(item) => `${item.user_id}-${item.event_id}`}
+          data={scores.slice(0,30)}
+          keyExtractor={(item)=>`${item.user_id}-${item.event_id}`}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{paddingBottom:25}}
           ListHeaderComponent={
             <View>
-              <Text style={s.title}>{event.title}</Text>
-              {!!event.description && <Text style={s.description}>{event.description}</Text>}
-              <View style={s.timerBadge}>
-                <Text style={s.timerText}>{formatTimeLeft(timeLeft)}</Text>
+              <View style={s.hero}>
+                {event.banner_url?<Image source={{uri:event.banner_url}} style={s.banner}/>:<View style={s.bannerFallback}><Text style={s.trophy}>🏆</Text></View>}
+                <View style={s.heroShade}/>
+                <View style={s.heroCopy}>
+                  <Text style={s.eventKicker}>LIVE EVENT</Text>
+                  <Text style={s.title}>{event.title}</Text>
+                  {!!event.description&&<Text style={s.description}>{event.description}</Text>}
+                  <View style={s.timer}><Text style={s.timerText}>⏱ {formatTimeLeft(timeLeft)}</Text></View>
+                </View>
               </View>
 
-              {!!error && <Text style={s.error}>{error}</Text>}
+              {!!error&&<Text style={s.error}>{error}</Text>}
 
-              {!myTeam ? (
-                <View style={{ marginBottom: 20 }}>
-                  <Text style={s.muted}>Pick a side to join the battle:</Text>
-                  <View style={s.teamRow}>
-                    {(event.teams || []).map((t: string) => (
-                      <Pressable key={t} style={s.teamBtn} onPress={() => joinTeam(t)} disabled={joining}>
-                        <Text style={s.teamBtnText}>{t}</Text>
-                      </Pressable>
-                    ))}
-                  </View>
-                </View>
-              ) : (
-                <View style={s.myTeamBanner}>
-                  <Text style={s.myTeamText}>You're on Team <Text style={{ fontWeight: "900" }}>{myTeam}</Text> — send gifts to boost your score!</Text>
-                </View>
-              )}
+              {!myTeam ? <View style={s.joinCard}>
+                <Text style={s.joinTitle}>Pick your side</Text>
+                <Text style={s.mutedLeft}>Send gifts to help your team win.</Text>
+                <View style={s.teamRow}>{(event.teams||[]).map((team:string)=><Pressable key={team} style={s.teamBtn} disabled={joining} onPress={()=>joinTeam(team)}><Text style={s.teamBtnText}>{team}</Text></Pressable>)}</View>
+              </View> : <View style={s.myTeam}><Text style={s.myTeamKicker}>YOUR TEAM</Text><Text style={s.myTeamText}>{myTeam}</Text><Text style={s.mutedLeft}>Your gifts now count toward this team’s score.</Text></View>}
 
-              <View style={s.scoreBar}>
-                <View style={[s.scoreBarFill, { width: `${(totalA / totalAll) * 100}%` }]} />
-              </View>
-              <View style={s.scoreLabels}>
-                <Text style={s.scoreLabelText}>{teamA}: {totalA}</Text>
-                <Text style={s.scoreLabelText}>{teamB}: {totalB}</Text>
+              <View style={s.scoreCard}>
+                <View style={s.scoreTop}><Text style={s.scoreTitle}>Battle score</Text><Text style={s.scoreHint}>LIVE</Text></View>
+                <View style={s.scoreBar}><View style={[s.scoreFill,{width:`${(totalA/totalAll)*100}%`}]}/></View>
+                <View style={s.scoreLabels}><Text style={s.scoreLabel}>{teamA}: <Text style={s.scoreValue}>{totalA}</Text></Text><Text style={s.scoreLabel}>{teamB}: <Text style={s.scoreValue}>{totalB}</Text></Text></View>
               </View>
 
               <Text style={s.sectionTitle}>Top contributors</Text>
-              {scores.length === 0 && <Text style={s.muted}>No one has scored yet — be the first!</Text>}
+              {scores.length===0&&<Text style={s.mutedLeft}>No one has scored yet — be the first!</Text>}
             </View>
           }
-          renderItem={({ item, index }) => (
-            <View style={s.listItem}>
-              <Text style={s.rank}>#{index + 1}</Text>
-              <Text style={{ flex: 1, color: "#eee" }}>{item.user?.display_name || item.user?.username}</Text>
-              <Text style={s.teamTag}>{item.team_side}</Text>
-              <Text style={s.points}>{item.total_gifts_sent + item.total_gifts_received} pts</Text>
-            </View>
-          )}
+          renderItem={({item,index})=><View style={s.listItem}>
+            <Text style={s.rank}>#{index+1}</Text>
+            <View style={s.contribAvatar}>{item.user?.profile_photo?<Image source={{uri:item.user.profile_photo}} style={s.contribImage}/>:<Text style={s.contribLetter}>{(item.user?.display_name||"A")[0]}</Text>}</View>
+            <View style={{flex:1}}><Text style={s.contribName}>{item.user?.display_name||item.user?.username}</Text><Text style={s.teamTag}>{item.team_side}</Text></View>
+            <Text style={s.points}>{item.total_gifts_sent+item.total_gifts_received} pts</Text>
+          </View>}
         />
       )}
     </View>
-  );
+  </AppShell>;
 }
 
-const s = StyleSheet.create({
-  page: { flex: 1, backgroundColor: "#050407", padding: 20 },
-  back: { fontSize: 42, color: "#fff" },
-  title: { fontSize: 26, fontWeight: "900", color: "#fff", marginTop: 8 },
-  description: { color: theme.muted, marginTop: 6, fontSize: 13 },
-  timerBadge: { alignSelf: "flex-start", backgroundColor: "#2a2a3e", paddingHorizontal: 14, paddingVertical: 4, borderRadius: 16, marginVertical: 12 },
-  timerText: { color: theme.gold, fontWeight: "800", fontSize: 12 },
-  error: { color: "#ff6b6b", marginBottom: 12 },
-  muted: { color: theme.muted, textAlign: "center", marginTop: 8 },
-  teamRow: { flexDirection: "row", gap: 10, marginTop: 8 },
-  teamBtn: { flex: 1, backgroundColor: theme.surface, borderWidth: 1, borderColor: theme.pink, borderRadius: 12, padding: 14, alignItems: "center" },
-  teamBtnText: { color: theme.pink, fontWeight: "900" },
-  myTeamBanner: { backgroundColor: "#1e1526", borderWidth: 1, borderColor: theme.pink, borderRadius: 12, padding: 12, marginBottom: 20 },
-  myTeamText: { color: "#eee", fontSize: 13 },
-  scoreBar: { height: 10, backgroundColor: "#2a2a3e", borderRadius: 6, overflow: "hidden" },
-  scoreBarFill: { height: "100%", backgroundColor: theme.pink },
-  scoreLabels: { flexDirection: "row", justifyContent: "space-between", marginTop: 6 },
-  scoreLabelText: { color: theme.muted, fontSize: 12 },
-  sectionTitle: { color: "#fff", fontSize: 16, fontWeight: "800", marginTop: 24, marginBottom: 8 },
-  listItem: { flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: theme.surface, borderWidth: 1, borderColor: theme.border, borderRadius: 10, padding: 10, marginBottom: 6 },
-  rank: { color: theme.gold, fontWeight: "900", width: 30 },
-  teamTag: { color: theme.muted, fontSize: 11 },
-  points: { color: theme.pink, fontWeight: "900" }
+const s=StyleSheet.create({
+  page:{flex:1,backgroundColor:theme.bg,paddingHorizontal:18},header:{flexDirection:"row",alignItems:"center",gap:10,paddingTop:10,paddingBottom:12},backBtn:{width:38,height:38,borderRadius:13,backgroundColor:"rgba(255,255,255,.045)",borderWidth:1,borderColor:"rgba(255,255,255,.08)",alignItems:"center",justifyContent:"center"},back:{fontSize:31,color:"#fff",marginTop:-4},kicker:{color:theme.pinkSoft,fontSize:8,fontWeight:"900",letterSpacing:2},headerTitle:{color:"#fff",fontSize:22,fontWeight:"900",marginTop:2},
+  hero:{height:235,borderRadius:26,overflow:"hidden",borderWidth:1,borderColor:"rgba(255,255,255,.10)",backgroundColor:theme.surface,position:"relative",marginBottom:12},banner:{width:"100%",height:"100%",opacity:.65},bannerFallback:{flex:1,alignItems:"center",justifyContent:"center",backgroundColor:theme.surface2},heroShade:{position:"absolute",left:0,right:0,top:0,bottom:0,backgroundColor:"rgba(5,3,12,.42)"},heroCopy:{position:"absolute",left:18,right:18,bottom:18},eventKicker:{color:theme.gold,fontSize:8,fontWeight:"900",letterSpacing:2},title:{color:"#fff",fontSize:27,fontWeight:"900",marginTop:4},description:{color:"#d4cadf",fontSize:10,lineHeight:15,marginTop:4},timer:{alignSelf:"flex-start",backgroundColor:"rgba(8,6,15,.72)",borderWidth:1,borderColor:"rgba(255,216,107,.25)",borderRadius:999,paddingHorizontal:11,paddingVertical:6,marginTop:9},timerText:{color:theme.gold,fontSize:9,fontWeight:"900"},
+  joinCard:{padding:16,borderRadius:20,backgroundColor:theme.surface,borderWidth:1,borderColor:"rgba(255,255,255,.08)",marginBottom:12},joinTitle:{color:"#fff",fontSize:17,fontWeight:"900"},mutedLeft:{color:theme.muted,fontSize:10,lineHeight:16,marginTop:3},teamRow:{flexDirection:"row",gap:9,marginTop:12},teamBtn:{flex:1,backgroundColor:"rgba(255,79,163,.08)",borderWidth:1,borderColor:"rgba(255,79,163,.5)",borderRadius:13,paddingVertical:13,alignItems:"center"},teamBtnText:{color:"#fff",fontWeight:"900",fontSize:11},
+  myTeam:{padding:16,borderRadius:20,backgroundColor:"rgba(255,79,163,.07)",borderWidth:1,borderColor:"rgba(255,79,163,.35)",marginBottom:12},myTeamKicker:{color:theme.pinkSoft,fontSize:8,fontWeight:"900",letterSpacing:2},myTeamText:{color:"#fff",fontSize:20,fontWeight:"900",marginTop:2},
+  scoreCard:{padding:15,borderRadius:20,backgroundColor:theme.surface,borderWidth:1,borderColor:"rgba(255,255,255,.08)"},scoreTop:{flexDirection:"row",justifyContent:"space-between",alignItems:"center",marginBottom:11},scoreTitle:{color:"#fff",fontSize:14,fontWeight:"900"},scoreHint:{color:theme.pink,fontSize:8,fontWeight:"900",letterSpacing:1.5},scoreBar:{height:12,borderRadius:6,backgroundColor:"#2a1b3d",overflow:"hidden"},scoreFill:{height:"100%",backgroundColor:theme.pink},scoreLabels:{flexDirection:"row",justifyContent:"space-between",marginTop:7},scoreLabel:{color:theme.muted,fontSize:10},scoreValue:{color:"#fff",fontWeight:"900"},
+  sectionTitle:{color:"#fff",fontSize:18,fontWeight:"900",marginTop:22,marginBottom:9},listItem:{flexDirection:"row",alignItems:"center",gap:9,backgroundColor:theme.surface,borderWidth:1,borderColor:"rgba(255,255,255,.07)",borderRadius:15,padding:10,marginBottom:6},rank:{width:28,color:theme.gold,fontWeight:"900",fontSize:11},contribAvatar:{width:34,height:34,borderRadius:17,overflow:"hidden",backgroundColor:theme.purple,alignItems:"center",justifyContent:"center"},contribImage:{width:"100%",height:"100%"},contribLetter:{color:"#fff",fontWeight:"900"},contribName:{color:"#fff",fontWeight:"800",fontSize:11},teamTag:{color:theme.dim,fontSize:8,marginTop:2},points:{color:theme.pink,fontWeight:"900",fontSize:10},
+  center:{alignItems:"center",justifyContent:"center"},trophy:{fontSize:48},emptyTitle:{color:"#fff",fontSize:20,fontWeight:"900",marginTop:10},muted:{color:theme.muted,textAlign:"center",fontSize:11,marginTop:5},error:{color:"#ff8bad",fontSize:10,textAlign:"center",paddingVertical:6}
 });

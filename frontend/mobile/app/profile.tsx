@@ -1,9 +1,10 @@
 import { useCallback, useState } from "react";
 import { router, useFocusEffect } from "expo-router";
-import { View, Text, Pressable, Image, StyleSheet, ActivityIndicator, ScrollView, Alert } from "react-native";
+import { View, Text, Pressable, Image, StyleSheet, ActivityIndicator, ScrollView, Alert, Linking } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { theme } from "../src/theme";
 import { api } from "../src/api/client";
+import AppShell from "../src/AppShell";
 
 type User = {
   id: string;
@@ -102,12 +103,12 @@ export default function Profile() {
   };
 
   const rows = [
-    { label: "Membership & VIP", onPress: () => router.push("/wallet") },
-    { label: "My level & rewards", onPress: () => {} },
-    { label: "My outfits & profile effects", onPress: () => {} },
+    { label: "Membership & VIP", onPress: () => router.push("/membership") },
+    { label: "My level & rewards", onPress: () => router.push("/rewards") },
+    { label: "My outfits & profile effects", onPress: () => router.push("/outfits") },
     { label: "Security Center", onPress: () => router.push("/security") },
     { label: "Delete my account", onPress: deleteAccount, danger: true },
-    { label: "Terms & policies", onPress: () => {} },
+    { label: "Terms & policies", onPress: () => Linking.openURL("https://www.amoramatch.one/legal/terms") },
     { label: "Log out", onPress: logout, danger: true }
   ];
 
@@ -120,6 +121,7 @@ export default function Profile() {
   }
 
   return (
+    <AppShell>
     <ScrollView style={s.page} contentContainerStyle={{ paddingBottom: 40 }}>
       <Pressable onPress={() => router.back()}>
         <Text style={s.back}>‹</Text>
@@ -151,6 +153,7 @@ export default function Profile() {
         </Pressable>
       ))}
     </ScrollView>
+    </AppShell>
   );
 }
 

@@ -4,6 +4,7 @@ import { View, Text, Pressable, StyleSheet, FlatList, ActivityIndicator, Platfor
 import * as WebBrowser from "expo-web-browser";
 import { theme } from "../src/theme";
 import { api } from "../src/api/client";
+import AppShell from "../src/AppShell";
 
 type CoinPackage = {
   id: string;
@@ -192,6 +193,7 @@ export default function Wallet() {
   }
 
   return (
+    <AppShell>
     <FlatList
       style={s.page}
       data={transactions}
@@ -247,6 +249,7 @@ export default function Wallet() {
         </View>
       )}
     />
+    </AppShell>
   );
 }
 

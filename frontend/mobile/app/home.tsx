@@ -4,6 +4,7 @@ import { View, Text, Pressable, StyleSheet, ScrollView } from "react-native";
 import { api } from "../src/api/client";
 import LuxuryGiftCard from "../src/LuxuryGiftCard";
 import { theme } from "../src/theme";
+import AppShell from "../src/AppShell";
 
 const actions = [
   ["💬", "Messages", "/messages"], ["✦", "Live", "/live"], ["🪙", "Coins & Gifts", "/wallet"],
@@ -13,7 +14,7 @@ const actions = [
 export default function Home() {
   const [gifts, setGifts] = useState<any[]>([]);
   useEffect(() => { api.gifts().then((data) => setGifts(Array.isArray(data) ? data.slice(0, 10) : [])).catch(() => {}); }, []);
-  return <ScrollView style={s.page} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
+  return <AppShell><ScrollView style={s.page} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
     <View style={s.top}><View><Text style={s.eyebrow}>MEANINGFUL CONNECTIONS</Text><Text style={s.brand}>AMORA</Text></View><Pressable style={s.coinPill} onPress={() => router.push("/wallet")}><Text style={s.coinIcon}>🪙</Text><Text style={s.coinText}>0</Text></Pressable></View>
 
     <View style={s.hero}>
@@ -30,7 +31,7 @@ export default function Home() {
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingHorizontal: 18 }} style={{ marginHorizontal: -18 }}><>{gifts.map((item) => <LuxuryGiftCard key={item.id} gift={item} onPress={() => router.push("/wallet")} />)}</></ScrollView>
 
     <View style={s.luxuryBanner}><View><Text style={s.luxuryKicker}>PRIVATE COLLECTION</Text><Text style={s.luxuryTitle}>Gifts that feel alive.</Text><Text style={s.luxuryText}>3D luxury gifts, live animations and premium moments.</Text></View><Text style={s.luxuryGem}>✦</Text></View>
-  </ScrollView>;
+  </ScrollView></AppShell>;
 }
 
 const s = StyleSheet.create({
