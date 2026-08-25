@@ -12,22 +12,34 @@ const { WebSocketServer } = require('ws');
 const Stripe = require('stripe');
 const { grantMonthlyBonusIfDue } = require('./lib/membership');
 const { incrementMissionProgress } = require('./lib/missions');
-const { requestSecurityMiddleware, createRateLimiter, noStore } = require('./middleware/security');
+const {
+  requestSecurityMiddleware,
+  createRateLimiter,
+  noStore
+} = require('./middleware/security');
 
 const app = express();
+
 app.set('trust proxy', 1);
+
 const server = http.createServer(app);
 const prisma = new PrismaClient();
 
-// ---------- Redis with graceful fallback ----------
-let pub, sub;
+// ============================================================
+// Redis with graceful fallback
+// ============================================================
+
+let pub;
+let sub;
 let redisReady = false;
 
 try {
   const redisUrl = process.env.REDIS_URL;
 
   if (!redisUrl) {
-    console.warn('⚠️ REDIS_URL not set – running without Redis');
+    console.warn(
+      '⚠️ REDIS_URL not set – running without Redis'
+    );
   } else {
     pub = new Redis(redisUrl, {
       retryStrategy: (times) => {
@@ -35,6 +47,7 @@ try {
           console.warn(
             'Redis connection failed after 5 retries – falling back to local'
           );
+
           return null;
         }
 
@@ -48,6 +61,7 @@ try {
           console.warn(
             'Redis connection failed after 5 retries – falling back to local'
           );
+
           return null;
         }
 
@@ -55,13 +69,19 @@ try {
       }
     });
 
-    pub.on('error', (err) =>
-      console.warn('Redis pub error:', err.message)
-    );
+    pub.on('error', (err) => {
+      console.warn(
+        'Redis pub error:',
+        err.message
+      );
+    });
 
-    sub.on('error', (err) =>
-      console.warn('Redis sub error:', err.message)
-    );
+    sub.on('error', (err) => {
+      console.warn(
+        'Redis sub error:',
+        err.message
+      );
+    });
 
     pub.on('connect', () => {
       redisReady = true;
@@ -79,19 +99,31 @@ try {
   );
 }
 
-// ---------- Middleware ----------
+// ============================================================
+// Middleware
+// ============================================================
+
 app.use(helmet());
+
 app.use(requestSecurityMiddleware);
 
-// ---------- CORS ----------
-const configuredCorsOrigins = (process.env.CORS_ORIGIN || '')
+// ============================================================
+// CORS
+// ============================================================
+
+const configuredCorsOrigins = (
+  process.env.CORS_ORIGIN || ''
+)
   .split(',')
-  .map((origin) => origin.trim().replace(/\/$/, ''))
+  .map((origin) =>
+    origin.trim().replace(/\/$/, '')
+  )
   .filter(Boolean);
 
-// These production domains are ALWAYS allowed.
-// Railway CORS_ORIGIN can add additional domains,
-// but it can never remove these two.
+// Production domains are ALWAYS allowed.
+//
+// CORS_ORIGIN may add development origins,
+// but it cannot remove the production domains.
 const uniqueAllowedCorsOrigins = [
   ...new Set([
     'https://amoramatch.one',
@@ -100,28 +132,165 @@ const uniqueAllowedCorsOrigins = [
   ])
 ];
 
+// ------------------------------------------------------------
+// Normalize an origin
+// ------------------------------------------------------------
+
+function normalizeOrigin(origin) {
+  return String(origin || '')
+    .trim()
+    .replace(/\/$/, '');
+}
+
+// ------------------------------------------------------------
+// GitHub Codespaces support
+//
+// Codespaces forwarded ports can change:
+//
+//   ...-8081.app.github.dev
+//   ...-8082.app.github.dev
+//   ...-8083.app.github.dev
+//
+// We allow the same Codespace when ONLY the forwarded
+// port changes.
+//
+// We do NOT allow arbitrary github.dev origins.
+// ------------------------------------------------------------
+
+function isAllowedCodespacesOrigin(origin) {
+  try {
+    const requested = new URL(origin);
+
+    if (
+      requested.protocol !== 'https:' ||
+      !requested.hostname.endsWith(
+        '.app.github.dev'
+      )
+    ) {
+      return false;
+    }
+
+    for (
+      const configuredOrigin of configuredCorsOrigins
+    ) {
+      try {
+        const configured =
+          new URL(configuredOrigin);
+
+        if (
+          configured.protocol !== 'https:' ||
+          !configured.hostname.endsWith(
+            '.app.github.dev'
+          )
+        ) {
+          continue;
+        }
+
+        // Remove the forwarded port suffix.
+        //
+        // Example:
+        //
+        // studious-space-palm-tree-abc-8081.app.github.dev
+        //
+        // becomes:
+        //
+        // studious-space-palm-tree-abc.app.github.dev
+
+        const configuredBase =
+          configured.hostname.replace(
+            /-\d+\.app\.github\.dev$/i,
+            '.app.github.dev'
+          );
+
+        const requestedBase =
+          requested.hostname.replace(
+            /-\d+\.app\.github\.dev$/i,
+            '.app.github.dev'
+          );
+
+        if (
+          configuredBase ===
+          requestedBase
+        ) {
+          return true;
+        }
+      } catch {
+        // Ignore malformed configured origins.
+      }
+    }
+
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+// ------------------------------------------------------------
+// Main CORS validation
+// ------------------------------------------------------------
+
+function isAllowedCorsOrigin(origin) {
+  const normalizedOrigin =
+    normalizeOrigin(origin);
+
+  // Exact production/configured origin.
+  if (
+    uniqueAllowedCorsOrigins.includes(
+      normalizedOrigin
+    )
+  ) {
+    return true;
+  }
+
+  // Same GitHub Codespace with a different
+  // forwarded port.
+  if (
+    isAllowedCodespacesOrigin(
+      normalizedOrigin
+    )
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+// ------------------------------------------------------------
+// Express CORS
+// ------------------------------------------------------------
+
 const corsOptions = {
   origin: (origin, callback) => {
-    // Allow server-to-server / non-browser requests.
+    // Server-to-server / non-browser request.
     if (!origin) {
       return callback(null, true);
     }
 
-    const normalizedOrigin = origin
-      .trim()
-      .replace(/\/$/, '');
+    const normalizedOrigin =
+      normalizeOrigin(origin);
 
-    if (uniqueAllowedCorsOrigins.includes(normalizedOrigin)) {
+    if (
+      isAllowedCorsOrigin(
+        normalizedOrigin
+      )
+    ) {
       return callback(null, true);
     }
 
-    console.error(`❌ CORS origin rejected: ${origin}`);
     console.error(
-      `✅ Allowed origins: ${uniqueAllowedCorsOrigins.join(', ')}`
+      `❌ CORS origin rejected: ${origin}`
+    );
+
+    console.error(
+      `✅ Configured origins: ${uniqueAllowedCorsOrigins.join(
+        ', '
+      )}`
     );
 
     return callback(
-      new Error(`CORS origin not allowed: ${origin}`)
+      new Error(
+        `CORS origin not allowed: ${origin}`
+      )
     );
   },
 
@@ -148,23 +317,37 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options(/.*/, cors(corsOptions));
+
+app.options(
+  /.*/,
+  cors(corsOptions)
+);
 
 console.log(
   '🔐 Auth/CORS configuration loaded for Amora web authentication'
 );
 
 console.log(
-  '🌐 Allowed CORS origins:',
+  '🌐 Allowed production/configured origins:',
   uniqueAllowedCorsOrigins
 );
 
-// ---------- Stripe webhook ----------
+console.log(
+  '🌐 GitHub Codespaces dynamic forwarded-port support: enabled'
+);
+
+// ============================================================
+// Stripe webhook
+//
 // Stripe requires the raw request body for signature verification.
-// This route must be registered before express.json().
+// This route MUST remain before express.json().
+// ============================================================
+
 app.post(
   '/payments/stripe/webhook',
-  express.raw({ type: 'application/json' }),
+  express.raw({
+    type: 'application/json'
+  }),
   async (req, res) => {
     if (
       !process.env.STRIPE_SECRET_KEY ||
@@ -172,95 +355,132 @@ app.post(
     ) {
       return res
         .status(503)
-        .send('Stripe webhook not configured');
+        .send(
+          'Stripe webhook not configured'
+        );
     }
 
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    const stripe = new Stripe(
+      process.env.STRIPE_SECRET_KEY
+    );
 
     let event;
 
     try {
-      const signature = req.headers['stripe-signature'];
+      const signature =
+        req.headers[
+          'stripe-signature'
+        ];
 
-      event = stripe.webhooks.constructEvent(
-        req.body,
-        signature,
-        process.env.STRIPE_WEBHOOK_SECRET
-      );
+      event =
+        stripe.webhooks.constructEvent(
+          req.body,
+          signature,
+          process.env
+            .STRIPE_WEBHOOK_SECRET
+        );
     } catch (err) {
       console.error(
         'Stripe signature verification failed:',
         err.message
       );
 
-      return res.status(400).send('Invalid signature');
+      return res
+        .status(400)
+        .send('Invalid signature');
     }
 
     try {
       if (
-        event.type === 'checkout.session.completed' ||
-        event.type === 'checkout.session.async_payment_succeeded'
+        event.type ===
+          'checkout.session.completed' ||
+        event.type ===
+          'checkout.session.async_payment_succeeded'
       ) {
-        const session = event.data.object;
-        const purchaseId = session.metadata?.purchaseId;
+        const session =
+          event.data.object;
+
+        const purchaseId =
+          session.metadata?.purchaseId;
 
         if (
           purchaseId &&
-          session.payment_status === 'paid'
+          session.payment_status ===
+            'paid'
         ) {
-          await prisma.$transaction(async (tx) => {
-            const purchase =
-              await tx.purchase.findUnique({
-                where: { id: purchaseId },
-                include: { package: true }
+          await prisma.$transaction(
+            async (tx) => {
+              const purchase =
+                await tx.purchase.findUnique(
+                  {
+                    where: {
+                      id: purchaseId
+                    },
+                    include: {
+                      package: true
+                    }
+                  }
+                );
+
+              if (
+                !purchase ||
+                purchase.status ===
+                  'completed'
+              ) {
+                return;
+              }
+
+              await tx.wallet.upsert({
+                where: {
+                  user_id:
+                    purchase.user_id
+                },
+
+                create: {
+                  user_id:
+                    purchase.user_id
+                },
+
+                update: {}
               });
 
-            if (
-              !purchase ||
-              purchase.status === 'completed'
-            ) {
-              return;
-            }
+              const coins =
+                purchase.package
+                  .coins_amount +
+                purchase.package
+                  .bonus_coins;
 
-            await tx.wallet.upsert({
-              where: {
-                user_id: purchase.user_id
-              },
-              create: {
-                user_id: purchase.user_id
-              },
-              update: {}
-            });
+              await tx.wallet.update({
+                where: {
+                  user_id:
+                    purchase.user_id
+                },
 
-            const coins =
-              purchase.package.coins_amount +
-              purchase.package.bonus_coins;
-
-            await tx.wallet.update({
-              where: {
-                user_id: purchase.user_id
-              },
-              data: {
-                balance: {
-                  increment: coins
+                data: {
+                  balance: {
+                    increment: coins
+                  }
                 }
-              }
-            });
+              });
 
-            await tx.purchase.update({
-              where: {
-                id: purchase.id
-              },
-              data: {
-                status: 'completed',
-                purchase_token: session.id
-              }
-            });
-          });
+              await tx.purchase.update({
+                where: {
+                  id: purchase.id
+                },
+
+                data: {
+                  status: 'completed',
+                  purchase_token:
+                    session.id
+                }
+              });
+            }
+          );
         }
 
         if (
-          session.mode === 'subscription' &&
+          session.mode ===
+            'subscription' &&
           session.subscription &&
           session.metadata?.userId &&
           session.metadata?.tier
@@ -271,106 +491,51 @@ app.post(
             );
 
           const endDate = new Date(
-            subscription.current_period_end * 1000
+            subscription.current_period_end *
+              1000
           );
 
-          await prisma.$transaction(async (tx) => {
-            await tx.membership.upsert({
-              where: {
-                user_id: session.metadata.userId
-              },
-
-              create: {
-                user_id: session.metadata.userId,
-                tier: session.metadata.tier,
-                start_date: new Date(),
-                end_date: endDate,
-                auto_renew:
-                  !subscription.cancel_at_period_end,
-                stripe_subscription_id:
-                  subscription.id
-              },
-
-              update: {
-                tier: session.metadata.tier,
-                start_date: new Date(),
-                end_date: endDate,
-                auto_renew:
-                  !subscription.cancel_at_period_end,
-                stripe_subscription_id:
-                  subscription.id
-              }
-            });
-
-            await tx.user.update({
-              where: {
-                id: session.metadata.userId
-              },
-
-              data: {
-                membership_tier:
-                  session.metadata.tier
-              }
-            });
-
-            // "Bonus coins monthly" is an advertised VIP/SVIP benefit —
-            // grant the first period's bonus right away rather than
-            // waiting for the first renewal.
-            await grantMonthlyBonusIfDue(tx, {
-              userId: session.metadata.userId,
-              tier: session.metadata.tier,
-              periodEnd: endDate
-            });
-          });
-        }
-      }
-
-      if (
-        event.type ===
-        'customer.subscription.updated'
-      ) {
-        const subscription = event.data.object;
-
-        const userId =
-          subscription.metadata?.userId;
-
-        const tier =
-          subscription.metadata?.tier;
-
-        if (userId) {
-          const active = [
-            'active',
-            'trialing',
-            'past_due'
-          ].includes(subscription.status);
-
-          if (active) {
-            const periodEnd = new Date(
-              subscription.current_period_end * 1000
-            );
-
-            await prisma.$transaction(async (tx) => {
+          await prisma.$transaction(
+            async (tx) => {
               await tx.membership.upsert({
                 where: {
-                  user_id: userId
+                  user_id:
+                    session.metadata
+                      .userId
                 },
 
                 create: {
-                  user_id: userId,
-                  tier: tier || 'premium',
+                  user_id:
+                    session.metadata
+                      .userId,
+
+                  tier:
+                    session.metadata
+                      .tier,
+
                   start_date: new Date(),
-                  end_date: periodEnd,
+
+                  end_date: endDate,
+
                   auto_renew:
                     !subscription.cancel_at_period_end,
+
                   stripe_subscription_id:
                     subscription.id
                 },
 
                 update: {
-                  tier: tier || undefined,
-                  end_date: periodEnd,
+                  tier:
+                    session.metadata
+                      .tier,
+
+                  start_date: new Date(),
+
+                  end_date: endDate,
+
                   auto_renew:
                     !subscription.cancel_at_period_end,
+
                   stripe_subscription_id:
                     subscription.id
                 }
@@ -378,24 +543,136 @@ app.post(
 
               await tx.user.update({
                 where: {
-                  id: userId
+                  id: session.metadata
+                    .userId
                 },
 
                 data: {
                   membership_tier:
-                    tier || 'premium'
+                    session.metadata
+                      .tier
                 }
               });
 
-              // Renewal reached — grant this billing period's bonus if it
-              // hasn't already been paid out (idempotent against Stripe
-              // redelivering this same webhook event).
-              await grantMonthlyBonusIfDue(tx, {
-                userId,
-                tier: tier || 'premium',
-                periodEnd
-              });
-            });
+              await grantMonthlyBonusIfDue(
+                tx,
+                {
+                  userId:
+                    session.metadata
+                      .userId,
+
+                  tier:
+                    session.metadata
+                      .tier,
+
+                  periodEnd: endDate
+                }
+              );
+            }
+          );
+        }
+      }
+
+      if (
+        event.type ===
+        'customer.subscription.updated'
+      ) {
+        const subscription =
+          event.data.object;
+
+        const userId =
+          subscription.metadata
+            ?.userId;
+
+        const tier =
+          subscription.metadata
+            ?.tier;
+
+        if (userId) {
+          const active = [
+            'active',
+            'trialing',
+            'past_due'
+          ].includes(
+            subscription.status
+          );
+
+          if (active) {
+            const periodEnd =
+              new Date(
+                subscription.current_period_end *
+                  1000
+              );
+
+            await prisma.$transaction(
+              async (tx) => {
+                await tx.membership.upsert({
+                  where: {
+                    user_id: userId
+                  },
+
+                  create: {
+                    user_id: userId,
+
+                    tier:
+                      tier ||
+                      'premium',
+
+                    start_date:
+                      new Date(),
+
+                    end_date:
+                      periodEnd,
+
+                    auto_renew:
+                      !subscription.cancel_at_period_end,
+
+                    stripe_subscription_id:
+                      subscription.id
+                  },
+
+                  update: {
+                    tier:
+                      tier ||
+                      undefined,
+
+                    end_date:
+                      periodEnd,
+
+                    auto_renew:
+                      !subscription.cancel_at_period_end,
+
+                    stripe_subscription_id:
+                      subscription.id
+                  }
+                });
+
+                await tx.user.update({
+                  where: {
+                    id: userId
+                  },
+
+                  data: {
+                    membership_tier:
+                      tier ||
+                      'premium'
+                  }
+                });
+
+                await grantMonthlyBonusIfDue(
+                  tx,
+                  {
+                    userId,
+
+                    tier:
+                      tier ||
+                      'premium',
+
+                    periodEnd
+                  }
+                );
+              }
+            );
           }
         }
       }
@@ -404,10 +681,12 @@ app.post(
         event.type ===
         'customer.subscription.deleted'
       ) {
-        const subscription = event.data.object;
+        const subscription =
+          event.data.object;
 
         const userId =
-          subscription.metadata?.userId;
+          subscription.metadata
+            ?.userId;
 
         if (userId) {
           await prisma.user.update({
@@ -416,20 +695,23 @@ app.post(
             },
 
             data: {
-              membership_tier: 'free'
+              membership_tier:
+                'free'
             }
           });
 
-          await prisma.membership.updateMany({
-            where: {
-              user_id: userId
-            },
+          await prisma.membership.updateMany(
+            {
+              where: {
+                user_id: userId
+              },
 
-            data: {
-              auto_renew: false,
-              end_date: new Date()
+              data: {
+                auto_renew: false,
+                end_date: new Date()
+              }
             }
-          });
+          );
         }
       }
 
@@ -444,20 +726,48 @@ app.post(
 
       res
         .status(500)
-        .send('Webhook processing failed');
+        .send(
+          'Webhook processing failed'
+        );
     }
   }
 );
 
-// ---------- API abuse protection ----------
-const apiRateLimiter = createRateLimiter({ windowMs: 60 * 1000, max: 600, keyPrefix: 'api' });
-const authRateLimiter = createRateLimiter({ windowMs: 10 * 60 * 1000, max: 40, keyPrefix: 'auth' });
+// ============================================================
+// API abuse protection
+// ============================================================
+
+const apiRateLimiter =
+  createRateLimiter({
+    windowMs: 60 * 1000,
+    max: 600,
+    keyPrefix: 'api'
+  });
+
+const authRateLimiter =
+  createRateLimiter({
+    windowMs: 10 * 60 * 1000,
+    max: 40,
+    keyPrefix: 'auth'
+  });
+
 app.use(apiRateLimiter);
 
-// Authentication, wallet and safety responses must never be cached by a proxy.
-app.use(['/auth', '/wallet', '/safety'], noStore);
+// Authentication, wallet and safety responses
+// must never be cached by a proxy.
+app.use(
+  [
+    '/auth',
+    '/wallet',
+    '/safety'
+  ],
+  noStore
+);
 
-// ---------- JSON body ----------
+// ============================================================
+// JSON body
+// ============================================================
+
 app.use(
   express.json({
     limit: '20mb'
@@ -465,568 +775,1089 @@ app.use(
 );
 
 // Apple Sign in with Apple uses response_mode=form_post.
-// Keep URL-encoded parsing scoped to normal request bodies; Stripe's raw
-// webhook remains registered above this middleware.
-app.use(express.urlencoded({ extended: false, limit: '100kb' }));
+app.use(
+  express.urlencoded({
+    extended: false,
+    limit: '100kb'
+  })
+);
 
-// ---------- Normalize double slashes ----------
-app.use((req, res, next) => {
-  // Browsers can preserve a trailing slash from
-  // NEXT_PUBLIC_API_URL and produce //auth/google/start.
-  if (req.url.startsWith('//')) {
-    req.url = req.url.replace(/^\/+/, '/');
+// ============================================================
+// Normalize double slashes
+// ============================================================
+
+app.use(
+  (req, res, next) => {
+    // Browsers can preserve a trailing slash from
+    // NEXT_PUBLIC_API_URL and produce //auth/google/start.
+    if (
+      req.url.startsWith('//')
+    ) {
+      req.url =
+        req.url.replace(
+          /^\/+/,
+          '/'
+        );
+    }
+
+    next();
   }
+);
 
-  next();
-});
+// ============================================================
+// Socket.IO
+// ============================================================
 
-// ---------- Socket.io ----------
 let io;
 
-if (redisReady && pub && sub) {
+const socketCorsOptions = {
+  origin: (origin, callback) => {
+    // Server-to-server / non-browser connection.
+    if (!origin) {
+      return callback(null, true);
+    }
+
+    const normalizedOrigin =
+      normalizeOrigin(origin);
+
+    if (
+      isAllowedCorsOrigin(
+        normalizedOrigin
+      )
+    ) {
+      return callback(null, true);
+    }
+
+    console.error(
+      `❌ Socket.IO CORS origin rejected: ${origin}`
+    );
+
+    console.error(
+      `✅ Configured origins: ${uniqueAllowedCorsOrigins.join(
+        ', '
+      )}`
+    );
+
+    return callback(
+      new Error(
+        `Socket.IO CORS origin not allowed: ${origin}`
+      )
+    );
+  },
+
+  methods: [
+    'GET',
+    'POST'
+  ],
+
+  credentials: true
+};
+
+if (
+  redisReady &&
+  pub &&
+  sub
+) {
   const {
     createAdapter
-  } = require('@socket.io/redis-adapter');
+  } = require(
+    '@socket.io/redis-adapter'
+  );
 
   io = new Server(server, {
-    cors: {
-      origin: uniqueAllowedCorsOrigins,
-      methods: ['GET', 'POST'],
-      credentials: true
-    },
+    cors: socketCorsOptions,
 
-    adapter: createAdapter(pub, sub)
+    adapter:
+      createAdapter(
+        pub,
+        sub
+      )
   });
 } else {
   io = new Server(server, {
-    cors: {
-      origin: uniqueAllowedCorsOrigins,
-      methods: ['GET', 'POST'],
-      credentials: true
-    }
+    cors: socketCorsOptions
   });
 }
 
 app.set('io', io);
 
-// ---------- Routes ----------
+// ============================================================
+// Routes
+// ============================================================
+
 const authRoutes =
-  require('./routes/auth')(prisma);
-
-const userRoutes =
-  require('./routes/users')(prisma);
-
-const liveRoutes =
-  require('./routes/live')(prisma, io);
-
-const battleRoutes =
-  require('./routes/battles')(prisma, io);
-
-const giftRoutes =
-  require('./routes/gifts')(prisma, io);
-
-const dailyRewardRoutes =
-  require('./routes/dailyRewards')(prisma);
-
-const missionRoutes =
-  require('./routes/missions')(prisma);
-
-const creatorStudioRoutes =
-  require('./routes/creatorStudio')(prisma);
-
-const discoverRoutes =
-  require('./routes/discover')(prisma);
-
-const storyRoutes =
-  require('./routes/stories')(prisma, io);
-
-const safetyRoutes =
-  require('./routes/safety')(prisma);
-
-const walletRoutes =
-  require('./routes/wallet')(prisma);
-
-const iapRoutes =
-  require('./routes/iap')(prisma);
-
-const membershipRoutes =
-  require('./routes/membership')(prisma);
-
-const storeRoutes =
-  require('./routes/store')(prisma);
-
-const eventRoutes =
-  require('./routes/events')(prisma, io);
-
-const adminRoutes =
-  require('./routes/admin')(prisma, io);
-
-const matchRoutes =
-  require('./routes/matches')(prisma);
-const messageRoutes =
-  require('./routes/messages')(prisma, io);
-
-const notificationRoutes =
-  require('./routes/notifications')(prisma, io);
-
-// ---------- Mount routes ----------
-app.use('/auth', authRateLimiter, authRoutes);
-app.use('/users', userRoutes);
-app.use('/live', liveRoutes);
-app.use('/live', battleRoutes);
-app.use('/gifts', giftRoutes);
-app.use('/daily-rewards', dailyRewardRoutes);
-app.use('/missions', missionRoutes);
-app.use('/creator-studio', creatorStudioRoutes);
-app.use('/discover', discoverRoutes);
-app.use('/stories', storyRoutes);
-app.use('/safety', safetyRoutes);
-app.use('/wallet', walletRoutes);
-app.use('/wallet/iap', iapRoutes);
-app.use('/membership', membershipRoutes);
-app.use('/store', storeRoutes);
-app.use('/events', eventRoutes);
-app.use('/admin', adminRoutes);
-app.use('/matches', matchRoutes);
-app.use('/messages', messageRoutes);
-app.use('/notifications', notificationRoutes);
-
-// ---------- Root endpoint ----------
-app.get('/', (req, res) => {
-  res.json({
-    name: 'AmoraLive API',
-    version: '2.0.0',
-    status: 'running',
-
-    endpoints: [
-      '/auth',
-      '/users',
-      '/live',
-      '/gifts',
-      '/wallet',
-      '/membership',
-      '/store',
-      '/events',
-      '/admin',
-      '/health',
-      '/matches',
-      '/messages',
-      '/notifications'
-    ]
-  });
-});
-
-// ---------- Health check ----------
-app.get('/health', async (req, res) => {
-  try {
-    await prisma.$queryRaw`SELECT 1`;
-    return res.status(200).json({ ok: true, api: 'up', database: 'up' });
-  } catch (e) {
-    console.error('Health check database error:', e.message);
-    return res.status(503).json({ ok: false, api: 'up', database: 'down' });
-  }
-});
-
-// ---------- Socket.IO handlers ----------
-io.on('connection', (socket) => {
-  let authAttempts = 0;
-  console.log(
-    'Socket.IO connection:',
-    socket.id
+  require('./routes/auth')(
+    prisma
   );
 
-  socket.use((packet, next) => {
-    if (
-      socket.userId ||
-      packet[0] === 'authenticate'
-    ) {
-      return next();
+const userRoutes =
+  require('./routes/users')(
+    prisma
+  );
+
+const liveRoutes =
+  require('./routes/live')(
+    prisma,
+    io
+  );
+
+const battleRoutes =
+  require('./routes/battles')(
+    prisma,
+    io
+  );
+
+const giftRoutes =
+  require('./routes/gifts')(
+    prisma,
+    io
+  );
+
+const dailyRewardRoutes =
+  require(
+    './routes/dailyRewards'
+  )(
+    prisma
+  );
+
+const missionRoutes =
+  require(
+    './routes/missions'
+  )(
+    prisma
+  );
+
+const creatorStudioRoutes =
+  require(
+    './routes/creatorStudio'
+  )(
+    prisma
+  );
+
+const discoverRoutes =
+  require(
+    './routes/discover'
+  )(
+    prisma
+  );
+
+const storyRoutes =
+  require(
+    './routes/stories'
+  )(
+    prisma,
+    io
+  );
+
+const safetyRoutes =
+  require(
+    './routes/safety'
+  )(
+    prisma
+  );
+
+const walletRoutes =
+  require(
+    './routes/wallet'
+  )(
+    prisma
+  );
+
+const iapRoutes =
+  require(
+    './routes/iap'
+  )(
+    prisma
+  );
+
+const membershipRoutes =
+  require(
+    './routes/membership'
+  )(
+    prisma
+  );
+
+const storeRoutes =
+  require(
+    './routes/store'
+  )(
+    prisma
+  );
+
+const eventRoutes =
+  require(
+    './routes/events'
+  )(
+    prisma,
+    io
+  );
+
+const adminRoutes =
+  require(
+    './routes/admin'
+  )(
+    prisma,
+    io
+  );
+
+const matchRoutes =
+  require(
+    './routes/matches'
+  )(
+    prisma
+  );
+
+const messageRoutes =
+  require(
+    './routes/messages'
+  )(
+    prisma,
+    io
+  );
+
+const notificationRoutes =
+  require(
+    './routes/notifications'
+  )(
+    prisma,
+    io
+  );
+
+// ============================================================
+// Mount routes
+// ============================================================
+
+app.use(
+  '/auth',
+  authRateLimiter,
+  authRoutes
+);
+
+app.use(
+  '/users',
+  userRoutes
+);
+
+app.use(
+  '/live',
+  liveRoutes
+);
+
+app.use(
+  '/live',
+  battleRoutes
+);
+
+app.use(
+  '/gifts',
+  giftRoutes
+);
+
+app.use(
+  '/daily-rewards',
+  dailyRewardRoutes
+);
+
+app.use(
+  '/missions',
+  missionRoutes
+);
+
+app.use(
+  '/creator-studio',
+  creatorStudioRoutes
+);
+
+app.use(
+  '/discover',
+  discoverRoutes
+);
+
+app.use(
+  '/stories',
+  storyRoutes
+);
+
+app.use(
+  '/safety',
+  safetyRoutes
+);
+
+app.use(
+  '/wallet',
+  walletRoutes
+);
+
+app.use(
+  '/wallet/iap',
+  iapRoutes
+);
+
+app.use(
+  '/membership',
+  membershipRoutes
+);
+
+app.use(
+  '/store',
+  storeRoutes
+);
+
+app.use(
+  '/events',
+  eventRoutes
+);
+
+app.use(
+  '/admin',
+  adminRoutes
+);
+
+app.use(
+  '/matches',
+  matchRoutes
+);
+
+app.use(
+  '/messages',
+  messageRoutes
+);
+
+app.use(
+  '/notifications',
+  notificationRoutes
+);
+
+// ============================================================
+// Root endpoint
+// ============================================================
+
+app.get(
+  '/',
+  (req, res) => {
+    res.json({
+      name: 'AmoraLive API',
+      version: '2.0.0',
+      status: 'running',
+
+      endpoints: [
+        '/auth',
+        '/users',
+        '/live',
+        '/gifts',
+        '/wallet',
+        '/membership',
+        '/store',
+        '/events',
+        '/admin',
+        '/health',
+        '/matches',
+        '/messages',
+        '/notifications'
+      ]
+    });
+  }
+);
+
+// ============================================================
+// Health check
+// ============================================================
+
+app.get(
+  '/health',
+  async (req, res) => {
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+
+      return res.status(200).json({
+        ok: true,
+        api: 'up',
+        database: 'up'
+      });
+    } catch (e) {
+      console.error(
+        'Health check database error:',
+        e.message
+      );
+
+      return res.status(503).json({
+        ok: false,
+        api: 'up',
+        database: 'down'
+      });
     }
+  }
+);
 
-    next(
-      new Error('Not authenticated')
+// ============================================================
+// Socket.IO handlers
+// ============================================================
+
+io.on(
+  'connection',
+  (socket) => {
+    let authAttempts = 0;
+
+    console.log(
+      'Socket.IO connection:',
+      socket.id
     );
-  });
 
-  socket.on(
-    'authenticate',
-    async (token, ack) => {
-      authAttempts += 1;
-      if (authAttempts > 5) {
-        if (typeof ack === 'function') ack({ ok: false, error: 'Too many authentication attempts' });
-        return socket.disconnect(true);
-      }
-      try {
-        const decoded = jwt.verify(
-          token,
-          process.env.JWT_SECRET
+    socket.use(
+      (packet, next) => {
+        if (
+          socket.userId ||
+          packet[0] ===
+            'authenticate'
+        ) {
+          return next();
+        }
+
+        next(
+          new Error(
+            'Not authenticated'
+          )
         );
+      }
+    );
 
-        if (decoded.type === 'refresh') throw new Error('Refresh token is not valid for sockets');
+    // ----------------------------------------------------------
+    // Authentication
+    // ----------------------------------------------------------
 
-        const user =
-          await prisma.user.findUnique({
-            where: {
-              id: decoded.id
-            },
+    socket.on(
+      'authenticate',
+      async (
+        token,
+        ack
+      ) => {
+        authAttempts += 1;
 
-            select: {
-              id: true,
-              is_active: true
-            }
-          });
+        if (
+          authAttempts > 5
+        ) {
+          if (
+            typeof ack ===
+            'function'
+          ) {
+            ack({
+              ok: false,
+              error:
+                'Too many authentication attempts'
+            });
+          }
 
-        if (!user?.is_active) {
-          throw new Error(
-            'Account unavailable'
+          return socket.disconnect(
+            true
           );
         }
 
-        socket.userId = user.id;
+        try {
+          const decoded =
+            jwt.verify(
+              token,
+              process.env
+                .JWT_SECRET
+            );
 
-        socket.join(
-          `user-${user.id}`
-        );
+          if (
+            decoded.type ===
+            'refresh'
+          ) {
+            throw new Error(
+              'Refresh token is not valid for sockets'
+            );
+          }
 
-        if (typeof ack === 'function') {
-          ack({
-            ok: true
-          });
-        }
-      } catch (e) {
-        if (typeof ack === 'function') {
-          ack({
-            ok: false,
-            error: 'Unauthorized'
-          });
-        }
+          const user =
+            await prisma.user.findUnique(
+              {
+                where: {
+                  id: decoded.id
+                },
 
-        socket.disconnect(true);
-      }
-    }
-  );
-
-  // ---------- Live room events ----------
-  socket.on(
-    'join-live',
-    (roomId) => {
-      socket.join(
-        `live-${roomId}`
-      );
-
-      io.to(
-        `live-${roomId}`
-      ).emit(
-        'viewer-joined',
-        socket.id
-      );
-    }
-  );
-
-  socket.on(
-    'leave-live',
-    (roomId) => {
-      socket.leave(
-        `live-${roomId}`
-      );
-
-      io.to(
-        `live-${roomId}`
-      ).emit(
-        'viewer-left',
-        socket.id
-      );
-    }
-  );
-
-  // ---------- Event (team-battle) leaderboard room ----------
-  socket.on('join-event', (eventId) => {
-    if (eventId) socket.join(`event-${eventId}`);
-  });
-
-  socket.on('leave-event', (eventId) => {
-    if (eventId) socket.leave(`event-${eventId}`);
-  });
-
-  socket.on(
-    'live-chat',
-    async (data) => {
-      const {
-        roomId,
-        message
-      } = data;
-
-      const userId =
-        socket.userId;
-
-      if (
-        !userId ||
-        !roomId ||
-        !String(
-          message || ''
-        ).trim()
-      ) {
-        return;
-      }
-
-      try {
-        const msg =
-          await prisma.liveChatMessage.create({
-            data: {
-              room_id: roomId,
-              user_id: userId,
-              message:
-                String(
-                  message
-                ).trim()
-            },
-            include: {
-              user: {
                 select: {
                   id: true,
-                  username: true,
-                  display_name: true,
-                  profile_photo: true,
-                  is_verified: true,
-                  membership_tier: true
+                  is_active: true
                 }
               }
-            }
-          });
+            );
+
+          if (
+            !user?.is_active
+          ) {
+            throw new Error(
+              'Account unavailable'
+            );
+          }
+
+          socket.userId =
+            user.id;
+
+          socket.join(
+            `user-${user.id}`
+          );
+
+          if (
+            typeof ack ===
+            'function'
+          ) {
+            ack({
+              ok: true
+            });
+          }
+        } catch (e) {
+          if (
+            typeof ack ===
+            'function'
+          ) {
+            ack({
+              ok: false,
+              error:
+                'Unauthorized'
+            });
+          }
+
+          socket.disconnect(
+            true
+          );
+        }
+      }
+    );
+
+    // ----------------------------------------------------------
+    // Live room events
+    // ----------------------------------------------------------
+
+    socket.on(
+      'join-live',
+      (roomId) => {
+        socket.join(
+          `live-${roomId}`
+        );
 
         io.to(
           `live-${roomId}`
         ).emit(
-          'new-chat',
-          msg
-        );
-      } catch (err) {
-        console.error(
-          'Chat error:',
-          err
+          'viewer-joined',
+          socket.id
         );
       }
-    }
-  );
+    );
 
-  socket.on(
-    'gift-sent',
-    (data) => {
-      io.to(
-        `live-${data.roomId}`
-      ).emit(
-        'gift-animation',
-        data
-      );
-    }
-  );
+    socket.on(
+      'leave-live',
+      (roomId) => {
+        socket.leave(
+          `live-${roomId}`
+        );
 
-  // ---------- Live "like" (heart tap) ----------
-  socket.on('live-like', async (roomId) => {
-    if (!socket.userId || !roomId) return;
-    try {
-      const updated = await prisma.liveRoom.update({
-        where: { id: roomId },
-        data: { like_count: { increment: 1 } },
-        select: { like_count: true }
-      });
-      io.to(`live-${roomId}`).emit('like-count', { count: updated.like_count, from: socket.userId });
-    } catch (err) {
-      // Room may not exist / already ended — not worth logging noisily
-      // since taps can arrive slightly after a stream ends.
-    }
-  });
-
-  // Note: 1:1 quick video matching is handled by the LiveKit-based queue in
-  // ./realtime/videoMatch.js, not by manual WebRTC signal relaying.
-
-  // ---------- Private chat ----------
-  socket.on(
-    'private-message',
-    async (data) => {
-      const {
-        receiverId,
-        content = '',
-        type = 'text',
-        media_urls = []
-      } = data || {};
-
-      const senderId = socket.userId;
-
-      if (!senderId || !receiverId || (!String(content).trim() && (!Array.isArray(media_urls) || media_urls.length === 0))) {
-        return;
+        io.to(
+          `live-${roomId}`
+        ).emit(
+          'viewer-left',
+          socket.id
+        );
       }
+    );
 
-      try {
-        // Socket messages must follow the same block rule as the REST route.
-        const block = await prisma.block.findFirst({
-          where: {
-            OR: [
-              { blocker_id: senderId, blocked_id: receiverId },
-              { blocker_id: receiverId, blocked_id: senderId }
-            ]
-          }
-        });
+    // ----------------------------------------------------------
+    // Event / team battle leaderboard room
+    // ----------------------------------------------------------
 
-        if (block) {
-          socket.emit('message-error', {
-            code: 'MESSAGING_BLOCKED',
-            error: 'You cannot message this user'
-          });
+    socket.on(
+      'join-event',
+      (eventId) => {
+        if (eventId) {
+          socket.join(
+            `event-${eventId}`
+          );
+        }
+      }
+    );
+
+    socket.on(
+      'leave-event',
+      (eventId) => {
+        if (eventId) {
+          socket.leave(
+            `event-${eventId}`
+          );
+        }
+      }
+    );
+
+    // ----------------------------------------------------------
+    // Live chat
+    // ----------------------------------------------------------
+
+    socket.on(
+      'live-chat',
+      async (data) => {
+        const {
+          roomId,
+          message
+        } = data;
+
+        const userId =
+          socket.userId;
+
+        if (
+          !userId ||
+          !roomId ||
+          !String(
+            message || ''
+          ).trim()
+        ) {
           return;
         }
 
-        const message = await prisma.message.create({
-          data: {
-            sender_id: senderId,
-            receiver_id: receiverId,
-            content: String(content || ''),
-            type,
-            media_urls: Array.isArray(media_urls) ? media_urls : []
-          },
-          include: {
-            sender: {
-              select: {
-                id: true,
-                username: true,
-                display_name: true,
-                profile_photo: true,
-                is_verified: true,
-                membership_tier: true
+        try {
+          const msg =
+            await prisma.liveChatMessage.create(
+              {
+                data: {
+                  room_id:
+                    roomId,
+
+                  user_id:
+                    userId,
+
+                  message:
+                    String(
+                      message
+                    ).trim()
+                },
+
+                include: {
+                  user: {
+                    select: {
+                      id: true,
+                      username: true,
+                      display_name: true,
+                      profile_photo: true,
+                      is_verified: true,
+                      membership_tier: true
+                    }
+                  }
+                }
               }
-            }
-          }
-        });
+            );
 
-        await prisma.notification.create({
-          data: {
-            user_id: receiverId,
-            type: 'new_message',
-            payload: {
-              senderId,
-              senderName: message.sender.display_name || message.sender.username,
-              preview: String(content || '').slice(0, 120)
-            }
-          }
-        }).catch((err) => {
-          console.error('Socket message notification failed:', err.message);
-        });
-
-        // Keep the mission counter identical to REST-sent messages.
-        prisma.$transaction((tx) =>
-          incrementMissionProgress(tx, senderId, 'messages_sent', 1)
-        ).catch((err) => {
-          console.error('Socket message mission progress failed:', err.message);
-        });
-
-        io.to(`user-${receiverId}`).emit('private-message', message);
-        socket.emit('private-message-sent', message);
-      } catch (err) {
-        console.error('Socket private message error:', err);
-        socket.emit('message-error', {
-          code: 'MESSAGE_SEND_FAILED',
-          error: 'Unable to send message'
-        });
-      }
-    }
-  );
-
-  socket.on(
-    'typing',
-    ({
-      receiverId,
-      isTyping
-    }) => {
-      const senderId =
-        socket.userId;
-
-      if (!senderId) {
-        return;
-      }
-
-      io.to(
-        `user-${receiverId}`
-      ).emit(
-        'typing',
-        {
-          from: senderId,
-          isTyping
+          io.to(
+            `live-${roomId}`
+          ).emit(
+            'new-chat',
+            msg
+          );
+        } catch (err) {
+          console.error(
+            'Chat error:',
+            err
+          );
         }
-      );
-    }
-  );
-
-  socket.on(
-    'mark-read',
-    async ({
-      senderId
-    }) => {
-      const userId =
-        socket.userId;
-
-      if (!userId) {
-        return;
       }
+    );
 
-      try {
-        await prisma.message.updateMany({
-          where: {
-            sender_id: senderId,
-            receiver_id: userId,
-            read_at: null
-          },
+    // ----------------------------------------------------------
+    // Gift
+    // ----------------------------------------------------------
 
-          data: {
-            read_at: new Date()
+    socket.on(
+      'gift-sent',
+      (data) => {
+        io.to(
+          `live-${data.roomId}`
+        ).emit(
+          'gift-animation',
+          data
+        );
+      }
+    );
+
+    // ----------------------------------------------------------
+    // Live like
+    // ----------------------------------------------------------
+
+    socket.on(
+      'live-like',
+      async (roomId) => {
+        if (
+          !socket.userId ||
+          !roomId
+        ) {
+          return;
+        }
+
+        try {
+          const updated =
+            await prisma.liveRoom.update(
+              {
+                where: {
+                  id: roomId
+                },
+
+                data: {
+                  like_count: {
+                    increment: 1
+                  }
+                },
+
+                select: {
+                  like_count: true
+                }
+              }
+            );
+
+          io.to(
+            `live-${roomId}`
+          ).emit(
+            'like-count',
+            {
+              count:
+                updated.like_count,
+
+              from:
+                socket.userId
+            }
+          );
+        } catch (err) {
+          // Room may not exist / already ended.
+        }
+      }
+    );
+
+    // ----------------------------------------------------------
+    // Private chat
+    // ----------------------------------------------------------
+
+    socket.on(
+      'private-message',
+      async (data) => {
+        const {
+          receiverId,
+          content = '',
+          type = 'text',
+          media_urls = []
+        } = data || {};
+
+        const senderId =
+          socket.userId;
+
+        if (
+          !senderId ||
+          !receiverId ||
+          (
+            !String(
+              content
+            ).trim() &&
+            (
+              !Array.isArray(
+                media_urls
+              ) ||
+              media_urls.length === 0
+            )
+          )
+        ) {
+          return;
+        }
+
+        try {
+          const block =
+            await prisma.block.findFirst(
+              {
+                where: {
+                  OR: [
+                    {
+                      blocker_id:
+                        senderId,
+
+                      blocked_id:
+                        receiverId
+                    },
+
+                    {
+                      blocker_id:
+                        receiverId,
+
+                      blocked_id:
+                        senderId
+                    }
+                  ]
+                }
+              }
+            );
+
+          if (block) {
+            socket.emit(
+              'message-error',
+              {
+                code:
+                  'MESSAGING_BLOCKED',
+
+                error:
+                  'You cannot message this user'
+              }
+            );
+
+            return;
           }
-        });
+
+          const message =
+            await prisma.message.create(
+              {
+                data: {
+                  sender_id:
+                    senderId,
+
+                  receiver_id:
+                    receiverId,
+
+                  content:
+                    String(
+                      content || ''
+                    ),
+
+                  type,
+
+                  media_urls:
+                    Array.isArray(
+                      media_urls
+                    )
+                      ? media_urls
+                      : []
+                },
+
+                include: {
+                  sender: {
+                    select: {
+                      id: true,
+                      username: true,
+                      display_name: true,
+                      profile_photo: true,
+                      is_verified: true,
+                      membership_tier: true
+                    }
+                  }
+                }
+              }
+            );
+
+          await prisma.notification
+            .create({
+              data: {
+                user_id:
+                  receiverId,
+
+                type:
+                  'new_message',
+
+                payload: {
+                  senderId,
+
+                  senderName:
+                    message
+                      .sender
+                      .display_name ||
+                    message
+                      .sender
+                      .username,
+
+                  preview:
+                    String(
+                      content || ''
+                    ).slice(
+                      0,
+                      120
+                    )
+                }
+              }
+            })
+            .catch(
+              (err) => {
+                console.error(
+                  'Socket message notification failed:',
+                  err.message
+                );
+              }
+            );
+
+          prisma
+            .$transaction(
+              (tx) =>
+                incrementMissionProgress(
+                  tx,
+                  senderId,
+                  'messages_sent',
+                  1
+                )
+            )
+            .catch(
+              (err) => {
+                console.error(
+                  'Socket message mission progress failed:',
+                  err.message
+                );
+              }
+            );
+
+          io.to(
+            `user-${receiverId}`
+          ).emit(
+            'private-message',
+            message
+          );
+
+          socket.emit(
+            'private-message-sent',
+            message
+          );
+        } catch (err) {
+          console.error(
+            'Socket private message error:',
+            err
+          );
+
+          socket.emit(
+            'message-error',
+            {
+              code:
+                'MESSAGE_SEND_FAILED',
+
+              error:
+                'Unable to send message'
+            }
+          );
+        }
+      }
+    );
+
+    // ----------------------------------------------------------
+    // Typing
+    // ----------------------------------------------------------
+
+    socket.on(
+      'typing',
+      ({
+        receiverId,
+        isTyping
+      }) => {
+        const senderId =
+          socket.userId;
+
+        if (!senderId) {
+          return;
+        }
 
         io.to(
-          `user-${senderId}`
+          `user-${receiverId}`
         ).emit(
-          'read-receipt',
+          'typing',
           {
-            from: userId
+            from: senderId,
+            isTyping
           }
         );
-      } catch (err) {
-        console.error(
-          'Mark read error:',
-          err
+      }
+    );
+
+    // ----------------------------------------------------------
+    // Mark read
+    // ----------------------------------------------------------
+
+    socket.on(
+      'mark-read',
+      async ({
+        senderId
+      }) => {
+        const userId =
+          socket.userId;
+
+        if (!userId) {
+          return;
+        }
+
+        try {
+          await prisma.message.updateMany(
+            {
+              where: {
+                sender_id:
+                  senderId,
+
+                receiver_id:
+                  userId,
+
+                read_at: null
+              },
+
+              data: {
+                read_at:
+                  new Date()
+              }
+            }
+          );
+
+          io.to(
+            `user-${senderId}`
+          ).emit(
+            'read-receipt',
+            {
+              from: userId
+            }
+          );
+        } catch (err) {
+          console.error(
+            'Mark read error:',
+            err
+          );
+        }
+      }
+    );
+
+    // ----------------------------------------------------------
+    // Disconnect
+    // ----------------------------------------------------------
+
+    socket.on(
+      'disconnect',
+      () => {
+        console.log(
+          'User disconnected:',
+          socket.id
         );
       }
-    }
-  );
+    );
+  }
+);
 
-  socket.on(
-    'disconnect',
-    () => {
-      console.log(
-        'User disconnected:',
-        socket.id
-      );
-    }
-  );
-});
+// ============================================================
+// Quick "video match" 1:1 live-video first-impression queue
+// ============================================================
 
-// Quick "video match" 1:1 live-video first-impression queue (see module for
-// details). Registered as a second io.on('connection', ...) listener; the
-// auth gate above (socket.use) already applies to every socket regardless
-// of which listener is attached, so these events stay protected.
-//
-// Loaded defensively: if this file is missing from the deploy (or throws
-// for any other reason) the whole API must NOT go down over an optional
-// feature. Same graceful-degradation philosophy as the Redis setup above.
 try {
-  require('./realtime/videoMatch')(io, prisma);
-  console.log('✅ Video match queue registered');
+  require(
+    './realtime/videoMatch'
+  )(
+    io,
+    prisma
+  );
+
+  console.log(
+    '✅ Video match queue registered'
+  );
 } catch (e) {
-  console.error('⚠️ Video match queue failed to load — video matching is disabled, rest of the API is unaffected:', e.message);
+  console.error(
+    '⚠️ Video match queue failed to load — video matching is disabled, the rest of the API is unaffected:',
+    e.message
+  );
 }
 
-// ---------- Native WebSocket bridge ----------
+// ============================================================
+// Native WebSocket bridge
+//
 // Keeps the existing web client compatible.
 // New clients should prefer Socket.IO.
+// ============================================================
 
 const wsServer =
   new WebSocketServer({
@@ -1066,6 +1897,7 @@ wsServer.on(
 
     ws.authenticated =
       false;
+
     let authAttempts = 0;
 
     ws.on(
@@ -1074,43 +1906,65 @@ wsServer.on(
         let data;
 
         try {
-          data = JSON.parse(
-            raw.toString()
-          );
+          data =
+            JSON.parse(
+              raw.toString()
+            );
         } catch {
           return;
         }
 
-        // ---------- WebSocket authentication ----------
+        // ------------------------------------------------------
+        // WebSocket authentication
+        // ------------------------------------------------------
+
         if (
           data.type ===
           'authenticate'
         ) {
           authAttempts += 1;
-          if (authAttempts > 5) {
-            ws.close(1008, 'Too many authentication attempts');
+
+          if (
+            authAttempts > 5
+          ) {
+            ws.close(
+              1008,
+              'Too many authentication attempts'
+            );
+
             return;
           }
+
           try {
             const decoded =
               jwt.verify(
                 data.token,
-                process.env.JWT_SECRET
+                process.env
+                  .JWT_SECRET
               );
 
-            if (decoded.type === 'refresh') throw new Error('Refresh token is not valid for WebSocket authentication');
+            if (
+              decoded.type ===
+              'refresh'
+            ) {
+              throw new Error(
+                'Refresh token is not valid for WebSocket authentication'
+              );
+            }
 
             const user =
-              await prisma.user.findUnique({
-                where: {
-                  id: decoded.id
-                },
+              await prisma.user.findUnique(
+                {
+                  where: {
+                    id: decoded.id
+                  },
 
-                select: {
-                  id: true,
-                  is_active: true
+                  select: {
+                    id: true,
+                    is_active: true
+                  }
                 }
-              });
+              );
 
             if (
               !user?.is_active
@@ -1143,15 +1997,20 @@ wsServer.on(
 
             ws.send(
               JSON.stringify({
-                type: 'authenticated',
+                type:
+                  'authenticated',
+
                 userId
               })
             );
           } catch {
             ws.send(
               JSON.stringify({
-                type: 'error',
-                error: 'Unauthorized'
+                type:
+                  'error',
+
+                error:
+                  'Unauthorized'
               })
             );
 
@@ -1173,10 +2032,14 @@ wsServer.on(
           );
         }
 
-        // ---------- Join live room ----------
+        // ------------------------------------------------------
+        // Join live room
+        // ------------------------------------------------------
+
         if (
           data.type === 'join' ||
-          data.type === 'join-live'
+          data.type ===
+            'join-live'
         ) {
           const roomId =
             data.roomId;
@@ -1186,17 +2049,19 @@ wsServer.on(
           }
 
           const room =
-            await prisma.liveRoom.findUnique({
-              where: {
-                id: roomId
-              },
+            await prisma.liveRoom.findUnique(
+              {
+                where: {
+                  id: roomId
+                },
 
-              select: {
-                id: true,
-                status: true,
-                viewer_count: true
+                select: {
+                  id: true,
+                  status: true,
+                  viewer_count: true
+                }
               }
-            });
+            );
 
           if (
             !room ||
@@ -1204,7 +2069,9 @@ wsServer.on(
           ) {
             return ws.send(
               JSON.stringify({
-                type: 'error',
+                type:
+                  'error',
+
                 error:
                   'Room is not live'
               })
@@ -1242,6 +2109,7 @@ wsServer.on(
             {
               type:
                 'viewer-count',
+
               count
             }
           );
@@ -1249,10 +2117,14 @@ wsServer.on(
           return;
         }
 
-        // ---------- Leave live room ----------
+        // ------------------------------------------------------
+        // Leave live room
+        // ------------------------------------------------------
+
         if (
           data.type === 'leave' ||
-          data.type === 'leave-live'
+          data.type ===
+            'leave-live'
         ) {
           const roomId =
             data.roomId;
@@ -1268,6 +2140,7 @@ wsServer.on(
 
           if (set) {
             set.delete(ws);
+
             rooms.delete(
               roomId
             );
@@ -1277,12 +2150,15 @@ wsServer.on(
               {
                 type:
                   'viewer-count',
+
                 count:
                   set.size
               }
             );
 
-            if (!set.size) {
+            if (
+              !set.size
+            ) {
               wsRooms.delete(
                 roomId
               );
@@ -1292,7 +2168,10 @@ wsServer.on(
           return;
         }
 
-        // ---------- Live chat ----------
+        // ------------------------------------------------------
+        // Live chat
+        // ------------------------------------------------------
+
         if (
           data.type ===
           'live-chat'
@@ -1307,28 +2186,32 @@ wsServer.on(
           }
 
           const msg =
-            await prisma.liveChatMessage.create({
-              data: {
-                room_id:
-                  data.roomId,
-                user_id:
-                  userId,
-                message:
-                  String(
-                    data.message
-                  ).trim()
-              },
+            await prisma.liveChatMessage.create(
+              {
+                data: {
+                  room_id:
+                    data.roomId,
 
-              include: {
-                user: {
-                  select: {
-                    username: true,
-                    display_name: true,
-                    profile_photo: true
+                  user_id:
+                    userId,
+
+                  message:
+                    String(
+                      data.message
+                    ).trim()
+                },
+
+                include: {
+                  user: {
+                    select: {
+                      username: true,
+                      display_name: true,
+                      profile_photo: true
+                    }
                   }
                 }
               }
-            });
+            );
 
           wsBroadcast(
             wsRooms.get(
@@ -1337,6 +2220,7 @@ wsServer.on(
             {
               type:
                 'new-chat',
+
               message: msg
             }
           );
@@ -1344,7 +2228,10 @@ wsServer.on(
           return;
         }
 
-        // ---------- Private message ----------
+        // ------------------------------------------------------
+        // Private message
+        // ------------------------------------------------------
+
         if (
           data.type ===
           'private-message'
@@ -1359,32 +2246,37 @@ wsServer.on(
           }
 
           const msg =
-            await prisma.message.create({
-              data: {
-                sender_id:
-                  userId,
-                receiver_id:
-                  data.receiverId,
-                content:
-                  String(
-                    data.content
-                  ).trim(),
-                type:
-                  data.messageType ||
-                  'text'
-              },
+            await prisma.message.create(
+              {
+                data: {
+                  sender_id:
+                    userId,
 
-              include: {
-                sender: {
-                  select: {
-                    id: true,
-                    username: true,
-                    display_name: true,
-                    profile_photo: true
+                  receiver_id:
+                    data.receiverId,
+
+                  content:
+                    String(
+                      data.content
+                    ).trim(),
+
+                  type:
+                    data.messageType ||
+                    'text'
+                },
+
+                include: {
+                  sender: {
+                    select: {
+                      id: true,
+                      username: true,
+                      display_name: true,
+                      profile_photo: true
+                    }
                   }
                 }
               }
-            });
+            );
 
           wsBroadcast(
             wsUsers.get(
@@ -1393,6 +2285,7 @@ wsServer.on(
             {
               type:
                 'private-message',
+
               message: msg
             }
           );
@@ -1401,6 +2294,7 @@ wsServer.on(
             JSON.stringify({
               type:
                 'private-message-sent',
+
               message: msg
             })
           );
@@ -1408,7 +2302,10 @@ wsServer.on(
           return;
         }
 
-        // ---------- Typing ----------
+        // ------------------------------------------------------
+        // Typing
+        // ------------------------------------------------------
+
         if (
           data.type ===
           'typing'
@@ -1420,7 +2317,10 @@ wsServer.on(
             {
               type:
                 'typing',
-              from: userId,
+
+              from:
+                userId,
+
               isTyping:
                 Boolean(
                   data.isTyping
@@ -1431,25 +2331,32 @@ wsServer.on(
           return;
         }
 
-        // ---------- Mark read ----------
+        // ------------------------------------------------------
+        // Mark read
+        // ------------------------------------------------------
+
         if (
           data.type ===
           'mark-read'
         ) {
-          await prisma.message.updateMany({
-            where: {
-              sender_id:
-                data.senderId,
-              receiver_id:
-                userId,
-              read_at: null
-            },
+          await prisma.message.updateMany(
+            {
+              where: {
+                sender_id:
+                  data.senderId,
 
-            data: {
-              read_at:
-                new Date()
+                receiver_id:
+                  userId,
+
+                read_at: null
+              },
+
+              data: {
+                read_at:
+                  new Date()
+              }
             }
-          });
+          );
 
           wsBroadcast(
             wsUsers.get(
@@ -1458,12 +2365,18 @@ wsServer.on(
             {
               type:
                 'read-receipt',
-              from: userId
+
+              from:
+                userId
             }
           );
         }
       }
     );
+
+    // ----------------------------------------------------------
+    // WebSocket close
+    // ----------------------------------------------------------
 
     ws.on(
       'close',
@@ -1487,12 +2400,15 @@ wsServer.on(
             {
               type:
                 'viewer-count',
+
               count:
                 set.size
             }
           );
 
-          if (!set.size) {
+          if (
+            !set.size
+          ) {
             wsRooms.delete(
               roomId
             );
@@ -1524,10 +2440,17 @@ wsServer.on(
   }
 );
 
-// ---------- WebSocket upgrade ----------
+// ============================================================
+// WebSocket upgrade
+// ============================================================
+
 server.on(
   'upgrade',
-  (request, socket, head) => {
+  (
+    request,
+    socket,
+    head
+  ) => {
     const pathname =
       new URL(
         request.url,
@@ -1555,7 +2478,10 @@ server.on(
   }
 );
 
-// ---------- Start server ----------
+// ============================================================
+// Start server
+// ============================================================
+
 const PORT =
   process.env.PORT || 3000;
 
@@ -1568,19 +2494,59 @@ server.listen(
   }
 );
 
+// ============================================================
+// Graceful shutdown
+// ============================================================
 
-async function shutdown(signal) {
-  console.log(`🛑 ${signal} received — shutting down gracefully`);
-  server.close(async () => {
-    try { await prisma.$disconnect(); } catch (e) { console.error('Prisma shutdown error:', e.message); }
-    try {
-      if (pub) await pub.quit();
-      if (sub) await sub.quit();
-    } catch (e) { console.error('Redis shutdown error:', e.message); }
-    process.exit(0);
-  });
-  setTimeout(() => process.exit(1), 10000).unref();
+async function shutdown(
+  signal
+) {
+  console.log(
+    `🛑 ${signal} received — shutting down gracefully`
+  );
+
+  server.close(
+    async () => {
+      try {
+        await prisma.$disconnect();
+      } catch (e) {
+        console.error(
+          'Prisma shutdown error:',
+          e.message
+        );
+      }
+
+      try {
+        if (pub) {
+          await pub.quit();
+        }
+
+        if (sub) {
+          await sub.quit();
+        }
+      } catch (e) {
+        console.error(
+          'Redis shutdown error:',
+          e.message
+        );
+      }
+
+      process.exit(0);
+    }
+  );
+
+  setTimeout(
+    () => process.exit(1),
+    10000
+  ).unref();
 }
 
-process.on('SIGTERM', () => shutdown('SIGTERM'));
-process.on('SIGINT', () => shutdown('SIGINT'));
+process.on(
+  'SIGTERM',
+  () => shutdown('SIGTERM')
+);
+
+process.on(
+  'SIGINT',
+  () => shutdown('SIGINT')
+);
