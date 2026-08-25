@@ -53,6 +53,8 @@ async function refreshAccessToken() {
         if (!res.ok) return null;
         const data = await res.json();
         if (data.accessToken) storeAccessToken(data.accessToken);
+        if (data.refreshToken && typeof window !== 'undefined') localStorage.setItem('refreshToken', data.refreshToken);
+        if (data.user?.id && typeof window !== 'undefined') localStorage.setItem('userId', String(data.user.id));
         return data.accessToken || null;
       })
       .catch(() => null)
