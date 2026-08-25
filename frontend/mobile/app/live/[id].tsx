@@ -18,7 +18,7 @@ import { Room, RoomEvent, Track, RemoteTrack } from "livekit-client";
 import { VideoView } from "@livekit/react-native";
 import { theme } from "../../src/theme";
 import { api, API_URL, getUserId, getValidAccessToken } from "../../src/api/client";
-import { giftArt } from "../../src/GiftArt";
+import GiftIcon from "../../src/GiftIcon";
 
 type ChatMessage = { id: string; message?: string; content?: string; user?: any; username?: string; system?: boolean };
 type Gift = { id: string; name: string; image_url?: string | null; coin_price: number; glyph?: string | null; rarity?: string | null };
@@ -478,7 +478,7 @@ export default function LiveRoom() {
             <View style={s.giftHalo} />
             <View style={s.giftSparkle}><Text style={s.giftSparkleText}>✦</Text></View>
             <Text style={s.giftRarity}>{String(giftShowcase.rarity || "PREMIUM").toUpperCase()}</Text>
-            <Image source={giftArt(giftShowcase)} style={s.giftShowcaseImage} />
+            <GiftIcon name={giftShowcase.name} glyph={giftShowcase.glyph} rarity={giftShowcase.rarity} size={210} animated />
             <Text style={s.giftShowcaseEyebrow}>AMORA LUXURY GIFT</Text>
             <Text style={s.giftShowcaseName}>{giftShowcase.name}</Text>
             <Text style={s.giftShowcaseMeta}>{giftShowcase.senderName} · {giftShowcase.coin_price || 0} coins{giftShowcase.quantity > 1 ? ` · ×${giftShowcase.quantity}` : ""}</Text>
@@ -561,7 +561,7 @@ export default function LiveRoom() {
         <View style={s.giftPicker}>
           {gifts.map((g) => (
             <Pressable key={g.id} onPress={() => sendGift(g.id)} style={s.giftBtn}>
-              <Image source={giftArt(g)} style={s.giftImage} />
+              <GiftIcon name={g.name} glyph={g.glyph} rarity={g.rarity} size={50} animated={g.rarity === "legendary" || g.rarity === "mythic"} />
               <Text style={{ color: "#fff", fontSize: 11, fontWeight: "700" }} numberOfLines={1}>{g.name}</Text>
               <Text style={{ color: theme.gold, fontSize: 10 }}>🪙 {g.coin_price}</Text>
             </Pressable>
