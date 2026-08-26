@@ -242,6 +242,10 @@ export const api = {
   membership: () => request('/membership/me'),
   membershipPlans: () => request('/membership/plans'),
   membershipCheckout: (tier: string) => request('/membership/checkout', { method: 'POST', body: JSON.stringify({ tier }) }),
+  verifyAppleSubscription: (receiptData: string) =>
+    request('/membership/iap/apple/verify', { method: 'POST', body: JSON.stringify({ receiptData }) }),
+  verifyGoogleSubscription: (tier: string, purchaseToken: string) =>
+    request('/membership/iap/google/verify', { method: 'POST', body: JSON.stringify({ tier, purchaseToken }) }),
   membershipCancel: () => request('/membership/cancel', { method: 'POST' }),
   dailyRewardStatus: () => request('/daily-rewards/status'),
   dailyRewardHistory: () => request('/daily-rewards/history?limit=14'),
