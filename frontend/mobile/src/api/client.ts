@@ -199,6 +199,10 @@ export const api = {
   nextMatch: () => request('/matches/next'),
   acceptMatch: (targetUserId: string) => request('/matches/accept', { method: 'POST', body: JSON.stringify({ targetUserId }) }),
   skipMatch: (targetUserId: string) => request('/matches/skip', { method: 'POST', body: JSON.stringify({ targetUserId }) }),
+  swipe: (targetUserId: string, decision: 'like' | 'pass' | 'superlike') =>
+    request('/matches/swipe', { method: 'POST', body: JSON.stringify({ targetUserId, decision }) }),
+  matchList: () => request('/matches'),
+  unmatch: (matchId: string) => request(`/matches/${matchId}/unmatch`, { method: 'POST' }),
   conversations: () => request('/messages/conversations'),
   messages: (userId: string, limit = 50) => request(`/messages/${userId}?limit=${limit}`),
   sendMessage: (userId: string, content: string) => request(`/messages/${userId}`, { method: 'POST', body: JSON.stringify({ content }) }),
