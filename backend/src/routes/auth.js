@@ -63,10 +63,7 @@ module.exports = (prisma) => {
   }
 
   async function getApplePublicKey(kid) {
-    if (
-      !appleKeysCache.keys ||
-      appleKeysCache.expiresAt < Date.now()
-    ) {
+    if (!appleKeysCache.keys || appleKeysCache.expiresAt < Date.now()) {
       const response = await fetch(
         'https://appleid.apple.com/auth/keys'
       );
@@ -78,8 +75,7 @@ module.exports = (prisma) => {
       const data = await response.json();
 
       appleKeysCache.keys = data.keys || [];
-      appleKeysCache.expiresAt =
-        Date.now() + 60 * 60 * 1000;
+      appleKeysCache.expiresAt = Date.now() + 60 * 60 * 1000;
     }
 
     const jwk = appleKeysCache.keys.find(
@@ -178,8 +174,7 @@ module.exports = (prisma) => {
         iss: process.env.APPLE_TEAM_ID,
         iat: Math.floor(Date.now() / 1000),
         exp:
-          Math.floor(Date.now() / 1000) +
-          5 * 60,
+          Math.floor(Date.now() / 1000) + 5 * 60,
         aud: 'https://appleid.apple.com',
         sub: clientId
       },
@@ -485,11 +480,16 @@ module.exports = (prisma) => {
       };
     }
 
-    // Only auto-link when the provider itself returned
-    // a verified email.
-    //
-    // This prevents an untrusted provider identifier
-    // from silently taking over an existing password account.
+    /*
+     * Only auto-link when the provider itself
+     * returned an email.
+     *
+     * If Facebook does not return an email,
+     * we DO NOT fabricate one.
+     *
+     * The user will be asked for a real email
+     * during the Amora account completion step.
+     */
     if (email) {
       const existingEmail =
         await prisma.user.findUnique({
@@ -630,9 +630,8 @@ module.exports = (prisma) => {
   }
 
   async function anonymizeDeletedAccount(userId) {
-    const suffix = crypto
-      .randomBytes(8)
-      .toString('hex');
+    const suffix =
+      crypto.randomBytes(8).toString('hex');
 
     const appleIdentity =
       await prisma.oAuthAccount.findFirst({
@@ -645,9 +644,7 @@ module.exports = (prisma) => {
         }
       });
 
-    if (
-      appleIdentity?.refresh_token_encrypted
-    ) {
+    if (appleIdentity?.refresh_token_encrypted) {
       try {
         await revokeAppleRefreshToken(
           decryptOAuthToken(
@@ -668,11 +665,7 @@ module.exports = (prisma) => {
         where: {
           OR: [
             { user_id: userId },
-            {
-              story: {
-                user_id: userId
-              }
-            }
+            { story: { user_id: userId } }
           ]
         }
       });
@@ -681,19 +674,13 @@ module.exports = (prisma) => {
         where: {
           OR: [
             { viewer_id: userId },
-            {
-              story: {
-                user_id: userId
-              }
-            }
+            { story: { user_id: userId } }
           ]
         }
       });
 
       await tx.story.deleteMany({
-        where: {
-          user_id: userId
-        }
+        where: { user_id: userId }
       });
 
       await tx.message.deleteMany({
@@ -769,87 +756,60 @@ module.exports = (prisma) => {
       });
 
       await tx.roomParticipant.deleteMany({
-        where: {
-          user_id: userId
-        }
+        where: { user_id: userId }
       });
 
       await tx.liveChatMessage.deleteMany({
-        where: {
-          user_id: userId
-        }
+        where: { user_id: userId }
       });
 
       await tx.notification.deleteMany({
-        where: {
-          user_id: userId
-        }
+        where: { user_id: userId }
       });
 
       await tx.dailyRewardStatus.deleteMany({
-        where: {
-          user_id: userId
-        }
+        where: { user_id: userId }
       });
 
       await tx.dailyRewardClaim.deleteMany({
-        where: {
-          user_id: userId
-        }
+        where: { user_id: userId }
       });
 
       await tx.xpTransaction.deleteMany({
-        where: {
-          user_id: userId
-        }
+        where: { user_id: userId }
       });
 
       await tx.missionProgress.deleteMany({
-        where: {
-          user_id: userId
-        }
+        where: { user_id: userId }
       });
 
       await tx.userCosmetic.deleteMany({
-        where: {
-          user_id: userId
-        }
+        where: { user_id: userId }
       });
 
       await tx.eventScore.deleteMany({
-        where: {
-          user_id: userId
-        }
+        where: { user_id: userId }
       });
 
       await tx.session.deleteMany({
-        where: {
-          user_id: userId
-        }
+        where: { user_id: userId }
       });
 
       await tx.oAuthAccount.deleteMany({
-        where: {
-          user_id: userId
-        }
+        where: { user_id: userId }
       });
 
       await tx.user.update({
-        where: {
-          id: userId
-        },
+        where: { id: userId },
         data: {
           email:
             `deleted-${suffix}@deleted.amoramatch.invalid`,
           username:
             `deleted_${suffix}`,
-          display_name:
-            'Deleted User',
+          display_name: 'Deleted User',
           password_hash:
             await bcrypt.hash(
-              crypto
-                .randomBytes(32)
-                .toString('hex'),
+              crypto.randomBytes(32).toString('hex'),
               12
             ),
           bio: null,
@@ -881,23 +841,20 @@ module.exports = (prisma) => {
         display_name: user.display_name,
         level: user.level,
         role: user.role,
-        membership_tier:
-          user.membership_tier
+        membership_tier: user.membership_tier
       }
     };
   }
 
   async function createSession(user, req) {
-    const refreshToken =
-      signRefreshToken(user);
+    const refreshToken = signRefreshToken(user);
 
     await prisma.session.create({
       data: {
         user_id: user.id,
         refresh_token: refreshToken,
         expires_at: new Date(
-          Date.now() +
-            7 * 24 * 60 * 60 * 1000
+          Date.now() + 7 * 24 * 60 * 60 * 1000
         ),
         device_info:
           req?.headers['user-agent']?.slice(
@@ -906,9 +863,9 @@ module.exports = (prisma) => {
           ) || null,
         ip_address:
           (
-            req?.headers[
-              'x-forwarded-for'
-            ]?.split(',')[0].trim() ||
+            req?.headers['x-forwarded-for']
+              ?.split(',')[0]
+              .trim() ||
             req?.ip ||
             null
           )
@@ -916,8 +873,7 @@ module.exports = (prisma) => {
     });
 
     return {
-      accessToken:
-        signAccessToken(user),
+      accessToken: signAccessToken(user),
       refreshToken,
       user: {
         id: user.id,
@@ -925,8 +881,7 @@ module.exports = (prisma) => {
         display_name: user.display_name,
         level: user.level,
         role: user.role,
-        membership_tier:
-          user.membership_tier
+        membership_tier: user.membership_tier
       }
     };
   }
@@ -940,11 +895,9 @@ module.exports = (prisma) => {
       registerSchema.safeParse(req.body);
 
     if (!result.success) {
-      return res
-        .status(400)
-        .json({
-          errors: result.error.issues
-        });
+      return res.status(400).json({
+        errors: result.error.issues
+      });
     }
 
     const {
@@ -955,77 +908,56 @@ module.exports = (prisma) => {
     } = result.data;
 
     if (
-      Number.isNaN(
-        dateOfBirth.getTime()
-      )
+      Number.isNaN(dateOfBirth.getTime())
     ) {
-      return res
-        .status(400)
-        .json({
-          error:
-            'Invalid date of birth.'
-        });
+      return res.status(400).json({
+        error: 'Invalid date of birth.'
+      });
     }
 
-    if (
-      calculateAge(dateOfBirth) < 18
-    ) {
-      return res
-        .status(403)
-        .json({
-          error:
-            'You must be 18 or older.'
-        });
+    if (calculateAge(dateOfBirth) < 18) {
+      return res.status(403).json({
+        error: 'You must be 18 or older.'
+      });
     }
 
     try {
       const hashed =
-        await bcrypt.hash(
-          password,
-          12
-        );
+        await bcrypt.hash(password, 12);
 
       const user =
-        await prisma.$transaction(
-          async tx => {
-            const created =
-              await tx.user.create({
-                data: {
-                  email:
-                    email.toLowerCase(),
-                  username,
-                  password_hash:
-                    hashed,
-                  date_of_birth:
-                    dateOfBirth,
-                  display_name:
-                    username,
-                  age_verified:
-                    true
-                }
-              });
-
-            await tx.wallet.create({
+        await prisma.$transaction(async tx => {
+          const created =
+            await tx.user.create({
               data: {
-                user_id: created.id,
-                balance: 0
+                email: email.toLowerCase(),
+                username,
+                password_hash: hashed,
+                date_of_birth: dateOfBirth,
+                display_name: username,
+                age_verified: true
               }
             });
 
-            return created;
-          }
-        );
+          await tx.wallet.create({
+            data: {
+              user_id: created.id,
+              balance: 0
+            }
+          });
+
+          return created;
+        });
 
       const verificationSent =
-        await sendVerificationEmail(
-          user
-        ).catch(err => {
-          console.error(
-            'Verification email failed:',
-            err.message
-          );
-          return false;
-        });
+        await sendVerificationEmail(user)
+          .catch(err => {
+            console.error(
+              'Verification email failed:',
+              err.message
+            );
+            return false;
+          });
 
       res.status(201).json({
         id: user.id,
@@ -1039,68 +971,48 @@ module.exports = (prisma) => {
         e
       );
 
-      if (
-        isUniqueConstraintError(e)
-      ) {
-        return res
-          .status(409)
-          .json({
-            error:
-              'Email or username already exists.'
-          });
+      if (isUniqueConstraintError(e)) {
+        return res.status(409).json({
+          error:
+            'Email or username already exists.'
+        });
       }
 
-      return res
-        .status(503)
-        .json({
-          error:
-            'Amora is temporarily unable to create your account. Please try again shortly.'
-        });
+      return res.status(503).json({
+        error:
+          'Amora is temporarily unable to create your account. Please try again shortly.'
+      });
     }
   });
 
-  router.get(
-    '/verify-email',
-    async (req, res) => {
-      try {
-        const decoded =
-          jwt.verify(
-            String(
-              req.query.token || ''
-            ),
-            process.env.JWT_SECRET
-          );
+  router.get('/verify-email', async (req, res) => {
+    try {
+      const decoded = jwt.verify(
+        String(req.query.token || ''),
+        process.env.JWT_SECRET
+      );
 
-        if (
-          decoded.purpose !==
-          'email_verification'
-        ) {
-          throw new Error(
-            'Invalid token'
-          );
-        }
-
-        await prisma.user.update({
-          where: {
-            id: decoded.id
-          },
-          data: {
-            is_verified: true
-          }
-        });
-
-        res.redirect(
-          `${appUrl()}/login?verified=1`
-        );
-      } catch {
-        res
-          .status(400)
-          .send(
-            'Verification link is invalid or expired.'
-          );
+      if (
+        decoded.purpose !==
+        'email_verification'
+      ) {
+        throw new Error('Invalid token');
       }
+
+      await prisma.user.update({
+        where: { id: decoded.id },
+        data: { is_verified: true }
+      });
+
+      res.redirect(
+        `${appUrl()}/login?verified=1`
+      );
+    } catch {
+      res.status(400).send(
+        'Verification link is invalid or expired.'
+      );
     }
-  );
+  });
 
   router.post(
     '/resend-verification',
@@ -1115,29 +1027,22 @@ module.exports = (prisma) => {
             }
           });
 
-        if (
-          !user ||
-          user.is_verified
-        ) {
+        if (!user || user.is_verified) {
           return res.json({
             success: true
           });
         }
 
-        await sendVerificationEmail(
-          user
-        );
+        await sendVerificationEmail(user);
 
         res.json({
           success: true
         });
       } catch (e) {
-        res
-          .status(500)
-          .json({
-            error:
-              'Unable to send verification email'
-          });
+        res.status(500).json({
+          error:
+            'Unable to send verification email'
+        });
       }
     }
   );
@@ -1147,20 +1052,15 @@ module.exports = (prisma) => {
     async (req, res) => {
       const email = String(
         req.body.email || ''
-      )
-        .trim()
-        .toLowerCase();
+      ).trim().toLowerCase();
 
       if (!email) {
-        return res
-          .status(400)
-          .json({
-            error:
-              'Email address is required.'
-          });
+        return res.status(400).json({
+          error:
+            'Email address is required.'
+        });
       }
 
-      // Do not reveal whether an account exists.
       const generic = {
         success: true,
         message:
@@ -1170,45 +1070,34 @@ module.exports = (prisma) => {
       try {
         const user =
           await prisma.user.findUnique({
-            where: {
-              email
-            }
+            where: { email }
           });
 
-        if (
-          user &&
-          user.is_active
-        ) {
+        if (user && user.is_active) {
           const sent =
             await sendAccountDeletionEmail(
               user
             );
 
           if (!sent) {
-            return res
-              .status(503)
-              .json({
-                error:
-                  'Account deletion email is temporarily unavailable. Please use in-app deletion from Settings.'
-              });
+            return res.status(503).json({
+              error:
+                'Account deletion email is temporarily unavailable. Please use in-app deletion from Settings.'
+            });
           }
         }
 
-        return res.json(
-          generic
-        );
+        return res.json(generic);
       } catch (e) {
         console.error(
           'Account deletion request error:',
           e
         );
 
-        return res
-          .status(500)
-          .json({
-            error:
-              'Unable to process the deletion request.'
-          });
+        return res.status(500).json({
+          error:
+            'Unable to process the deletion request.'
+        });
       }
     }
   );
@@ -1217,232 +1106,163 @@ module.exports = (prisma) => {
     '/delete-account',
     async (req, res) => {
       try {
-        const decoded =
-          jwt.verify(
-            String(
-              req.query.token || ''
-            ),
-            process.env.JWT_SECRET
-          );
+        const decoded = jwt.verify(
+          String(req.query.token || ''),
+          process.env.JWT_SECRET
+        );
 
         if (
           decoded.purpose !==
           'account_deletion'
         ) {
-          throw new Error(
-            'Invalid token'
-          );
+          throw new Error('Invalid token');
         }
 
         const user =
           await prisma.user.findUnique({
-            where: {
-              id: decoded.id
-            }
+            where: { id: decoded.id }
           });
 
-        if (
-          !user ||
-          !user.is_active
-        ) {
-          return res
-            .status(200)
-            .send(
-              'Your Amora account has already been deleted or is no longer active.'
-            );
+        if (!user || !user.is_active) {
+          return res.status(200).send(
+            'Your Amora account has already been deleted or is no longer active.'
+          );
         }
 
         await anonymizeDeletedAccount(
           user.id
         );
 
-        res
-          .status(200)
-          .send(
-            'Your Amora account deletion request has been completed.'
-          );
+        res.status(200).send(
+          'Your Amora account deletion request has been completed.'
+        );
       } catch (e) {
-        res
-          .status(400)
-          .send(
-            'This account deletion link is invalid or expired.'
-          );
+        res.status(400).send(
+          'This account deletion link is invalid or expired.'
+        );
       }
     }
   );
 
-  router.post(
-    '/login',
-    async (req, res) => {
-      const identifier = String(
-        req.body.identifier || ''
-      ).trim();
+  router.post('/login', async (req, res) => {
+    const identifier = String(
+      req.body.identifier || ''
+    ).trim();
 
-      const password = String(
-        req.body.password || ''
-      );
+    const password = String(
+      req.body.password || ''
+    );
 
-      const user =
-        await prisma.user.findFirst({
-          where: {
-            OR: [
-              {
-                email:
-                  identifier.toLowerCase()
-              },
-              {
-                username: identifier
-              }
-            ]
-          }
-        });
-
-      if (
-        !user ||
-        !(
-          await bcrypt.compare(
-            password,
-            user.password_hash
-          )
-        )
-      ) {
-        await logSecurityEvent(
-          prisma,
-          {
-            action:
-              'login_failed',
-            targetType:
-              'auth',
-            targetId:
-              crypto
-                .createHash('sha256')
-                .update(
-                  identifier.toLowerCase()
-                )
-                .digest('hex')
-                .slice(0, 24),
-            details: {
-              reason:
-                'invalid_credentials',
-              requestId:
-                req.requestId
+    const user =
+      await prisma.user.findFirst({
+        where: {
+          OR: [
+            {
+              email:
+                identifier.toLowerCase()
             },
-            ip: req.clientIp
-          }
-        );
-
-        return res
-          .status(401)
-          .json({
-            error:
-              'Invalid credentials.'
-          });
-      }
-
-      if (!user.is_active) {
-        await logSecurityEvent(
-          prisma,
-          {
-            userId: user.id,
-            action:
-              'login_blocked',
-            targetType:
-              'user',
-            targetId:
-              user.id,
-            details: {
-              reason:
-                'account_suspended',
-              requestId:
-                req.requestId
-            },
-            ip: req.clientIp
-          }
-        );
-
-        return res
-          .status(403)
-          .json({
-            error:
-              'Account suspended.'
-          });
-      }
-
-      const session =
-        await createSession(
-          user,
-          req
-        );
-
-      await logSecurityEvent(
-        prisma,
-        {
-          userId: user.id,
-          action:
-            'login_success',
-          targetType:
-            'user',
-          targetId:
-            user.id,
-          details: {
-            requestId:
-              req.requestId,
-            device:
-              req.headers[
-                'user-agent'
-              ]?.slice(
-                0,
-                180
-              ) || null
-          },
-          ip: req.clientIp
+            {
+              username: identifier
+            }
+          ]
         }
-      );
+      });
 
-      res.json(session);
+    if (
+      !user ||
+      !(await bcrypt.compare(
+        password,
+        user.password_hash
+      ))
+    ) {
+      await logSecurityEvent(prisma, {
+        action: 'login_failed',
+        targetType: 'auth',
+        targetId: crypto
+          .createHash('sha256')
+          .update(
+            identifier.toLowerCase()
+          )
+          .digest('hex')
+          .slice(0, 24),
+        details: {
+          reason: 'invalid_credentials',
+          requestId: req.requestId
+        },
+        ip: req.clientIp
+      });
+
+      return res.status(401).json({
+        error: 'Invalid credentials.'
+      });
     }
-  );
+
+    if (!user.is_active) {
+      await logSecurityEvent(prisma, {
+        userId: user.id,
+        action: 'login_blocked',
+        targetType: 'user',
+        targetId: user.id,
+        details: {
+          reason: 'account_suspended',
+          requestId: req.requestId
+        },
+        ip: req.clientIp
+      });
+
+      return res.status(403).json({
+        error: 'Account suspended.'
+      });
+    }
+
+    const session =
+      await createSession(user, req);
+
+    await logSecurityEvent(prisma, {
+      userId: user.id,
+      action: 'login_success',
+      targetType: 'user',
+      targetId: user.id,
+      details: {
+        requestId: req.requestId,
+        device:
+          req.headers['user-agent']
+            ?.slice(0, 180) || null
+      },
+      ip: req.clientIp
+    });
+
+    res.json(session);
+  });
 
   // ---------- Change password ----------
-  // Keeps password changes server-side, revokes every existing refresh session
-  // after success, and never stores or logs plaintext passwords.
+
   router.post(
     '/change-password',
     auth,
     async (req, res) => {
-      const currentPassword =
-        String(
-          req.body.currentPassword ||
-            ''
-        );
+      const currentPassword = String(
+        req.body.currentPassword || ''
+      );
 
-      const newPassword =
-        String(
-          req.body.newPassword ||
-            ''
-        );
+      const newPassword = String(
+        req.body.newPassword || ''
+      );
 
-      if (
-        newPassword.length < 10
-      ) {
-        return res
-          .status(400)
-          .json({
-            error:
-              'New password must be at least 10 characters.'
-          });
+      if (newPassword.length < 10) {
+        return res.status(400).json({
+          error:
+            'New password must be at least 10 characters.'
+        });
       }
 
       if (
-        newPassword ===
-        currentPassword
+        newPassword === currentPassword
       ) {
-        return res
-          .status(400)
-          .json({
-            error:
-              'Choose a different password.'
-          });
+        return res.status(400).json({
+          error:
+            'Choose a different password.'
+        });
       }
 
       try {
@@ -1454,12 +1274,9 @@ module.exports = (prisma) => {
           });
 
         if (!user) {
-          return res
-            .status(404)
-            .json({
-              error:
-                'Account not found.'
-            });
+          return res.status(404).json({
+            error: 'Account not found.'
+          });
         }
 
         const valid =
@@ -1469,32 +1286,24 @@ module.exports = (prisma) => {
           );
 
         if (!valid) {
-          await logSecurityEvent(
-            prisma,
-            {
-              userId: user.id,
-              action:
-                'password_change_failed',
-              targetType:
-                'user',
-              targetId:
-                user.id,
-              details: {
-                reason:
-                  'invalid_current_password',
-                requestId:
-                  req.requestId
-              },
-              ip: req.clientIp
-            }
-          );
+          await logSecurityEvent(prisma, {
+            userId: user.id,
+            action:
+              'password_change_failed',
+            targetType: 'user',
+            targetId: user.id,
+            details: {
+              reason:
+                'invalid_current_password',
+              requestId: req.requestId
+            },
+            ip: req.clientIp
+          });
 
-          return res
-            .status(401)
-            .json({
-              error:
-                'Current password is incorrect.'
-            });
+          return res.status(401).json({
+            error:
+              'Current password is incorrect.'
+          });
         }
 
         const passwordHash =
@@ -1509,8 +1318,7 @@ module.exports = (prisma) => {
               id: user.id
             },
             data: {
-              password_hash:
-                passwordHash
+              password_hash: passwordHash
             }
           }),
           prisma.session.deleteMany({
@@ -1520,30 +1328,21 @@ module.exports = (prisma) => {
           })
         ]);
 
-        await logSecurityEvent(
-          prisma,
-          {
-            userId: user.id,
-            action:
-              'password_changed',
-            targetType:
-              'user',
-            targetId:
-              user.id,
-            details: {
-              requestId:
-                req.requestId,
-              sessionsRevoked:
-                true
-            },
-            ip: req.clientIp
-          }
-        );
+        await logSecurityEvent(prisma, {
+          userId: user.id,
+          action: 'password_changed',
+          targetType: 'user',
+          targetId: user.id,
+          details: {
+            requestId: req.requestId,
+            sessionsRevoked: true
+          },
+          ip: req.clientIp
+        });
 
         res.json({
           success: true,
-          sessionsRevoked:
-            true
+          sessionsRevoked: true
         });
       } catch (e) {
         console.error(
@@ -1551,93 +1350,69 @@ module.exports = (prisma) => {
           e
         );
 
-        res
-          .status(500)
-          .json({
-            error:
-              'Unable to change password.'
-          });
-      }
-    }
-  );
-
-  // Google OAuth:
-  // Existing users can log in immediately.
-  // New users are returned a short-lived completion token
-  // because DOB/username are required by Amora.
-  //
-  // The flow uses a signed state value bound to a short-lived
-  // HttpOnly cookie to protect the redirect flow against CSRF.
-  //
-  // platform=mobile lets the native app opt into a deep-link
-  // redirect instead of the web app completion page.
-  router.get(
-    '/google/start',
-    (req, res) => {
-      if (
-        !process.env.GOOGLE_CLIENT_ID
-      ) {
-        return res
-          .status(503)
-          .send(
-            'Google authentication is not configured'
-          );
-      }
-
-      const platform =
-        req.query.platform ===
-        'mobile'
-          ? 'mobile'
-          : 'web';
-
-      const state =
-        crypto
-          .randomBytes(32)
-          .toString('hex');
-
-      const stateToken =
-        jwt.sign(
-          {
-            purpose:
-              'google_oauth_state',
-            state,
-            platform
-          },
-          process.env.JWT_SECRET,
-          {
-            expiresIn: '10m'
-          }
-        );
-
-      setOAuthStateCookie(
-        res,
-        'google',
-        stateToken
-      );
-
-      const params =
-        new URLSearchParams({
-          client_id:
-            process.env.GOOGLE_CLIENT_ID,
-          redirect_uri:
-            googleRedirectUri(),
-          response_type:
-            'code',
-          scope:
-            'openid email profile',
-          access_type:
-            'offline',
-          prompt:
-            'select_account',
-          state:
-            stateToken
+        res.status(500).json({
+          error:
+            'Unable to change password.'
         });
-
-      res.redirect(
-        `https://accounts.google.com/o/oauth2/v2/auth?${params}`
-      );
+      }
     }
   );
+
+  // ---------- Google OAuth ----------
+
+  router.get('/google/start', (req, res) => {
+    if (!process.env.GOOGLE_CLIENT_ID) {
+      return res.status(503).send(
+        'Google authentication is not configured'
+      );
+    }
+
+    const platform =
+      req.query.platform === 'mobile'
+        ? 'mobile'
+        : 'web';
+
+    const state =
+      crypto.randomBytes(32)
+        .toString('hex');
+
+    const stateToken = jwt.sign(
+      {
+        purpose:
+          'google_oauth_state',
+        state,
+        platform
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: '10m'
+      }
+    );
+
+    setOAuthStateCookie(
+      res,
+      'google',
+      stateToken
+    );
+
+    const params =
+      new URLSearchParams({
+        client_id:
+          process.env.GOOGLE_CLIENT_ID,
+        redirect_uri:
+          googleRedirectUri(),
+        response_type: 'code',
+        scope:
+          'openid email profile',
+        access_type: 'offline',
+        prompt: 'select_account',
+        state: stateToken
+      });
+
+    res.redirect(
+      `https://accounts.google.com/o/oauth2/v2/auth?${params}`
+    );
+  });
 
   router.get(
     '/google/callback',
@@ -1671,41 +1446,31 @@ module.exports = (prisma) => {
         );
 
         const isMobile =
-          state.platform ===
-          'mobile';
+          state.platform === 'mobile';
 
-        const failureRedirect =
-          isMobile
-            ? 'amora://auth-callback?error=google_auth_failed'
-            : `${appUrl()}/login?error=google_auth_failed`;
-
-        const tokenRes =
-          await fetch(
-            'https://oauth2.googleapis.com/token',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type':
-                  'application/x-www-form-urlencoded'
-              },
-              body:
-                new URLSearchParams({
-                  code: String(
-                    req.query.code
-                  ),
-                  client_id:
-                    process.env
-                      .GOOGLE_CLIENT_ID,
-                  client_secret:
-                    process.env
-                      .GOOGLE_CLIENT_SECRET,
-                  redirect_uri:
-                    googleRedirectUri(),
-                  grant_type:
-                    'authorization_code'
-                })
-            }
-          );
+        const tokenRes = await fetch(
+          'https://oauth2.googleapis.com/token',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type':
+                'application/x-www-form-urlencoded'
+            },
+            body: new URLSearchParams({
+              code: String(
+                req.query.code
+              ),
+              client_id:
+                process.env.GOOGLE_CLIENT_ID,
+              client_secret:
+                process.env.GOOGLE_CLIENT_SECRET,
+              redirect_uri:
+                googleRedirectUri(),
+              grant_type:
+                'authorization_code'
+            })
+          }
+        );
 
         const tokens =
           await tokenRes.json();
@@ -1745,16 +1510,12 @@ module.exports = (prisma) => {
           await findOrPrepareSocialUser({
             provider: 'google',
             providerAccountId:
-              String(
-                profile.sub
-              ),
+              String(profile.sub),
             email:
               profile.email.toLowerCase(),
             displayName:
               profile.name ||
-              profile.email.split(
-                '@'
-              )[0],
+              profile.email.split('@')[0],
             req
           });
 
@@ -1785,14 +1546,12 @@ module.exports = (prisma) => {
     '/google/complete',
     async (req, res) => {
       try {
-        const decoded =
-          jwt.verify(
-            String(
-              req.body.completionToken ||
-                ''
-            ),
-            process.env.JWT_SECRET
-          );
+        const decoded = jwt.verify(
+          String(
+            req.body.completionToken || ''
+          ),
+          process.env.JWT_SECRET
+        );
 
         if (
           decoded.purpose !==
@@ -1818,28 +1577,22 @@ module.exports = (prisma) => {
             username
           )
         ) {
-          return res
-            .status(400)
-            .json({
-              error:
-                'Invalid username'
-            });
+          return res.status(400).json({
+            error:
+              'Invalid username'
+          });
         }
 
         if (
           Number.isNaN(
             dateOfBirth.getTime()
           ) ||
-          calculateAge(
-            dateOfBirth
-          ) < 18
+          calculateAge(dateOfBirth) < 18
         ) {
-          return res
-            .status(403)
-            .json({
-              error:
-                'You must be 18 or older.'
-            });
+          return res.status(403).json({
+            error:
+              'You must be 18 or older.'
+          });
         }
 
         const passwordHash =
@@ -1856,8 +1609,7 @@ module.exports = (prisma) => {
               const created =
                 await tx.user.create({
                   data: {
-                    email:
-                      decoded.email,
+                    email: decoded.email,
                     username,
                     password_hash:
                       passwordHash,
@@ -1865,17 +1617,14 @@ module.exports = (prisma) => {
                       dateOfBirth,
                     display_name:
                       decoded.name,
-                    age_verified:
-                      true,
-                    is_verified:
-                      true
+                    age_verified: true,
+                    is_verified: true
                   }
                 });
 
               await tx.wallet.create({
                 data: {
-                  user_id:
-                    created.id,
+                  user_id: created.id,
                   balance: 0
                 }
               });
@@ -1884,14 +1633,12 @@ module.exports = (prisma) => {
             }
           );
 
-        res
-          .status(201)
-          .json(
-            await createSession(
-              user,
-              req
-            )
-          );
+        res.status(201).json(
+          await createSession(
+            user,
+            req
+          )
+        );
       } catch (e) {
         console.error(
           'Google registration error:',
@@ -1901,20 +1648,16 @@ module.exports = (prisma) => {
         if (
           isUniqueConstraintError(e)
         ) {
-          return res
-            .status(409)
-            .json({
-              error:
-                'Email or username already exists.'
-            });
+          return res.status(409).json({
+            error:
+              'Email or username already exists.'
+          });
         }
 
-        return res
-          .status(503)
-          .json({
-            error:
-              'Google registration is temporarily unavailable. Please try again shortly.'
-          });
+        return res.status(503).json({
+          error:
+            'Google registration is temporarily unavailable. Please try again shortly.'
+        });
       }
     }
   );
@@ -1925,21 +1668,16 @@ module.exports = (prisma) => {
     '/apple/native',
     async (req, res) => {
       try {
-        if (
-          !process.env.JWT_SECRET
-        ) {
-          return res
-            .status(503)
-            .json({
-              error:
-                'Apple authentication is not configured.'
-            });
+        if (!process.env.JWT_SECRET) {
+          return res.status(503).json({
+            error:
+              'Apple authentication is not configured.'
+          });
         }
 
         const identityToken =
           String(
-            req.body.identityToken ||
-              ''
+            req.body.identityToken || ''
           );
 
         const nonce =
@@ -1955,12 +1693,10 @@ module.exports = (prisma) => {
             : '';
 
         if (!identityToken) {
-          return res
-            .status(400)
-            .json({
-              error:
-                'Apple identity token is required.'
-            });
+          return res.status(400).json({
+            error:
+              'Apple identity token is required.'
+          });
         }
 
         const claims =
@@ -1982,16 +1718,13 @@ module.exports = (prisma) => {
 
         const displayName =
           String(
-            req.body.displayName ||
-              ''
+            req.body.displayName || ''
           ).trim() || null;
 
         let refreshTokenEncrypted =
           null;
 
-        if (
-          authorizationCode
-        ) {
+        if (authorizationCode) {
           try {
             const tokenData =
               await exchangeAppleAuthorizationCode(
@@ -2023,16 +1756,13 @@ module.exports = (prisma) => {
           });
 
         if (prepared.userId) {
-          if (
-            refreshTokenEncrypted
-          ) {
+          if (refreshTokenEncrypted) {
             await prisma.oAuthAccount.updateMany(
               {
                 where: {
                   user_id:
                     prepared.userId,
-                  provider:
-                    'apple',
+                  provider: 'apple',
                   provider_account_id:
                     providerAccountId
                 },
@@ -2053,12 +1783,10 @@ module.exports = (prisma) => {
             });
 
           if (!user?.is_active) {
-            return res
-              .status(403)
-              .json({
-                error:
-                  'Account suspended.'
-              });
+            return res.status(403).json({
+              error:
+                'Account suspended.'
+            });
           }
 
           const session =
@@ -2073,13 +1801,10 @@ module.exports = (prisma) => {
               userId: user.id,
               action:
                 'social_login_success',
-              targetType:
-                'user',
-              targetId:
-                user.id,
+              targetType: 'user',
+              targetId: user.id,
               details: {
-                provider:
-                  'apple',
+                provider: 'apple',
                 requestId:
                   req.requestId,
                 hasAuthorizationCode:
@@ -2117,20 +1842,16 @@ module.exports = (prisma) => {
           e.message ===
           'account_suspended'
         ) {
-          return res
-            .status(403)
-            .json({
-              error:
-                'Account suspended.'
-            });
+          return res.status(403).json({
+            error:
+              'Account suspended.'
+          });
         }
 
-        res
-          .status(401)
-          .json({
-            error:
-              'Apple sign-in could not be verified.'
-          });
+        res.status(401).json({
+          error:
+            'Apple sign-in could not be verified.'
+        });
       }
     }
   );
@@ -2150,11 +1871,9 @@ module.exports = (prisma) => {
           !process.env.APPLE_KEY_ID ||
           !process.env.APPLE_PRIVATE_KEY
         ) {
-          return res
-            .status(503)
-            .send(
-              'Apple web authentication is not configured'
-            );
+          return res.status(503).send(
+            'Apple web authentication is not configured'
+          );
         }
 
         const platform =
@@ -2178,8 +1897,7 @@ module.exports = (prisma) => {
 
         const params =
           new URLSearchParams({
-            client_id:
-              clientId,
+            client_id: clientId,
             redirect_uri:
               appleRedirectUri(),
             response_type:
@@ -2188,8 +1906,7 @@ module.exports = (prisma) => {
               'form_post',
             scope:
               'name email',
-            state:
-              stateToken,
+            state: stateToken,
             nonce:
               jwt.decode(
                 stateToken
@@ -2205,11 +1922,9 @@ module.exports = (prisma) => {
           e
         );
 
-        res
-          .status(503)
-          .send(
-            'Apple authentication is not configured'
-          );
+        res.status(503).send(
+          'Apple authentication is not configured'
+        );
       }
     }
   );
@@ -2231,11 +1946,6 @@ module.exports = (prisma) => {
         const isMobile =
           state.platform ===
           'mobile';
-
-        const failureRedirect =
-          isMobile
-            ? 'amora://auth-callback?error=apple_auth_failed'
-            : fallback;
 
         if (!req.body.code) {
           throw new Error(
@@ -2331,14 +2041,10 @@ module.exports = (prisma) => {
                           );
 
                         return [
-                          u.name
-                            ?.firstName,
-                          u.name
-                            ?.lastName
+                          u.name?.firstName,
+                          u.name?.lastName
                         ]
-                          .filter(
-                            Boolean
-                          )
+                          .filter(Boolean)
                           .join(' ');
                       } catch {
                         return '';
@@ -2376,9 +2082,7 @@ module.exports = (prisma) => {
           e
         );
 
-        res.redirect(
-          fallback
-        );
+        res.redirect(fallback);
       }
     }
   );
@@ -2388,14 +2092,10 @@ module.exports = (prisma) => {
   router.get(
     '/facebook/start',
     (req, res) => {
-      if (
-        !process.env.FACEBOOK_APP_ID
-      ) {
-        return res
-          .status(503)
-          .send(
-            'Facebook authentication is not configured'
-          );
+      if (!process.env.FACEBOOK_APP_ID) {
+        return res.status(503).send(
+          'Facebook authentication is not configured'
+        );
       }
 
       const platform =
@@ -2419,16 +2119,13 @@ module.exports = (prisma) => {
       const params =
         new URLSearchParams({
           client_id:
-            process.env
-              .FACEBOOK_APP_ID,
+            process.env.FACEBOOK_APP_ID,
           redirect_uri:
             facebookRedirectUri(),
-          response_type:
-            'code',
+          response_type: 'code',
           scope:
             'email,public_profile',
-          state:
-            stateToken
+          state: stateToken
         });
 
       res.redirect(
@@ -2443,9 +2140,6 @@ module.exports = (prisma) => {
       const fallback =
         `${appUrl()}/login?error=facebook_auth_failed`;
 
-      let failureRedirect =
-        fallback;
-
       try {
         const state =
           consumeOAuthState(
@@ -2458,11 +2152,6 @@ module.exports = (prisma) => {
           state.platform ===
           'mobile';
 
-        failureRedirect =
-          isMobile
-            ? 'amora://auth-callback?error=facebook_auth_failed'
-            : fallback;
-
         if (!req.query.code) {
           throw new Error(
             'Missing Facebook authorization code'
@@ -2472,21 +2161,15 @@ module.exports = (prisma) => {
         const version =
           facebookGraphVersion();
 
-        // ---------------------------------------------------------
-        // 1. Exchange Facebook authorization code for access token
-        // ---------------------------------------------------------
-
         const tokenUrl =
           `https://graph.facebook.com/${version}/oauth/access_token`;
 
         const tokenParams =
           new URLSearchParams({
             client_id:
-              process.env
-                .FACEBOOK_APP_ID,
+              process.env.FACEBOOK_APP_ID,
             client_secret:
-              process.env
-                .FACEBOOK_APP_SECRET ||
+              process.env.FACEBOOK_APP_SECRET ||
               '',
             redirect_uri:
               facebookRedirectUri(),
@@ -2513,17 +2196,6 @@ module.exports = (prisma) => {
           );
         }
 
-        // ---------------------------------------------------------
-        // 2. Get Facebook profile
-        //
-        // IMPORTANT:
-        // Facebook does not guarantee an email address for every
-        // account/login.
-        //
-        // The Facebook ID is the primary OAuth identity.
-        // Email is optional and is only used for safe account linking.
-        // ---------------------------------------------------------
-
         const profileUrl =
           `https://graph.facebook.com/${version}/me?fields=id,name,email`;
 
@@ -2541,42 +2213,23 @@ module.exports = (prisma) => {
         const profile =
           await profileRes.json();
 
-        // Only Facebook ID is mandatory here.
-        //
-        // Previously this check also required profile.email,
-        // which caused:
-        //
-        // "Facebook did not return a usable verified email address"
-        //
-        // even when Facebook had returned a valid user ID.
+        /*
+         * IMPORTANT:
+         *
+         * Facebook is allowed to return no email.
+         * We therefore require the user to provide
+         * an email during the Amora account completion
+         * step instead of treating the OAuth callback
+         * as a failure.
+         */
         if (
           !profileRes.ok ||
           !profile.id
         ) {
           throw new Error(
-            profile.error?.message ||
-              'Facebook did not return a valid user profile'
+            'Facebook did not return a usable account identifier'
           );
         }
-
-        // Facebook email is optional.
-        //
-        // If Facebook provides it, use it for safe account linking.
-        // If Facebook does not provide it, an already-linked
-        // Facebook account can still be found using providerAccountId.
-        const facebookEmail =
-          typeof profile.email ===
-            'string' &&
-          profile.email.trim()
-            ? profile.email
-                .trim()
-                .toLowerCase()
-            : null;
-
-        const displayName =
-          String(
-            profile.name || ''
-          ).trim() || null;
 
         console.log(
           'Facebook OAuth profile:',
@@ -2584,64 +2237,41 @@ module.exports = (prisma) => {
             providerAccountId:
               String(profile.id),
             hasEmail:
-              Boolean(
-                facebookEmail
-              ),
-            displayName
+              Boolean(profile.email),
+            displayName:
+              String(
+                profile.name || ''
+              ).trim() || null
           }
         );
 
-        // ---------------------------------------------------------
-        // 3. Find existing Facebook identity
-        //
-        // findOrPrepareSocialUser() first searches by:
-        //
-        // provider = facebook
-        // provider_account_id = Facebook user ID
-        //
-        // Therefore an existing Facebook user can log in even when
-        // Facebook does not return an email address.
-        // ---------------------------------------------------------
-
         const prepared =
           await findOrPrepareSocialUser({
-            provider:
-              'facebook',
-
+            provider: 'facebook',
             providerAccountId:
-              String(
-                profile.id
-              ),
-
+              String(profile.id),
             email:
-              facebookEmail,
-
-            displayName,
-
+              profile.email
+                ? String(
+                    profile.email
+                  ).toLowerCase()
+                : null,
+            displayName:
+              String(
+                profile.name || ''
+              ).trim() || null,
             req
           });
-
-        // ---------------------------------------------------------
-        // 4. Clear OAuth state cookie
-        // ---------------------------------------------------------
 
         res.setHeader(
           'Set-Cookie',
           'amora_facebook_state=; Max-Age=0; Path=/auth/facebook; Secure; HttpOnly; SameSite=Lax'
         );
 
-        // ---------------------------------------------------------
-        // 5. Create one-time secure handoff
-        // ---------------------------------------------------------
-
         const handoffCode =
           await createOAuthHandoff(
             prepared
           );
-
-        // ---------------------------------------------------------
-        // 6. Return to web or mobile
-        // ---------------------------------------------------------
 
         return res.redirect(
           isMobile
@@ -2654,18 +2284,13 @@ module.exports = (prisma) => {
           e
         );
 
-        // IMPORTANT:
-        // Use the mobile deep link when the login was started
-        // from the mobile flow.
-        return res.redirect(
-          failureRedirect
-        );
+        res.redirect(fallback);
       }
     }
   );
 
-  // One-time browser/native handoff exchange.
-  // No access or refresh token is placed in the callback URL.
+  // ---------- Social handoff exchange ----------
+
   router.post(
     '/social/exchange',
     async (req, res) => {
@@ -2676,12 +2301,10 @@ module.exports = (prisma) => {
           );
 
         if (!rawCode) {
-          return res
-            .status(400)
-            .json({
-              error:
-                'Missing social handoff code.'
-            });
+          return res.status(400).json({
+            error:
+              'Missing social handoff code.'
+          });
         }
 
         const codeHash =
@@ -2694,8 +2317,7 @@ module.exports = (prisma) => {
           await prisma.oAuthHandoff.findUnique(
             {
               where: {
-                code_hash:
-                  codeHash
+                code_hash: codeHash
               }
             }
           );
@@ -2706,12 +2328,10 @@ module.exports = (prisma) => {
           handoff.expires_at <
             new Date()
         ) {
-          return res
-            .status(401)
-            .json({
-              error:
-                'This sign-in session has expired. Please try again.'
-            });
+          return res.status(401).json({
+            error:
+              'This sign-in session has expired. Please try again.'
+          });
         }
 
         if (handoff.user_id) {
@@ -2720,8 +2340,7 @@ module.exports = (prisma) => {
               {
                 where: {
                   id: handoff.id,
-                  consumed_at:
-                    null
+                  consumed_at: null
                 },
                 data: {
                   consumed_at:
@@ -2730,32 +2349,25 @@ module.exports = (prisma) => {
               }
             );
 
-          if (
-            claimed.count !== 1
-          ) {
-            return res
-              .status(401)
-              .json({
-                error:
-                  'This sign-in session has already been used.'
-              });
+          if (claimed.count !== 1) {
+            return res.status(401).json({
+              error:
+                'This sign-in session has already been used.'
+            });
           }
 
           const user =
             await prisma.user.findUnique({
               where: {
-                id:
-                  handoff.user_id
+                id: handoff.user_id
               }
             });
 
           if (!user?.is_active) {
-            return res
-              .status(403)
-              .json({
-                error:
-                  'Account suspended.'
-              });
+            return res.status(403).json({
+              error:
+                'Account suspended.'
+            });
           }
 
           if (
@@ -2769,8 +2381,7 @@ module.exports = (prisma) => {
                 where: {
                   provider_provider_account_id:
                     {
-                      provider:
-                        'apple',
+                      provider: 'apple',
                       provider_account_id:
                         handoff.provider_account_id
                     }
@@ -2782,10 +2393,8 @@ module.exports = (prisma) => {
                     handoff.email
                 },
                 create: {
-                  user_id:
-                    user.id,
-                  provider:
-                    'apple',
+                  user_id: user.id,
+                  provider: 'apple',
                   provider_account_id:
                     handoff.provider_account_id,
                   email:
@@ -2817,16 +2426,31 @@ module.exports = (prisma) => {
             },
             process.env.JWT_SECRET,
             {
-              expiresIn:
-                '10m'
+              expiresIn: '10m'
             }
           );
 
+        /*
+         * Tell the frontend whether an email
+         * is already available from the provider.
+         *
+         * Facebook can return:
+         *   email = null
+         *
+         * In that case the frontend MUST display
+         * an email input.
+         */
         res.json({
           needsProfile: true,
           provider:
             handoff.provider,
-          completionToken
+          completionToken,
+          needsEmail:
+            !handoff.email,
+          email:
+            handoff.email || null,
+          emailVerified:
+            Boolean(handoff.email)
         });
       } catch (e) {
         console.error(
@@ -2834,15 +2458,15 @@ module.exports = (prisma) => {
           e
         );
 
-        res
-          .status(401)
-          .json({
-            error:
-              'Unable to complete social sign-in.'
-          });
+        res.status(401).json({
+          error:
+            'Unable to complete social sign-in.'
+        });
       }
     }
   );
+
+  // ---------- Social account completion ----------
 
   router.post(
     '/social/complete',
@@ -2851,8 +2475,7 @@ module.exports = (prisma) => {
         const decoded =
           jwt.verify(
             String(
-              req.body
-                .completionToken ||
+              req.body.completionToken ||
                 ''
             ),
             process.env.JWT_SECRET
@@ -2869,8 +2492,7 @@ module.exports = (prisma) => {
 
         const username =
           String(
-            req.body.username ||
-              ''
+            req.body.username || ''
           ).trim();
 
         const dateOfBirth =
@@ -2878,41 +2500,25 @@ module.exports = (prisma) => {
             req.body.dateOfBirth
           );
 
-        if (
-          !/^[a-zA-Z0-9_.-]{3,20}$/.test(
-            username
-          )
-        ) {
-          return res
-            .status(400)
-            .json({
-              error:
-                'Invalid username'
-            });
-        }
-
-        if (
-          Number.isNaN(
-            dateOfBirth.getTime()
-          ) ||
-          calculateAge(
-            dateOfBirth
-          ) < 18
-        ) {
-          return res
-            .status(403)
-            .json({
-              error:
-                'You must be 18 or older.'
-            });
-        }
+        /*
+         * EMAIL IS REQUIRED.
+         *
+         * If Facebook supplied an email,
+         * use that email.
+         *
+         * If Facebook did not supply one,
+         * the frontend MUST send req.body.email.
+         */
+        const submittedEmail =
+          String(
+            req.body.email || ''
+          ).trim().toLowerCase();
 
         const handoff =
           await prisma.oAuthHandoff.findUnique(
             {
               where: {
-                id:
-                  decoded.handoffId
+                id: decoded.handoffId
               }
             }
           );
@@ -2923,34 +2529,147 @@ module.exports = (prisma) => {
           handoff.expires_at <
             new Date()
         ) {
-          return res
-            .status(401)
-            .json({
-              error:
-                'This registration session has expired.'
-            });
+          return res.status(401).json({
+            error:
+              'This registration session has expired.'
+          });
         }
 
-        if (!handoff.email) {
-          return res
-            .status(400)
-            .json({
-              error:
-                'A verified email is required to create an Amora account.'
-            });
+        /*
+         * Provider email = trusted/verified email
+         * from Google/Apple/Facebook.
+         *
+         * Missing provider email = user must enter
+         * a real email address and verify it.
+         */
+        const email =
+          handoff.email ||
+          submittedEmail;
+
+        const emailWasProvidedByUser =
+          !handoff.email;
+
+        if (!email) {
+          return res.status(400).json({
+            error:
+              'Email address is required to create an Amora account.',
+            code:
+              'EMAIL_REQUIRED',
+            field:
+              'email'
+          });
         }
+
+        const emailValidation =
+          z.string().email().safeParse(
+            email
+          );
+
+        if (
+          !emailValidation.success
+        ) {
+          return res.status(400).json({
+            error:
+              'Please enter a valid email address.',
+            code:
+              'INVALID_EMAIL',
+            field:
+              'email'
+          });
+        }
+
+        if (
+          !/^[a-zA-Z0-9_.-]{3,20}$/.test(
+            username
+          )
+        ) {
+          return res.status(400).json({
+            error:
+              'Invalid username'
+          });
+        }
+
+        if (
+          Number.isNaN(
+            dateOfBirth.getTime()
+          ) ||
+          calculateAge(dateOfBirth) < 18
+        ) {
+          return res.status(403).json({
+            error:
+              'You must be 18 or older.'
+          });
+        }
+
+        /*
+         * Check the email before creating the
+         * account so the frontend receives a
+         * clean conflict instead of a generic
+         * database error.
+         */
+        const existingEmail =
+          await prisma.user.findUnique({
+            where: {
+              email
+            }
+          });
+
+        if (existingEmail) {
+          return res.status(409).json({
+            error:
+              'This email address is already registered. Please sign in or use another email.',
+            code:
+              'EMAIL_ALREADY_REGISTERED',
+            field:
+              'email'
+          });
+        }
+
+        const existingUsername =
+          await prisma.user.findUnique({
+            where: {
+              username
+            }
+          });
+
+        if (existingUsername) {
+          return res.status(409).json({
+            error:
+              'This username is already taken.',
+            code:
+              'USERNAME_ALREADY_TAKEN',
+            field:
+              'username'
+          });
+        }
+
+        /*
+         * Social accounts don't need a password.
+         * A random password is generated only because
+         * the existing User schema requires password_hash.
+         */
+        const passwordHash =
+          await bcrypt.hash(
+            crypto
+              .randomBytes(32)
+              .toString('hex'),
+            12
+          );
 
         const user =
           await prisma.$transaction(
             async tx => {
+              /*
+               * Claim the handoff atomically.
+               * This prevents the same OAuth handoff
+               * from being used twice.
+               */
               const claimed =
                 await tx.oAuthHandoff.updateMany(
                   {
                     where: {
-                      id:
-                        handoff.id,
-                      consumed_at:
-                        null
+                      id: handoff.id,
+                      consumed_at: null
                     },
                     data: {
                       consumed_at:
@@ -2959,10 +2678,7 @@ module.exports = (prisma) => {
                   }
                 );
 
-              if (
-                claimed.count !==
-                1
-              ) {
+              if (claimed.count !== 1) {
                 throw new Error(
                   'Social registration session already used'
                 );
@@ -2971,29 +2687,27 @@ module.exports = (prisma) => {
               const created =
                 await tx.user.create({
                   data: {
-                    email:
-                      handoff.email,
+                    email,
                     username,
                     password_hash:
-                      await bcrypt.hash(
-                        crypto
-                          .randomBytes(
-                            32
-                          )
-                          .toString(
-                            'hex'
-                          ),
-                        12
-                      ),
+                      passwordHash,
                     date_of_birth:
                       dateOfBirth,
                     display_name:
                       handoff.display_name ||
                       username,
-                    age_verified:
-                      true,
+                    age_verified: true,
+
+                    /*
+                     * Google/Apple/Facebook-provided
+                     * email is treated as verified.
+                     *
+                     * An email manually supplied because
+                     * Facebook did not provide one MUST
+                     * be verified by Amora first.
+                     */
                     is_verified:
-                      true
+                      !emailWasProvidedByUser
                   }
                 });
 
@@ -3005,6 +2719,10 @@ module.exports = (prisma) => {
                 }
               });
 
+              /*
+               * Keep the Facebook/Google/Apple identity
+               * permanently linked to the Amora account.
+               */
               await tx.oAuthAccount.create({
                 data: {
                   user_id:
@@ -3013,38 +2731,80 @@ module.exports = (prisma) => {
                     handoff.provider,
                   provider_account_id:
                     handoff.provider_account_id,
-                  email:
-                    handoff.email,
+                  email,
                   refresh_token_encrypted:
                     handoff.refresh_token_encrypted
                 }
               });
 
-              await tx.oAuthHandoff.update(
-                {
-                  where: {
-                    id:
-                      handoff.id
-                  },
-                  data: {
-                    user_id:
-                      created.id
-                  }
+              await tx.oAuthHandoff.update({
+                where: {
+                  id: handoff.id
+                },
+                data: {
+                  user_id:
+                    created.id
                 }
-              );
+              });
 
               return created;
             }
           );
 
-        res
-          .status(201)
-          .json(
-            await createSession(
-              user,
-              req
-            )
-          );
+        /*
+         * Facebook did not provide an email.
+         *
+         * The user supplied one manually, so send
+         * Amora's normal verification email.
+         */
+        if (emailWasProvidedByUser) {
+          const verificationSent =
+            await sendVerificationEmail(
+              user
+            ).catch(err => {
+              console.error(
+                'Social registration verification email failed:',
+                err.message
+              );
+
+              return false;
+            });
+
+          if (!verificationSent) {
+            return res.status(503).json({
+              error:
+                'Your account was created, but Amora could not send the verification email. Please try resending it.',
+              code:
+                'VERIFICATION_EMAIL_UNAVAILABLE',
+              emailVerificationRequired:
+                true,
+              email
+            });
+          }
+
+          return res.status(201).json({
+            success: true,
+            id: user.id,
+            provider:
+              handoff.provider,
+            emailVerificationRequired:
+              true,
+            email,
+            message:
+              'Your Amora account was created. Please check your email and verify your email address before signing in.'
+          });
+        }
+
+        /*
+         * Provider supplied a verified email.
+         * No additional email verification is needed.
+         */
+        return res.status(201).json(
+          await createSession(
+            user,
+            req
+          )
+        );
       } catch (e) {
         console.error(
           'Social registration error:',
@@ -3054,23 +2814,21 @@ module.exports = (prisma) => {
         if (
           isUniqueConstraintError(e)
         ) {
-          return res
-            .status(409)
-            .json({
-              error:
-                'Email or username already exists.'
-            });
+          return res.status(409).json({
+            error:
+              'Email or username already exists.'
+          });
         }
 
-        return res
-          .status(503)
-          .json({
-            error:
-              'Social registration is temporarily unavailable. Please try again shortly.'
-          });
+        return res.status(503).json({
+          error:
+            'Social registration is temporarily unavailable. Please try again shortly.'
+        });
       }
     }
   );
+
+  // ---------- Refresh ----------
 
   router.post(
     '/refresh',
@@ -3110,43 +2868,34 @@ module.exports = (prisma) => {
           session.expires_at <
             new Date()
         ) {
-          return res
-            .status(401)
-            .json({
-              error:
-                'Invalid refresh token.'
-            });
+          return res.status(401).json({
+            error:
+              'Invalid refresh token.'
+          });
         }
 
         const user =
           await prisma.user.findUnique({
             where: {
-              id:
-                session.user_id
+              id: session.user_id
             }
           });
 
         if (!user?.is_active) {
-          return res
-            .status(403)
-            .json({
-              error:
-                'Account suspended.'
-            });
+          return res.status(403).json({
+            error:
+              'Account suspended.'
+          });
         }
 
-        // Rotate the refresh token on every successful refresh.
         const nextRefreshToken =
-          signRefreshToken(
-            user
-          );
+          signRefreshToken(user);
 
         const updated =
           await prisma.session.updateMany(
             {
               where: {
-                id:
-                  session.id,
+                id: session.id,
                 refresh_token:
                   refreshToken
               },
@@ -3166,22 +2915,16 @@ module.exports = (prisma) => {
             }
           );
 
-        if (
-          updated.count !== 1
-        ) {
-          return res
-            .status(401)
-            .json({
-              error:
-                'Invalid refresh token.'
-            });
+        if (updated.count !== 1) {
+          return res.status(401).json({
+            error:
+              'Invalid refresh token.'
+          });
         }
 
         res.json({
           accessToken:
-            signAccessToken(
-              user
-            ),
+            signAccessToken(user),
           refreshToken:
             nextRefreshToken,
           user: {
@@ -3205,15 +2948,12 @@ module.exports = (prisma) => {
         );
 
         if (
-          e?.code ===
-          'P2002'
+          e?.code === 'P2002'
         ) {
-          return res
-            .status(503)
-            .json({
-              error:
-                'Session refresh is temporarily unavailable. Please try again.'
-            });
+          return res.status(503).json({
+            error:
+              'Session refresh is temporarily unavailable. Please try again.'
+          });
         }
 
         if (
@@ -3222,23 +2962,21 @@ module.exports = (prisma) => {
           e?.name ===
             'TokenExpiredError'
         ) {
-          return res
-            .status(401)
-            .json({
-              error:
-                'Invalid refresh token.'
-            });
+          return res.status(401).json({
+            error:
+              'Invalid refresh token.'
+          });
         }
 
-        return res
-          .status(503)
-          .json({
-            error:
-              'Session refresh is temporarily unavailable. Please try again.'
-          });
+        return res.status(503).json({
+          error:
+            'Session refresh is temporarily unavailable. Please try again.'
+        });
       }
     }
   );
+
+  // ---------- Logout ----------
 
   router.post(
     '/logout',
@@ -3246,8 +2984,7 @@ module.exports = (prisma) => {
       await prisma.session.deleteMany({
         where: {
           refresh_token:
-            req.body.refreshToken ||
-            ''
+            req.body.refreshToken || ''
         }
       });
 
