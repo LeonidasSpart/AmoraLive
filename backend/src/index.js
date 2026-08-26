@@ -977,6 +977,12 @@ const iapRoutes =
     prisma
   );
 
+const appleNotificationRoutes =
+  require('./routes/appleNotifications')(prisma);
+
+const googleRtdnRoutes =
+  require('./routes/googleRtdn')(prisma);
+
 const membershipRoutes =
   require(
     './routes/membership'
@@ -1098,6 +1104,19 @@ app.use(
 app.use(
   '/wallet/iap',
   iapRoutes
+);
+
+// Not user-authenticated routes — Apple/Google's own signature schemes
+// (verified inside each handler) are what authenticates these requests,
+// not the app's normal JWT auth middleware.
+app.use(
+  '/webhooks/apple-notifications',
+  appleNotificationRoutes
+);
+
+app.use(
+  '/webhooks/google-rtdn',
+  googleRtdnRoutes
 );
 
 app.use(
