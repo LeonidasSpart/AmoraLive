@@ -8,7 +8,8 @@ import AppShell from "../src/AppShell";
 
 const actions = [
   ["💬", "Messages", "/messages"], ["✦", "Live", "/live"], ["🪙", "Coins & Gifts", "/wallet"],
-  ["🏆", "Events", "/events"], ["◎", "Profile", "/profile"]
+  ["🏆", "Events", "/events"], ["◎", "Profile", "/profile"], ["🔎", "Discover", "/discover"],
+  ["✨", "Store", "/store"], ["🛡️", "Safety", "/safety"]
 ] as const;
 
 export default function Home() {
