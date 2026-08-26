@@ -201,6 +201,11 @@ model Membership {
   end_date        DateTime
   auto_renew      Boolean  @default(false)
   stripe_subscription_id String?
+  // Apple's subscription identity survives renewals (unlike the token from
+  // any single transaction), so it's what a "restore purchases" flow looks
+  // up by. Google's purchase token plays the equivalent role for Android.
+  apple_original_transaction_id String?
+  google_purchase_token String?
   // Tracks which billing period's monthly bonus coins have already been
   // granted, keyed to Stripe's current_period_end for that cycle. Stripe
   // can and does redeliver the same webhook event on retry, so without
