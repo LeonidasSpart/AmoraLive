@@ -106,6 +106,7 @@ export default function Profile() {
     { label: "Membership & VIP", onPress: () => router.push("/membership") },
     { label: "My level & rewards", onPress: () => router.push("/rewards") },
     { label: "My outfits & profile effects", onPress: () => router.push("/outfits") },
+    { label: "Creator Studio", onPress: () => router.push("/studio") },
     { label: "Security Center", onPress: () => router.push("/security") },
     { label: "Delete my account", onPress: deleteAccount, danger: true },
     { label: "Terms & policies", onPress: () => Linking.openURL("https://www.amoramatch.one/legal/terms") },
