@@ -1,3 +1,91 @@
-import{useEffect,useState}from"react";import{ActivityIndicator,Pressable,StyleSheet,Text,View}from"react-native";import{useLocalSearchParams,router}from"expo-router";import AppShell from"../../../src/AppShell";import{theme}from"../../../src/theme";import{phase5Api}from"../../../src/phase5Api";
-export default function VideoDate(){const{matchId}=useLocalSearchParams<{matchId:string}>();const[token,setToken]=useState<any>(null),[error,setError]=useState("");useEffect(()=>{if(matchId)phase5Api.videoDateToken(String(matchId)).then(setToken).catch((e:any)=>setError(e.message||"Unable to start this video date."))},[matchId]);return <AppShell><View style={s.p}><Pressable onPress={()=>router.back()}><Text style={s.back}>‹</Text></Pressable>{error?<View style={s.center}><Text style={s.err}>{error}</Text><Pressable onPress={()=>router.back()} style={s.button}><Text style={s.bt}>Back to Matches</Text></Pressable></View>:!token?<View style={s.center}><ActivityIndicator color={theme.pink}/><Text style={s.muted}>Preparing your private video date…</Text></View>:<View style={s.center}><Text style={s.icon}>♥</Text><Text style={s.title}>Video Date Ready</Text><Text style={s.muted}>Your secure LiveKit room is ready.</Text><Text style={s.muted}>Connect the native LiveKit camera view here using the returned room token.</Text><Text selectable style={s.token}>Room: {token.roomName||"private"}</Text><Pressable onPress={()=>router.back()} style={s.button}><Text style={s.bt}>Return to Matches</Text></Pressable></View>}</View></AppShell>}
-const s=StyleSheet.create({p:{flex:1,backgroundColor:theme.bg,padding:18},back:{color:"#fff",fontSize:40},center:{flex:1,alignItems:"center",justifyContent:"center",padding:20},icon:{fontSize:52,color:theme.pink},title:{color:"#fff",fontSize:24,fontWeight:"900",marginTop:10},muted:{color:theme.muted,fontSize:9,textAlign:"center",lineHeight:15,marginTop:7},token:{color:theme.dim,fontSize:7,marginTop:14},button:{backgroundColor:theme.pink,borderRadius:13,paddingVertical:13,paddingHorizontal:25,marginTop:18},bt:{color:"#fff",fontWeight:"900"},err:{color:"#ff8bad",fontSize:10,textAlign:"center"}})
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { useLocalSearchParams, router } from "expo-router";
+import { Room, RoomEvent, Track } from "livekit-client";
+import { VideoTrack } from "@livekit/react-native";
+import AppShell from "../../../src/AppShell";
+import { theme } from "../../../src/theme";
+import { phase5Api } from "../../../src/phase5Api";
+
+// Same verified LiveKit connection pattern as app/live/[id].tsx and
+// app/video-match.tsx — both people in the match connect to the same
+// deterministic room name the backend derives from the match id, and both
+// can publish (unlike the host/viewer live-room model).
+export default function VideoDate() {
+  const { matchId } = useLocalSearchParams<{ matchId: string }>();
+  const [connected, setConnected] = useState(false);
+  const [error, setError] = useState("");
+  const [myTrackRef, setMyTrackRef] = useState<any>(null);
+  const [peerTrackRef, setPeerTrackRef] = useState<any>(null);
+  const lkRoom = useRef<Room | null>(null);
+
+  useEffect(() => {
+    if (!matchId) return;
+    let active = true;
+    (async () => {
+      try {
+        const data = await phase5Api.videoDateToken(String(matchId));
+        if (!active || !data?.token || !data?.url) return;
+
+        const room = new Room({ adaptiveStream: true, dynacast: true });
+        lkRoom.current = room;
+        room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+          if (track.kind === Track.Kind.Video) setPeerTrackRef({ participant, publication });
+        });
+        room.on(RoomEvent.TrackUnsubscribed, () => setPeerTrackRef(null));
+
+        await room.connect(data.url, data.token);
+        if (!active) { room.disconnect(); return; }
+        setConnected(true);
+
+        await room.localParticipant.setCameraEnabled(true);
+        await room.localParticipant.setMicrophoneEnabled(true);
+        setMyTrackRef({ participant: room.localParticipant, publication: null });
+      } catch (e: any) {
+        if (active) setError(e.message || "Unable to start this video date.");
+      }
+    })();
+    return () => {
+      active = false;
+      lkRoom.current?.disconnect();
+      lkRoom.current = null;
+    };
+  }, [matchId]);
+
+  return <AppShell>
+    <View style={s.p}>
+      <Pressable onPress={() => { lkRoom.current?.disconnect(); router.back(); }} style={s.closeBtn}><Text style={s.back}>✕</Text></Pressable>
+
+      {error ? (
+        <View style={s.center}>
+          <Text style={s.err}>{error}</Text>
+          <Pressable onPress={() => router.back()} style={s.button}><Text style={s.bt}>Back to Matches</Text></Pressable>
+        </View>
+      ) : (
+        <View style={s.videoStage}>
+          {peerTrackRef ? <VideoTrack trackRef={peerTrackRef} style={s.videoFill} /> : (
+            <View style={s.center}>
+              <ActivityIndicator color={theme.pink} />
+              <Text style={s.muted}>{connected ? "Waiting for the other person…" : "Connecting…"}</Text>
+            </View>
+          )}
+          {myTrackRef && <View style={s.selfPip}><VideoTrack trackRef={myTrackRef} style={s.videoFill} /></View>}
+        </View>
+      )}
+    </View>
+  </AppShell>;
+}
+
+const s = StyleSheet.create({
+  p: { flex: 1, backgroundColor: "#000" },
+  closeBtn: { position: "absolute", top: 50, left: 16, zIndex: 5, width: 34, height: 34, borderRadius: 17, backgroundColor: "rgba(0,0,0,.5)", alignItems: "center", justifyContent: "center" },
+  back: { color: "#fff", fontSize: 16, fontWeight: "900" },
+  center: { flex: 1, alignItems: "center", justifyContent: "center", gap: 10 },
+  err: { color: "#ff8bad", textAlign: "center", paddingHorizontal: 30 },
+  muted: { color: theme.muted, fontSize: 12 },
+  button: { marginTop: 14, backgroundColor: theme.pink, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 26 },
+  bt: { color: "#fff", fontWeight: "900" },
+  videoStage: { flex: 1, position: "relative" },
+  videoFill: { width: "100%", height: "100%" },
+  selfPip: { position: "absolute", bottom: 30, right: 16, width: 100, height: 140, borderRadius: 14, overflow: "hidden", borderWidth: 2, borderColor: "rgba(255,255,255,.3)" }
+});
