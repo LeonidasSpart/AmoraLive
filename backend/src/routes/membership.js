@@ -1,11 +1,13 @@
 const auth = require('../middleware/auth');
 const Stripe = require('stripe');
+const { verifyAppleReceipt, verifyGoogleSubscription, acknowledgeGoogleSubscription } = require('../lib/iapVerification');
+const { grantMonthlyBonusIfDue } = require('../lib/membership');
 
 const PLANS = [
   { tier: 'free', label: 'Free', price: 0, currency: 'USD', benefits: ['Basic profile', 'View live streams', 'Send basic gifts', 'Limited chat'] },
-  { tier: 'premium', label: 'Premium', price: 9.99, currency: 'USD', benefits: ['Ad-free experience', 'Exclusive gifts', 'Priority support', 'Profile badge', 'Extended chat history'] },
-  { tier: 'vip', label: 'VIP', price: 29.99, currency: 'USD', benefits: ['All Premium benefits', 'Profile boost', 'Bonus coins monthly', 'Exclusive VIP events', 'Private shows access'] },
-  { tier: 'svip', label: 'SVIP', price: 59.99, currency: 'USD', benefits: ['All VIP benefits', 'Unlimited gifts', 'Private 1-on-1 shows', 'Early access to features', 'Dedicated account manager'] }
+  { tier: 'premium', label: 'Premium', price: 9.99, currency: 'USD', benefits: ['Ad-free experience', 'Exclusive gifts', 'Priority support', 'Profile badge', 'Extended chat history'], apple_product_id: 'com.amoralive.premium.monthly', google_product_id: 'premium_monthly' },
+  { tier: 'vip', label: 'VIP', price: 29.99, currency: 'USD', benefits: ['All Premium benefits', 'Profile boost', 'Bonus coins monthly', 'Exclusive VIP events', 'Private shows access'], apple_product_id: 'com.amoralive.vip.monthly', google_product_id: 'vip_monthly' },
+  { tier: 'svip', label: 'SVIP', price: 59.99, currency: 'USD', benefits: ['All VIP benefits', 'Unlimited gifts', 'Private 1-on-1 shows', 'Early access to features', 'Dedicated account manager'], apple_product_id: 'com.amoralive.svip.monthly', google_product_id: 'svip_monthly' }
 ];
 
 module.exports = (prisma) => {
@@ -62,6 +64,102 @@ module.exports = (prisma) => {
     } catch (e) {
       console.error('Membership checkout error:', e);
       res.status(500).json({ error: 'Unable to create membership checkout' });
+    }
+  });
+
+  // ---------- Native IAP subscription verification (Apple / Google) ----------
+  //
+  // Apple's App Store Review Guidelines require auto-renewable
+  // subscriptions to go through StoreKit, not a third-party processor —
+  // this is what makes VIP/SVIP membership actually launchable on iOS
+  // (Stripe checkout above remains the web path and the Android/Expo-Go
+  // fallback). Reuses grantMonthlyBonusIfDue from lib/membership.js so
+  // the bonus-coin logic is identical to the Stripe webhook path — same
+  // idempotency guarantee (keyed to last_bonus_period_end), so a client
+  // retrying this call with the same still-active receipt never
+  // double-credits the bonus.
+
+  router.post('/iap/apple/verify', auth, async (req, res) => {
+    const { receiptData } = req.body;
+    if (!receiptData) return res.status(400).json({ error: 'receiptData is required.' });
+
+    try {
+      const result = await verifyAppleReceipt(receiptData);
+      if (result.status !== 0) {
+        return res.status(400).json({ error: `Apple could not verify this receipt (status ${result.status}).` });
+      }
+
+      const subscriptionProductIds = PLANS.filter((p) => p.apple_product_id).map((p) => p.apple_product_id);
+      const transactions = result.latest_receipt_info || result.receipt?.in_app || [];
+      const matching = transactions
+        .filter((t) => subscriptionProductIds.includes(t.product_id))
+        .sort((a, b) => Number(b.purchase_date_ms) - Number(a.purchase_date_ms))[0];
+
+      if (!matching) return res.status(400).json({ error: 'No matching subscription was found in this receipt.' });
+      if (!matching.expires_date_ms) return res.status(400).json({ error: 'This product is not a subscription.' });
+
+      const expiresAt = new Date(Number(matching.expires_date_ms));
+      if (expiresAt <= new Date()) return res.status(400).json({ error: 'This subscription has already expired.' });
+
+      const plan = PLANS.find((p) => p.apple_product_id === matching.product_id);
+      const originalTransactionId = matching.original_transaction_id;
+
+      // pending_renewal_info reflects whether the person has actually
+      // turned auto-renew off in their App Store settings — trust that
+      // over assuming a still-valid receipt always means auto-renew is on.
+      const pendingRenewal = (result.pending_renewal_info || []).find((p) => p.original_transaction_id === originalTransactionId);
+      const autoRenew = pendingRenewal ? pendingRenewal.auto_renew_status === '1' : true;
+
+      const membership = await prisma.$transaction(async (tx) => {
+        const m = await tx.membership.upsert({
+          where: { user_id: req.user.id },
+          create: { user_id: req.user.id, tier: plan.tier, end_date: expiresAt, auto_renew: autoRenew, apple_original_transaction_id: originalTransactionId },
+          update: { tier: plan.tier, end_date: expiresAt, auto_renew: autoRenew, apple_original_transaction_id: originalTransactionId }
+        });
+        await grantMonthlyBonusIfDue(tx, { userId: req.user.id, tier: plan.tier, periodEnd: expiresAt });
+        return m;
+      });
+
+      res.json({ success: true, membership });
+    } catch (e) {
+      console.error('Apple subscription verification error:', e);
+      res.status(500).json({ error: 'Unable to verify this subscription.' });
+    }
+  });
+
+  router.post('/iap/google/verify', auth, async (req, res) => {
+    const { tier, purchaseToken } = req.body;
+    const plan = PLANS.find((p) => p.tier === tier && p.google_product_id);
+    if (!plan) return res.status(400).json({ error: 'Invalid or unsupported tier.' });
+    if (!purchaseToken) return res.status(400).json({ error: 'purchaseToken is required.' });
+
+    try {
+      const { data, accessToken, packageName } = await verifyGoogleSubscription(plan.google_product_id, purchaseToken);
+      if (!data.expiryTimeMillis) return res.status(400).json({ error: 'Google Play could not verify this subscription.' });
+
+      const expiresAt = new Date(Number(data.expiryTimeMillis));
+      if (expiresAt <= new Date()) return res.status(400).json({ error: 'This subscription has already expired.' });
+
+      const membership = await prisma.$transaction(async (tx) => {
+        const m = await tx.membership.upsert({
+          where: { user_id: req.user.id },
+          create: { user_id: req.user.id, tier: plan.tier, end_date: expiresAt, auto_renew: !!data.autoRenewing, google_purchase_token: purchaseToken },
+          update: { tier: plan.tier, end_date: expiresAt, auto_renew: !!data.autoRenewing, google_purchase_token: purchaseToken }
+        });
+        await grantMonthlyBonusIfDue(tx, { userId: req.user.id, tier: plan.tier, periodEnd: expiresAt });
+        return m;
+      });
+
+      // Google requires subscription purchases to be acknowledged within
+      // 3 days or it auto-refunds them.
+      if (data.acknowledgementState === 0) {
+        acknowledgeGoogleSubscription({ packageName, subscriptionId: plan.google_product_id, purchaseToken, accessToken });
+      }
+
+      res.json({ success: true, membership });
+    } catch (e) {
+      console.error('Google subscription verification error:', e);
+      res.status(500).json({ error: 'Unable to verify this subscription.' });
     }
   });
 
