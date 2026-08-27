@@ -3,6 +3,7 @@ import { router, useFocusEffect } from "expo-router";
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, View } from "react-native";
 import { theme } from "../src/theme";
 import { api } from "../src/api/client";
+import { unregisterPushNotifications } from "../src/push";
 
 type Session = { id: string; device_info?: string | null; ip_address?: string | null; created_at: string; expires_at: string };
 type SecurityOverview = { score: number; recommendations: string[]; emailVerified: boolean; ageVerified: boolean; privacyConfigured: boolean; activeSessions: number };
@@ -60,6 +61,7 @@ export default function Security() {
     setBusy("password");
     try {
       await api.changePassword(currentPassword, newPassword);
+      await unregisterPushNotifications();
       await api.logout();
       setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
       Alert.alert("Password changed", "For your protection, all existing sessions were revoked. Please sign in again.", [{ text: "Sign in", onPress: () => router.replace("/auth") }]);
