@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const { awardXp } = require('../lib/xp');
 const { meetsMinTier } = require('../lib/membership');
 const { incrementMissionProgress } = require('../lib/missions');
+const { sendPushToUser } = require('../lib/push');
 const { createRateLimiter } = require('../middleware/security');
 
 module.exports = (prisma, io) => {
@@ -219,6 +220,17 @@ module.exports = (prisma, io) => {
       if (result.room_id) io.to(`live-${result.room_id}`).emit('gift-animation', result);
       io.to(`user-${result.receiver_id}`).emit('gift-received', result);
       io.to(`user-${result.sender_id}`).emit('gift-sent', result);
+
+      // req.user is just the decoded JWT ({id, tier, role}) — never a
+      // display name — so the sender's name has to be fetched fresh here
+      // rather than read off req.user.
+      prisma.user.findUnique({ where: { id: req.user.id }, select: { display_name: true, username: true } })
+        .then((sender) => sendPushToUser(prisma, receiver.id, {
+          title: 'You received a gift! 🎁',
+          body: `${sender?.display_name || sender?.username || 'Someone'} sent you ${qty > 1 ? `${qty}x ` : ''}${gift.name}`,
+          data: { type: 'gift_received', giftId: gift.id }
+        }))
+        .catch((err) => console.error('Gift push notification failed:', err.message));
 
       if (xpResult?.leveledUp) {
         io.to(`user-${result.receiver_id}`).emit('level-up', { newLevel: xpResult.newLevel, badge: xpResult.newBadge });
