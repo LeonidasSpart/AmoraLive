@@ -2,6 +2,7 @@
 const auth = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 const { incrementMissionProgress } = require('../lib/missions');
+const { sendPushToUser } = require('../lib/push');
 const { calculateAge, compatibilityScore } = require('../lib/compatibility');
 
 const publicProfileSelect = {
@@ -139,6 +140,11 @@ module.exports = (prisma) => {
       await prisma.notification.create({
         data: { user_id: targetUserId, type: 'super_liked', payload: { fromId: userId, fromName: sender?.display_name || sender?.username } }
       }).catch(err => console.error('Failed to create super-like notification:', err.message));
+      sendPushToUser(prisma, targetUserId, {
+        title: 'Someone super liked you! ⭐',
+        body: `${sender?.display_name || sender?.username || 'Someone'} thinks you're special.`,
+        data: { type: 'super_liked', fromId: userId }
+      });
     }
 
     const reciprocal = await prisma.swipe.findUnique({
@@ -164,6 +170,13 @@ module.exports = (prisma) => {
         { user_id: targetUserId, type: 'new_match', payload: { peerId: userId, source } }
       ]
     }).catch(err => console.error('Failed to create match notifications:', err.message));
+
+    const [userInfo, targetInfo] = await Promise.all([
+      prisma.user.findUnique({ where: { id: userId }, select: { display_name: true, username: true } }),
+      prisma.user.findUnique({ where: { id: targetUserId }, select: { display_name: true, username: true } })
+    ]);
+    sendPushToUser(prisma, userId, { title: "It's a match! 💕", body: `You and ${targetInfo?.display_name || targetInfo?.username || 'someone'} liked each other.`, data: { type: 'new_match', peerId: targetUserId } });
+    sendPushToUser(prisma, targetUserId, { title: "It's a match! 💕", body: `You and ${userInfo?.display_name || userInfo?.username || 'someone'} liked each other.`, data: { type: 'new_match', peerId: userId } });
 
     prisma.$transaction(async (tx) => {
       await incrementMissionProgress(tx, userId, 'matches_made', 1);
