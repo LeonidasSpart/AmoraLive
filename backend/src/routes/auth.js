@@ -1192,7 +1192,7 @@ module.exports = (prisma) => {
           action: 'login_failed',
           target_type: 'auth',
           target_id: identifierHash,
-          created_at: {
+          timestamp: {
             gte: new Date(Date.now() - 15 * 60 * 1000)
           }
         }
