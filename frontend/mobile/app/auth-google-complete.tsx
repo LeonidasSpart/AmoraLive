@@ -3,6 +3,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { View, Text, Pressable, TextInput, StyleSheet, ActivityIndicator } from "react-native";
 import { theme } from "../src/theme";
 import { api } from "../src/api/client";
+import { registerForPushNotifications } from "../src/push";
 
 export default function AuthGoogleComplete() {
   const { token } = useLocalSearchParams<{ token: string }>();
@@ -24,6 +25,7 @@ export default function AuthGoogleComplete() {
     setLoading(true);
     try {
       await api.googleComplete({ completionToken: token, username: username.trim(), dateOfBirth });
+      registerForPushNotifications();
       router.replace("/home");
     } catch (e: any) {
       setError(e.message || "Unable to complete Google registration. Username may already be taken.");
