@@ -16,6 +16,7 @@ import * as AppleAuthentication from "expo-apple-authentication";
 import * as Crypto from "expo-crypto";
 import { theme } from "../src/theme";
 import { api, API_URL, storeSession } from "../src/api/client";
+import { registerForPushNotifications } from "../src/push";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -50,6 +51,7 @@ export default function Auth() {
     setLoading(true);
     try {
       await api.login({ identifier: email.trim(), password });
+      registerForPushNotifications();
       router.replace("/home");
     } catch (e: any) {
       setError(e.message || "We could not sign you in. Please check your details.");
@@ -116,6 +118,7 @@ export default function Auth() {
         refreshToken: queryParams.refreshToken ? String(queryParams.refreshToken) : undefined,
         user: { id: queryParams.userId ? String(queryParams.userId) : undefined }
       });
+      registerForPushNotifications();
       router.replace("/home");
       return;
     }
@@ -196,6 +199,7 @@ export default function Auth() {
 
         if (result.accessToken) {
           await storeSession(result);
+          registerForPushNotifications();
           router.replace("/home");
           return;
         }
