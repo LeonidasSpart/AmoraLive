@@ -166,11 +166,6 @@ export const api = {
     await storeSession(session);
     return session;
   },
-  googleComplete: async (body: unknown) => {
-    const session = await request('/auth/google/complete', { method: 'POST', body: JSON.stringify(body) });
-    await storeSession(session);
-    return session;
-  },
   appleNative: (body: unknown) => request('/auth/apple/native', { method: 'POST', body: JSON.stringify(body) }),
   socialExchange: async (code: string) => {
     const result = await request('/auth/social/exchange', { method: 'POST', body: JSON.stringify({ code }) });
@@ -207,6 +202,7 @@ export const api = {
   messages: (userId: string, limit = 50) => request(`/messages/${userId}?limit=${limit}`),
   sendMessage: (userId: string, content: string) => request(`/messages/${userId}`, { method: 'POST', body: JSON.stringify({ content }) }),
   uploadMessageMedia: (formData: FormData) => uploadFile('/messages/upload', formData),
+  uploadStory: (formData: FormData) => uploadFile('/stories', formData),
   wallet: () => request('/wallet/me'),
   walletTransactions: () => request('/wallet/transactions'),
   gifts: () => request('/gifts/catalog'),

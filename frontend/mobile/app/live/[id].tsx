@@ -76,7 +76,7 @@ export default function LiveRoom() {
       s.on("battle:started", async (payload: any) => {
         setIncomingInvite(null);
         setBattle({ battleId: payload.battleId, mySide: payload.mySide, endsAt: payload.endsAt, opponent: payload.opponent, scoreA: payload.scoreA || 0, scoreB: payload.scoreB || 0 });
-        connectOpponentFeed(payload.opponent?.roomId);
+        connectOpponentFeed(payload.opponent?.id);
       });
       s.on("battle:score", (payload: any) => {
         setBattle((prev: any) => (prev && prev.battleId === payload.battleId ? { ...prev, scoreA: payload.scoreA, scoreB: payload.scoreB } : prev));
@@ -101,7 +101,7 @@ export default function LiveRoom() {
         .then((b) => {
           if (!b || !active) return;
           setBattle({ battleId: b.battleId, mySide: b.mySide, endsAt: b.endsAt, opponent: b.opponent, scoreA: b.scoreA, scoreB: b.scoreB });
-          connectOpponentFeed(b.opponent?.roomId);
+          connectOpponentFeed(b.opponent?.id);
         })
         .catch(() => {});
     })();
@@ -255,7 +255,7 @@ export default function LiveRoom() {
         <Pressable style={s.action} onPress={() => router.push({ pathname: "/chat/[userId]", params: { userId: String(room?.host?.id) } })}><Text style={s.actionIcon}>💬</Text><Text style={s.actionText}>Message</Text></Pressable>
       </View>
 
-      {giftOpen && <View style={s.giftPanel}>{gifts.slice(0, 8).map((g) => <Pressable key={g.id} style={s.gift} onPress={() => sendGift(g)}><Text style={{ fontSize: 25 }}>{g.emoji || "🎁"}</Text><Text style={s.giftName}>{g.name}</Text><Text style={s.coin}>🪙 {g.price_coins || g.coins || 0}</Text></Pressable>)}</View>}
+      {giftOpen && <View style={s.giftPanel}>{gifts.slice(0, 8).map((g) => <Pressable key={g.id} style={s.gift} onPress={() => sendGift(g)}><Text style={{ fontSize: 25 }}>{g.glyph || "🎁"}</Text><Text style={s.giftName}>{g.name}</Text><Text style={s.coin}>🪙 {g.coin_price || 0}</Text></Pressable>)}</View>}
 
       <View style={s.info}><Text style={s.section}>About this live</Text><Text style={s.muted}>#{room?.category || "General"} · {viewerCount} watching</Text></View>
     </ScrollView>

@@ -7,16 +7,15 @@ async function first(paths:string[], options:RequestInit={}){
   }
   throw last||new Error("Request failed");
 }
+// Note: battles/battle/joinBattle/leaveBattle/story/discover/trending/
+// createStory were removed here — they guessed at endpoint paths that were
+// never real (the actual routes are /live/:id/battle* and /stories/feed,
+// used directly elsewhere), and nothing in the app called them. Keeping
+// unused, wrong-path API surface around is exactly what let this app end
+// up with wiring bugs before — a 404 landmine for the next screen built
+// against it.
 export const phase3Api={
-  discover:(params:string="")=>first([`/discover${params}`,`/discover/feed${params}`,`/live/discover${params}`]),
-  trending:()=>first(["/discover/trending","/live/trending"]),
   stories:()=>first(["/stories","/stories/feed"]),
-  story:(id:string)=>first([`/stories/${id}`]),
-  createStory:(body:any)=>first(["/stories"],{method:"POST",body:JSON.stringify(body)}),
   viewStory:(id:string)=>first([`/stories/${id}/view`,`/stories/${id}/views`],{method:"POST"}),
-  reactStory:(id:string,reaction:string)=>first([`/stories/${id}/react`,`/stories/${id}/reaction`],{method:"POST",body:JSON.stringify({reaction})}),
-  battles:(id?:string)=>first(id?[`/live/battles/${id}`,`/battles/${id}`]:["/live/battles","/battles"]),
-  battle:(id:string)=>first([`/live/battles/${id}`,`/battles/${id}`]),
-  joinBattle:(id:string)=>first([`/live/battles/${id}/join`,`/battles/${id}/join`],{method:"POST"}),
-  leaveBattle:(id:string)=>first([`/live/battles/${id}/leave`,`/battles/${id}/leave`],{method:"POST"})
+  reactStory:(id:string,reaction:string)=>first([`/stories/${id}/react`,`/stories/${id}/reaction`],{method:"POST",body:JSON.stringify({reaction})})
 };

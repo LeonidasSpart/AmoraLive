@@ -14,15 +14,17 @@ const actions = [
 
 export default function Home() {
   const [gifts, setGifts] = useState<any[]>([]);
+  const [balance, setBalance] = useState<number | null>(null);
   useEffect(() => { api.gifts().then((data) => setGifts(Array.isArray(data) ? data.slice(0, 10) : [])).catch(() => {}); }, []);
+  useEffect(() => { api.wallet().then((w: any) => setBalance(typeof w?.balance === "number" ? w.balance : 0)).catch(() => {}); }, []);
   return <AppShell><ScrollView style={s.page} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-    <View style={s.top}><View><Text style={s.eyebrow}>MEANINGFUL CONNECTIONS</Text><Text style={s.brand}>AMORA</Text></View><Pressable style={s.coinPill} onPress={() => router.push("/wallet")}><Text style={s.coinIcon}>🪙</Text><Text style={s.coinText}>0</Text></Pressable></View>
+    <View style={s.top}><View><Text style={s.eyebrow}>MEANINGFUL CONNECTIONS</Text><Text style={s.brand}>AMORA</Text></View><Pressable style={s.coinPill} onPress={() => router.push("/wallet")}><Text style={s.coinIcon}>🪙</Text><Text style={s.coinText}>{balance ?? "–"}</Text></Pressable></View>
 
     <View style={s.hero}>
       <View style={s.heroGlow} /><View style={s.heroRing} /><View style={s.heroHeart}><Text style={s.heart}>♡</Text></View>
       <Text style={s.heroKicker}>AMORA LIVE</Text><Text style={s.heroTitle}>Meet someone.{"\n"}<Text style={s.heroGradient}>Feel something real.</Text></Text>
       <Text style={s.heroSub}>Discover live people, video matches and moments worth remembering.</Text>
-      <View style={s.heroActions}><Pressable style={s.primary} onPress={() => router.push("/video")}><Text style={s.primaryText}>Start matching</Text><Text style={s.arrow}>→</Text></Pressable><Pressable style={s.secondary} onPress={() => router.push("/live")}><Text style={s.secondaryText}>Explore Live</Text></Pressable></View>
+      <View style={s.heroActions}><Pressable style={s.primary} onPress={() => router.push("/video-match")}><Text style={s.primaryText}>Start matching</Text><Text style={s.arrow}>→</Text></Pressable><Pressable style={s.secondary} onPress={() => router.push("/live")}><Text style={s.secondaryText}>Explore Live</Text></Pressable></View>
     </View>
 
     <View style={s.sectionHead}><Text style={s.sectionTitle}>Your Amora world</Text><Text style={s.sectionHint}>Everything in one place</Text></View>

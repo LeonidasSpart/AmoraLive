@@ -106,8 +106,10 @@ export default function Profile() {
   };
 
   const rows = [
+    { label: "Settings", onPress: () => router.push("/settings") },
     { label: "Membership & VIP", onPress: () => router.push("/membership") },
-    { label: "My level & rewards", onPress: () => router.push("/rewards") },
+    { label: "My level & badges", onPress: () => router.push("/levels") },
+    { label: "Daily rewards", onPress: () => router.push("/rewards") },
     { label: "My outfits & profile effects", onPress: () => router.push("/outfits") },
     { label: "Creator Studio", onPress: () => router.push("/studio") },
     { label: "Security Center", onPress: () => router.push("/security") },

@@ -74,7 +74,7 @@ export default function Messages() {
             <View style={s.emptyOrb}><Text style={s.big}>♡</Text></View>
             <Text style={s.emptyTitle}>Your private space</Text>
             <Text style={s.muted}>Your matches and conversations will appear here.</Text>
-            <Pressable style={s.primary} onPress={() => router.push("/video")}><Text style={s.primaryText}>Start matching →</Text></Pressable>
+            <Pressable style={s.primary} onPress={() => router.push("/video-match")}><Text style={s.primaryText}>Start matching →</Text></Pressable>
           </View>
         ) : (
           <FlatList
