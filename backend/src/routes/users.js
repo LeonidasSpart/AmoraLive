@@ -91,7 +91,8 @@ module.exports = (prisma) => {
       const { password_hash, ...safeUser } = user;
       res.json(safeUser);
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -159,14 +160,18 @@ module.exports = (prisma) => {
       // Cheap, valuable to know from a profile view: are they live right
       // now, and where — powers a "Watch Live" button instead of making
       // the visitor separately go check Discover.
-      const liveRoom = await prisma.liveRoom.findFirst({
-        where: { host_id: req.params.userId, status: 'live' },
-        select: { id: true }
-      });
+      const [liveRoom, followerCount] = await Promise.all([
+        prisma.liveRoom.findFirst({
+          where: { host_id: req.params.userId, status: 'live' },
+          select: { id: true }
+        }),
+        prisma.follow.count({ where: { following_id: req.params.userId } })
+      ]);
 
-      res.json({ ...user, isLive: !!liveRoom, liveRoomId: liveRoom?.id || null });
+      res.json({ ...user, isLive: !!liveRoom, liveRoomId: liveRoom?.id || null, followerCount });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -270,7 +275,8 @@ module.exports = (prisma) => {
       });
       res.json(user?.privacy_settings || {});
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -278,20 +284,27 @@ module.exports = (prisma) => {
   router.patch('/me/privacy', auth, async (req, res) => {
     const { online_status_visible, profile_visible, show_age, show_location } = req.body;
     try {
+      const existingUser = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: { privacy_settings: true }
+      });
+      const current = existingUser?.privacy_settings || {};
+
       const updated = await prisma.user.update({
         where: { id: req.user.id },
         data: {
           privacy_settings: {
-            online_status_visible: online_status_visible ?? true,
-            profile_visible: profile_visible ?? true,
-            show_age: show_age ?? true,
-            show_location: show_location ?? true
+            online_status_visible: online_status_visible ?? current.online_status_visible ?? true,
+            profile_visible: profile_visible ?? current.profile_visible ?? true,
+            show_age: show_age ?? current.show_age ?? true,
+            show_location: show_location ?? current.show_location ?? true
           }
         }
       });
       res.json({ success: true, privacy_settings: updated.privacy_settings });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -443,7 +456,7 @@ module.exports = (prisma) => {
       await Promise.all(
         [current.profile_photo, current.cover_photo]
           .filter(Boolean)
-          .map(url => deleteUploadThingFile(url).catch(() => null))
+          .map(url => deleteUploadThingFile(utapi, url).catch(() => null))
       );
 
       res.json({ success: true });
@@ -475,7 +488,8 @@ module.exports = (prisma) => {
         followers: followers.map(f => f.follower)
       });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -501,7 +515,8 @@ module.exports = (prisma) => {
         following: following.map(f => f.following)
       });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -532,7 +547,8 @@ module.exports = (prisma) => {
       const count = await prisma.follow.count({ where: { following_id: userId, follower: { deleted_at: null } } });
       res.json({ following: true, followerCount: count });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -543,7 +559,8 @@ module.exports = (prisma) => {
       const count = await prisma.follow.count({ where: { following_id: userId, follower: { deleted_at: null } } });
       res.json({ following: false, followerCount: count });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -556,7 +573,8 @@ module.exports = (prisma) => {
       ]);
       res.json({ following: Boolean(isFollowing), followerCount });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -582,7 +600,8 @@ module.exports = (prisma) => {
         blocks: blocks.map(b => b.blocked)
       });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -647,7 +666,7 @@ module.exports = (prisma) => {
       res.json({ url });
     } catch (e) {
       console.error('Photo upload error:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 

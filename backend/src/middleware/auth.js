@@ -7,7 +7,7 @@ module.exports = (req, res, next) => {
     return res.status(401).json({ error: 'Unauthorized' });
   }
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
     if (!decoded?.id || decoded.type === 'refresh') {
       return res.status(401).json({ error: 'Invalid access token' });
     }

@@ -31,7 +31,8 @@ module.exports = (prisma, io) => {
       });
       res.json(users);
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -48,13 +49,24 @@ module.exports = (prisma, io) => {
       const target = await prisma.user.findUnique({ where: { id: userId }, select: { id: true, username: true } });
       if (!target) return res.status(404).json({ error: 'User not found.' });
 
-      const wallet = await prisma.wallet.upsert({
-        where: { user_id: userId },
-        create: { user_id: userId, balance: Math.max(grantAmount, 0), lifetime_earned: Math.max(grantAmount, 0) },
-        update: grantAmount > 0
-          ? { balance: { increment: grantAmount }, lifetime_earned: { increment: grantAmount } }
-          : { balance: { increment: grantAmount } }
-      });
+      let wallet;
+      if (grantAmount >= 0) {
+        wallet = await prisma.wallet.upsert({
+          where: { user_id: userId },
+          create: { user_id: userId, balance: grantAmount, lifetime_earned: grantAmount },
+          update: { balance: { increment: grantAmount }, lifetime_earned: { increment: grantAmount } }
+        });
+      } else {
+        const deductAmount = Math.abs(grantAmount);
+        const deducted = await prisma.wallet.updateMany({
+          where: { user_id: userId, balance: { gte: deductAmount } },
+          data: { balance: { decrement: deductAmount } }
+        });
+        if (deducted.count !== 1) {
+          return res.status(400).json({ error: 'User does not have enough coins for this deduction.' });
+        }
+        wallet = await prisma.wallet.findUnique({ where: { user_id: userId } });
+      }
 
       await Promise.all([
         prisma.notification.create({
@@ -78,7 +90,7 @@ module.exports = (prisma, io) => {
       res.json({ success: true, balance: wallet.balance, username: target.username });
     } catch (e) {
       console.error('Wallet grant error:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Unable to process wallet grant.' });
     }
   });
 
@@ -112,7 +124,8 @@ module.exports = (prisma, io) => {
         pendingReports
       });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -143,22 +156,43 @@ module.exports = (prisma, io) => {
       ]);
       res.json({ users, total, page: Number(page), limit: Number(limit) });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
   router.patch('/users/:userId', auth, adminCheck, async (req, res) => {
     const { userId } = req.params;
     const { role, is_active, is_verified, membership_tier, level } = req.body;
+
+    if (role !== undefined) {
+      const ALLOWED_ROLES = ['user', 'admin', 'superadmin'];
+      if (!ALLOWED_ROLES.includes(role)) {
+        return res.status(400).json({ error: 'Invalid role.' });
+      }
+      if (req.user.role !== 'superadmin') {
+        return res.status(403).json({ error: 'Only a superadmin can change a user\'s role.' });
+      }
+    }
+
+    const data = { role, is_active, is_verified, membership_tier, level };
+    if (is_active === true) {
+      // Reactivating an account should also clear the soft-delete
+      // marker, otherwise it stays invisible in the default admin
+      // listing (which filters on deleted_at: null) despite being active.
+      data.deleted_at = null;
+    }
+
     try {
       const updated = await prisma.user.update({
         where: { id: userId },
-        data: { role, is_active, is_verified, membership_tier, level }
+        data
       });
       const { password_hash, ...safeUser } = updated;
       res.json(safeUser);
     } catch (e) {
-      res.status(400).json({ error: e.message });
+      console.error('Admin user update error:', e);
+      res.status(400).json({ error: 'Unable to update user.' });
     }
   });
 
@@ -193,7 +227,8 @@ module.exports = (prisma, io) => {
       ]);
       res.json({ rooms, total, page: Number(page), limit: Number(limit) });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -220,7 +255,8 @@ module.exports = (prisma, io) => {
       const gifts = await prisma.giftCatalog.findMany({ orderBy: { coin_price: 'asc' } });
       res.json(gifts);
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -261,12 +297,15 @@ module.exports = (prisma, io) => {
       });
     } catch (e) {
       console.error('Seed defaults error:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
   router.post('/gifts', auth, adminCheck, async (req, res) => {
     const { name, description, image_url, animation_url, sound_url, coin_price, rarity, category, glyph, min_tier, sort_order, is_active } = req.body;
+    if (!Number.isInteger(coin_price) || coin_price <= 0) {
+      return res.status(400).json({ error: 'coin_price must be a positive integer.' });
+    }
     try {
       const gift = await prisma.giftCatalog.create({
         data: { name, description, image_url: image_url || '', animation_url, sound_url, coin_price, rarity, category, glyph, min_tier: min_tier || 'free', sort_order: sort_order ?? 0, is_active: is_active ?? true }
@@ -280,6 +319,9 @@ module.exports = (prisma, io) => {
   router.patch('/gifts/:giftId', auth, adminCheck, async (req, res) => {
     const { giftId } = req.params;
     const { name, description, image_url, animation_url, sound_url, coin_price, rarity, category, glyph, min_tier, sort_order, is_active } = req.body;
+    if (coin_price !== undefined && (!Number.isInteger(coin_price) || coin_price <= 0)) {
+      return res.status(400).json({ error: 'coin_price must be a positive integer.' });
+    }
     try {
       const updated = await prisma.giftCatalog.update({
         where: { id: giftId },
@@ -325,7 +367,8 @@ module.exports = (prisma, io) => {
       ]);
       res.json({ reports, total, page: Number(page), limit: Number(limit) });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -349,12 +392,19 @@ module.exports = (prisma, io) => {
       const packages = await prisma.coinPackage.findMany({ orderBy: { coins_amount: 'asc' } });
       res.json(packages);
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
   router.post('/packages', auth, adminCheck, async (req, res) => {
     const { name, price_cents, coins_amount, bonus_coins, is_promotion, region, platform, stripe_price_id } = req.body;
+    if (!Number.isInteger(price_cents) || price_cents <= 0 || !Number.isInteger(coins_amount) || coins_amount <= 0) {
+      return res.status(400).json({ error: 'price_cents and coins_amount must be positive integers.' });
+    }
+    if (bonus_coins !== undefined && bonus_coins !== null && (!Number.isInteger(bonus_coins) || bonus_coins < 0)) {
+      return res.status(400).json({ error: 'bonus_coins must be a non-negative integer.' });
+    }
     try {
       const pkg = await prisma.coinPackage.create({
         data: { name, price_cents, coins_amount, bonus_coins: bonus_coins || 0, is_promotion: is_promotion || false, region, platform, stripe_price_id }
@@ -415,7 +465,8 @@ module.exports = (prisma, io) => {
       const events = await prisma.event.findMany({ orderBy: { starts_at: 'desc' }, take: 50 });
       res.json(events);
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -486,7 +537,8 @@ module.exports = (prisma, io) => {
       ]);
       res.json({ withdrawals, total, page: Number(page), limit: Number(limit) });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -544,7 +596,7 @@ module.exports = (prisma, io) => {
       res.json(updated);
     } catch (e) {
       console.error('Withdrawal review error:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 

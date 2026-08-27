@@ -55,6 +55,13 @@ module.exports = (prisma) => {
     expiresAt: 0
   };
 
+  function timingSafeStringEqual(a, b) {
+    const bufA = Buffer.from(String(a || ''));
+    const bufB = Buffer.from(String(b || ''));
+    if (bufA.length !== bufB.length) return false;
+    return crypto.timingSafeEqual(bufA, bufB);
+  }
+
   function base64urlToBuffer(value) {
     return Buffer.from(
       String(value).replace(/-/g, '+').replace(/_/g, '/'),
@@ -387,12 +394,14 @@ module.exports = (prisma) => {
 
     const state = jwt.verify(
       String(stateToken || ''),
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      { algorithms: ["HS256"] }
     );
 
     const cookie = jwt.verify(
       String(cookieState || ''),
-      process.env.JWT_SECRET
+      process.env.JWT_SECRET,
+      { algorithms: ["HS256"] }
     );
 
     if (
@@ -400,8 +409,8 @@ module.exports = (prisma) => {
         `${provider}_oauth_state` ||
       cookie.purpose !==
         `${provider}_oauth_state` ||
-      state.state !== cookie.state ||
-      state.nonce !== cookie.nonce ||
+      !timingSafeStringEqual(state.state, cookie.state) ||
+      !timingSafeStringEqual(state.nonce, cookie.nonce) ||
       state.platform !== cookie.platform
     ) {
       throw new Error(
@@ -993,7 +1002,8 @@ module.exports = (prisma) => {
     try {
       const decoded = jwt.verify(
         String(req.query.token || ''),
-        process.env.JWT_SECRET
+        process.env.JWT_SECRET,
+        { algorithms: ["HS256"] }
       );
 
       if (
@@ -1106,13 +1116,18 @@ module.exports = (prisma) => {
     }
   );
 
-  router.get(
+  // POST, not GET: this permanently deletes the account, and a bare GET
+  // link is routinely auto-followed by email security scanners (Microsoft
+  // Safe Links, Proofpoint, etc.) before the user ever opens the email —
+  // which would destroy the account with no real user action at all.
+  router.post(
     '/delete-account',
     async (req, res) => {
       try {
         const decoded = jwt.verify(
-          String(req.query.token || ''),
-          process.env.JWT_SECRET
+          String(req.body.token || ''),
+          process.env.JWT_SECRET,
+          { algorithms: ["HS256"] }
         );
 
         if (
@@ -1128,22 +1143,25 @@ module.exports = (prisma) => {
           });
 
         if (!user || !user.is_active) {
-          return res.status(200).send(
-            'Your Amora account has already been deleted or is no longer active.'
-          );
+          return res.status(200).json({
+            message:
+              'Your Amora account has already been deleted or is no longer active.'
+          });
         }
 
         await anonymizeDeletedAccount(
           user.id
         );
 
-        res.status(200).send(
-          'Your Amora account deletion request has been completed.'
-        );
+        res.status(200).json({
+          message:
+            'Your Amora account deletion request has been completed.'
+        });
       } catch (e) {
-        res.status(400).send(
-          'This account deletion link is invalid or expired.'
-        );
+        res.status(400).json({
+          error:
+            'This account deletion link is invalid or expired.'
+        });
       }
     }
   );
@@ -1156,6 +1174,36 @@ module.exports = (prisma) => {
     const password = String(
       req.body.password || ''
     );
+
+    // Per-account lockout, independent of the shared per-IP rate limiter
+    // above this route: without this, an attacker spreading login attempts
+    // across many IPs (or a botnet) faces no throttling at all on a
+    // specific victim account. Keyed by the same hashed identifier already
+    // written to login_failed events, over a 15-minute window.
+    const identifierHash = crypto
+      .createHash('sha256')
+      .update(identifier.toLowerCase())
+      .digest('hex')
+      .slice(0, 24);
+
+    const recentFailures =
+      await prisma.auditLog.count({
+        where: {
+          action: 'login_failed',
+          target_type: 'auth',
+          target_id: identifierHash,
+          created_at: {
+            gte: new Date(Date.now() - 15 * 60 * 1000)
+          }
+        }
+      });
+
+    if (recentFailures >= 10) {
+      return res.status(429).json({
+        error:
+          'Too many failed sign-in attempts for this account. Please try again in 15 minutes.'
+      });
+    }
 
     const user =
       await prisma.user.findFirst({
@@ -1182,13 +1230,7 @@ module.exports = (prisma) => {
       await logSecurityEvent(prisma, {
         action: 'login_failed',
         targetType: 'auth',
-        targetId: crypto
-          .createHash('sha256')
-          .update(
-            identifier.toLowerCase()
-          )
-          .digest('hex')
-          .slice(0, 24),
+        targetId: identifierHash,
         details: {
           reason: 'invalid_credentials',
           requestId: req.requestId
@@ -1546,125 +1588,11 @@ module.exports = (prisma) => {
     }
   );
 
-  router.post(
-    '/google/complete',
-    async (req, res) => {
-      try {
-        const decoded = jwt.verify(
-          String(
-            req.body.completionToken || ''
-          ),
-          process.env.JWT_SECRET
-        );
-
-        if (
-          decoded.purpose !==
-          'google_signup'
-        ) {
-          throw new Error(
-            'Invalid token'
-          );
-        }
-
-        const username =
-          String(
-            req.body.username || ''
-          ).trim();
-
-        const dateOfBirth =
-          new Date(
-            req.body.dateOfBirth
-          );
-
-        if (
-          !/^[a-zA-Z0-9_.-]{3,20}$/.test(
-            username
-          )
-        ) {
-          return res.status(400).json({
-            error:
-              'Invalid username'
-          });
-        }
-
-        if (
-          Number.isNaN(
-            dateOfBirth.getTime()
-          ) ||
-          calculateAge(dateOfBirth) < 18
-        ) {
-          return res.status(403).json({
-            error:
-              'You must be 18 or older.'
-          });
-        }
-
-        const passwordHash =
-          await bcrypt.hash(
-            crypto
-              .randomBytes(32)
-              .toString('hex'),
-            12
-          );
-
-        const user =
-          await prisma.$transaction(
-            async tx => {
-              const created =
-                await tx.user.create({
-                  data: {
-                    email: decoded.email,
-                    username,
-                    password_hash:
-                      passwordHash,
-                    date_of_birth:
-                      dateOfBirth,
-                    display_name:
-                      decoded.name,
-                    age_verified: true,
-                    is_verified: true
-                  }
-                });
-
-              await tx.wallet.create({
-                data: {
-                  user_id: created.id,
-                  balance: 0
-                }
-              });
-
-              return created;
-            }
-          );
-
-        res.status(201).json(
-          await createSession(
-            user,
-            req
-          )
-        );
-      } catch (e) {
-        console.error(
-          'Google registration error:',
-          e
-        );
-
-        if (
-          isUniqueConstraintError(e)
-        ) {
-          return res.status(409).json({
-            error:
-              'Email or username already exists.'
-          });
-        }
-
-        return res.status(503).json({
-          error:
-            'Google registration is temporarily unavailable. Please try again shortly.'
-        });
-      }
-    }
-  );
+  // Note: the legacy /google/complete (purpose: 'google_signup') endpoint
+  // was removed here — nothing in this codebase issues that token purpose
+  // anymore. Google/Apple/Facebook signups all go through the unified
+  // /auth/social/exchange -> /auth/social/complete handoff below
+  // (purpose: 'social_signup').
 
   // ---------- Apple Sign in (native iOS) ----------
 
@@ -2482,7 +2410,8 @@ module.exports = (prisma) => {
               req.body.completionToken ||
                 ''
             ),
-            process.env.JWT_SECRET
+            process.env.JWT_SECRET,
+            { algorithms: ["HS256"] }
           );
 
         if (
@@ -2845,7 +2774,8 @@ module.exports = (prisma) => {
         const decoded =
           jwt.verify(
             refreshToken,
-            process.env.JWT_SECRET
+            process.env.JWT_SECRET,
+            { algorithms: ["HS256"] }
           );
 
         if (

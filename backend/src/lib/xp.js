@@ -44,6 +44,15 @@ async function awardXp(tx, { userId, amount, reason, metadata, dailyCap }) {
   if (dailyCap) {
     const since = new Date();
     since.setUTCHours(0, 0, 0, 0);
+
+    // Serialize concurrent XP awards for the same user+reason so the
+    // daily-cap check below can't be raced by two callers (e.g. two
+    // different senders gifting the same live host at nearly the same
+    // time) each reading "under cap" before either has committed. The
+    // lock is scoped to this transaction and releases automatically
+    // when it commits or rolls back.
+    await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${`${userId}:${reason}`}))`;
+
     const earnedToday = await tx.xpTransaction.aggregate({
       where: { user_id: userId, reason, created_at: { gte: since } },
       _sum: { amount: true }

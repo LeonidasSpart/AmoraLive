@@ -33,7 +33,8 @@ module.exports = (prisma) => {
       const user = await prisma.user.findUnique({ where: { id: req.user.id }, select: { dating_preferences: true, gender: true } });
       res.json({ gender: user?.gender || null, ...(user?.dating_preferences || {}) });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -118,7 +119,7 @@ module.exports = (prisma) => {
       res.json({ ...safeMatch, age: calculateAge(date_of_birth), compatibility: compatibilityScore(me, match) });
     } catch (e) {
       console.error('Error fetching next match:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -216,7 +217,7 @@ module.exports = (prisma) => {
       res.json(result);
     } catch (e) {
       console.error('Error recording swipe:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -231,7 +232,7 @@ module.exports = (prisma) => {
       res.json({ ...result, existing: false });
     } catch (e) {
       console.error('Error accepting match:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -244,7 +245,7 @@ module.exports = (prisma) => {
       res.json({ success: true });
     } catch (e) {
       console.error('Error skipping match:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -279,7 +280,7 @@ module.exports = (prisma) => {
       res.json(shaped);
     } catch (e) {
       console.error('Error listing matches:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -305,7 +306,7 @@ module.exports = (prisma) => {
       res.json({ success: true });
     } catch (e) {
       console.error('Error unmatching:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 

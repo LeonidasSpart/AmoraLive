@@ -225,10 +225,10 @@ module.exports = (prisma, io) => {
       // display name — so the sender's name has to be fetched fresh here
       // rather than read off req.user.
       prisma.user.findUnique({ where: { id: req.user.id }, select: { display_name: true, username: true } })
-        .then((sender) => sendPushToUser(prisma, receiver.id, {
+        .then((sender) => sendPushToUser(prisma, result.receiver.id, {
           title: 'You received a gift! 🎁',
-          body: `${sender?.display_name || sender?.username || 'Someone'} sent you ${qty > 1 ? `${qty}x ` : ''}${gift.name}`,
-          data: { type: 'gift_received', giftId: gift.id }
+          body: `${sender?.display_name || sender?.username || 'Someone'} sent you ${qty > 1 ? `${qty}x ` : ''}${result.gift.name}`,
+          data: { type: 'gift_received', giftId: result.gift.id }
         }))
         .catch((err) => console.error('Gift push notification failed:', err.message));
 
