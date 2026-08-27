@@ -455,6 +455,13 @@ export default function Profile() {
                       <span key={badge}>✦ {badge}</span>
                     ))}
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => router.push('/levels')}
+                    style={{ background: 'none', border: 'none', padding: 0, marginTop: 10, color: 'var(--amora-pink-2)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+                  >
+                    View level rewards →
+                  </button>
                 </div>
               </div>
 

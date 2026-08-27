@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import { apiFetch } from '../../lib/api';
 
-const STATUSES = ['pending', 'reviewed', 'dismissed', 'all'];
+const STATUSES = ['pending', 'reviewing', 'resolved', 'dismissed', 'all'];
 
 export default function AdminReports() {
   const [reports, setReports] = useState([]);
@@ -108,7 +108,7 @@ export default function AdminReports() {
                   <td style={s.td}>
                     {r.status === 'pending' && (
                       <>
-                        <button style={s.smallBtn} disabled={actioning === r.id} onClick={() => review(r.id, 'reviewed', 'Action taken by moderator')}>
+                        <button style={s.smallBtn} disabled={actioning === r.id} onClick={() => review(r.id, 'resolved', 'Action taken by moderator')}>
                           Take action
                         </button>
                         <button style={{ ...s.smallBtn, marginLeft: 6 }} disabled={actioning === r.id} onClick={() => review(r.id, 'dismissed', null)}>

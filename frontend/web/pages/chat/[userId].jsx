@@ -176,6 +176,15 @@ export default function ChatRoom() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Tell the sender's live socket their messages were just read — without
+  // this, the sender's UI keeps showing "sent" instead of "read" until
+  // they reload, since marking read in the DB (via the GET above) doesn't
+  // by itself notify anyone.
+  useEffect(() => {
+    if (!socket || !socketReady || !userId) return;
+    socket.emit('mark-read', { senderId: userId });
+  }, [socket, socketReady, userId, messages.length]);
+
   const sendMessage = (e) => {
     e.preventDefault();
 
@@ -360,9 +369,6 @@ export default function ChatRoom() {
           <Link href={`/creator/${userId}`} className="headerButton" aria-label="View profile">
             ♡
           </Link>
-          <button type="button" className="headerButton" aria-label="Call">
-            ◌
-          </button>
         </div>
       </header>
 

@@ -113,6 +113,7 @@ export default function Store() {
         <div style={s.tabs}>
           <button style={tab === 'catalog' ? s.tabActive : s.tab} onClick={() => setTab('catalog')}>Catalog</button>
           <button style={tab === 'owned' ? s.tabActive : s.tab} onClick={() => setTab('owned')}>My Items ({owned.length})</button>
+          <button style={s.tab} onClick={() => router.push('/outfits')}>Equip Outfits →</button>
         </div>
 
         {message && <div style={s.message}>{message}</div>}

@@ -10,6 +10,7 @@ export default function VideoDate() {
 
   const [error, setError] = useState('');
   const [connected, setConnected] = useState(false);
+  const [started, setStarted] = useState(false);
   const localRef = useRef(null);
   const remoteRef = useRef(null);
   const roomRef = useRef(null);
@@ -20,6 +21,10 @@ export default function VideoDate() {
       router.push('/login');
       return;
     }
+  }, [matchId, router]);
+
+  useEffect(() => {
+    if (!matchId || !started) return;
     let active = true;
 
     const connect = async () => {
@@ -77,7 +82,24 @@ export default function VideoDate() {
       active = false;
       roomRef.current?.disconnect();
     };
-  }, [matchId, router]);
+  }, [matchId, started]);
+
+  if (!started) {
+    return (
+      <div style={s.stage}>
+        <div style={s.page}>
+          <Link href="/matches" style={s.closeBtn}>✕</Link>
+          <div style={s.intro}>
+            <h2 style={{ margin: 0 }}>Ready for your video date?</h2>
+            <p style={{ color: '#aaa', maxWidth: 260, textAlign: 'center' }}>
+              This will turn on your camera and microphone so you and your match can see each other.
+            </p>
+            <button type="button" onClick={() => setStarted(true)} style={s.startBtn}>Start video date</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={s.stage}>
@@ -100,5 +122,7 @@ const s = {
   page: { position: 'relative', height: '100%', width: 'calc(100vh * 9 / 16)', maxWidth: '100vw', background: '#0a0a12', overflow: 'hidden', fontFamily: 'sans-serif', color: '#fff' },
   closeBtn: { position: 'absolute', top: 16, left: 16, zIndex: 5, color: '#fff', textDecoration: 'none', fontSize: 20, width: 32, height: 32, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.5)', borderRadius: '50%' },
   remoteVideo: { position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0a0a12' },
-  localVideo: { position: 'absolute', bottom: 20, right: 20, width: 100, height: 140, borderRadius: 12, overflow: 'hidden', border: '2px solid rgba(255,255,255,0.3)', background: '#1a1a2e' }
+  localVideo: { position: 'absolute', bottom: 20, right: 20, width: 100, height: 140, borderRadius: 12, overflow: 'hidden', border: '2px solid rgba(255,255,255,0.3)', background: '#1a1a2e' },
+  intro: { position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, padding: 24, textAlign: 'center' },
+  startBtn: { marginTop: 8, background: 'linear-gradient(135deg, #ff3f9d 0%, #9b35ff 100%)', border: 'none', color: '#fff', fontWeight: 700, padding: '12px 28px', borderRadius: 30, cursor: 'pointer', fontSize: 14 }
 };
