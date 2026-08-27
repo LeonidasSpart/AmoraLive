@@ -2,17 +2,18 @@ import { ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { usePathname, router } from "expo-router";
 import { theme } from "./theme";
-
-const items = [
-  { path: "/home", label: "Home", icon: "⌂" },
-  { path: "/video-match", label: "Match", icon: "♡" },
-  { path: "/live", label: "Live", icon: "✦" },
-  { path: "/messages", label: "Chat", icon: "◌" },
-  { path: "/profile", label: "Profile", icon: "◎" }
-];
+import { useTranslation } from "./i18n";
 
 export default function AppShell({ children, bottom = true }: { children: ReactNode; bottom?: boolean }) {
   const pathname = usePathname();
+  const { t } = useTranslation();
+  const items = [
+    { path: "/home", label: t("nav.home"), icon: "⌂" },
+    { path: "/video-match", label: t("nav.match"), icon: "♡" },
+    { path: "/live", label: t("nav.live"), icon: "✦" },
+    { path: "/messages", label: t("nav.chat"), icon: "◌" },
+    { path: "/profile", label: t("nav.profile"), icon: "◎" }
+  ];
   return (
     <View style={s.shell}>
       <View style={s.content}>{children}</View>

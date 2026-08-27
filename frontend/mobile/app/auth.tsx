@@ -17,12 +17,14 @@ import * as Crypto from "expo-crypto";
 import { theme } from "../src/theme";
 import { api, API_URL, storeSession } from "../src/api/client";
 import { registerForPushNotifications } from "../src/push";
+import { useTranslation } from "../src/i18n";
 
 WebBrowser.maybeCompleteAuthSession();
 
 type Mode = "login" | "register";
 
 export default function Auth() {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -232,15 +234,15 @@ export default function Auth() {
     <ScrollView contentContainerStyle={s.page} keyboardShouldPersistTaps="handled">
       <Text style={s.brand}>AMORA</Text>
       <Text style={s.title}>
-        {mode === "login" ? "Welcome back." : "Find your meaningful connection."}
+        {mode === "login" ? t("auth.welcomeBack") : t("auth.findConnection")}
       </Text>
 
       <View style={s.tabs}>
         <Pressable style={[s.tab, mode === "login" && s.tabActive]} onPress={() => { setMode("login"); resetMessages(); }}>
-          <Text style={[s.tabText, mode === "login" && s.tabTextActive]}>Sign in</Text>
+          <Text style={[s.tabText, mode === "login" && s.tabTextActive]}>{t("common.signIn")}</Text>
         </Pressable>
         <Pressable style={[s.tab, mode === "register" && s.tabActive]} onPress={() => { setMode("register"); resetMessages(); }}>
-          <Text style={[s.tabText, mode === "register" && s.tabTextActive]}>Create account</Text>
+          <Text style={[s.tabText, mode === "register" && s.tabTextActive]}>{t("common.createAccount")}</Text>
         </Pressable>
       </View>
 
@@ -248,7 +250,7 @@ export default function Auth() {
       {!!info && <Text style={s.info}>{info}</Text>}
 
       <TextInput
-        placeholder={mode === "login" ? "Email or username" : "Email"}
+        placeholder={mode === "login" ? t("auth.emailOrUsername") : t("auth.email")}
         placeholderTextColor="#8d849b"
         style={s.input}
         autoCapitalize="none"
@@ -259,20 +261,20 @@ export default function Auth() {
       />
 
       {mode === "register" && (
-        <TextInput placeholder="Username (3-20 characters)" placeholderTextColor="#8d849b" style={s.input} autoCapitalize="none" autoCorrect={false} value={username} onChangeText={setUsername} />
+        <TextInput placeholder={t("auth.username")} placeholderTextColor="#8d849b" style={s.input} autoCapitalize="none" autoCorrect={false} value={username} onChangeText={setUsername} />
       )}
 
-      <TextInput placeholder="Password" placeholderTextColor="#8d849b" style={s.input} secureTextEntry autoCapitalize="none" value={password} onChangeText={setPassword} />
+      <TextInput placeholder={t("auth.password")} placeholderTextColor="#8d849b" style={s.input} secureTextEntry autoCapitalize="none" value={password} onChangeText={setPassword} />
 
       {mode === "register" && (
-        <TextInput placeholder="Date of birth (YYYY-MM-DD)" placeholderTextColor="#8d849b" style={s.input} autoCapitalize="none" value={dateOfBirth} onChangeText={setDateOfBirth} />
+        <TextInput placeholder={t("auth.dob")} placeholderTextColor="#8d849b" style={s.input} autoCapitalize="none" value={dateOfBirth} onChangeText={setDateOfBirth} />
       )}
 
       <Pressable style={s.primary} onPress={handleSubmit} disabled={loading}>
-        {loading ? <ActivityIndicator color="#fff" /> : <Text style={s.primaryText}>{mode === "login" ? "Sign in" : "Create account"}</Text>}
+        {loading ? <ActivityIndicator color="#fff" /> : <Text style={s.primaryText}>{mode === "login" ? t("common.signIn") : t("common.createAccount")}</Text>}
       </Pressable>
 
-      <Text style={s.or}>OR</Text>
+      <Text style={s.or}>{t("common.or")}</Text>
 
       {Platform.OS === "ios" ? (
         <AppleAuthentication.AppleAuthenticationButton
@@ -284,29 +286,29 @@ export default function Auth() {
         />
       ) : (
         <Pressable style={s.apple} onPress={continueWithApple} disabled={appleLoading}>
-          {appleLoading ? <ActivityIndicator color="#fff" /> : <Text style={s.appleText}>  Continue with Apple</Text>}
+          {appleLoading ? <ActivityIndicator color="#fff" /> : <Text style={s.appleText}>  {t("auth.continueApple")}</Text>}
         </Pressable>
       )}
 
       <Pressable style={s.facebook} onPress={continueWithFacebook} disabled={facebookLoading}>
-        {facebookLoading ? <ActivityIndicator color="#fff" /> : <Text style={s.facebookText}>f  Continue with Facebook</Text>}
+        {facebookLoading ? <ActivityIndicator color="#fff" /> : <Text style={s.facebookText}>f  {t("auth.continueFacebook")}</Text>}
       </Pressable>
 
       <Pressable style={s.google} onPress={continueWithGoogle} disabled={googleLoading}>
-        {googleLoading ? <ActivityIndicator color="#17131f" /> : <Text style={s.googleText}>Continue with Google</Text>}
+        {googleLoading ? <ActivityIndicator color="#17131f" /> : <Text style={s.googleText}>{t("auth.continueGoogle")}</Text>}
       </Pressable>
 
       <Pressable onPress={() => { setMode(mode === "login" ? "register" : "login"); resetMessages(); }}>
-        <Text style={s.link}>{mode === "login" ? "New to Amora? Create an account" : "Already have an account? Sign in"}</Text>
+        <Text style={s.link}>{mode === "login" ? t("auth.newToAmora") : t("auth.alreadyHaveAccount")}</Text>
       </Pressable>
 
       {mode === "login" && (
         <Pressable onPress={() => router.push("/delete-account")}>
-          <Text style={s.deleteLink}>Want to delete your account instead?</Text>
+          <Text style={s.deleteLink}>{t("auth.deleteInstead")}</Text>
         </Pressable>
       )}
 
-      <Text style={s.foot}>By continuing you accept the Terms and Privacy Policy.</Text>
+      <Text style={s.foot}>{t("auth.terms")}</Text>
     </ScrollView>
   );
 }

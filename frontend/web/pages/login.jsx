@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import AuthLayout from '../components/AuthLayout';
+import { useTranslation } from '../lib/i18n';
 
 const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 
 export default function Login() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -59,60 +61,60 @@ export default function Login() {
 
   return (
     <AuthLayout
-      eyebrow="WELCOME BACK"
-      title={<>Welcome back to <span className="amora-gradient-text">Amora.</span></>}
-      subtitle="Sign in to your matches, conversations and live moments."
-      footerText="New to Amora?"
+      eyebrow={t('auth.login.eyebrow')}
+      title={<>{t('auth.login.title')} <span className="amora-gradient-text">{t('auth.login.titleHighlight')}</span></>}
+      subtitle={t('auth.login.subtitle')}
+      footerText={t('auth.login.footerText')}
       footerHref="/register"
-      footerLabel="Create your account"
+      footerLabel={t('auth.login.footerLabel')}
     >
-      <Link href="/" className="amora-auth-back">← Back to AmoraLive</Link>
+      <Link href="/" className="amora-auth-back">{t('auth.login.backLink')}</Link>
 
       {(router.query.error || error) && (
         <div className="amora-error" role="alert">
           {router.query.error === 'google_auth_failed'
-            ? 'Google sign-in could not be completed. Please try again.'
+            ? t('auth.login.errorGoogle')
             : router.query.error === 'apple_auth_failed'
-              ? 'Apple sign-in could not be completed. Please try again.'
+              ? t('auth.login.errorApple')
               : router.query.error === 'facebook_auth_failed'
-                ? 'Facebook sign-in could not be completed. Please try again.'
+                ? t('auth.login.errorFacebook')
                 : router.query.error === 'account_suspended'
-                  ? 'This account is currently suspended.'
+                  ? t('auth.login.errorSuspended')
                   : error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="amora-auth-form">
         <div className="amora-field">
-          <label className="amora-label" htmlFor="identifier">Email or username</label>
-          <input id="identifier" className="amora-input" autoComplete="username" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder="you@example.com or username" required />
+          <label className="amora-label" htmlFor="identifier">{t('auth.login.emailLabel')}</label>
+          <input id="identifier" className="amora-input" autoComplete="username" value={identifier} onChange={(e) => setIdentifier(e.target.value)} placeholder={t('auth.login.emailPlaceholder')} required />
         </div>
 
         <div className="amora-field">
-          <label className="amora-label" htmlFor="password">Password</label>
+          <label className="amora-label" htmlFor="password">{t('auth.login.passwordLabel')}</label>
           <div className="amora-password-wrap">
-            <input id="password" className="amora-input" autoComplete="current-password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" required />
-            <button type="button" className="amora-password-toggle" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? 'Hide password' : 'Show password'}>
-              {showPassword ? 'Hide' : 'Show'}
+            <input id="password" className="amora-input" autoComplete="current-password" type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('auth.login.passwordPlaceholder')} required />
+            <button type="button" className="amora-password-toggle" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? t('auth.login.hidePassword') : t('auth.login.showPassword')}>
+              {showPassword ? t('auth.login.hidePassword') : t('auth.login.showPassword')}
             </button>
           </div>
         </div>
 
         <button className="amora-btn amora-btn-primary amora-auth-submit" disabled={loading} type="submit">
-          {loading ? 'Signing you in…' : 'Sign in'}
+          {loading ? t('auth.login.submitting') : t('auth.login.submit')}
         </button>
       </form>
 
-      <div className="amora-divider"><span>OR</span></div>
+      <div className="amora-divider"><span>{t('common.or')}</span></div>
 
       <div className="amora-social-stack">
         <button className="amora-social amora-apple" type="button" onClick={appleLogin} disabled={appleLoading}>
-          <span className="amora-social-symbol" aria-hidden="true"></span>
-          {appleLoading ? 'Connecting to Apple…' : 'Continue with Apple'}
+          <span className="amora-social-symbol" aria-hidden="true"></span>
+          {appleLoading ? t('auth.login.connectingApple') : t('auth.login.continueApple')}
         </button>
         <button className="amora-social amora-facebook" type="button" onClick={facebookLogin} disabled={facebookLoading}>
           <span className="amora-social-symbol" aria-hidden="true">f</span>
-          {facebookLoading ? 'Connecting to Facebook…' : 'Continue with Facebook'}
+          {facebookLoading ? t('auth.login.connectingFacebook') : t('auth.login.continueFacebook')}
         </button>
       </div>
 
@@ -125,11 +127,11 @@ export default function Login() {
     <path fill="#EA4335" d="M12 6.15c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.24 14.63 2.25 12 2.25a9.74 9.74 0 0 0-8.71 5.41l3.24 2.53C6.3 7.87 8.46 6.15 12 6.15Z"/>
   </svg>
 </span>
-        {googleLoading ? 'Connecting to Google…' : 'Continue with Google'}
+        {googleLoading ? t('auth.login.connectingGoogle') : t('auth.login.continueGoogle')}
       </button>
 
       <p className="amora-auth-small">
-        By continuing, you agree to AmoraLive's <Link href="/legal/terms">Terms</Link> and <Link href="/legal/privacy">Privacy Policy</Link>.
+        {t('auth.login.byContinuing')} <Link href="/legal/terms">{t('auth.login.termsLink')}</Link> {t('auth.login.andLink')} <Link href="/legal/privacy">{t('auth.login.privacyLink')}</Link>.
       </p>
     </AuthLayout>
   );
