@@ -4,6 +4,7 @@ import { View, Text, Pressable, Image, StyleSheet, ActivityIndicator, ScrollView
 import * as ImagePicker from "expo-image-picker";
 import { theme } from "../src/theme";
 import { api } from "../src/api/client";
+import { unregisterPushNotifications } from "../src/push";
 import AppShell from "../src/AppShell";
 
 type User = {
@@ -85,6 +86,7 @@ export default function Profile() {
         {
           text: "Delete", style: "destructive", onPress: async () => {
             try {
+              await unregisterPushNotifications();
               await api.deleteAccount();
               await api.logout();
               router.replace("/auth");
@@ -98,6 +100,7 @@ export default function Profile() {
   };
 
   const logout = async () => {
+    await unregisterPushNotifications();
     await api.logout();
     router.replace("/auth");
   };
