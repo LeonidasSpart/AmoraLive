@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import AppShell from "../src/AppShell";
 import { theme } from "../src/theme";
 import { api } from "../src/api/client";
+import { unregisterPushNotifications } from "../src/push";
 
 export default function Settings(){
  const [user,setUser]=useState<any>(null),[privacy,setPrivacy]=useState<any>({}),[loading,setLoading]=useState(true),[saving,setSaving]=useState(false),[error,setError]=useState("");
@@ -11,8 +12,8 @@ export default function Settings(){
  const load=useCallback(async()=>{try{const [u,p]=await Promise.all([api.me(),api.privacy()]);setUser(u);setDisplayName(u.display_name||"");setBio(u.bio||"");setPrivacy(p||{});setEmailNotifications(p?.emailNotifications!==false);}catch(e:any){setError(e.message||"Unable to load settings.");}finally{setLoading(false);}},[]);
  useEffect(()=>{load();},[load]);
  const save=async()=>{setSaving(true);setError("");try{await api.updateProfile({display_name:displayName.trim(),bio:bio.trim()});await api.updatePrivacy({emailNotifications});Alert.alert("Saved","Your settings have been updated.");}catch(e:any){setError(e.message||"Unable to save settings.");}finally{setSaving(false);}};
- const logout=async()=>{await api.logout();router.replace("/auth");};
- const deleteAccount=()=>Alert.alert("Delete your Amora account?","This permanently removes your account and cannot be undone.",[{text:"Cancel",style:"cancel"},{text:"Delete",style:"destructive",onPress:async()=>{try{await api.deleteAccount();await api.logout();router.replace("/auth");}catch(e:any){setError(e.message||"Unable to delete account.");}}}]);
+ const logout=async()=>{await unregisterPushNotifications();await api.logout();router.replace("/auth");};
+ const deleteAccount=()=>Alert.alert("Delete your Amora account?","This permanently removes your account and cannot be undone.",[{text:"Cancel",style:"cancel"},{text:"Delete",style:"destructive",onPress:async()=>{try{await unregisterPushNotifications();await api.deleteAccount();await api.logout();router.replace("/auth");}catch(e:any){setError(e.message||"Unable to delete account.");}}}]);
  if(loading)return <AppShell><View style={s.center}><ActivityIndicator color={theme.pink}/></View></AppShell>;
  return <AppShell><ScrollView style={s.page} contentContainerStyle={{paddingBottom:40}}>
   <Pressable onPress={()=>router.back()}><Text style={s.back}>‹</Text></Pressable><Text style={s.kicker}>AMORA ACCOUNT</Text><Text style={s.title}>Settings</Text>
