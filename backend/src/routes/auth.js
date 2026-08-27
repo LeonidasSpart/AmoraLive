@@ -476,7 +476,9 @@ module.exports = (prisma) => {
       }
 
       return {
-        userId: existingIdentity.user.id
+        userId: existingIdentity.user.id,
+        provider,
+        providerAccountId
       };
     }
 
@@ -510,7 +512,9 @@ module.exports = (prisma) => {
         });
 
         return {
-          userId: existingEmail.id
+          userId: existingEmail.id,
+          provider,
+          providerAccountId
         };
       }
     }
