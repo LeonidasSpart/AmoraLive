@@ -12,6 +12,7 @@ const { WebSocketServer } = require('ws');
 const Stripe = require('stripe');
 const { grantMonthlyBonusIfDue } = require('./lib/membership');
 const { incrementMissionProgress } = require('./lib/missions');
+const { sendPushToUser } = require('./lib/push');
 const {
   requestSecurityMiddleware,
   createRateLimiter,
@@ -1726,6 +1727,12 @@ io.on(
                 );
               }
             );
+
+          sendPushToUser(prisma, receiverId, {
+            title: message.sender.display_name || message.sender.username,
+            body: String(content || '').slice(0, 120) || 'Sent you a message',
+            data: { type: 'new_message', senderId }
+          });
 
           io.to(
             `user-${receiverId}`
