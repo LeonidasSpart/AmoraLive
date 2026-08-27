@@ -10,6 +10,8 @@ export default function SocialComplete() {
   const [completionToken, setCompletionToken] = useState('');
   const [username, setUsername] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
+  const [needsEmail, setNeedsEmail] = useState(false);
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -46,6 +48,8 @@ export default function SocialComplete() {
 
         if (!data.completionToken) throw new Error('Unable to continue social registration.');
         setCompletionToken(String(data.completionToken));
+        setNeedsEmail(Boolean(data.needsEmail));
+        if (data.email) setEmail(String(data.email));
       } catch (e) {
         setError(e.message || `Unable to continue ${providerName} registration.`);
       } finally {
@@ -65,7 +69,8 @@ export default function SocialComplete() {
         body: JSON.stringify({
           completionToken,
           username: username.trim(),
-          dateOfBirth
+          dateOfBirth,
+          email: email.trim()
         })
       });
       const data = await res.json().catch(() => ({}));
@@ -96,6 +101,13 @@ export default function SocialComplete() {
         <>
           {error && <div className="amora-error" role="alert">{error}</div>}
           <form onSubmit={complete} className="amora-auth-form" style={{ padding: 0, background: 'transparent' }}>
+            {needsEmail && (
+              <div className="amora-field">
+                <label className="amora-label" htmlFor="social-email">Email address</label>
+                <input id="social-email" className="amora-input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+                <div className="amora-field-hint">{providerName} didn't share an email with us, so we need one to create your account.</div>
+              </div>
+            )}
             <div className="amora-field">
               <label className="amora-label" htmlFor="social-username">Username</label>
               <input id="social-username" className="amora-input" value={username} onChange={(e) => setUsername(e.target.value)} minLength={3} maxLength={20} pattern="[A-Za-z0-9_.-]{3,20}" placeholder="Choose a username" required />

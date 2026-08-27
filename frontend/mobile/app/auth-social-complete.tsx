@@ -10,6 +10,8 @@ export default function SocialComplete() {
   const [completionToken, setCompletionToken] = useState("");
   const [username, setUsername] = useState("");
   const [dateOfBirth, setDateOfBirth] = useState("");
+  const [needsEmail, setNeedsEmail] = useState(false);
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -32,6 +34,8 @@ export default function SocialComplete() {
         }
         if (!result.completionToken) throw new Error("Unable to continue social registration.");
         setCompletionToken(String(result.completionToken));
+        setNeedsEmail(Boolean(result.needsEmail));
+        if (result.email) setEmail(String(result.email));
       } catch (e: any) {
         setError(e.message || "Unable to continue social registration.");
       } finally {
@@ -42,6 +46,10 @@ export default function SocialComplete() {
 
   const complete = async () => {
     setError("");
+    if (needsEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      setError("Enter a valid email address.");
+      return;
+    }
     if (!/^[A-Za-z0-9_.-]{3,20}$/.test(username.trim())) {
       setError("Choose a username with 3–20 letters, numbers, dots, dashes or underscores.");
       return;
@@ -55,7 +63,8 @@ export default function SocialComplete() {
       await api.socialComplete({
         completionToken,
         username: username.trim(),
-        dateOfBirth
+        dateOfBirth,
+        email: email.trim()
       });
       registerForPushNotifications();
       router.replace("/home");
@@ -83,6 +92,18 @@ export default function SocialComplete() {
 
       {!!error && <Text style={s.error}>{error}</Text>}
 
+      {needsEmail && (
+        <TextInput
+          placeholder="Email address"
+          placeholderTextColor="#8d849b"
+          style={s.input}
+          autoCapitalize="none"
+          autoCorrect={false}
+          keyboardType="email-address"
+          value={email}
+          onChangeText={setEmail}
+        />
+      )}
       <TextInput
         placeholder="Username (3-20 characters)"
         placeholderTextColor="#8d849b"
