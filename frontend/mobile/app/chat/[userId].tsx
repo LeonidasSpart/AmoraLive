@@ -50,15 +50,12 @@ export default function Chat() {
           <Text style={s.name}>{peer?.display_name || peer?.username || "Chat"}</Text>
           <Text style={s.status}>Private conversation</Text>
         </View>
-        <Pressable onPress={() => router.push({ pathname: "/video", params: { userId: String(userId) } })} style={s.call}>
-          <Text>📹</Text>
-        </Pressable>
       </View>
 
       {loading ? <ActivityIndicator color={theme.pink} style={{ marginTop: 40 }} /> :
         <ScrollView ref={scroll} style={s.messages} contentContainerStyle={{ paddingVertical: 15 }} onContentSizeChange={() => scroll.current?.scrollToEnd({ animated: false })}>
           {messages.map((m, i) => {
-            const mine = m.sender_id === m.senderId || m.senderId !== String(userId);
+            const mine = m.sender_id !== String(userId);
             return <View key={m.id || i} style={[s.bubble, mine ? s.mine : s.theirs]}>
               <Text style={s.bubbleText}>{m.content}</Text>
             </View>;

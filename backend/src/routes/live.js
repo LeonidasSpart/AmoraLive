@@ -28,7 +28,7 @@ module.exports = (prisma, io) => {
         const jwt = require('jsonwebtoken');
         let userId;
         try {
-          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
           userId = decoded.id;
         } catch (e) {
           return res.status(401).json({ error: 'Invalid token' });
@@ -87,7 +87,7 @@ module.exports = (prisma, io) => {
       res.json(result);
     } catch (e) {
       console.error('Error fetching live rooms:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -157,7 +157,7 @@ module.exports = (prisma, io) => {
       });
     } catch (e) {
       console.error('Error fetching room:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -246,7 +246,7 @@ module.exports = (prisma, io) => {
       res.status(201).json(room);
     } catch (e) {
       console.error('Error creating room:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -295,7 +295,7 @@ module.exports = (prisma, io) => {
       res.status(201).json(msg);
     } catch (e) {
       console.error('Error sending chat:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -314,19 +314,38 @@ module.exports = (prisma, io) => {
         return res.status(400).json({ error: 'Room is not live' });
       }
 
+      // Atomically decide whether this is a genuinely new join, so a
+      // duplicate/retried join request can't inflate viewer_count. A
+      // pre-read-then-decide approach here would race: two near-
+      // simultaneous joins could both read "not yet present" and both
+      // increment.
+      let isNewJoin = false;
+      const reactivated = await prisma.roomParticipant.updateMany({
+        where: { room_id: id, user_id: userId, left_at: { not: null } },
+        data: { left_at: null }
+      });
+      if (reactivated.count === 1) {
+        isNewJoin = true;
+      } else {
+        try {
+          await prisma.roomParticipant.create({
+            data: { room_id: id, user_id: userId, role: 'viewer' }
+          });
+          isNewJoin = true;
+        } catch (createErr) {
+          if (createErr.code !== 'P2002') throw createErr;
+          // Unique constraint hit: already an active participant, not a new join.
+        }
+      }
+
       const participant = await prisma.roomParticipant.findUnique({
-        where: { room_id_user_id: { room_id: id, user_id: userId } }
-      });
-
-      await prisma.roomParticipant.upsert({
         where: { room_id_user_id: { room_id: id, user_id: userId } },
-        update: { left_at: null, role: participant?.role === 'host' ? 'host' : 'viewer' },
-        create: { room_id: id, user_id: userId, role: 'viewer' }
+        select: { role: true }
       });
 
-      const updated = participant?.left_at === null
-        ? room
-        : await prisma.liveRoom.update({ where: { id }, data: { viewer_count: { increment: 1 } } });
+      const updated = isNewJoin
+        ? await prisma.liveRoom.update({ where: { id }, data: { viewer_count: { increment: 1 } } })
+        : room;
 
       // viewer_count decreases as people leave, so it can never answer
       // "what was the highest it ever reached" — peak_viewer_count is a
@@ -350,7 +369,7 @@ module.exports = (prisma, io) => {
       res.json({ success: true, viewer_count: updated.viewer_count });
     } catch (e) {
       console.error('Error joining room:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -386,7 +405,7 @@ module.exports = (prisma, io) => {
       res.json({ success: true, viewer_count: updated.viewer_count });
     } catch (e) {
       console.error('Error leaving room:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -462,7 +481,7 @@ module.exports = (prisma, io) => {
       res.json({ success: true, room: ended });
     } catch (e) {
       console.error('Error ending room:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -487,7 +506,7 @@ module.exports = (prisma, io) => {
       res.json(totals.map((t) => ({ user: byId[t.sender_id], totalCoins: t._sum.coin_cost || 0 })));
     } catch (e) {
       console.error('Error fetching top gifters:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 

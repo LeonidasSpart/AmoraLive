@@ -133,7 +133,14 @@ const uniqueAllowedCorsOrigins = [
   ])
 ];
 
-const wildcardCorsEnabled = configuredCorsOrigins.includes('*');
+// A `*` in CORS_ORIGIN alone is not enough to enable wildcard CORS — that
+// value can leak in from a copied dev/staging config with no one noticing,
+// and combined with credentials:true it would grant any site full
+// credentialed API access. A second, explicit, differently-named env var
+// has to also be set before this dangerous mode turns on.
+const wildcardCorsEnabled =
+  configuredCorsOrigins.includes('*') &&
+  process.env.CORS_ALLOW_WILDCARD === 'true';
 
 // ------------------------------------------------------------
 // Normalize an origin
@@ -1284,7 +1291,8 @@ io.on(
             jwt.verify(
               token,
               process.env
-                .JWT_SECRET
+                .JWT_SECRET,
+              { algorithms: ['HS256'] }
             );
 
           if (
@@ -1490,17 +1498,11 @@ io.on(
     // Gift
     // ----------------------------------------------------------
 
-    socket.on(
-      'gift-sent',
-      (data) => {
-        io.to(
-          `live-${data.roomId}`
-        ).emit(
-          'gift-animation',
-          data
-        );
-      }
-    );
+    // Note: 'gift-animation' is emitted authoritatively from
+    // POST /gifts/send (routes/gifts.js) once a real purchase is
+    // verified. A client-triggered relay was removed here because
+    // it let any socket in a room broadcast a fabricated gift
+    // animation with no backing transaction.
 
     // ----------------------------------------------------------
     // Live like
@@ -1947,6 +1949,8 @@ wsServer.on(
           return;
         }
 
+        try {
+
         // ------------------------------------------------------
         // WebSocket authentication
         // ------------------------------------------------------
@@ -1973,7 +1977,8 @@ wsServer.on(
               jwt.verify(
                 data.token,
                 process.env
-                  .JWT_SECRET
+                  .JWT_SECRET,
+                { algorithms: ['HS256'] }
               );
 
             if (
@@ -2278,6 +2283,36 @@ wsServer.on(
             return;
           }
 
+          const wsBlock =
+            await prisma.block.findFirst(
+              {
+                where: {
+                  OR: [
+                    {
+                      blocker_id: userId,
+                      blocked_id: data.receiverId
+                    },
+                    {
+                      blocker_id: data.receiverId,
+                      blocked_id: userId
+                    }
+                  ]
+                }
+              }
+            );
+
+          if (wsBlock) {
+            ws.send(
+              JSON.stringify({
+                type: 'message-error',
+                code: 'MESSAGING_BLOCKED',
+                error: 'You cannot message this user'
+              })
+            );
+
+            return;
+          }
+
           const msg =
             await prisma.message.create(
               {
@@ -2402,6 +2437,13 @@ wsServer.on(
               from:
                 userId
             }
+          );
+        }
+
+        } catch (wsMessageError) {
+          console.error(
+            'WebSocket message handler error:',
+            wsMessageError
           );
         }
       }
@@ -2573,6 +2615,16 @@ async function shutdown(
     10000
   ).unref();
 }
+
+process.on(
+  'unhandledRejection',
+  (reason) => {
+    console.error(
+      'Unhandled promise rejection:',
+      reason
+    );
+  }
+);
 
 process.on(
   'SIGTERM',

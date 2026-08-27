@@ -33,7 +33,7 @@ module.exports = (prisma, io) => {
       });
     } catch (e) {
       console.error('Notifications error:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -45,7 +45,8 @@ module.exports = (prisma, io) => {
       });
       res.json({ count });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -68,7 +69,8 @@ module.exports = (prisma, io) => {
       });
       res.json(updated);
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -81,7 +83,8 @@ module.exports = (prisma, io) => {
       });
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -89,26 +92,34 @@ module.exports = (prisma, io) => {
   router.post('/preferences', auth, async (req, res) => {
     const { message, match, gift, live_event, follow, purchase, membership, security } = req.body;
     try {
-      // Store preferences as JSON on user record or separate table
-      // For simplicity, we'll store in a JSON field on User
+      // Preferences are stored as JSON on the User record. Merge with
+      // whatever is already stored so a partial update doesn't silently
+      // reset every unspecified preference back to its default.
+      const existingUser = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: { notification_preferences: true }
+      });
+      const current = existingUser?.notification_preferences || {};
+
       const user = await prisma.user.update({
         where: { id: req.user.id },
         data: {
           notification_preferences: {
-            message: message ?? true,
-            match: match ?? true,
-            gift: gift ?? true,
-            live_event: live_event ?? true,
-            follow: follow ?? true,
-            purchase: purchase ?? true,
-            membership: membership ?? true,
-            security: security ?? true
+            message: message ?? current.message ?? true,
+            match: match ?? current.match ?? true,
+            gift: gift ?? current.gift ?? true,
+            live_event: live_event ?? current.live_event ?? true,
+            follow: follow ?? current.follow ?? true,
+            purchase: purchase ?? current.purchase ?? true,
+            membership: membership ?? current.membership ?? true,
+            security: security ?? current.security ?? true
           }
         }
       });
       res.json({ success: true, preferences: user.notification_preferences });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -121,7 +132,8 @@ module.exports = (prisma, io) => {
       });
       res.json(user?.notification_preferences || {});
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -141,7 +153,8 @@ module.exports = (prisma, io) => {
       await prisma.notification.delete({ where: { id } });
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 

@@ -5,7 +5,7 @@ import { theme } from "./theme";
 
 const items = [
   { path: "/home", label: "Home", icon: "⌂" },
-  { path: "/video", label: "Match", icon: "♡" },
+  { path: "/video-match", label: "Match", icon: "♡" },
   { path: "/live", label: "Live", icon: "✦" },
   { path: "/messages", label: "Chat", icon: "◌" },
   { path: "/profile", label: "Profile", icon: "◎" }

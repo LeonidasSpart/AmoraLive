@@ -300,6 +300,12 @@ export default function Auth() {
         <Text style={s.link}>{mode === "login" ? "New to Amora? Create an account" : "Already have an account? Sign in"}</Text>
       </Pressable>
 
+      {mode === "login" && (
+        <Pressable onPress={() => router.push("/delete-account")}>
+          <Text style={s.deleteLink}>Want to delete your account instead?</Text>
+        </Pressable>
+      )}
+
       <Text style={s.foot}>By continuing you accept the Terms and Privacy Policy.</Text>
     </ScrollView>
   );
@@ -328,5 +334,6 @@ const s = StyleSheet.create({
   googleText: { color: "#17131f", fontWeight: "800" },
   or: { color: theme.muted, textAlign: "center", margin: 20 },
   link: { color: theme.pink, textAlign: "center", fontWeight: "700", marginTop: 12 },
+  deleteLink: { color: theme.muted, textAlign: "center", fontSize: 12, marginTop: 16 },
   foot: { color: "#777080", fontSize: 11, textAlign: "center", marginTop: 28 }
 });

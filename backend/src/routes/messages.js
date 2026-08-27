@@ -101,7 +101,7 @@ module.exports = (prisma, io) => {
       res.json(conversations.map((c) => ({ ...c, unread_count: Number(c.unread_count) })));
     } catch (e) {
       console.error('Error fetching conversations:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -142,7 +142,7 @@ module.exports = (prisma, io) => {
       res.json(messages.reverse()); // return in ascending order
     } catch (e) {
       console.error('Error fetching messages:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -203,7 +203,7 @@ module.exports = (prisma, io) => {
       res.status(201).json(message);
     } catch (e) {
       console.error('Error sending message:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 

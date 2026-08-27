@@ -144,7 +144,8 @@ module.exports = (prisma, io) => {
         opponent: opponentRoom ? { id: opponentRoom.id, title: opponentRoom.title, host: opponentRoom.host } : null
       });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -182,7 +183,8 @@ module.exports = (prisma, io) => {
 
       res.json({ success: true, expiresAt });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -232,7 +234,8 @@ module.exports = (prisma, io) => {
 
       res.json({ success: true, battleId: battle.id, endsAt });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -245,7 +248,8 @@ module.exports = (prisma, io) => {
       io.to(`live-${invite.fromRoomId}`).emit('battle:invite_declined', { targetRoomId: id });
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -259,7 +263,8 @@ module.exports = (prisma, io) => {
       io.to(`live-${targetRoomId}`).emit('battle:invite_cancelled', { fromRoomId: id });
       res.json({ success: true });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -274,7 +279,8 @@ module.exports = (prisma, io) => {
       if (!ended) return res.status(404).json({ error: 'Battle already ended.' });
       res.json({ success: true, battle: ended });
     } catch (e) {
-      res.status(500).json({ error: e.message });
+      console.error(e);
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 

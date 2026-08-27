@@ -426,9 +426,9 @@ export default function Settings() {
           React.createElement('span', { style: { color: '#aaa' } }, 'Current Plan'),
           React.createElement('span', { style: { color: '#FFD700', fontWeight: 'bold' } }, membership?.tier || 'Free')
         ),
-        membership?.expires_at && React.createElement('div', { key: 'expires', style: { display: 'flex', justifyContent: 'space-between', padding: '8px 0' } },
+        membership?.end_date && React.createElement('div', { key: 'expires', style: { display: 'flex', justifyContent: 'space-between', padding: '8px 0' } },
           React.createElement('span', { style: { color: '#aaa' } }, 'Expires'),
-          React.createElement('span', { style: { color: '#fff' } }, new Date(membership.expires_at).toLocaleDateString())
+          React.createElement('span', { style: { color: '#fff' } }, new Date(membership.end_date).toLocaleDateString())
         )
       ]),
       React.createElement('div', {

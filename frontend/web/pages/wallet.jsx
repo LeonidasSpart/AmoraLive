@@ -54,15 +54,13 @@ export default function Wallet() {
 
   const purchasePackage = async (packageId) => {
     try {
-      const res = await apiFetch('/wallet/purchase', {
+      const res = await apiFetch('/wallet/checkout', {
         method: 'POST',
         body: JSON.stringify({ packageId })
       });
-      if (!res.ok) throw new Error('Purchase failed');
-      const data = await res.json();
-      setBalance(data.newBalance);
-      setShowPackages(false);
-      await fetchWalletData(); // Refresh transactions
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Unable to start checkout.');
+      window.location.href = data.checkoutUrl;
     } catch (err) {
       alert('Purchase failed: ' + err.message);
     }

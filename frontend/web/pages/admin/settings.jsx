@@ -46,8 +46,8 @@ export default function AdminSettings() {
       setError('New password and confirmation do not match.');
       return;
     }
-    if (newPassword.length < 8) {
-      setError('New password must be at least 8 characters.');
+    if (newPassword.length < 10) {
+      setError('New password must be at least 10 characters.');
       return;
     }
     setChangingPassword(true);
@@ -138,7 +138,7 @@ export default function AdminSettings() {
           <input
             style={s.input}
             type="password"
-            placeholder="New password (min. 8 characters)"
+            placeholder="New password (min. 10 characters)"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
           />

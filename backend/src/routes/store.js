@@ -19,7 +19,7 @@ module.exports = (prisma) => {
       res.json(cosmetics);
     } catch (e) {
       console.error('Catalog error:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -39,7 +39,7 @@ module.exports = (prisma) => {
       res.json(owned);
     } catch (e) {
       console.error('My items error:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -60,7 +60,7 @@ module.exports = (prisma) => {
       res.json(equipped);
     } catch (e) {
       console.error('Equipped error:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -90,12 +90,7 @@ module.exports = (prisma) => {
         });
       }
 
-      // 3. Check balance
-      if (wallet.balance < cosmetic.price_coins) {
-        return res.status(400).json({ error: 'Insufficient coins' });
-      }
-
-      // 4. Check if user already owns this cosmetic (not expired)
+      // 3. Check if user already owns this cosmetic (not expired)
       const existing = await prisma.userCosmetic.findFirst({
         where: {
           user_id: req.user.id,
@@ -124,16 +119,19 @@ module.exports = (prisma) => {
         }
 
         // Update transaction: deduct coins + update expiry
-        await prisma.$transaction([
-          prisma.wallet.update({
-            where: { user_id: req.user.id },
+        await prisma.$transaction(async (tx) => {
+          const debit = await tx.wallet.updateMany({
+            where: { user_id: req.user.id, balance: { gte: cosmetic.price_coins } },
             data: { balance: { decrement: cosmetic.price_coins } }
-          }),
-          prisma.userCosmetic.update({
+          });
+          if (debit.count !== 1) {
+            throw Object.assign(new Error('Insufficient coins'), { statusCode: 400 });
+          }
+          await tx.userCosmetic.update({
             where: { id: existing.id },
             data: { expires_at: expiresAt }
-          })
-        ]);
+          });
+        });
 
         return res.json({
           success: true,
@@ -142,21 +140,24 @@ module.exports = (prisma) => {
         });
       }
 
-      // 6. Otherwise create new purchase
-      await prisma.$transaction([
-        prisma.wallet.update({
-          where: { user_id: req.user.id },
+      // 5. Otherwise create new purchase
+      await prisma.$transaction(async (tx) => {
+        const debit = await tx.wallet.updateMany({
+          where: { user_id: req.user.id, balance: { gte: cosmetic.price_coins } },
           data: { balance: { decrement: cosmetic.price_coins } }
-        }),
-        prisma.userCosmetic.create({
+        });
+        if (debit.count !== 1) {
+          throw Object.assign(new Error('Insufficient coins'), { statusCode: 400 });
+        }
+        await tx.userCosmetic.create({
           data: {
             user_id: req.user.id,
             cosmetic_id: cosmeticId,
             expires_at: expiresAt,
             is_equipped: false
           }
-        })
-      ]);
+        });
+      });
 
       res.json({
         success: true,
@@ -165,7 +166,10 @@ module.exports = (prisma) => {
       });
     } catch (e) {
       console.error('Purchase error:', e);
-      res.status(500).json({ error: e.message });
+      if (e.statusCode) {
+        return res.status(e.statusCode).json({ error: e.message });
+      }
+      res.status(500).json({ error: 'Unable to complete purchase.' });
     }
   });
 
@@ -214,7 +218,7 @@ module.exports = (prisma) => {
       res.json({ success: true });
     } catch (e) {
       console.error('Equip error:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
@@ -244,7 +248,7 @@ module.exports = (prisma) => {
       res.json({ success: true });
     } catch (e) {
       console.error('Unequip error:', e);
-      res.status(500).json({ error: e.message });
+      res.status(500).json({ error: 'Something went wrong. Please try again.' });
     }
   });
 
