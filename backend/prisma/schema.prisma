@@ -93,6 +93,7 @@ model User {
   mutedUsers        Mute[]           @relation("muter")
   mutedBy           Mute[]           @relation("mutedBy")
   withdrawals       Withdrawal[]
+  pushTokens        PushToken[]
   oauthAccounts     OAuthAccount[]
 }
 
@@ -669,4 +670,20 @@ model StoryReaction {
   user       User     @relation(fields: [user_id], references: [id])
 
   @@id([story_id, user_id])
+}
+
+// One row per device — a person can be logged in on more than one phone,
+// and each needs its own token to actually receive a push. Tokens that
+// Expo's push service reports as no-longer-valid (app uninstalled, token
+// rotated) get pruned rather than left to keep failing silently forever.
+model PushToken {
+  id         String   @id @default(uuid())
+  user_id    String
+  token      String   @unique
+  platform   String   // "ios" | "android"
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id])
+
+  @@index([user_id])
 }
