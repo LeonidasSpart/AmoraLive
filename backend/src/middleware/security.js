@@ -14,13 +14,20 @@ let sharedRedisClient = null;
 function getRateLimiterRedis() {
   if (!process.env.REDIS_URL) return null;
   if (!sharedRedisClient) {
+    // Same connection options as the app's own pub/sub Redis clients in
+    // index.js, which connect reliably. enableOfflineQueue:false was tried
+    // here initially to "fail fast," but it instead makes every command
+    // throw hard whenever the connection is anything other than fully
+    // ready (including brief reconnects) — the default (queue commands
+    // until connected) is what's actually proven to work in this app.
     sharedRedisClient = new Redis(process.env.REDIS_URL, {
-      maxRetriesPerRequest: 1,
-      enableOfflineQueue: false,
       retryStrategy: (times) => (times > 5 ? null : Math.min(times * 100, 3000))
     });
     sharedRedisClient.on('error', (err) => {
-      console.error('Rate-limiter Redis error:', err.message);
+      console.warn('Rate-limiter Redis error:', err.message);
+    });
+    sharedRedisClient.on('connect', () => {
+      console.log('✅ Rate-limiter Redis connected');
     });
   }
   return sharedRedisClient;
