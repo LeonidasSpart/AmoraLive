@@ -344,6 +344,39 @@ module.exports = (prisma) => {
     }
   });
 
+  // ---------- Push notification token registration ----------
+  router.post('/me/push-token', auth, async (req, res) => {
+    const token = String(req.body.token || '').trim();
+    const platform = ['ios', 'android'].includes(req.body.platform) ? req.body.platform : null;
+    if (!token || !platform) return res.status(400).json({ error: 'token and platform ("ios" or "android") are required.' });
+
+    try {
+      // A token can move between accounts (shared device, different
+      // login) — upsert on the token itself rather than on (user,
+      // platform), so re-registering always points it at whoever is
+      // currently logged in on that device.
+      await prisma.pushToken.upsert({
+        where: { token },
+        create: { user_id: req.user.id, token, platform },
+        update: { user_id: req.user.id, platform }
+      });
+      res.json({ success: true });
+    } catch (e) {
+      res.status(500).json({ error: 'Unable to register push token.' });
+    }
+  });
+
+  router.delete('/me/push-token', auth, async (req, res) => {
+    const token = String(req.body.token || '').trim();
+    if (!token) return res.status(400).json({ error: 'token is required.' });
+    try {
+      await prisma.pushToken.deleteMany({ where: { token, user_id: req.user.id } });
+      res.json({ success: true });
+    } catch (e) {
+      res.status(500).json({ error: 'Unable to remove push token.' });
+    }
+  });
+
   // ---------- DELETE /users/me (soft delete) ----------
   router.delete('/me', auth, async (req, res) => {
     try {
