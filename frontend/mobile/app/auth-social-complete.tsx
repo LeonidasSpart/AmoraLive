@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { router, useLocalSearchParams } from "expo-router";
 import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { api } from "../src/api/client";
+import { registerForPushNotifications } from "../src/push";
 import { theme } from "../src/theme";
 
 export default function SocialComplete() {
@@ -25,6 +26,7 @@ export default function SocialComplete() {
       try {
         const result = await api.socialExchange(String(code));
         if (result.accessToken) {
+          registerForPushNotifications();
           router.replace("/home");
           return;
         }
@@ -55,6 +57,7 @@ export default function SocialComplete() {
         username: username.trim(),
         dateOfBirth
       });
+      registerForPushNotifications();
       router.replace("/home");
     } catch (e: any) {
       setError(e.message || `Unable to finish ${providerName} registration.`);
