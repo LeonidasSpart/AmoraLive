@@ -8,6 +8,7 @@
       "distribution": "internal"
     },
     "production": {
+      "distribution": "store",
       "autoIncrement": true
     }
   }
