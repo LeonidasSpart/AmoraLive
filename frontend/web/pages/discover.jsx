@@ -5,8 +5,10 @@ import Layout from '../components/Layout';
 import { apiFetch } from '../lib/api';
 import VerifiedBadge from '../components/VerifiedBadge';
 import Stories from '../components/Stories';
+import { useTranslation } from '../lib/i18n';
 
 export default function Discover() {
+  const { t } = useTranslation();
   const [rooms, setRooms] = useState([]);
   const [creators, setCreators] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,21 +23,30 @@ export default function Discover() {
   const searchTimer = useRef(null);
 
   const tabs = [
-    { key: 'recommended', label: 'Recommended' },
-    { key: 'trending', label: 'Trending' },
-    { key: 'new', label: 'New' },
-    { key: 'following', label: 'Following' },
-    { key: 'creators', label: 'Creators' },
-    { key: 'categories', label: 'Categories' }
+    { key: 'recommended', label: t('discover.tabRecommended') },
+    { key: 'trending', label: t('discover.tabTrending') },
+    { key: 'new', label: t('discover.tabNew') },
+    { key: 'following', label: t('discover.tabFollowing') },
+    { key: 'creators', label: t('discover.tabCreators') },
+    { key: 'categories', label: t('discover.tabCategories') }
   ];
 
   const creatorTypes = [
-    { key: 'popular', label: 'Popular' },
-    { key: 'rising', label: 'Rising' },
-    { key: 'new', label: 'New' }
+    { key: 'popular', label: t('discover.typePopular') },
+    { key: 'rising', label: t('discover.typeRising') },
+    { key: 'new', label: t('discover.typeNew') }
   ];
 
-  const categories = ['Chat', 'Music', 'Entertainment', 'Gaming', 'Lifestyle', 'Travel', 'Q&A', 'Dating'];
+  const categories = [
+    { value: 'Chat', label: t('discover.catChat') },
+    { value: 'Music', label: t('discover.catMusic') },
+    { value: 'Entertainment', label: t('discover.catEntertainment') },
+    { value: 'Gaming', label: t('discover.catGaming') },
+    { value: 'Lifestyle', label: t('discover.catLifestyle') },
+    { value: 'Travel', label: t('discover.catTravel') },
+    { value: 'Q&A', label: t('discover.catQA') },
+    { value: 'Dating', label: t('discover.catDating') }
+  ];
 
   const fetchRooms = async () => {
     if (!localStorage.getItem('accessToken')) {
@@ -193,7 +204,7 @@ export default function Discover() {
               fontWeight: 'bold',
               textTransform: 'uppercase'
             }
-          }, 'LIVE'),
+          }, t('discover.live')),
           React.createElement('span', {
             key: 'viewers',
             style: {
@@ -242,7 +253,7 @@ export default function Discover() {
             React.createElement('span', {
               key: 'hostname',
               style: { display: 'inline-flex', alignItems: 'center', color: '#fff', fontSize: '13px', fontWeight: '500' }
-            }, [room.host?.display_name || room.host?.username || 'Unknown', React.createElement(VerifiedBadge, { key: 'badge', user: room.host, size: 12 })])
+            }, [room.host?.display_name || room.host?.username || t('discover.unknown'), React.createElement(VerifiedBadge, { key: 'badge', user: room.host, size: 12 })])
           ]),
           React.createElement('h3', {
             style: {
@@ -253,13 +264,13 @@ export default function Discover() {
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap'
             }
-          }, room.title || 'Untitled'),
+          }, room.title || t('discover.untitled')),
           React.createElement('div', {
             style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '4px' }
           }, [
             React.createElement('span', {
               style: { color: '#888', fontSize: '11px' }
-            }, `#${room.category || 'General'}`),
+            }, `#${room.category || t('discover.general')}`),
             React.createElement('span', {
               style: { color: '#666', fontSize: '11px' }
             }, timeSince(room.created_at))
@@ -299,8 +310,8 @@ export default function Discover() {
         style: { display: 'flex', alignItems: 'center', color: '#fff', fontWeight: 600, fontSize: '14px', textDecoration: 'none' }
       }, [creator.display_name || creator.username, React.createElement(VerifiedBadge, { key: 'b', user: creator, size: 12 })]),
       creator.bio && React.createElement('p', { key: 'bio', style: { color: '#888', fontSize: '12px', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' } }, creator.bio),
-      creator.followerCount != null && React.createElement('span', { key: 'followers', style: { color: '#666', fontSize: '11px' } }, `${creator.followerCount} followers`),
-      creator.newFollowersThisWeek != null && React.createElement('span', { key: 'rising', style: { color: '#8f8', fontSize: '11px' } }, `+${creator.newFollowersThisWeek} this week`),
+      creator.followerCount != null && React.createElement('span', { key: 'followers', style: { color: '#666', fontSize: '11px' } }, `${creator.followerCount} ${t('discover.followersSuffix')}`),
+      creator.newFollowersThisWeek != null && React.createElement('span', { key: 'rising', style: { color: '#8f8', fontSize: '11px' } }, `+${creator.newFollowersThisWeek} ${t('discover.thisWeekSuffix')}`),
       React.createElement('div', { key: 'actions', style: { display: 'flex', gap: '8px', marginTop: '6px', width: '100%' } }, [
         React.createElement('button', {
           key: 'follow',
@@ -311,9 +322,9 @@ export default function Discover() {
             background: creator.isFollowing ? 'rgba(255,255,255,0.1)' : 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)',
             color: '#fff'
           }
-        }, creator.isFollowing ? 'Following' : 'Follow'),
+        }, creator.isFollowing ? t('discover.following') : t('discover.follow')),
         React.createElement(Link, { key: 'msg', href: `/chat/${creator.id}`, style: { flex: 1, textDecoration: 'none' } },
-          React.createElement('div', { style: { padding: '6px 0', borderRadius: '8px', border: '1px solid #333', fontSize: '12px', color: '#ccc', textAlign: 'center' } }, 'Message')
+          React.createElement('div', { style: { padding: '6px 0', borderRadius: '8px', border: '1px solid #333', fontSize: '12px', color: '#ccc', textAlign: 'center' } }, t('discover.message'))
         )
       ])
     ]);
@@ -328,7 +339,7 @@ export default function Discover() {
       React.createElement('input', {
         key: 'search',
         type: 'text',
-        placeholder: '🔍 Search creators and live streams…',
+        placeholder: t('discover.searchPlaceholder'),
         value: searchQuery,
         onChange: (e) => setSearchQuery(e.target.value),
         className: 'amora-discover-search',
@@ -347,17 +358,17 @@ export default function Discover() {
 
       isSearching
         ? React.createElement('div', { key: 'search-results' }, [
-            searching && React.createElement('p', { key: 'loading', style: { color: '#666', padding: '20px 0' } }, 'Searching…'),
+            searching && React.createElement('p', { key: 'loading', style: { color: '#666', padding: '20px 0' } }, t('discover.searching')),
             !searching && searchResults?.creators?.length > 0 && React.createElement('div', { key: 'creators', style: { marginBottom: '24px' } }, [
-              React.createElement('h4', { key: 't', style: { color: '#999', fontSize: '13px', marginBottom: '10px' } }, 'Creators'),
+              React.createElement('h4', { key: 't', style: { color: '#999', fontSize: '13px', marginBottom: '10px' } }, t('discover.creatorsHeader')),
               React.createElement('div', { key: 'grid', style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '14px' } }, searchResults.creators.map(renderCreatorCard))
             ]),
             !searching && searchResults?.rooms?.length > 0 && React.createElement('div', { key: 'rooms' }, [
-              React.createElement('h4', { key: 't', style: { color: '#999', fontSize: '13px', marginBottom: '10px' } }, 'Live now'),
+              React.createElement('h4', { key: 't', style: { color: '#999', fontSize: '13px', marginBottom: '10px' } }, t('discover.liveNowHeader')),
               React.createElement('div', { key: 'grid', style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px' } }, searchResults.rooms.map(renderRoomCard))
             ]),
             !searching && searchResults && searchResults.creators?.length === 0 && searchResults.rooms?.length === 0 &&
-              React.createElement('p', { key: 'empty', style: { color: '#666', padding: '40px 0', textAlign: 'center' } }, `No results for "${searchQuery}"`)
+              React.createElement('p', { key: 'empty', style: { color: '#666', padding: '40px 0', textAlign: 'center' } }, `${t('discover.noResultsFor')} "${searchQuery}"`)
           ])
         : [
       // Tabs
@@ -423,32 +434,32 @@ export default function Discover() {
         }
       }, categories.map(cat =>
         React.createElement('button', {
-          key: cat,
-          onClick: () => setSelectedCategory(selectedCategory === cat ? null : cat),
+          key: cat.value,
+          onClick: () => setSelectedCategory(selectedCategory === cat.value ? null : cat.value),
           style: {
             padding: '8px 20px',
             borderRadius: '20px',
-            border: selectedCategory === cat ? 'none' : '1px solid #333',
-            background: selectedCategory === cat ? 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)' : '#1a1a2e',
+            border: selectedCategory === cat.value ? 'none' : '1px solid #333',
+            background: selectedCategory === cat.value ? 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)' : '#1a1a2e',
             color: '#fff',
             cursor: 'pointer',
             fontSize: '14px',
             transition: '0.2s'
           }
-        }, cat)
+        }, cat.label)
       )),
 
       // Loading / Error / Grid
       loading && React.createElement('div', {
         key: 'loading',
         style: { textAlign: 'center', padding: '60px 0', color: '#666' }
-      }, activeTab === 'creators' ? 'Loading creators...' : 'Loading live streams...'),
+      }, activeTab === 'creators' ? t('discover.loadingCreators') : t('discover.loadingLive')),
 
       error && React.createElement('div', {
         key: 'error',
         style: { textAlign: 'center', padding: '40px 0', color: '#ff6b6b' }
       }, [
-        React.createElement('p', { key: 'msg' }, `Error: ${error}`),
+        React.createElement('p', { key: 'msg' }, `${t('discover.errorPrefix')} ${error}`),
         React.createElement('button', {
           key: 'retry',
           onClick: fetchRooms,
@@ -461,14 +472,14 @@ export default function Discover() {
             color: '#fff',
             cursor: 'pointer'
           }
-        }, 'Retry')
+        }, t('discover.retry'))
       ]),
 
       !loading && !error && activeTab === 'creators' && React.createElement('div', {
         key: 'creator-grid',
         style: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '14px' }
       }, creators.length === 0
-        ? React.createElement('p', { style: { gridColumn: '1 / -1', textAlign: 'center', color: '#666', padding: '40px 0' } }, 'No creators to show yet.')
+        ? React.createElement('p', { style: { gridColumn: '1 / -1', textAlign: 'center', color: '#666', padding: '40px 0' } }, t('discover.noCreatorsYet'))
         : creators.map(renderCreatorCard)
       ),
 
@@ -490,8 +501,8 @@ export default function Discover() {
             color: '#666'
           }
         }, [
-          React.createElement('p', { key: 'msg', style: { fontSize: '18px' } }, 'No live streams right now'),
-          React.createElement('p', { key: 'sub', style: { fontSize: '14px' } }, 'Check back later or start your own!')
+          React.createElement('p', { key: 'msg', style: { fontSize: '18px' } }, t('discover.noLiveNow')),
+          React.createElement('p', { key: 'sub', style: { fontSize: '14px' } }, t('discover.checkBackLater'))
         ])
       ] : rooms.map(renderRoomCard))
       ]

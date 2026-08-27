@@ -5,10 +5,12 @@ import Link from 'next/link';
 import Layout from '../components/Layout';
 import { apiFetch, getRefreshToken } from '../lib/api';
 import VerifiedBadge from '../components/VerifiedBadge';
+import { useTranslation } from '../lib/i18n';
 
 const STATUS_COLORS = { pending: '#ffd166', reviewing: '#3fa9ff', resolved: '#8f8', dismissed: '#777' };
 
 export default function SafetyCenter() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [tab, setTab] = useState('blocked');
   const [blocked, setBlocked] = useState([]);
@@ -40,7 +42,7 @@ export default function SafetyCenter() {
       if (sessionsRes.ok) setSessions(await sessionsRes.json());
       if (securityRes.ok) setSecurity(await securityRes.json());
     } catch (e) {
-      setError('Unable to load Safety Center.');
+      setError(t('safety.errorLoad'));
     } finally {
       setLoading(false);
     }
@@ -73,7 +75,7 @@ export default function SafetyCenter() {
   };
 
   const revokeOthers = async () => {
-    if (!confirm('Log out every other device? You\'ll stay signed in here.')) return;
+    if (!confirm(t('safety.revokeOthersConfirm'))) return;
     try {
       const res = await apiFetch('/safety/sessions/revoke-others', {
         method: 'POST',
@@ -81,23 +83,23 @@ export default function SafetyCenter() {
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
-        setMessage(`Signed out of ${data.revokedCount} other device${data.revokedCount === 1 ? '' : 's'}.`);
+        setMessage(`${t('safety.signedOutOf')} ${data.revokedCount} ${data.revokedCount === 1 ? t('safety.otherDevice') : t('safety.otherDevices')}`);
         await load();
       }
     } catch {}
   };
 
   const tabs = [
-    { key: 'blocked', label: `Blocked (${blocked.length})` },
-    { key: 'muted', label: `Muted (${muted.length})` },
-    { key: 'reports', label: `My Reports (${reports.length})` },
-    { key: 'sessions', label: `Devices (${sessions.length})` }
+    { key: 'blocked', label: `${t('safety.tabBlocked')} (${blocked.length})` },
+    { key: 'muted', label: `${t('safety.tabMuted')} (${muted.length})` },
+    { key: 'reports', label: `${t('safety.tabMyReports')} (${reports.length})` },
+    { key: 'sessions', label: `${t('safety.tabDevices')} (${sessions.length})` }
   ];
 
   if (loading) {
     return (
       <Layout>
-        <div style={s.wrap}><p style={{ color: '#999' }}>Loading…</p></div>
+        <div style={s.wrap}><p style={{ color: '#999' }}>{t('common.loading')}</p></div>
       </Layout>
     );
   }
@@ -105,15 +107,15 @@ export default function SafetyCenter() {
   return (
     <Layout>
       <div style={s.wrap}>
-        <h1 style={s.title}>🛡️ Safety Center</h1>
+        <h1 style={s.title}>{t('safety.title')}</h1>
         {security && (
           <div style={s.securityCard}>
             <div style={s.securityOrb}><strong>{security.score}</strong><span>/100</span></div>
             <div style={{ flex: 1 }}>
-              <div style={s.securityKicker}>AMORA SECURITY</div>
-              <h2 style={s.securityTitle}>{security.score >= 90 ? 'Excellent protection' : security.score >= 75 ? 'Strong protection' : 'Protection needs attention'}</h2>
+              <div style={s.securityKicker}>{t('safety.securityKicker')}</div>
+              <h2 style={s.securityTitle}>{security.score >= 90 ? t('safety.excellentProtection') : security.score >= 75 ? t('safety.strongProtection') : t('safety.protectionNeedsAttention')}</h2>
               <p style={s.securityText}>{security.recommendations?.[0]}</p>
-              <div style={s.securityChips}><span>{security.emailVerified ? '✓ Email' : 'Review email'}</span><span>{security.activeSessions} device{security.activeSessions === 1 ? '' : 's'}</span><span>{security.privacyConfigured ? '✓ Privacy' : 'Review privacy'}</span></div>
+              <div style={s.securityChips}><span>{security.emailVerified ? t('safety.emailVerified') : t('safety.reviewEmail')}</span><span>{security.activeSessions} {security.activeSessions === 1 ? t('safety.device') : t('safety.devices')}</span><span>{security.privacyConfigured ? t('safety.privacyConfigured') : t('safety.reviewPrivacy')}</span></div>
             </div>
           </div>
         )}
@@ -121,23 +123,23 @@ export default function SafetyCenter() {
         {error && <div style={s.error}>{error}</div>}
 
         <div style={s.linkRow}>
-          <Link href="/settings" style={s.linkChip}>🔑 Change Password</Link>
-          <Link href="/settings" style={s.linkChip}>🔒 Privacy Settings</Link>
+          <Link href="/settings" style={s.linkChip}>{t('safety.changePassword')}</Link>
+          <Link href="/settings" style={s.linkChip}>{t('safety.privacySettings')}</Link>
         </div>
 
         <div style={s.tabRow}>
-          {tabs.map((t) => (
-            <button key={t.key} onClick={() => setTab(t.key)} style={{ ...s.tabBtn, ...(tab === t.key ? s.tabBtnActive : {}) }}>{t.label}</button>
+          {tabs.map((tabItem) => (
+            <button key={tabItem.key} onClick={() => setTab(tabItem.key)} style={{ ...s.tabBtn, ...(tab === tabItem.key ? s.tabBtnActive : {}) }}>{tabItem.label}</button>
           ))}
         </div>
 
         {tab === 'blocked' && (
-          blocked.length === 0 ? <p style={s.empty}>No blocked users.</p> : (
+          blocked.length === 0 ? <p style={s.empty}>{t('safety.noBlockedUsers')}</p> : (
             <div style={s.list}>
               {blocked.map((u) => (
                 <div key={u.id} style={s.row}>
                   <span style={{ display: 'flex', alignItems: 'center' }}>{u.display_name || u.username}<VerifiedBadge user={u} size={12} /></span>
-                  <button onClick={() => unblock(u.id)} style={s.actionBtn}>Unblock</button>
+                  <button onClick={() => unblock(u.id)} style={s.actionBtn}>{t('safety.unblock')}</button>
                 </div>
               ))}
             </div>
@@ -145,12 +147,12 @@ export default function SafetyCenter() {
         )}
 
         {tab === 'muted' && (
-          muted.length === 0 ? <p style={s.empty}>No muted users. Muting hides someone's content from you without them knowing, and without blocking them.</p> : (
+          muted.length === 0 ? <p style={s.empty}>{t('safety.noMutedUsers')}</p> : (
             <div style={s.list}>
               {muted.map((u) => (
                 <div key={u.id} style={s.row}>
                   <span style={{ display: 'flex', alignItems: 'center' }}>{u.display_name || u.username}<VerifiedBadge user={u} size={12} /></span>
-                  <button onClick={() => unmute(u.id)} style={s.actionBtn}>Unmute</button>
+                  <button onClick={() => unmute(u.id)} style={s.actionBtn}>{t('safety.unmute')}</button>
                 </div>
               ))}
             </div>
@@ -158,7 +160,7 @@ export default function SafetyCenter() {
         )}
 
         {tab === 'reports' && (
-          reports.length === 0 ? <p style={s.empty}>You haven't submitted any reports.</p> : (
+          reports.length === 0 ? <p style={s.empty}>{t('safety.noReportsSubmitted')}</p> : (
             <div style={s.list}>
               {reports.map((r) => (
                 <div key={r.id} style={s.reportRow}>
@@ -176,16 +178,16 @@ export default function SafetyCenter() {
         {tab === 'sessions' && (
           <div>
             {sessions.length > 1 && (
-              <button onClick={revokeOthers} style={s.revokeAllBtn}>Log out all other devices</button>
+              <button onClick={revokeOthers} style={s.revokeAllBtn}>{t('safety.logOutAllOtherDevices')}</button>
             )}
             <div style={s.list}>
               {sessions.map((sess) => (
                 <div key={sess.id} style={s.row}>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 13 }}>{sess.device_info ? sess.device_info.slice(0, 60) : 'Unknown device'}</div>
-                    <div style={{ color: '#777', fontSize: 11 }}>{sess.ip_address || 'Unknown location'} · signed in {new Date(sess.created_at).toLocaleDateString()}</div>
+                    <div style={{ fontWeight: 700, fontSize: 13 }}>{sess.device_info ? sess.device_info.slice(0, 60) : t('safety.unknownDevice')}</div>
+                    <div style={{ color: '#777', fontSize: 11 }}>{sess.ip_address || t('safety.unknownLocation')} · {t('safety.signedInPrefix')} {new Date(sess.created_at).toLocaleDateString()}</div>
                   </div>
-                  <button onClick={() => revokeSession(sess.id)} style={s.actionBtn}>Revoke</button>
+                  <button onClick={() => revokeSession(sess.id)} style={s.actionBtn}>{t('safety.revoke')}</button>
                 </div>
               ))}
             </div>

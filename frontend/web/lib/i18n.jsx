@@ -76,6 +76,60 @@ export const translations = {
         goToLogin: 'Go to Login',
         byCreating: 'By creating an account, you agree to our', termsLink: 'Terms', andLink: 'and', privacyLink: 'Privacy Policy'
       }
+    },
+    discover: {
+      tabRecommended: 'Recommended', tabTrending: 'Trending', tabNew: 'New', tabFollowing: 'Following', tabCreators: 'Creators', tabCategories: 'Categories',
+      typePopular: 'Popular', typeRising: 'Rising', typeNew: 'New',
+      catChat: 'Chat', catMusic: 'Music', catEntertainment: 'Entertainment', catGaming: 'Gaming', catLifestyle: 'Lifestyle', catTravel: 'Travel', catQA: 'Q&A', catDating: 'Dating',
+      searchPlaceholder: '🔍 Search creators and live streams…', searching: 'Searching…',
+      creatorsHeader: 'Creators', liveNowHeader: 'Live now', noResultsFor: 'No results for',
+      loadingCreators: 'Loading creators...', loadingLive: 'Loading live streams...',
+      errorPrefix: 'Error:', retry: 'Retry',
+      noCreatorsYet: 'No creators to show yet.', noLiveNow: 'No live streams right now', checkBackLater: 'Check back later or start your own!',
+      following: 'Following', follow: 'Follow', message: 'Message',
+      followersSuffix: 'followers', thisWeekSuffix: 'this week',
+      live: 'LIVE', unknown: 'Unknown', untitled: 'Untitled', general: 'General'
+    },
+    matches: {
+      title: '💕 Matches', preferencesBtn: '⚙️ Preferences', tabDiscover: 'Discover', tabMyMatches: 'My Matches',
+      matchedWithPrefix: "🎉 It's a match with", matchedWithSuffix: '! Tap to dismiss.',
+      noMoreProfiles: 'No more profiles right now', widenPreferences: 'Check back later, or widen your preferences.',
+      matchPercentSuffix: '% match', noMatchesYet: 'No matches yet — keep discovering!', compatiblePercentSuffix: '% compatible',
+      unmatchConfirm: 'Unmatch? This removes the connection and cannot be undone.',
+      prefsTitle: 'Dating Preferences', yourGender: 'Your gender', preferNotToSay: 'Prefer not to say', showMe: 'Show me',
+      ageRangeLabel: 'Age range:', savePreferences: 'Save Preferences'
+    },
+    wallet: {
+      loadingWallet: 'Loading wallet...', errorPrefix: 'Error:', retry: 'Retry', title: 'My Wallet', profile: 'Profile',
+      availableCoins: 'Available Coins', hidePackages: 'Hide Packages', buyCoins: 'Buy Coins', withdraw: 'Withdraw', buy: 'Buy',
+      promotion: '🔥 Promotion', allTransactions: 'All Transactions', giftHistory: 'Gift History',
+      noTransactionsYet: 'No transactions yet', transactionFallback: 'Transaction'
+    },
+    store: {
+      kicker: 'AMORA • LUXURY VAULT', title: 'The Amora Boutique', subtitle: 'Collect luminous profile effects, royal identities and premium cosmetics.',
+      catalogTab: 'Catalog', myItemsTab: 'My Items', equipOutfits: 'Equip Outfits →',
+      loadingBoutique: 'Loading the boutique…', nothingInStore: 'Nothing in the store right now.',
+      daysSuffix: 'days', permanent: 'Permanent', processing: 'Processing…', extend: 'Extend', owned: 'Owned', buy: 'Buy',
+      noOwnedItems: "You don't own any items yet. Check the catalog!", expiresPrefix: 'Expires', equipped: 'Equipped ✓', equip: 'Equip',
+      errorLoadStore: 'Unable to load the store right now.', notEnoughCoins: "You don't have enough coins for this item.",
+      purchaseFailed: 'Purchase failed.', extendedPrefix: 'Extended', purchasedPrefix: 'Purchased', updateItemFailed: 'Unable to update this item.',
+      typeAvatarFrame: 'Avatar Frames', typeEntranceEffect: 'Entrance Effects', typeBadge: 'Badges', typeChatBubble: 'Chat Bubbles', typeProfileCard: 'Profile Cards'
+    },
+    safety: {
+      errorLoad: 'Unable to load Safety Center.',
+      revokeOthersConfirm: "Log out every other device? You'll stay signed in here.",
+      signedOutOf: 'Signed out of', otherDevice: 'other device.', otherDevices: 'other devices.',
+      tabBlocked: 'Blocked', tabMuted: 'Muted', tabMyReports: 'My Reports', tabDevices: 'Devices',
+      title: '🛡️ Safety Center', securityKicker: 'AMORA SECURITY',
+      excellentProtection: 'Excellent protection', strongProtection: 'Strong protection', protectionNeedsAttention: 'Protection needs attention',
+      emailVerified: '✓ Email', reviewEmail: 'Review email', device: 'device', devices: 'devices',
+      privacyConfigured: '✓ Privacy', reviewPrivacy: 'Review privacy',
+      changePassword: '🔑 Change Password', privacySettings: '🔒 Privacy Settings',
+      noBlockedUsers: 'No blocked users.', unblock: 'Unblock',
+      noMutedUsers: "No muted users. Muting hides someone's content from you without them knowing, and without blocking them.", unmute: 'Unmute',
+      noReportsSubmitted: "You haven't submitted any reports.",
+      logOutAllOtherDevices: 'Log out all other devices',
+      unknownDevice: 'Unknown device', unknownLocation: 'Unknown location', signedInPrefix: 'signed in', revoke: 'Revoke'
     }
   },
 
@@ -133,6 +187,60 @@ export const translations = {
         goToLogin: 'Ir a Iniciar sesión',
         byCreating: 'Al crear una cuenta, aceptas nuestros', termsLink: 'Términos', andLink: 'y', privacyLink: 'Política de Privacidad'
       }
+    },
+    discover: {
+      tabRecommended: 'Recomendado', tabTrending: 'Tendencias', tabNew: 'Nuevo', tabFollowing: 'Siguiendo', tabCreators: 'Creadores', tabCategories: 'Categorías',
+      typePopular: 'Popular', typeRising: 'En ascenso', typeNew: 'Nuevo',
+      catChat: 'Chat', catMusic: 'Música', catEntertainment: 'Entretenimiento', catGaming: 'Videojuegos', catLifestyle: 'Estilo de vida', catTravel: 'Viajes', catQA: 'Preguntas', catDating: 'Citas',
+      searchPlaceholder: '🔍 Buscar creadores y transmisiones en vivo…', searching: 'Buscando…',
+      creatorsHeader: 'Creadores', liveNowHeader: 'En vivo ahora', noResultsFor: 'Sin resultados para',
+      loadingCreators: 'Cargando creadores...', loadingLive: 'Cargando transmisiones en vivo...',
+      errorPrefix: 'Error:', retry: 'Reintentar',
+      noCreatorsYet: 'Aún no hay creadores para mostrar.', noLiveNow: 'No hay transmisiones en vivo ahora', checkBackLater: '¡Vuelve más tarde o comienza la tuya!',
+      following: 'Siguiendo', follow: 'Seguir', message: 'Mensaje',
+      followersSuffix: 'seguidores', thisWeekSuffix: 'esta semana',
+      live: 'EN VIVO', unknown: 'Desconocido', untitled: 'Sin título', general: 'General'
+    },
+    matches: {
+      title: '💕 Coincidencias', preferencesBtn: '⚙️ Preferencias', tabDiscover: 'Descubrir', tabMyMatches: 'Mis coincidencias',
+      matchedWithPrefix: '🎉 ¡Hiciste match con', matchedWithSuffix: '! Toca para cerrar.',
+      noMoreProfiles: 'No hay más perfiles por ahora', widenPreferences: 'Vuelve más tarde o amplía tus preferencias.',
+      matchPercentSuffix: '% de compatibilidad', noMatchesYet: 'Aún no tienes coincidencias — ¡sigue descubriendo!', compatiblePercentSuffix: '% compatible',
+      unmatchConfirm: '¿Deshacer match? Esto elimina la conexión y no se puede deshacer.',
+      prefsTitle: 'Preferencias de citas', yourGender: 'Tu género', preferNotToSay: 'Prefiero no decirlo', showMe: 'Mostrarme',
+      ageRangeLabel: 'Rango de edad:', savePreferences: 'Guardar preferencias'
+    },
+    wallet: {
+      loadingWallet: 'Cargando billetera...', errorPrefix: 'Error:', retry: 'Reintentar', title: 'Mi billetera', profile: 'Perfil',
+      availableCoins: 'Monedas disponibles', hidePackages: 'Ocultar paquetes', buyCoins: 'Comprar monedas', withdraw: 'Retirar', buy: 'Comprar',
+      promotion: '🔥 Promoción', allTransactions: 'Todas las transacciones', giftHistory: 'Historial de regalos',
+      noTransactionsYet: 'Aún no hay transacciones', transactionFallback: 'Transacción'
+    },
+    store: {
+      kicker: 'AMORA • BÓVEDA DE LUJO', title: 'La Boutique Amora', subtitle: 'Colecciona efectos de perfil luminosos, identidades reales y cosméticos premium.',
+      catalogTab: 'Catálogo', myItemsTab: 'Mis artículos', equipOutfits: 'Equipar atuendos →',
+      loadingBoutique: 'Cargando la boutique…', nothingInStore: 'No hay nada en la tienda por ahora.',
+      daysSuffix: 'días', permanent: 'Permanente', processing: 'Procesando…', extend: 'Extender', owned: 'Adquirido', buy: 'Comprar',
+      noOwnedItems: 'Aún no tienes artículos. ¡Revisa el catálogo!', expiresPrefix: 'Expira', equipped: 'Equipado ✓', equip: 'Equipar',
+      errorLoadStore: 'No se puede cargar la tienda en este momento.', notEnoughCoins: 'No tienes suficientes monedas para este artículo.',
+      purchaseFailed: 'La compra falló.', extendedPrefix: 'Extendido', purchasedPrefix: 'Comprado', updateItemFailed: 'No se pudo actualizar este artículo.',
+      typeAvatarFrame: 'Marcos de avatar', typeEntranceEffect: 'Efectos de entrada', typeBadge: 'Insignias', typeChatBubble: 'Burbujas de chat', typeProfileCard: 'Tarjetas de perfil'
+    },
+    safety: {
+      errorLoad: 'No se pudo cargar el Centro de seguridad.',
+      revokeOthersConfirm: '¿Cerrar sesión en todos los demás dispositivos? Seguirás con la sesión iniciada aquí.',
+      signedOutOf: 'Se cerró sesión en', otherDevice: 'otro dispositivo.', otherDevices: 'otros dispositivos.',
+      tabBlocked: 'Bloqueados', tabMuted: 'Silenciados', tabMyReports: 'Mis reportes', tabDevices: 'Dispositivos',
+      title: '🛡️ Centro de seguridad', securityKicker: 'SEGURIDAD AMORA',
+      excellentProtection: 'Protección excelente', strongProtection: 'Protección sólida', protectionNeedsAttention: 'La protección necesita atención',
+      emailVerified: '✓ Correo', reviewEmail: 'Revisar correo', device: 'dispositivo', devices: 'dispositivos',
+      privacyConfigured: '✓ Privacidad', reviewPrivacy: 'Revisar privacidad',
+      changePassword: '🔑 Cambiar contraseña', privacySettings: '🔒 Ajustes de privacidad',
+      noBlockedUsers: 'No hay usuarios bloqueados.', unblock: 'Desbloquear',
+      noMutedUsers: 'No hay usuarios silenciados. Silenciar oculta el contenido de alguien sin que lo sepa y sin bloquearlo.', unmute: 'Quitar silencio',
+      noReportsSubmitted: 'No has enviado ningún reporte.',
+      logOutAllOtherDevices: 'Cerrar sesión en todos los demás dispositivos',
+      unknownDevice: 'Dispositivo desconocido', unknownLocation: 'Ubicación desconocida', signedInPrefix: 'sesión iniciada', revoke: 'Revocar'
     }
   },
 
@@ -190,6 +298,60 @@ export const translations = {
         goToLogin: 'Ir para Entrar',
         byCreating: 'Ao criar uma conta, você concorda com nossos', termsLink: 'Termos', andLink: 'e', privacyLink: 'Política de Privacidade'
       }
+    },
+    discover: {
+      tabRecommended: 'Recomendado', tabTrending: 'Em alta', tabNew: 'Novo', tabFollowing: 'Seguindo', tabCreators: 'Criadores', tabCategories: 'Categorias',
+      typePopular: 'Popular', typeRising: 'Em ascensão', typeNew: 'Novo',
+      catChat: 'Chat', catMusic: 'Música', catEntertainment: 'Entretenimento', catGaming: 'Jogos', catLifestyle: 'Estilo de vida', catTravel: 'Viagens', catQA: 'Perguntas', catDating: 'Namoro',
+      searchPlaceholder: '🔍 Buscar criadores e transmissões ao vivo…', searching: 'Buscando…',
+      creatorsHeader: 'Criadores', liveNowHeader: 'Ao vivo agora', noResultsFor: 'Nenhum resultado para',
+      loadingCreators: 'Carregando criadores...', loadingLive: 'Carregando transmissões ao vivo...',
+      errorPrefix: 'Erro:', retry: 'Tentar novamente',
+      noCreatorsYet: 'Ainda não há criadores para mostrar.', noLiveNow: 'Nenhuma transmissão ao vivo agora', checkBackLater: 'Volte mais tarde ou comece a sua!',
+      following: 'Seguindo', follow: 'Seguir', message: 'Mensagem',
+      followersSuffix: 'seguidores', thisWeekSuffix: 'esta semana',
+      live: 'AO VIVO', unknown: 'Desconhecido', untitled: 'Sem título', general: 'Geral'
+    },
+    matches: {
+      title: '💕 Combinações', preferencesBtn: '⚙️ Preferências', tabDiscover: 'Descobrir', tabMyMatches: 'Minhas combinações',
+      matchedWithPrefix: '🎉 Você combinou com', matchedWithSuffix: '! Toque para dispensar.',
+      noMoreProfiles: 'Sem mais perfis por enquanto', widenPreferences: 'Volte mais tarde ou amplie suas preferências.',
+      matchPercentSuffix: '% de compatibilidade', noMatchesYet: 'Ainda sem combinações — continue descobrindo!', compatiblePercentSuffix: '% compatível',
+      unmatchConfirm: 'Desfazer combinação? Isso remove a conexão e não pode ser desfeito.',
+      prefsTitle: 'Preferências de namoro', yourGender: 'Seu gênero', preferNotToSay: 'Prefiro não dizer', showMe: 'Mostrar-me',
+      ageRangeLabel: 'Faixa etária:', savePreferences: 'Salvar preferências'
+    },
+    wallet: {
+      loadingWallet: 'Carregando carteira...', errorPrefix: 'Erro:', retry: 'Tentar novamente', title: 'Minha carteira', profile: 'Perfil',
+      availableCoins: 'Moedas disponíveis', hidePackages: 'Ocultar pacotes', buyCoins: 'Comprar moedas', withdraw: 'Sacar', buy: 'Comprar',
+      promotion: '🔥 Promoção', allTransactions: 'Todas as transações', giftHistory: 'Histórico de presentes',
+      noTransactionsYet: 'Ainda sem transações', transactionFallback: 'Transação'
+    },
+    store: {
+      kicker: 'AMORA • COFRE DE LUXO', title: 'A Boutique Amora', subtitle: 'Colecione efeitos de perfil luminosos, identidades reais e cosméticos premium.',
+      catalogTab: 'Catálogo', myItemsTab: 'Meus itens', equipOutfits: 'Equipar trajes →',
+      loadingBoutique: 'Carregando a boutique…', nothingInStore: 'Nada na loja no momento.',
+      daysSuffix: 'dias', permanent: 'Permanente', processing: 'Processando…', extend: 'Estender', owned: 'Adquirido', buy: 'Comprar',
+      noOwnedItems: 'Você ainda não possui itens. Confira o catálogo!', expiresPrefix: 'Expira', equipped: 'Equipado ✓', equip: 'Equipar',
+      errorLoadStore: 'Não foi possível carregar a loja agora.', notEnoughCoins: 'Você não tem moedas suficientes para este item.',
+      purchaseFailed: 'Falha na compra.', extendedPrefix: 'Estendido', purchasedPrefix: 'Comprado', updateItemFailed: 'Não foi possível atualizar este item.',
+      typeAvatarFrame: 'Molduras de avatar', typeEntranceEffect: 'Efeitos de entrada', typeBadge: 'Emblemas', typeChatBubble: 'Balões de chat', typeProfileCard: 'Cartões de perfil'
+    },
+    safety: {
+      errorLoad: 'Não foi possível carregar a Central de Segurança.',
+      revokeOthersConfirm: 'Encerrar sessão em todos os outros dispositivos? Você continuará conectado aqui.',
+      signedOutOf: 'Sessão encerrada em', otherDevice: 'outro dispositivo.', otherDevices: 'outros dispositivos.',
+      tabBlocked: 'Bloqueados', tabMuted: 'Silenciados', tabMyReports: 'Meus relatórios', tabDevices: 'Dispositivos',
+      title: '🛡️ Central de Segurança', securityKicker: 'SEGURANÇA AMORA',
+      excellentProtection: 'Proteção excelente', strongProtection: 'Proteção forte', protectionNeedsAttention: 'A proteção precisa de atenção',
+      emailVerified: '✓ E-mail', reviewEmail: 'Revisar e-mail', device: 'dispositivo', devices: 'dispositivos',
+      privacyConfigured: '✓ Privacidade', reviewPrivacy: 'Revisar privacidade',
+      changePassword: '🔑 Alterar senha', privacySettings: '🔒 Configurações de privacidade',
+      noBlockedUsers: 'Nenhum usuário bloqueado.', unblock: 'Desbloquear',
+      noMutedUsers: 'Nenhum usuário silenciado. Silenciar oculta o conteúdo de alguém sem que ele saiba e sem bloqueá-lo.', unmute: 'Remover silêncio',
+      noReportsSubmitted: 'Você não enviou nenhum relatório.',
+      logOutAllOtherDevices: 'Encerrar sessão em todos os outros dispositivos',
+      unknownDevice: 'Dispositivo desconhecido', unknownLocation: 'Localização desconhecida', signedInPrefix: 'sessão iniciada em', revoke: 'Revogar'
     }
   },
 
@@ -247,6 +409,60 @@ export const translations = {
         goToLogin: 'Aller à la connexion',
         byCreating: 'En créant un compte, vous acceptez nos', termsLink: 'Conditions', andLink: 'et notre', privacyLink: 'Politique de confidentialité'
       }
+    },
+    discover: {
+      tabRecommended: 'Recommandé', tabTrending: 'Tendances', tabNew: 'Nouveau', tabFollowing: 'Abonnements', tabCreators: 'Créateurs', tabCategories: 'Catégories',
+      typePopular: 'Populaire', typeRising: 'En hausse', typeNew: 'Nouveau',
+      catChat: 'Chat', catMusic: 'Musique', catEntertainment: 'Divertissement', catGaming: 'Jeux', catLifestyle: 'Style de vie', catTravel: 'Voyage', catQA: 'Q&R', catDating: 'Rencontres',
+      searchPlaceholder: '🔍 Rechercher des créateurs et des lives…', searching: 'Recherche…',
+      creatorsHeader: 'Créateurs', liveNowHeader: 'En direct', noResultsFor: 'Aucun résultat pour',
+      loadingCreators: 'Chargement des créateurs...', loadingLive: 'Chargement des lives...',
+      errorPrefix: 'Erreur :', retry: 'Réessayer',
+      noCreatorsYet: 'Aucun créateur à afficher pour le moment.', noLiveNow: 'Aucun live en ce moment', checkBackLater: 'Revenez plus tard ou lancez le vôtre !',
+      following: 'Abonné', follow: 'Suivre', message: 'Message',
+      followersSuffix: 'abonnés', thisWeekSuffix: 'cette semaine',
+      live: 'EN DIRECT', unknown: 'Inconnu', untitled: 'Sans titre', general: 'Général'
+    },
+    matches: {
+      title: '💕 Matchs', preferencesBtn: '⚙️ Préférences', tabDiscover: 'Découvrir', tabMyMatches: 'Mes matchs',
+      matchedWithPrefix: "🎉 C'est un match avec", matchedWithSuffix: ' ! Touchez pour fermer.',
+      noMoreProfiles: 'Plus de profils pour le moment', widenPreferences: 'Revenez plus tard ou élargissez vos préférences.',
+      matchPercentSuffix: '% de compatibilité', noMatchesYet: 'Pas encore de matchs — continuez à explorer !', compatiblePercentSuffix: '% compatible',
+      unmatchConfirm: 'Annuler le match ? Cela supprime la connexion et ne peut pas être annulé.',
+      prefsTitle: 'Préférences de rencontre', yourGender: 'Votre genre', preferNotToSay: 'Préfère ne pas dire', showMe: 'Me montrer',
+      ageRangeLabel: "Tranche d'âge :", savePreferences: 'Enregistrer les préférences'
+    },
+    wallet: {
+      loadingWallet: 'Chargement du portefeuille...', errorPrefix: 'Erreur :', retry: 'Réessayer', title: 'Mon portefeuille', profile: 'Profil',
+      availableCoins: 'Pièces disponibles', hidePackages: 'Masquer les offres', buyCoins: 'Acheter des pièces', withdraw: 'Retirer', buy: 'Acheter',
+      promotion: '🔥 Promotion', allTransactions: 'Toutes les transactions', giftHistory: 'Historique des cadeaux',
+      noTransactionsYet: 'Aucune transaction pour le moment', transactionFallback: 'Transaction'
+    },
+    store: {
+      kicker: 'AMORA • COFFRE DE LUXE', title: 'La Boutique Amora', subtitle: 'Collectionnez des effets de profil lumineux, des identités royales et des cosmétiques premium.',
+      catalogTab: 'Catalogue', myItemsTab: 'Mes articles', equipOutfits: 'Équiper des tenues →',
+      loadingBoutique: 'Chargement de la boutique…', nothingInStore: 'Rien dans la boutique pour le moment.',
+      daysSuffix: 'jours', permanent: 'Permanent', processing: 'Traitement…', extend: 'Prolonger', owned: 'Possédé', buy: 'Acheter',
+      noOwnedItems: 'Vous ne possédez encore aucun article. Consultez le catalogue !', expiresPrefix: 'Expire', equipped: 'Équipé ✓', equip: 'Équiper',
+      errorLoadStore: 'Impossible de charger la boutique pour le moment.', notEnoughCoins: "Vous n'avez pas assez de pièces pour cet article.",
+      purchaseFailed: "L'achat a échoué.", extendedPrefix: 'Prolongé', purchasedPrefix: 'Acheté', updateItemFailed: 'Impossible de mettre à jour cet article.',
+      typeAvatarFrame: "Cadres d'avatar", typeEntranceEffect: "Effets d'entrée", typeBadge: 'Badges', typeChatBubble: 'Bulles de chat', typeProfileCard: 'Cartes de profil'
+    },
+    safety: {
+      errorLoad: 'Impossible de charger le Centre de sécurité.',
+      revokeOthersConfirm: 'Déconnecter tous les autres appareils ? Vous resterez connecté ici.',
+      signedOutOf: 'Déconnecté de', otherDevice: 'autre appareil.', otherDevices: 'autres appareils.',
+      tabBlocked: 'Bloqués', tabMuted: 'Masqués', tabMyReports: 'Mes signalements', tabDevices: 'Appareils',
+      title: '🛡️ Centre de sécurité', securityKicker: 'SÉCURITÉ AMORA',
+      excellentProtection: 'Protection excellente', strongProtection: 'Protection solide', protectionNeedsAttention: 'La protection nécessite votre attention',
+      emailVerified: '✓ E-mail', reviewEmail: "Vérifier l'e-mail", device: 'appareil', devices: 'appareils',
+      privacyConfigured: '✓ Confidentialité', reviewPrivacy: 'Vérifier la confidentialité',
+      changePassword: '🔑 Changer le mot de passe', privacySettings: '🔒 Paramètres de confidentialité',
+      noBlockedUsers: 'Aucun utilisateur bloqué.', unblock: 'Débloquer',
+      noMutedUsers: "Aucun utilisateur masqué. Masquer cache le contenu de quelqu'un sans qu'il le sache, et sans le bloquer.", unmute: 'Réactiver',
+      noReportsSubmitted: "Vous n'avez soumis aucun signalement.",
+      logOutAllOtherDevices: 'Déconnecter tous les autres appareils',
+      unknownDevice: 'Appareil inconnu', unknownLocation: 'Lieu inconnu', signedInPrefix: 'connecté le', revoke: 'Révoquer'
     }
   },
 
@@ -304,6 +520,60 @@ export const translations = {
         goToLogin: 'Zur Anmeldung',
         byCreating: 'Mit der Kontoerstellung akzeptierst du unsere', termsLink: 'AGB', andLink: 'und unsere', privacyLink: 'Datenschutzerklärung'
       }
+    },
+    discover: {
+      tabRecommended: 'Empfohlen', tabTrending: 'Beliebt', tabNew: 'Neu', tabFollowing: 'Folge ich', tabCreators: 'Creator', tabCategories: 'Kategorien',
+      typePopular: 'Beliebt', typeRising: 'Aufsteigend', typeNew: 'Neu',
+      catChat: 'Chat', catMusic: 'Musik', catEntertainment: 'Unterhaltung', catGaming: 'Gaming', catLifestyle: 'Lifestyle', catTravel: 'Reisen', catQA: 'Fragen', catDating: 'Dating',
+      searchPlaceholder: '🔍 Creator und Livestreams suchen…', searching: 'Suche läuft…',
+      creatorsHeader: 'Creator', liveNowHeader: 'Jetzt live', noResultsFor: 'Keine Ergebnisse für',
+      loadingCreators: 'Creator werden geladen...', loadingLive: 'Livestreams werden geladen...',
+      errorPrefix: 'Fehler:', retry: 'Erneut versuchen',
+      noCreatorsYet: 'Noch keine Creator zum Anzeigen.', noLiveNow: 'Gerade kein Livestream', checkBackLater: 'Schau später noch mal vorbei oder starte deinen eigenen!',
+      following: 'Gefolgt', follow: 'Folgen', message: 'Nachricht',
+      followersSuffix: 'Follower', thisWeekSuffix: 'diese Woche',
+      live: 'LIVE', unknown: 'Unbekannt', untitled: 'Ohne Titel', general: 'Allgemein'
+    },
+    matches: {
+      title: '💕 Matches', preferencesBtn: '⚙️ Einstellungen', tabDiscover: 'Entdecken', tabMyMatches: 'Meine Matches',
+      matchedWithPrefix: '🎉 Es ist ein Match mit', matchedWithSuffix: '! Zum Schließen tippen.',
+      noMoreProfiles: 'Gerade keine weiteren Profile', widenPreferences: 'Schau später vorbei oder erweitere deine Einstellungen.',
+      matchPercentSuffix: '% Übereinstimmung', noMatchesYet: 'Noch keine Matches — entdecke weiter!', compatiblePercentSuffix: '% kompatibel',
+      unmatchConfirm: 'Match aufheben? Dies entfernt die Verbindung und kann nicht rückgängig gemacht werden.',
+      prefsTitle: 'Dating-Einstellungen', yourGender: 'Dein Geschlecht', preferNotToSay: 'Keine Angabe', showMe: 'Zeig mir',
+      ageRangeLabel: 'Altersspanne:', savePreferences: 'Einstellungen speichern'
+    },
+    wallet: {
+      loadingWallet: 'Wallet wird geladen...', errorPrefix: 'Fehler:', retry: 'Erneut versuchen', title: 'Meine Wallet', profile: 'Profil',
+      availableCoins: 'Verfügbare Coins', hidePackages: 'Pakete ausblenden', buyCoins: 'Coins kaufen', withdraw: 'Auszahlen', buy: 'Kaufen',
+      promotion: '🔥 Aktion', allTransactions: 'Alle Transaktionen', giftHistory: 'Geschenkverlauf',
+      noTransactionsYet: 'Noch keine Transaktionen', transactionFallback: 'Transaktion'
+    },
+    store: {
+      kicker: 'AMORA • LUXUS-TRESOR', title: 'Die Amora Boutique', subtitle: 'Sammle leuchtende Profileffekte, königliche Identitäten und Premium-Kosmetik.',
+      catalogTab: 'Katalog', myItemsTab: 'Meine Artikel', equipOutfits: 'Outfits ausrüsten →',
+      loadingBoutique: 'Boutique wird geladen…', nothingInStore: 'Gerade nichts im Shop.',
+      daysSuffix: 'Tage', permanent: 'Dauerhaft', processing: 'Wird verarbeitet…', extend: 'Verlängern', owned: 'Besitzt', buy: 'Kaufen',
+      noOwnedItems: 'Du besitzt noch keine Artikel. Schau im Katalog vorbei!', expiresPrefix: 'Läuft ab', equipped: 'Ausgerüstet ✓', equip: 'Ausrüsten',
+      errorLoadStore: 'Der Shop kann gerade nicht geladen werden.', notEnoughCoins: 'Du hast nicht genug Coins für diesen Artikel.',
+      purchaseFailed: 'Kauf fehlgeschlagen.', extendedPrefix: 'Verlängert', purchasedPrefix: 'Gekauft', updateItemFailed: 'Dieser Artikel konnte nicht aktualisiert werden.',
+      typeAvatarFrame: 'Avatar-Rahmen', typeEntranceEffect: 'Eintrittseffekte', typeBadge: 'Abzeichen', typeChatBubble: 'Chat-Sprechblasen', typeProfileCard: 'Profilkarten'
+    },
+    safety: {
+      errorLoad: 'Sicherheitscenter konnte nicht geladen werden.',
+      revokeOthersConfirm: 'Auf allen anderen Geräten abmelden? Hier bleibst du angemeldet.',
+      signedOutOf: 'Abgemeldet von', otherDevice: 'anderem Gerät.', otherDevices: 'anderen Geräten.',
+      tabBlocked: 'Blockiert', tabMuted: 'Stummgeschaltet', tabMyReports: 'Meine Meldungen', tabDevices: 'Geräte',
+      title: '🛡️ Sicherheitscenter', securityKicker: 'AMORA SICHERHEIT',
+      excellentProtection: 'Ausgezeichneter Schutz', strongProtection: 'Starker Schutz', protectionNeedsAttention: 'Schutz benötigt Aufmerksamkeit',
+      emailVerified: '✓ E-Mail', reviewEmail: 'E-Mail überprüfen', device: 'Gerät', devices: 'Geräte',
+      privacyConfigured: '✓ Datenschutz', reviewPrivacy: 'Datenschutz überprüfen',
+      changePassword: '🔑 Passwort ändern', privacySettings: '🔒 Datenschutzeinstellungen',
+      noBlockedUsers: 'Keine blockierten Nutzer.', unblock: 'Blockierung aufheben',
+      noMutedUsers: 'Keine stummgeschalteten Nutzer. Stummschalten verbirgt die Inhalte einer Person vor dir, ohne sie zu blockieren und ohne dass sie es merkt.', unmute: 'Stummschaltung aufheben',
+      noReportsSubmitted: 'Du hast noch keine Meldungen eingereicht.',
+      logOutAllOtherDevices: 'Auf allen anderen Geräten abmelden',
+      unknownDevice: 'Unbekanntes Gerät', unknownLocation: 'Unbekannter Standort', signedInPrefix: 'angemeldet am', revoke: 'Widerrufen'
     }
   },
 
@@ -361,6 +631,60 @@ export const translations = {
         goToLogin: 'الذهاب إلى تسجيل الدخول',
         byCreating: 'بإنشاء حساب، فإنك توافق على', termsLink: 'الشروط', andLink: 'و', privacyLink: 'سياسة الخصوصية'
       }
+    },
+    discover: {
+      tabRecommended: 'موصى به', tabTrending: 'الأكثر رواجًا', tabNew: 'جديد', tabFollowing: 'المتابَعون', tabCreators: 'صناع المحتوى', tabCategories: 'الفئات',
+      typePopular: 'شائع', typeRising: 'صاعد', typeNew: 'جديد',
+      catChat: 'دردشة', catMusic: 'موسيقى', catEntertainment: 'ترفيه', catGaming: 'ألعاب', catLifestyle: 'أسلوب حياة', catTravel: 'سفر', catQA: 'أسئلة وأجوبة', catDating: 'مواعدة',
+      searchPlaceholder: '🔍 ابحث عن صناع محتوى وبثوث مباشرة…', searching: 'جارٍ البحث…',
+      creatorsHeader: 'صناع المحتوى', liveNowHeader: 'مباشر الآن', noResultsFor: 'لا نتائج لـ',
+      loadingCreators: 'جارٍ تحميل صناع المحتوى...', loadingLive: 'جارٍ تحميل البثوث المباشرة...',
+      errorPrefix: 'خطأ:', retry: 'إعادة المحاولة',
+      noCreatorsYet: 'لا يوجد صناع محتوى لعرضهم بعد.', noLiveNow: 'لا يوجد بث مباشر الآن', checkBackLater: 'عد لاحقًا أو ابدأ بثك الخاص!',
+      following: 'متابَع', follow: 'متابعة', message: 'رسالة',
+      followersSuffix: 'متابع', thisWeekSuffix: 'هذا الأسبوع',
+      live: 'مباشر', unknown: 'غير معروف', untitled: 'بدون عنوان', general: 'عام'
+    },
+    matches: {
+      title: '💕 التطابقات', preferencesBtn: '⚙️ التفضيلات', tabDiscover: 'استكشاف', tabMyMatches: 'تطابقاتي',
+      matchedWithPrefix: '🎉 لقد تطابقت مع', matchedWithSuffix: '! اضغط للإغلاق.',
+      noMoreProfiles: 'لا مزيد من الملفات الشخصية الآن', widenPreferences: 'عد لاحقًا أو وسّع تفضيلاتك.',
+      matchPercentSuffix: '% تطابق', noMatchesYet: 'لا توجد تطابقات بعد — استمر في الاستكشاف!', compatiblePercentSuffix: '% توافق',
+      unmatchConfirm: 'إلغاء التطابق؟ سيؤدي هذا إلى إزالة الاتصال ولا يمكن التراجع عنه.',
+      prefsTitle: 'تفضيلات المواعدة', yourGender: 'جنسك', preferNotToSay: 'أفضل عدم الإفصاح', showMe: 'أرني',
+      ageRangeLabel: 'الفئة العمرية:', savePreferences: 'حفظ التفضيلات'
+    },
+    wallet: {
+      loadingWallet: 'جارٍ تحميل المحفظة...', errorPrefix: 'خطأ:', retry: 'إعادة المحاولة', title: 'محفظتي', profile: 'الملف الشخصي',
+      availableCoins: 'العملات المتاحة', hidePackages: 'إخفاء الباقات', buyCoins: 'شراء عملات', withdraw: 'سحب', buy: 'شراء',
+      promotion: '🔥 عرض ترويجي', allTransactions: 'كل المعاملات', giftHistory: 'سجل الهدايا',
+      noTransactionsYet: 'لا توجد معاملات بعد', transactionFallback: 'معاملة'
+    },
+    store: {
+      kicker: 'أمورا • الخزنة الفاخرة', title: 'بوتيك أمورا', subtitle: 'اجمع تأثيرات ملف شخصي مضيئة وهويات ملكية ومستحضرات تجميل مميزة.',
+      catalogTab: 'الكتالوج', myItemsTab: 'عناصري', equipOutfits: 'تجهيز الأزياء ←',
+      loadingBoutique: 'جارٍ تحميل البوتيك…', nothingInStore: 'لا يوجد شيء في المتجر الآن.',
+      daysSuffix: 'أيام', permanent: 'دائم', processing: 'جارٍ المعالجة…', extend: 'تمديد', owned: 'مملوك', buy: 'شراء',
+      noOwnedItems: 'ليس لديك أي عناصر بعد. تصفح الكتالوج!', expiresPrefix: 'تنتهي في', equipped: 'مجهز ✓', equip: 'تجهيز',
+      errorLoadStore: 'تعذر تحميل المتجر الآن.', notEnoughCoins: 'ليس لديك عملات كافية لهذا العنصر.',
+      purchaseFailed: 'فشلت عملية الشراء.', extendedPrefix: 'تم التمديد', purchasedPrefix: 'تم الشراء', updateItemFailed: 'تعذر تحديث هذا العنصر.',
+      typeAvatarFrame: 'إطارات الصورة الرمزية', typeEntranceEffect: 'تأثيرات الدخول', typeBadge: 'الشارات', typeChatBubble: 'فقاعات الدردشة', typeProfileCard: 'بطاقات الملف الشخصي'
+    },
+    safety: {
+      errorLoad: 'تعذر تحميل مركز الأمان.',
+      revokeOthersConfirm: 'تسجيل الخروج من جميع الأجهزة الأخرى؟ ستبقى مسجلاً هنا.',
+      signedOutOf: 'تم تسجيل الخروج من', otherDevice: 'جهاز آخر.', otherDevices: 'أجهزة أخرى.',
+      tabBlocked: 'المحظورون', tabMuted: 'المكتومون', tabMyReports: 'بلاغاتي', tabDevices: 'الأجهزة',
+      title: '🛡️ مركز الأمان', securityKicker: 'أمان أمورا',
+      excellentProtection: 'حماية ممتازة', strongProtection: 'حماية قوية', protectionNeedsAttention: 'الحماية تحتاج إلى انتباه',
+      emailVerified: '✓ البريد الإلكتروني', reviewEmail: 'مراجعة البريد الإلكتروني', device: 'جهاز', devices: 'أجهزة',
+      privacyConfigured: '✓ الخصوصية', reviewPrivacy: 'مراجعة الخصوصية',
+      changePassword: '🔑 تغيير كلمة المرور', privacySettings: '🔒 إعدادات الخصوصية',
+      noBlockedUsers: 'لا يوجد مستخدمون محظورون.', unblock: 'إلغاء الحظر',
+      noMutedUsers: 'لا يوجد مستخدمون مكتومون. الكتم يخفي محتوى الشخص عنك دون علمه ودون حظره.', unmute: 'إلغاء الكتم',
+      noReportsSubmitted: 'لم تقدم أي بلاغات.',
+      logOutAllOtherDevices: 'تسجيل الخروج من جميع الأجهزة الأخرى',
+      unknownDevice: 'جهاز غير معروف', unknownLocation: 'موقع غير معروف', signedInPrefix: 'تم تسجيل الدخول في', revoke: 'إلغاء'
     }
   },
 
@@ -418,6 +742,60 @@ export const translations = {
         goToLogin: 'साइन इन पर जाएं',
         byCreating: 'खाता बनाकर, आप हमारी', termsLink: 'शर्तों', andLink: 'और', privacyLink: 'गोपनीयता नीति से सहमत होते हैं'
       }
+    },
+    discover: {
+      tabRecommended: 'अनुशंसित', tabTrending: 'ट्रेंडिंग', tabNew: 'नया', tabFollowing: 'फॉलोइंग', tabCreators: 'क्रिएटर्स', tabCategories: 'श्रेणियां',
+      typePopular: 'लोकप्रिय', typeRising: 'उभरते हुए', typeNew: 'नया',
+      catChat: 'चैट', catMusic: 'संगीत', catEntertainment: 'मनोरंजन', catGaming: 'गेमिंग', catLifestyle: 'लाइफस्टाइल', catTravel: 'यात्रा', catQA: 'प्रश्नोत्तर', catDating: 'डेटिंग',
+      searchPlaceholder: '🔍 क्रिएटर्स और लाइव स्ट्रीम खोजें…', searching: 'खोजा जा रहा है…',
+      creatorsHeader: 'क्रिएटर्स', liveNowHeader: 'अभी लाइव', noResultsFor: 'इसके लिए कोई परिणाम नहीं',
+      loadingCreators: 'क्रिएटर्स लोड हो रहे हैं...', loadingLive: 'लाइव स्ट्रीम लोड हो रही हैं...',
+      errorPrefix: 'त्रुटि:', retry: 'पुनः प्रयास करें',
+      noCreatorsYet: 'दिखाने के लिए अभी कोई क्रिएटर नहीं है।', noLiveNow: 'अभी कोई लाइव स्ट्रीम नहीं', checkBackLater: 'बाद में देखें या अपनी खुद की शुरू करें!',
+      following: 'फॉलो हो रहा है', follow: 'फॉलो करें', message: 'मैसेज',
+      followersSuffix: 'फॉलोअर्स', thisWeekSuffix: 'इस सप्ताह',
+      live: 'लाइव', unknown: 'अज्ञात', untitled: 'शीर्षकहीन', general: 'सामान्य'
+    },
+    matches: {
+      title: '💕 मैच', preferencesBtn: '⚙️ प्राथमिकताएं', tabDiscover: 'खोजें', tabMyMatches: 'मेरे मैच',
+      matchedWithPrefix: '🎉 आपका मैच हुआ', matchedWithSuffix: '! बंद करने के लिए टैप करें।',
+      noMoreProfiles: 'अभी और प्रोफ़ाइल नहीं हैं', widenPreferences: 'बाद में देखें, या अपनी प्राथमिकताएं व्यापक करें।',
+      matchPercentSuffix: '% मैच', noMatchesYet: 'अभी तक कोई मैच नहीं — खोजते रहें!', compatiblePercentSuffix: '% अनुकूल',
+      unmatchConfirm: 'मैच हटाएं? इससे कनेक्शन हट जाएगा और इसे पूर्ववत नहीं किया जा सकता।',
+      prefsTitle: 'डेटिंग प्राथमिकताएं', yourGender: 'आपका लिंग', preferNotToSay: 'बताना नहीं चाहते', showMe: 'मुझे दिखाएं',
+      ageRangeLabel: 'आयु सीमा:', savePreferences: 'प्राथमिकताएं सहेजें'
+    },
+    wallet: {
+      loadingWallet: 'वॉलेट लोड हो रहा है...', errorPrefix: 'त्रुटि:', retry: 'पुनः प्रयास करें', title: 'मेरा वॉलेट', profile: 'प्रोफ़ाइल',
+      availableCoins: 'उपलब्ध कॉइन', hidePackages: 'पैकेज छिपाएं', buyCoins: 'कॉइन खरीदें', withdraw: 'निकासी', buy: 'खरीदें',
+      promotion: '🔥 प्रचार', allTransactions: 'सभी लेनदेन', giftHistory: 'गिफ्ट इतिहास',
+      noTransactionsYet: 'अभी तक कोई लेनदेन नहीं', transactionFallback: 'लेनदेन'
+    },
+    store: {
+      kicker: 'अमोरा • लक्ज़री वॉल्ट', title: 'द अमोरा बुटीक', subtitle: 'चमकदार प्रोफ़ाइल इफ़ेक्ट, शाही पहचान और प्रीमियम कॉस्मेटिक्स इकट्ठा करें।',
+      catalogTab: 'कैटलॉग', myItemsTab: 'मेरी वस्तुएं', equipOutfits: 'आउटफिट लगाएं →',
+      loadingBoutique: 'बुटीक लोड हो रहा है…', nothingInStore: 'अभी स्टोर में कुछ नहीं है।',
+      daysSuffix: 'दिन', permanent: 'स्थायी', processing: 'प्रोसेसिंग…', extend: 'बढ़ाएं', owned: 'स्वामित्व में', buy: 'खरीदें',
+      noOwnedItems: 'आपके पास अभी कोई आइटम नहीं है। कैटलॉग देखें!', expiresPrefix: 'समाप्ति', equipped: 'लगाया गया ✓', equip: 'लगाएं',
+      errorLoadStore: 'अभी स्टोर लोड नहीं हो पा रहा है।', notEnoughCoins: 'इस आइटम के लिए आपके पास पर्याप्त कॉइन नहीं हैं।',
+      purchaseFailed: 'खरीद विफल रही।', extendedPrefix: 'बढ़ाया गया', purchasedPrefix: 'खरीदा गया', updateItemFailed: 'इस आइटम को अपडेट नहीं किया जा सका।',
+      typeAvatarFrame: 'अवतार फ्रेम', typeEntranceEffect: 'एंट्री इफ़ेक्ट', typeBadge: 'बैज', typeChatBubble: 'चैट बबल', typeProfileCard: 'प्रोफ़ाइल कार्ड'
+    },
+    safety: {
+      errorLoad: 'सुरक्षा केंद्र लोड नहीं हो सका।',
+      revokeOthersConfirm: 'हर दूसरे डिवाइस से लॉग आउट करें? आप यहां साइन इन रहेंगे।',
+      signedOutOf: 'इससे साइन आउट किया गया', otherDevice: 'अन्य डिवाइस।', otherDevices: 'अन्य डिवाइस।',
+      tabBlocked: 'ब्लॉक किए गए', tabMuted: 'म्यूट किए गए', tabMyReports: 'मेरी रिपोर्ट्स', tabDevices: 'डिवाइस',
+      title: '🛡️ सुरक्षा केंद्र', securityKicker: 'अमोरा सुरक्षा',
+      excellentProtection: 'उत्कृष्ट सुरक्षा', strongProtection: 'मजबूत सुरक्षा', protectionNeedsAttention: 'सुरक्षा पर ध्यान देने की आवश्यकता है',
+      emailVerified: '✓ ईमेल', reviewEmail: 'ईमेल जांचें', device: 'डिवाइस', devices: 'डिवाइस',
+      privacyConfigured: '✓ गोपनीयता', reviewPrivacy: 'गोपनीयता जांचें',
+      changePassword: '🔑 पासवर्ड बदलें', privacySettings: '🔒 गोपनीयता सेटिंग्स',
+      noBlockedUsers: 'कोई ब्लॉक किया गया उपयोगकर्ता नहीं है।', unblock: 'अनब्लॉक करें',
+      noMutedUsers: 'कोई म्यूट किया गया उपयोगकर्ता नहीं है। म्यूट करने से किसी की सामग्री उसे बताए बिना और उसे ब्लॉक किए बिना आपसे छिप जाती है।', unmute: 'अनम्यूट करें',
+      noReportsSubmitted: 'आपने कोई रिपोर्ट सबमिट नहीं की है।',
+      logOutAllOtherDevices: 'सभी अन्य डिवाइस से लॉग आउट करें',
+      unknownDevice: 'अज्ञात डिवाइस', unknownLocation: 'अज्ञात स्थान', signedInPrefix: 'साइन इन किया गया', revoke: 'रद्द करें'
     }
   },
 
@@ -475,6 +853,60 @@ export const translations = {
         goToLogin: 'Ke halaman Masuk',
         byCreating: 'Dengan membuat akun, Anda menyetujui', termsLink: 'Ketentuan', andLink: 'dan', privacyLink: 'Kebijakan Privasi'
       }
+    },
+    discover: {
+      tabRecommended: 'Direkomendasikan', tabTrending: 'Trending', tabNew: 'Baru', tabFollowing: 'Mengikuti', tabCreators: 'Kreator', tabCategories: 'Kategori',
+      typePopular: 'Populer', typeRising: 'Naik daun', typeNew: 'Baru',
+      catChat: 'Obrolan', catMusic: 'Musik', catEntertainment: 'Hiburan', catGaming: 'Gaming', catLifestyle: 'Gaya hidup', catTravel: 'Perjalanan', catQA: 'Tanya Jawab', catDating: 'Kencan',
+      searchPlaceholder: '🔍 Cari kreator dan siaran langsung…', searching: 'Mencari…',
+      creatorsHeader: 'Kreator', liveNowHeader: 'Sedang live', noResultsFor: 'Tidak ada hasil untuk',
+      loadingCreators: 'Memuat kreator...', loadingLive: 'Memuat siaran langsung...',
+      errorPrefix: 'Kesalahan:', retry: 'Coba lagi',
+      noCreatorsYet: 'Belum ada kreator untuk ditampilkan.', noLiveNow: 'Tidak ada siaran langsung saat ini', checkBackLater: 'Coba lagi nanti atau mulai siaranmu sendiri!',
+      following: 'Mengikuti', follow: 'Ikuti', message: 'Pesan',
+      followersSuffix: 'pengikut', thisWeekSuffix: 'minggu ini',
+      live: 'LIVE', unknown: 'Tidak diketahui', untitled: 'Tanpa judul', general: 'Umum'
+    },
+    matches: {
+      title: '💕 Kecocokan', preferencesBtn: '⚙️ Preferensi', tabDiscover: 'Jelajahi', tabMyMatches: 'Kecocokan Saya',
+      matchedWithPrefix: '🎉 Anda cocok dengan', matchedWithSuffix: '! Ketuk untuk menutup.',
+      noMoreProfiles: 'Tidak ada profil lagi untuk saat ini', widenPreferences: 'Coba lagi nanti, atau perluas preferensi Anda.',
+      matchPercentSuffix: '% cocok', noMatchesYet: 'Belum ada kecocokan — terus jelajahi!', compatiblePercentSuffix: '% cocok',
+      unmatchConfirm: 'Batalkan kecocokan? Ini akan menghapus koneksi dan tidak dapat dibatalkan.',
+      prefsTitle: 'Preferensi Kencan', yourGender: 'Jenis kelamin Anda', preferNotToSay: 'Tidak ingin memberi tahu', showMe: 'Tampilkan saya',
+      ageRangeLabel: 'Rentang usia:', savePreferences: 'Simpan preferensi'
+    },
+    wallet: {
+      loadingWallet: 'Memuat dompet...', errorPrefix: 'Kesalahan:', retry: 'Coba lagi', title: 'Dompet Saya', profile: 'Profil',
+      availableCoins: 'Koin tersedia', hidePackages: 'Sembunyikan paket', buyCoins: 'Beli koin', withdraw: 'Tarik dana', buy: 'Beli',
+      promotion: '🔥 Promosi', allTransactions: 'Semua transaksi', giftHistory: 'Riwayat hadiah',
+      noTransactionsYet: 'Belum ada transaksi', transactionFallback: 'Transaksi'
+    },
+    store: {
+      kicker: 'AMORA • BRANKAS MEWAH', title: 'Butik Amora', subtitle: 'Kumpulkan efek profil bercahaya, identitas kerajaan, dan kosmetik premium.',
+      catalogTab: 'Katalog', myItemsTab: 'Item Saya', equipOutfits: 'Pakai Kostum →',
+      loadingBoutique: 'Memuat butik…', nothingInStore: 'Tidak ada apa pun di toko saat ini.',
+      daysSuffix: 'hari', permanent: 'Permanen', processing: 'Memproses…', extend: 'Perpanjang', owned: 'Dimiliki', buy: 'Beli',
+      noOwnedItems: 'Anda belum memiliki item apa pun. Lihat katalog!', expiresPrefix: 'Kedaluwarsa', equipped: 'Terpasang ✓', equip: 'Pasang',
+      errorLoadStore: 'Tidak dapat memuat toko saat ini.', notEnoughCoins: 'Koin Anda tidak cukup untuk item ini.',
+      purchaseFailed: 'Pembelian gagal.', extendedPrefix: 'Diperpanjang', purchasedPrefix: 'Dibeli', updateItemFailed: 'Tidak dapat memperbarui item ini.',
+      typeAvatarFrame: 'Bingkai Avatar', typeEntranceEffect: 'Efek Masuk', typeBadge: 'Lencana', typeChatBubble: 'Gelembung Obrolan', typeProfileCard: 'Kartu Profil'
+    },
+    safety: {
+      errorLoad: 'Tidak dapat memuat Pusat Keamanan.',
+      revokeOthersConfirm: 'Keluar dari semua perangkat lain? Anda akan tetap masuk di sini.',
+      signedOutOf: 'Keluar dari', otherDevice: 'perangkat lain.', otherDevices: 'perangkat lain.',
+      tabBlocked: 'Diblokir', tabMuted: 'Dibisukan', tabMyReports: 'Laporan Saya', tabDevices: 'Perangkat',
+      title: '🛡️ Pusat Keamanan', securityKicker: 'KEAMANAN AMORA',
+      excellentProtection: 'Perlindungan sangat baik', strongProtection: 'Perlindungan kuat', protectionNeedsAttention: 'Perlindungan perlu diperhatikan',
+      emailVerified: '✓ Email', reviewEmail: 'Tinjau email', device: 'perangkat', devices: 'perangkat',
+      privacyConfigured: '✓ Privasi', reviewPrivacy: 'Tinjau privasi',
+      changePassword: '🔑 Ubah Kata Sandi', privacySettings: '🔒 Pengaturan Privasi',
+      noBlockedUsers: 'Tidak ada pengguna yang diblokir.', unblock: 'Buka blokir',
+      noMutedUsers: 'Tidak ada pengguna yang dibisukan. Membisukan menyembunyikan konten seseorang dari Anda tanpa sepengetahuan mereka, dan tanpa memblokirnya.', unmute: 'Batalkan bisukan',
+      noReportsSubmitted: 'Anda belum mengirimkan laporan apa pun.',
+      logOutAllOtherDevices: 'Keluar dari semua perangkat lain',
+      unknownDevice: 'Perangkat tidak dikenal', unknownLocation: 'Lokasi tidak dikenal', signedInPrefix: 'masuk pada', revoke: 'Cabut'
     }
   }
 };

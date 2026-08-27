@@ -3,8 +3,10 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { apiFetch } from '../lib/api';
+import { useTranslation } from '../lib/i18n';
 
 export default function Wallet() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
@@ -84,7 +86,7 @@ export default function Wallet() {
         justifyContent: 'center',
         fontFamily: 'sans-serif'
       }
-    }, 'Loading wallet...');
+    }, t('wallet.loadingWallet'));
   }
 
   if (error) {
@@ -100,7 +102,7 @@ export default function Wallet() {
         fontFamily: 'sans-serif'
       }
     }, [
-      React.createElement('p', { key: 'msg', style: { color: '#ff6b6b' } }, `Error: ${error}`),
+      React.createElement('p', { key: 'msg', style: { color: '#ff6b6b' } }, `${t('wallet.errorPrefix')} ${error}`),
       React.createElement('button', {
         key: 'retry',
         onClick: fetchWalletData,
@@ -113,7 +115,7 @@ export default function Wallet() {
           color: '#fff',
           cursor: 'pointer'
         }
-      }, 'Retry')
+      }, t('wallet.retry'))
     ]);
   }
 
@@ -143,13 +145,13 @@ export default function Wallet() {
           href: '/discover',
           style: { color: '#888', textDecoration: 'none', fontSize: '20px' }
         }, '←'),
-        React.createElement('h1', { key: 'title', style: { color: '#fff', fontSize: '24px', margin: 0 } }, 'My Wallet')
+        React.createElement('h1', { key: 'title', style: { color: '#fff', fontSize: '24px', margin: 0 } }, t('wallet.title'))
       ]),
       React.createElement(Link, {
         key: 'profile',
         href: '/profile',
         style: { color: '#888', textDecoration: 'none' }
-      }, 'Profile')
+      }, t('wallet.profile'))
     ]),
 
     // Balance card
@@ -164,7 +166,7 @@ export default function Wallet() {
         border: '1px solid #FF6B9D'
       }
     }, [
-      React.createElement('div', { key: 'label', style: { color: '#aaa', fontSize: '14px' } }, 'Available Coins'),
+      React.createElement('div', { key: 'label', style: { color: '#aaa', fontSize: '14px' } }, t('wallet.availableCoins')),
       React.createElement('div', { key: 'action-row', style: { display: 'flex', gap: '10px', marginTop: '12px', justifyContent: 'center', flexWrap: 'wrap' } }, [
         React.createElement('button', {
           key: 'buy',
@@ -178,7 +180,7 @@ export default function Wallet() {
             cursor: 'pointer',
             fontWeight: 'bold'
           }
-        }, showPackages ? 'Hide Packages' : 'Buy Coins'),
+        }, showPackages ? t('wallet.hidePackages') : t('wallet.buyCoins')),
         React.createElement(Link, {
           key: 'withdraw',
           href: '/withdraw',
@@ -193,7 +195,7 @@ export default function Wallet() {
             display: 'inline-flex',
             alignItems: 'center'
           }
-        }, 'Withdraw')
+        }, t('wallet.withdraw'))
       ])
     ]),
 
@@ -220,7 +222,7 @@ export default function Wallet() {
         React.createElement('div', { key: 'name', style: { color: '#fff', fontWeight: 'bold' } }, pkg.name),
         React.createElement('div', { key: 'coins', style: { color: '#FFD700', fontSize: '24px', margin: '4px 0' } }, pkg.coins_amount + (pkg.bonus_coins || 0)),
         React.createElement('div', { key: 'price', style: { color: '#aaa' } }, `$${(pkg.price_cents / 100).toFixed(2)}`),
-        pkg.is_promotion && React.createElement('div', { key: 'promo', style: { color: '#FF6B9D', fontSize: '12px' } }, '🔥 Promotion'),
+        pkg.is_promotion && React.createElement('div', { key: 'promo', style: { color: '#FF6B9D', fontSize: '12px' } }, t('wallet.promotion')),
         React.createElement('button', {
           key: 'buy-btn',
           onClick: () => purchasePackage(pkg.id),
@@ -233,7 +235,7 @@ export default function Wallet() {
             color: '#fff',
             cursor: 'pointer'
           }
-        }, 'Buy')
+        }, t('wallet.buy'))
       ])
     )),
 
@@ -248,8 +250,8 @@ export default function Wallet() {
         paddingBottom: '8px'
       }
     }, [
-      ['transactions', 'All Transactions'],
-      ['gifts', 'Gift History']
+      ['transactions', t('wallet.allTransactions')],
+      ['gifts', t('wallet.giftHistory')]
     ].map(([key, label]) =>
       React.createElement('button', {
         key: key,
@@ -271,7 +273,7 @@ export default function Wallet() {
       ? React.createElement('div', {
           key: 'empty',
           style: { textAlign: 'center', padding: '40px 0', color: '#666' }
-        }, 'No transactions yet')
+        }, t('wallet.noTransactionsYet'))
       : React.createElement('div', {
           key: 'list',
           style: { display: 'flex', flexDirection: 'column', gap: '8px' }
@@ -294,7 +296,7 @@ export default function Wallet() {
             }
           }, [
             React.createElement('div', { key: 'info' }, [
-              React.createElement('div', { key: 'desc', style: { color: '#fff' } }, tx.description || 'Transaction'),
+              React.createElement('div', { key: 'desc', style: { color: '#fff' } }, tx.description || t('wallet.transactionFallback')),
               React.createElement('div', { key: 'time', style: { color: '#666', fontSize: '12px' } }, formatDate(tx.created_at))
             ]),
             React.createElement('div', {

@@ -5,10 +5,12 @@ import Link from 'next/link';
 import Layout from '../components/Layout';
 import { apiFetch } from '../lib/api';
 import VerifiedBadge from '../components/VerifiedBadge';
+import { useTranslation } from '../lib/i18n';
 
 const GENDERS = ['woman', 'man', 'nonbinary'];
 
 export default function Matches() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [tab, setTab] = useState('discover');
   const [candidate, setCandidate] = useState(null);
@@ -94,7 +96,7 @@ export default function Matches() {
   };
 
   const unmatch = async (matchId) => {
-    if (!confirm('Unmatch? This removes the connection and cannot be undone.')) return;
+    if (!confirm(t('matches.unmatchConfirm'))) return;
     try {
       const res = await apiFetch(`/matches/${matchId}/unmatch`, { method: 'POST' });
       if (res.ok) setMatchList((prev) => prev.filter((m) => m.matchId !== matchId));
@@ -122,31 +124,31 @@ export default function Matches() {
     <Layout>
       <div style={s.wrap}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <h1 style={s.title}>💕 Matches</h1>
-          <button onClick={() => setShowPrefs(true)} style={s.prefsBtn}>⚙️ Preferences</button>
+          <h1 style={s.title}>{t('matches.title')}</h1>
+          <button onClick={() => setShowPrefs(true)} style={s.prefsBtn}>{t('matches.preferencesBtn')}</button>
         </div>
 
         <div style={s.tabRow}>
-          <button onClick={() => setTab('discover')} style={{ ...s.tabBtn, ...(tab === 'discover' ? s.tabBtnActive : {}) }}>Discover</button>
-          <button onClick={() => setTab('matches')} style={{ ...s.tabBtn, ...(tab === 'matches' ? s.tabBtnActive : {}) }}>My Matches ({matchList.length})</button>
+          <button onClick={() => setTab('discover')} style={{ ...s.tabBtn, ...(tab === 'discover' ? s.tabBtnActive : {}) }}>{t('matches.tabDiscover')}</button>
+          <button onClick={() => setTab('matches')} style={{ ...s.tabBtn, ...(tab === 'matches' ? s.tabBtnActive : {}) }}>{t('matches.tabMyMatches')} ({matchList.length})</button>
         </div>
 
         {matchedToast && (
           <div style={s.matchToast} onClick={() => setMatchedToast(null)}>
-            🎉 It's a match with {matchedToast.display_name || matchedToast.username}! Tap to dismiss.
+            {t('matches.matchedWithPrefix')} {matchedToast.display_name || matchedToast.username}{t('matches.matchedWithSuffix')}
           </div>
         )}
 
         {tab === 'discover' && (
           <div>
             {candidateLoading ? (
-              <p style={{ color: '#999', textAlign: 'center', padding: '60px 0' }}>Loading…</p>
+              <p style={{ color: '#999', textAlign: 'center', padding: '60px 0' }}>{t('common.loading')}</p>
             ) : candidateError ? (
               <p style={{ color: '#ff6b6b', textAlign: 'center', padding: '40px 0' }}>{candidateError}</p>
             ) : !candidate ? (
               <div style={{ textAlign: 'center', padding: '60px 0', color: '#999' }}>
-                <p style={{ fontSize: 18 }}>No more profiles right now</p>
-                <p style={{ fontSize: 13 }}>Check back later, or widen your preferences.</p>
+                <p style={{ fontSize: 18 }}>{t('matches.noMoreProfiles')}</p>
+                <p style={{ fontSize: 13 }}>{t('matches.widenPreferences')}</p>
               </div>
             ) : (
               <div style={s.card}>
@@ -157,7 +159,7 @@ export default function Matches() {
                     <span style={{ fontSize: 60 }}>{(candidate.display_name || candidate.username || '?')[0]?.toUpperCase()}</span>
                   )}
                   {candidate.compatibility && (
-                    <div style={s.compatBadge}>{candidate.compatibility.score}% match</div>
+                    <div style={s.compatBadge}>{candidate.compatibility.score}{t('matches.matchPercentSuffix')}</div>
                   )}
                 </div>
                 <div style={{ padding: 16 }}>
@@ -187,9 +189,9 @@ export default function Matches() {
         {tab === 'matches' && (
           <div>
             {matchListLoading ? (
-              <p style={{ color: '#999', textAlign: 'center', padding: '40px 0' }}>Loading…</p>
+              <p style={{ color: '#999', textAlign: 'center', padding: '40px 0' }}>{t('common.loading')}</p>
             ) : matchList.length === 0 ? (
-              <p style={{ color: '#999', textAlign: 'center', padding: '40px 0' }}>No matches yet — keep discovering!</p>
+              <p style={{ color: '#999', textAlign: 'center', padding: '40px 0' }}>{t('matches.noMatchesYet')}</p>
             ) : (
               <div style={s.matchGrid}>
                 {matchList.map((m) => (
@@ -205,7 +207,7 @@ export default function Matches() {
                       {m.peer.display_name || m.peer.username}
                       <VerifiedBadge user={m.peer} size={12} />
                     </div>
-                    <div style={{ color: '#999', fontSize: 11 }}>{m.compatibility.score}% compatible</div>
+                    <div style={{ color: '#999', fontSize: 11 }}>{m.compatibility.score}{t('matches.compatiblePercentSuffix')}</div>
                     <div style={{ display: 'flex', gap: 6, marginTop: 10, width: '100%' }}>
                       <Link href={`/chat/${m.peer.id}`} style={s.matchActionBtn}>💬</Link>
                       <Link href={`/matches/date/${m.matchId}`} style={s.matchActionBtn}>📹</Link>
@@ -221,27 +223,27 @@ export default function Matches() {
         {showPrefs && (
           <div style={s.modalOverlay} onClick={() => setShowPrefs(false)}>
             <div style={s.modal} onClick={(e) => e.stopPropagation()}>
-              <h3 style={{ marginTop: 0 }}>Dating Preferences</h3>
-              <label style={s.label}>Your gender</label>
+              <h3 style={{ marginTop: 0 }}>{t('matches.prefsTitle')}</h3>
+              <label style={s.label}>{t('matches.yourGender')}</label>
               <select value={prefs.gender} onChange={(e) => setPrefs({ ...prefs, gender: e.target.value })} style={s.select}>
-                <option value="">Prefer not to say</option>
+                <option value="">{t('matches.preferNotToSay')}</option>
                 {GENDERS.map((g) => <option key={g} value={g}>{g}</option>)}
               </select>
 
-              <label style={s.label}>Show me</label>
+              <label style={s.label}>{t('matches.showMe')}</label>
               <div style={s.chipRow}>
                 {GENDERS.map((g) => (
                   <button key={g} onClick={() => toggleShowMe(g)} style={{ ...s.chip, cursor: 'pointer', ...(prefs.showMe.includes(g) ? s.chipShared : {}) }}>{g}</button>
                 ))}
               </div>
 
-              <label style={s.label}>Age range: {prefs.minAge}–{prefs.maxAge}</label>
+              <label style={s.label}>{t('matches.ageRangeLabel')} {prefs.minAge}–{prefs.maxAge}</label>
               <div style={{ display: 'flex', gap: 10 }}>
                 <input type="number" min="18" max="99" value={prefs.minAge} onChange={(e) => setPrefs({ ...prefs, minAge: Number(e.target.value) })} style={s.numInput} />
                 <input type="number" min="18" max="99" value={prefs.maxAge} onChange={(e) => setPrefs({ ...prefs, maxAge: Number(e.target.value) })} style={s.numInput} />
               </div>
 
-              <button onClick={savePrefs} style={s.saveBtn}>Save Preferences</button>
+              <button onClick={savePrefs} style={s.saveBtn}>{t('matches.savePreferences')}</button>
             </div>
           </div>
         )}

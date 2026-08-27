@@ -3,16 +3,17 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import { apiFetch } from '../lib/api';
-
-const TYPE_LABELS = {
-  avatar_frame: 'Avatar Frames',
-  entrance_effect: 'Entrance Effects',
-  badge: 'Badges',
-  chat_bubble: 'Chat Bubbles',
-  profile_card: 'Profile Cards'
-};
+import { useTranslation } from '../lib/i18n';
 
 export default function Store() {
+  const { t } = useTranslation();
+  const TYPE_LABELS = {
+    avatar_frame: t('store.typeAvatarFrame'),
+    entrance_effect: t('store.typeEntranceEffect'),
+    badge: t('store.typeBadge'),
+    chat_bubble: t('store.typeChatBubble'),
+    profile_card: t('store.typeProfileCard')
+  };
   const router = useRouter();
   const [catalog, setCatalog] = useState([]);
   const [owned, setOwned] = useState([]);
@@ -36,7 +37,7 @@ export default function Store() {
         apiFetch('/store/my'),
         apiFetch('/wallet/me')
       ]);
-      if (!catalogRes.ok) throw new Error('Unable to load the store right now.');
+      if (!catalogRes.ok) throw new Error(t('store.errorLoadStore'));
       setCatalog(await catalogRes.json());
       if (ownedRes.ok) setOwned(await ownedRes.json());
       if (walletRes.ok) setBalance((await walletRes.json()).balance || 0);
@@ -57,7 +58,7 @@ export default function Store() {
   const purchase = async (item) => {
     if (!localStorage.getItem('accessToken')) return router.push('/login');
     if (balance < item.price_coins) {
-      setMessage("You don't have enough coins for this item.");
+      setMessage(t('store.notEnoughCoins'));
       return;
     }
     setPurchasingId(item.id);
@@ -68,8 +69,8 @@ export default function Store() {
         body: JSON.stringify({ cosmeticId: item.id })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Purchase failed.');
-      setMessage(data.message === 'Cosmetic extended successfully' ? `Extended ${item.name}!` : `Purchased ${item.name}!`);
+      if (!res.ok) throw new Error(data.error || t('store.purchaseFailed'));
+      setMessage(data.message === 'Cosmetic extended successfully' ? `${t('store.extendedPrefix')} ${item.name}!` : `${t('store.purchasedPrefix')} ${item.name}!`);
       await load();
     } catch (e) {
       setMessage(e.message);
@@ -86,7 +87,7 @@ export default function Store() {
         body: JSON.stringify({ cosmeticId: userCosmetic.cosmetic_id })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Unable to update this item.');
+      if (!res.ok) throw new Error(data.error || t('store.updateItemFailed'));
       await load();
     } catch (e) {
       setMessage(e.message);
@@ -103,27 +104,27 @@ export default function Store() {
       <div style={s.page}>
         <div style={s.header}>
           <div>
-            <div style={s.kicker}>AMORA • LUXURY VAULT</div>
-            <h1 style={s.title}>The Amora Boutique</h1>
-            <p style={s.subtitle}>Collect luminous profile effects, royal identities and premium cosmetics.</p>
+            <div style={s.kicker}>{t('store.kicker')}</div>
+            <h1 style={s.title}>{t('store.title')}</h1>
+            <p style={s.subtitle}>{t('store.subtitle')}</p>
           </div>
           <div style={s.balance}>🪙 {balance}</div>
         </div>
 
         <div style={s.tabs}>
-          <button style={tab === 'catalog' ? s.tabActive : s.tab} onClick={() => setTab('catalog')}>Catalog</button>
-          <button style={tab === 'owned' ? s.tabActive : s.tab} onClick={() => setTab('owned')}>My Items ({owned.length})</button>
-          <button style={s.tab} onClick={() => router.push('/outfits')}>Equip Outfits →</button>
+          <button style={tab === 'catalog' ? s.tabActive : s.tab} onClick={() => setTab('catalog')}>{t('store.catalogTab')}</button>
+          <button style={tab === 'owned' ? s.tabActive : s.tab} onClick={() => setTab('owned')}>{t('store.myItemsTab')} ({owned.length})</button>
+          <button style={s.tab} onClick={() => router.push('/outfits')}>{t('store.equipOutfits')}</button>
         </div>
 
         {message && <div style={s.message}>{message}</div>}
         {error && <div style={s.error}>{error}</div>}
 
         {loading ? (
-          <div style={s.centerMsg}>Loading the boutique…</div>
+          <div style={s.centerMsg}>{t('store.loadingBoutique')}</div>
         ) : tab === 'catalog' ? (
           Object.keys(grouped).length === 0 ? (
-            <div style={s.centerMsg}>Nothing in the store right now.</div>
+            <div style={s.centerMsg}>{t('store.nothingInStore')}</div>
           ) : (
             Object.entries(grouped).map(([type, items]) => (
               <div key={type} style={{ marginBottom: 32 }}>
@@ -142,7 +143,7 @@ export default function Store() {
                         </div>
                         <div style={s.cardName}>{item.name}</div>
                         <div style={s.cardMeta}>
-                          {item.duration_days ? `${item.duration_days} days` : 'Permanent'}
+                          {item.duration_days ? `${item.duration_days} ${t('store.daysSuffix')}` : t('store.permanent')}
                         </div>
                         <div style={s.cardPrice}>🪙 {item.price_coins}</div>
                         <button
@@ -151,10 +152,10 @@ export default function Store() {
                           onClick={() => purchase(item)}
                         >
                           {purchasingId === item.id
-                            ? 'Processing…'
+                            ? t('store.processing')
                             : alreadyOwned
-                              ? (item.duration_days ? 'Extend' : 'Owned')
-                              : 'Buy'}
+                              ? (item.duration_days ? t('store.extend') : t('store.owned'))
+                              : t('store.buy')}
                         </button>
                       </div>
                     );
@@ -164,7 +165,7 @@ export default function Store() {
             ))
           )
         ) : owned.length === 0 ? (
-          <div style={s.centerMsg}>You don't own any items yet. Check the catalog!</div>
+          <div style={s.centerMsg}>{t('store.noOwnedItems')}</div>
         ) : (
           <div style={s.grid}>
             {owned.map((o) => (
@@ -178,13 +179,13 @@ export default function Store() {
                 </div>
                 <div style={s.cardName}>{o.cosmetic.name}</div>
                 <div style={s.cardMeta}>
-                  {o.expires_at ? `Expires ${new Date(o.expires_at).toLocaleDateString()}` : 'Permanent'}
+                  {o.expires_at ? `${t('store.expiresPrefix')} ${new Date(o.expires_at).toLocaleDateString()}` : t('store.permanent')}
                 </div>
                 <button
                   style={o.is_equipped ? s.equippedBtn : s.buyBtn}
                   onClick={() => toggleEquip(o)}
                 >
-                  {o.is_equipped ? 'Equipped ✓' : 'Equip'}
+                  {o.is_equipped ? t('store.equipped') : t('store.equip')}
                 </button>
               </div>
             ))}

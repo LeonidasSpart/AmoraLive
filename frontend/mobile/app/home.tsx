@@ -5,35 +5,36 @@ import { api } from "../src/api/client";
 import LuxuryGiftCard from "../src/LuxuryGiftCard";
 import { theme } from "../src/theme";
 import AppShell from "../src/AppShell";
-
-const actions = [
-  ["💬", "Messages", "/messages"], ["✦", "Live", "/live"], ["🪙", "Coins & Gifts", "/wallet"],
-  ["🏆", "Events", "/events"], ["◎", "Profile", "/profile"], ["🔎", "Discover", "/discover"],
-  ["✨", "Store", "/store"], ["🛡️", "Safety", "/safety"]
-] as const;
+import { useTranslation } from "../src/i18n";
 
 export default function Home() {
+  const { t } = useTranslation();
+  const actions = [
+    ["💬", t("home.messages"), "/messages"], ["✦", t("nav.live"), "/live"], ["🪙", t("home.coinsAndGifts"), "/wallet"],
+    ["🏆", t("home.events"), "/events"], ["◎", t("nav.profile"), "/profile"], ["🔎", t("nav.discover"), "/discover"],
+    ["✨", t("nav.store"), "/store"], ["🛡️", t("nav.safety"), "/safety"]
+  ] as const;
   const [gifts, setGifts] = useState<any[]>([]);
   const [balance, setBalance] = useState<number | null>(null);
   useEffect(() => { api.gifts().then((data) => setGifts(Array.isArray(data) ? data.slice(0, 10) : [])).catch(() => {}); }, []);
   useEffect(() => { api.wallet().then((w: any) => setBalance(typeof w?.balance === "number" ? w.balance : 0)).catch(() => {}); }, []);
   return <AppShell><ScrollView style={s.page} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
-    <View style={s.top}><View><Text style={s.eyebrow}>MEANINGFUL CONNECTIONS</Text><Text style={s.brand}>AMORA</Text></View><Pressable style={s.coinPill} onPress={() => router.push("/wallet")}><Text style={s.coinIcon}>🪙</Text><Text style={s.coinText}>{balance ?? "–"}</Text></Pressable></View>
+    <View style={s.top}><View><Text style={s.eyebrow}>{t("home.eyebrow")}</Text><Text style={s.brand}>AMORA</Text></View><Pressable style={s.coinPill} onPress={() => router.push("/wallet")}><Text style={s.coinIcon}>🪙</Text><Text style={s.coinText}>{balance ?? "–"}</Text></Pressable></View>
 
     <View style={s.hero}>
       <View style={s.heroGlow} /><View style={s.heroRing} /><View style={s.heroHeart}><Text style={s.heart}>♡</Text></View>
-      <Text style={s.heroKicker}>AMORA LIVE</Text><Text style={s.heroTitle}>Meet someone.{"\n"}<Text style={s.heroGradient}>Feel something real.</Text></Text>
-      <Text style={s.heroSub}>Discover live people, video matches and moments worth remembering.</Text>
-      <View style={s.heroActions}><Pressable style={s.primary} onPress={() => router.push("/video-match")}><Text style={s.primaryText}>Start matching</Text><Text style={s.arrow}>→</Text></Pressable><Pressable style={s.secondary} onPress={() => router.push("/live")}><Text style={s.secondaryText}>Explore Live</Text></Pressable></View>
+      <Text style={s.heroKicker}>AMORA LIVE</Text><Text style={s.heroTitle}>{t("home.heroTitleLine1")}{"\n"}<Text style={s.heroGradient}>{t("home.heroTitleLine2")}</Text></Text>
+      <Text style={s.heroSub}>{t("home.heroSub")}</Text>
+      <View style={s.heroActions}><Pressable style={s.primary} onPress={() => router.push("/video-match")}><Text style={s.primaryText}>{t("home.startMatching")}</Text><Text style={s.arrow}>→</Text></Pressable><Pressable style={s.secondary} onPress={() => router.push("/live")}><Text style={s.secondaryText}>{t("home.exploreLive")}</Text></Pressable></View>
     </View>
 
-    <View style={s.sectionHead}><Text style={s.sectionTitle}>Your Amora world</Text><Text style={s.sectionHint}>Everything in one place</Text></View>
-    <View style={s.grid}>{actions.map(([icon,title,path]) => <Pressable key={title} style={s.box} onPress={() => router.push(path as any)}><View style={s.boxIcon}><Text style={s.icon}>{icon}</Text></View><Text style={s.boxTitle}>{title}</Text><Text style={s.boxSub}>{title === "Live" ? "Watch & join" : title === "Coins & Gifts" ? "Premium moments" : "Open"}</Text></Pressable>)}</View>
+    <View style={s.sectionHead}><Text style={s.sectionTitle}>{t("home.yourAmoraWorld")}</Text><Text style={s.sectionHint}>{t("home.everythingInOnePlace")}</Text></View>
+    <View style={s.grid}>{actions.map(([icon,title,path]) => <Pressable key={title} style={s.box} onPress={() => router.push(path as any)}><View style={s.boxIcon}><Text style={s.icon}>{icon}</Text></View><Text style={s.boxTitle}>{title}</Text><Text style={s.boxSub}>{title === t("nav.live") ? t("home.watchAndJoin") : title === t("home.coinsAndGifts") ? t("home.premiumMoments") : t("home.open")}</Text></Pressable>)}</View>
 
-    <View style={s.sectionHead}><Text style={s.sectionTitle}>Amora Luxury</Text><Text style={s.sectionHint}>3D collection</Text></View>
+    <View style={s.sectionHead}><Text style={s.sectionTitle}>{t("home.amoraLuxury")}</Text><Text style={s.sectionHint}>{t("home.threeDCollection")}</Text></View>
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 10, paddingHorizontal: 18 }} style={{ marginHorizontal: -18 }}><>{gifts.map((item) => <LuxuryGiftCard key={item.id} gift={item} onPress={() => router.push("/wallet")} />)}</></ScrollView>
 
-    <View style={s.luxuryBanner}><View><Text style={s.luxuryKicker}>PRIVATE COLLECTION</Text><Text style={s.luxuryTitle}>Gifts that feel alive.</Text><Text style={s.luxuryText}>3D luxury gifts, live animations and premium moments.</Text></View><Text style={s.luxuryGem}>✦</Text></View>
+    <View style={s.luxuryBanner}><View><Text style={s.luxuryKicker}>{t("home.privateCollection")}</Text><Text style={s.luxuryTitle}>{t("home.giftsThatFeelAlive")}</Text><Text style={s.luxuryText}>{t("home.luxuryText")}</Text></View><Text style={s.luxuryGem}>✦</Text></View>
   </ScrollView></AppShell>;
 }
 
