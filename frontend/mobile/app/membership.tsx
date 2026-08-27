@@ -91,6 +91,69 @@ export default function Membership() {
     ]);
   };
 
+  // Apple requires apps with auto-renewable subscriptions to offer this —
+  // App Store Review Guideline 3.1.2 — for reinstalls, new devices, or
+  // any case where a purchase's verify call never reached the backend.
+  // Reuses the exact same verify endpoints subscribe() calls above; the
+  // only difference is where the purchase record comes from
+  // (getAvailablePurchases, the store's own record of past purchases,
+  // instead of a fresh requestSubscription).
+  const [restoring, setRestoring] = useState(false);
+  const restore = async () => {
+    if (!RNIap) {
+      Alert.alert("Not available", "Restore Purchases needs the native app build — it isn't available in this preview.");
+      return;
+    }
+    setRestoring(true);
+    setError("");
+    try {
+      await RNIap.initConnection();
+      try {
+        const purchases = await RNIap.getAvailablePurchases();
+        if (!purchases?.length) {
+          Alert.alert("Nothing to restore", "No active subscription was found for this account.");
+          return;
+        }
+
+        let restoredAny = false;
+        for (const purchase of purchases as any[]) {
+          try {
+            if (Platform.OS === "ios") {
+              const receiptData = purchase?.transactionReceipt;
+              if (!receiptData) continue;
+              const verified = await api.verifyAppleSubscription(receiptData);
+              setCurrent(verified.membership);
+              restoredAny = true;
+            } else {
+              const sku = purchase?.productId;
+              const plan = plans.find((p) => p.google_product_id === sku);
+              const purchaseToken = purchase?.purchaseToken;
+              if (!plan || !purchaseToken) continue;
+              const verified = await api.verifyGoogleSubscription(String(plan.tier || plan.id), purchaseToken);
+              setCurrent(verified.membership);
+              restoredAny = true;
+            }
+          } catch (e: any) {
+            console.warn("Restore: one purchase failed to verify:", e.message);
+          }
+        }
+
+        if (restoredAny) {
+          Alert.alert("Restored", "Your membership has been restored.");
+          await load();
+        } else {
+          Alert.alert("Nothing to restore", "No active subscription was found for this account.");
+        }
+      } finally {
+        await RNIap.endConnection();
+      }
+    } catch (e: any) {
+      setError(e.message || "Unable to restore purchases.");
+    } finally {
+      setRestoring(false);
+    }
+  };
+
   return <AppShell>
     <ScrollView style={s.page}>
       <Pressable onPress={() => router.back()}><Text style={s.back}>‹</Text></Pressable>
@@ -99,6 +162,7 @@ export default function Membership() {
       <Text style={s.sub}>A more beautiful way to enjoy AmoraLive.</Text>
       {loading ? <ActivityIndicator color={theme.pink} /> : error ? <Text style={s.error}>{error}</Text> : <>
         <View style={s.current}><Text style={s.label}>YOUR MEMBERSHIP</Text><Text style={s.vip}>{current?.name || current?.plan?.name || current?.tier || "Free"}</Text></View>
+        <Pressable onPress={restore} disabled={restoring} style={s.restoreBtn}><Text style={s.restoreText}>{restoring ? "Restoring…" : "Restore Purchases"}</Text></Pressable>
         {!RNIap && <Text style={s.hint}>Native store purchases aren't available in this build — using secure web checkout instead.</Text>}
         {plans.map((p, i) => {
           const tier = String(p.tier || p.id);
@@ -124,6 +188,8 @@ const s = StyleSheet.create({
   sub: { color: theme.muted, fontSize: 10, marginBottom: 15 },
   current: { backgroundColor: "#171321", borderRadius: 20, padding: 18, borderWidth: 1, borderColor: "#6f4f8c", marginBottom: 12 },
   label: { color: theme.dim, fontSize: 7, fontWeight: "900" }, vip: { color: theme.gold, fontSize: 23, fontWeight: "900", marginTop: 6 },
+  restoreBtn: { alignSelf: "flex-start", marginBottom: 14, paddingVertical: 8, paddingHorizontal: 14, borderRadius: 12, backgroundColor: "rgba(255,255,255,.06)", borderWidth: 1, borderColor: theme.border },
+  restoreText: { color: theme.pinkSoft, fontSize: 11, fontWeight: "800" },
   hint: { color: theme.dim, fontSize: 9, marginBottom: 12, lineHeight: 14 },
   card: { backgroundColor: theme.surface, borderRadius: 20, padding: 17, marginBottom: 10 },
   plan: { color: "#fff", fontSize: 17, fontWeight: "900" }, price: { color: theme.pinkSoft, fontSize: 10, marginBottom: 10 },
