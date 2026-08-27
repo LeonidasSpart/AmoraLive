@@ -1,6 +1,7 @@
 // backend/src/routes/messages.js
 const auth = require('../middleware/auth');
 const { incrementMissionProgress } = require('../lib/missions');
+const { sendPushToUser } = require('../lib/push');
 const multer = require('multer');
 const path = require('path');
 const { UTApi } = require('uploadthing/server');
@@ -190,6 +191,12 @@ module.exports = (prisma, io) => {
 
       prisma.$transaction((tx) => incrementMissionProgress(tx, currentUserId, 'messages_sent', 1))
         .catch(err => console.error('Mission progress (messages_sent) failed:', err.message));
+
+      sendPushToUser(prisma, userId, {
+        title: message.sender.display_name || message.sender.username,
+        body: (content || '').slice(0, 120) || 'Sent you a message',
+        data: { type: 'new_message', senderId: currentUserId }
+      });
 
       // Emit to recipient via socket
       io.to(`user-${userId}`).emit('private-message', message);
