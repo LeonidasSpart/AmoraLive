@@ -3,10 +3,11 @@
 import React from 'react';
 import Head from 'next/head';
 import '../styles.css';
+import { LanguageProvider } from '../lib/i18n';
 
 export default function App({ Component, pageProps }) {
   return (
-    <>
+    <LanguageProvider>
       <Head>
         <title>AmoraLive — Meaningful Connections</title>
 
@@ -137,6 +138,6 @@ export default function App({ Component, pageProps }) {
       </Head>
 
       <Component {...pageProps} />
-    </>
+    </LanguageProvider>
   );
 }

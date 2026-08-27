@@ -6,6 +6,7 @@ import * as Notifications from "expo-notifications";
 import { router } from "expo-router";
 import { isLoggedIn } from "../src/api/client";
 import { registerForPushNotifications, pushDataToRoute } from "../src/push";
+import { LanguageProvider } from "../src/i18n";
 
 // Must run once at app startup, before any LiveKit Room is created, so the
 // native WebRTC globals (RTCPeerConnection, mediaDevices, etc.) exist.
@@ -27,8 +28,8 @@ export default function Layout() {
     return () => sub.remove();
   }, []);
 
-  return <>
+  return <LanguageProvider>
     <StatusBar style="light" />
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: "#080611" } }} />
-  </>;
+  </LanguageProvider>;
 }

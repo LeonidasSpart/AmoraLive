@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { apiFetch, clearSession } from '../lib/api';
+import { useTranslation } from '../lib/i18n';
 
 function Icon({ name, size = 20 }) {
   const common = { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.8, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true };
@@ -29,6 +30,7 @@ function Icon({ name, size = 20 }) {
 
 export default function Layout({ children }) {
   const router = useRouter();
+  const { t, lang, setLang, languages } = useTranslation();
   const [balance, setBalance] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
   const [user, setUser] = useState(null);
@@ -72,20 +74,20 @@ export default function Layout({ children }) {
   };
 
   const navItems = [
-    { href: '/discover', label: 'Discover', icon: 'discover' },
-    { href: '/go-live', label: 'Go Live', icon: 'live' },
-    { href: '/studio', label: 'Studio', icon: 'studio' },
-    { href: '/video-match', label: 'Match', icon: 'match' },
-    { href: '/events', label: 'Events', icon: 'events' },
-    { href: '/rewards', label: 'Rewards', icon: 'rewards' },
-    { href: '/missions', label: 'Missions', icon: 'missions' },
-    { href: '/membership', label: 'VIP', icon: 'vip' },
-    { href: '/chat', label: 'Chat', icon: 'chat' },
-    { href: '/matches', label: 'Matches', icon: 'matches' },
-    { href: '/safety', label: 'Safety', icon: 'safety' },
+    { href: '/discover', label: t('nav.discover'), icon: 'discover' },
+    { href: '/go-live', label: t('nav.goLive'), icon: 'live' },
+    { href: '/studio', label: t('nav.studio'), icon: 'studio' },
+    { href: '/video-match', label: t('nav.match'), icon: 'match' },
+    { href: '/events', label: t('nav.events'), icon: 'events' },
+    { href: '/rewards', label: t('nav.rewards'), icon: 'rewards' },
+    { href: '/missions', label: t('nav.missions'), icon: 'missions' },
+    { href: '/membership', label: t('nav.vip'), icon: 'vip' },
+    { href: '/chat', label: t('nav.chat'), icon: 'chat' },
+    { href: '/matches', label: t('nav.matches'), icon: 'matches' },
+    { href: '/safety', label: t('nav.safety'), icon: 'safety' },
   ];
   const isAdmin = user?.role === 'admin' || user?.role === 'superadmin';
-  const bottomItems = [navItems[0], navItems[3], navItems[1], navItems[8], { href: '/profile', label: 'Profile', icon: 'user' }];
+  const bottomItems = [navItems[0], navItems[3], navItems[1], navItems[8], { href: '/profile', label: t('nav.profile'), icon: 'user' }];
 
   return (
     <div className="amora-app-shell">
@@ -103,16 +105,27 @@ export default function Layout({ children }) {
             ))}
           </nav>
           <div className="amora-app-actions">
-            <Link href="/store" className="amora-icon-action" aria-label="Store"><Icon name="store" /></Link>
-            <Link href="/notifications" className="amora-icon-action amora-notification-link" aria-label="Notifications">
+            <select
+              className="amora-language-select"
+              aria-label={t('common.language')}
+              value={lang}
+              onChange={(e) => setLang(e.target.value)}
+              style={{ background: 'transparent', color: 'inherit', border: '1px solid rgba(255,255,255,.15)', borderRadius: 8, padding: '4px 6px', fontSize: 12 }}
+            >
+              {languages.map((l) => (
+                <option key={l.code} value={l.code} style={{ color: '#000' }}>{l.label}</option>
+              ))}
+            </select>
+            <Link href="/store" className="amora-icon-action" aria-label={t('nav.store')}><Icon name="store" /></Link>
+            <Link href="/notifications" className="amora-icon-action amora-notification-link" aria-label={t('nav.notifications')}>
               <Icon name="bell" />
               {unreadCount > 0 && <span className="amora-notification-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
             </Link>
-            <Link href="/wallet" className="amora-wallet-link" aria-label={`Wallet, ${balance} coins`}><Icon name="wallet" /><span>{balance.toLocaleString()}</span></Link>
-            <Link href="/profile" className="amora-profile-link" aria-label="Profile"><Icon name="user" size={18} /></Link>
-            {isAdmin && <Link className="amora-admin-link" href="/admin">Admin</Link>}
+            <Link href="/wallet" className="amora-wallet-link" aria-label={`${t('nav.wallet')}, ${balance} coins`}><Icon name="wallet" /><span>{balance.toLocaleString()}</span></Link>
+            <Link href="/profile" className="amora-profile-link" aria-label={t('nav.profile')}><Icon name="user" size={18} /></Link>
+            {isAdmin && <Link className="amora-admin-link" href="/admin">{t('nav.admin')}</Link>}
             {!['/login', '/register'].includes(router.pathname) && (
-              <button className="amora-logout-button" type="button" onClick={logout} aria-label="Log out"><Icon name="logout" size={17} /><span>Logout</span></button>
+              <button className="amora-logout-button" type="button" onClick={logout} aria-label={t('nav.logout')}><Icon name="logout" size={17} /><span>{t('nav.logout')}</span></button>
             )}
           </div>
         </div>
@@ -127,8 +140,8 @@ export default function Layout({ children }) {
       </nav>
       <footer className="amora-app-footer">
         <div className="amora-app-footer-brand"><img src="/brand/amora-mark.png" alt="" aria-hidden="true" /><strong>AmoraLive</strong></div>
-        <div className="amora-app-footer-links"><Link href="/legal/terms">Terms</Link><Link href="/legal/privacy">Privacy</Link><Link href="/legal/guidelines">Guidelines</Link><Link href="/legal/cookies">Cookies</Link></div>
-        <span className="amora-app-footer-copy">Made for meaningful connections.</span>
+        <div className="amora-app-footer-links"><Link href="/legal/terms">{t('footer.terms')}</Link><Link href="/legal/privacy">{t('footer.privacy')}</Link><Link href="/legal/guidelines">{t('footer.guidelines')}</Link><Link href="/legal/cookies">{t('footer.cookies')}</Link></div>
+        <span className="amora-app-footer-copy">{t('footer.tagline')}</span>
       </footer>
     </div>
   );

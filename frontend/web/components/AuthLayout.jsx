@@ -1,6 +1,7 @@
 import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import { useTranslation } from '../lib/i18n';
 
 export default function AuthLayout({
   eyebrow,
@@ -11,6 +12,7 @@ export default function AuthLayout({
   footerHref,
   footerLabel,
 }) {
+  const { lang, setLang, languages, t } = useTranslation();
   return (
     <>
       <Head>
@@ -21,6 +23,18 @@ export default function AuthLayout({
       <main className="amora-auth-page">
         <div className="amora-auth-card">
           <div className="amora-auth-top">
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <select
+                aria-label={t('common.language')}
+                value={lang}
+                onChange={(e) => setLang(e.target.value)}
+                style={{ background: 'transparent', color: 'inherit', border: '1px solid rgba(255,255,255,.15)', borderRadius: 8, padding: '4px 6px', fontSize: 12 }}
+              >
+                {languages.map((l) => (
+                  <option key={l.code} value={l.code} style={{ color: '#000' }}>{l.label}</option>
+                ))}
+              </select>
+            </div>
             <Link href="/" className="amora-auth-logo-link" aria-label="AmoraLive home">
               <img
                 src="/brand/amora-header-logo.png"

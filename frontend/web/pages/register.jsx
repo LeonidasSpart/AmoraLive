@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import AuthLayout from '../components/AuthLayout';
+import { useTranslation } from '../lib/i18n';
 
 const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 
 export default function Register() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -59,17 +61,17 @@ export default function Register() {
     return (
       <AuthLayout
         eyebrow="YOU'RE IN"
-        title="Check your inbox."
-        subtitle="Your Amora account is ready. Verify your email address to continue."
-        footerText="Already verified?"
+        title={t('auth.register.successTitle')}
+        subtitle={t('auth.register.successSubtitle')}
+        footerText={t('auth.register.footerText')}
         footerHref="/login"
-        footerLabel="Sign in"
+        footerLabel={t('auth.register.footerLabel')}
       >
         <div className="amora-success-box">
           <div className="amora-success-icon">✓</div>
-          <h2>Registration successful</h2>
-          <p>We sent a verification link to your email. Open it, then come back and sign in.</p>
-          <Link href="/login" className="amora-btn amora-btn-primary amora-auth-submit">Go to Login</Link>
+          <h2>{t('auth.register.successHeading')}</h2>
+          <p>{t('auth.register.successBody')}</p>
+          <Link href="/login" className="amora-btn amora-btn-primary amora-auth-submit">{t('auth.register.goToLogin')}</Link>
         </div>
       </AuthLayout>
     );
@@ -77,25 +79,25 @@ export default function Register() {
 
   return (
     <AuthLayout
-      eyebrow="JOIN AMORA"
-      title="Create your Amora account."
-      subtitle="Meet people, build connections and share meaningful moments."
-      footerText="Already have an account?"
+      eyebrow={t('auth.register.eyebrow')}
+      title={t('auth.register.title')}
+      subtitle={t('auth.register.subtitle')}
+      footerText={t('auth.register.footerText')}
       footerHref="/login"
-      footerLabel="Sign in"
+      footerLabel={t('auth.register.footerLabel')}
     >
-      <Link href="/" className="amora-auth-back">← Back to AmoraLive</Link>
+      <Link href="/" className="amora-auth-back">{t('auth.register.backLink')}</Link>
 
       {error && <div className="amora-error" role="alert">{error}</div>}
 
       <div className="amora-social-stack">
         <button className="amora-social amora-apple" type="button" onClick={startApple} disabled={appleLoading}>
           <span className="amora-social-symbol" aria-hidden="true"></span>
-          {appleLoading ? 'Connecting to Apple…' : 'Continue with Apple'}
+          {appleLoading ? t('auth.register.connectingApple') : t('auth.register.continueApple')}
         </button>
         <button className="amora-social amora-facebook" type="button" onClick={startFacebook} disabled={facebookLoading}>
           <span className="amora-social-symbol" aria-hidden="true">f</span>
-          {facebookLoading ? 'Connecting to Facebook…' : 'Continue with Facebook'}
+          {facebookLoading ? t('auth.register.connectingFacebook') : t('auth.register.continueFacebook')}
         </button>
       </div>
 
@@ -108,43 +110,43 @@ export default function Register() {
     <path fill="#EA4335" d="M12 6.15c1.43 0 2.71.49 3.72 1.45l2.79-2.79C16.84 3.24 14.63 2.25 12 2.25a9.74 9.74 0 0 0-8.71 5.41l3.24 2.53C6.3 7.87 8.46 6.15 12 6.15Z"/>
   </svg>
 </span>
-        {googleLoading ? 'Connecting to Google…' : 'Continue with Google'}
+        {googleLoading ? t('auth.register.connectingGoogle') : t('auth.register.continueGoogle')}
       </button>
-      <div className="amora-divider"><span>OR</span></div>
+      <div className="amora-divider"><span>{t('common.or')}</span></div>
 
       <form onSubmit={handleSubmit} className="amora-auth-form">
         <div className="amora-field">
-          <label className="amora-label" htmlFor="email">Email address</label>
-          <input id="email" className="amora-input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+          <label className="amora-label" htmlFor="email">{t('auth.register.emailLabel')}</label>
+          <input id="email" className="amora-input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t('auth.register.emailPlaceholder')} required />
         </div>
 
         <div className="amora-field">
-          <label className="amora-label" htmlFor="username">Username</label>
-          <input id="username" className="amora-input" type="text" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="Choose a username" minLength={3} maxLength={20} pattern="[A-Za-z0-9_.-]{3,20}" required />
-          <div className="amora-field-hint">3–20 characters: letters, numbers, dots, dashes or underscores.</div>
+          <label className="amora-label" htmlFor="username">{t('auth.register.usernameLabel')}</label>
+          <input id="username" className="amora-input" type="text" autoComplete="username" value={username} onChange={(e) => setUsername(e.target.value)} placeholder={t('auth.register.usernamePlaceholder')} minLength={3} maxLength={20} pattern="[A-Za-z0-9_.-]{3,20}" required />
+          <div className="amora-field-hint">{t('auth.register.usernameHint')}</div>
         </div>
 
         <div className="amora-field">
-          <label className="amora-label" htmlFor="register-password">Password</label>
+          <label className="amora-label" htmlFor="register-password">{t('auth.register.passwordLabel')}</label>
           <div className="amora-password-wrap">
-            <input id="register-password" className="amora-input" type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" minLength={8} required />
-            <button type="button" className="amora-password-toggle" onClick={() => setShowPassword((v) => !v)}>{showPassword ? 'Hide' : 'Show'}</button>
+            <input id="register-password" className="amora-input" type={showPassword ? 'text' : 'password'} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder={t('auth.register.passwordPlaceholder')} minLength={8} required />
+            <button type="button" className="amora-password-toggle" onClick={() => setShowPassword((v) => !v)}>{showPassword ? t('auth.register.hidePassword') : t('auth.register.showPassword')}</button>
           </div>
         </div>
 
         <div className="amora-field">
-          <label className="amora-label" htmlFor="dob">Date of birth</label>
+          <label className="amora-label" htmlFor="dob">{t('auth.register.dobLabel')}</label>
           <input id="dob" className="amora-input amora-date-input" type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} required />
-          <div className="amora-field-hint">AmoraLive is an 18+ community.</div>
+          <div className="amora-field-hint">{t('auth.register.dobHint')}</div>
         </div>
 
         <button className="amora-btn amora-btn-primary amora-auth-submit" type="submit" disabled={loading}>
-          {loading ? 'Creating account…' : 'Create account'}
+          {loading ? t('auth.register.submitting') : t('auth.register.submit')}
         </button>
       </form>
 
       <p className="amora-auth-small">
-        By creating an account, you agree to our <Link href="/legal/terms">Terms</Link> and <Link href="/legal/privacy">Privacy Policy</Link>.
+        {t('auth.register.byCreating')} <Link href="/legal/terms">{t('auth.register.termsLink')}</Link> {t('auth.register.andLink')} <Link href="/legal/privacy">{t('auth.register.privacyLink')}</Link>.
       </p>
     </AuthLayout>
   );
