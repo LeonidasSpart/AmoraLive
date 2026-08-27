@@ -247,6 +247,10 @@ export const api = {
   verifyGoogleSubscription: (tier: string, purchaseToken: string) =>
     request('/membership/iap/google/verify', { method: 'POST', body: JSON.stringify({ tier, purchaseToken }) }),
   membershipCancel: () => request('/membership/cancel', { method: 'POST' }),
+  registerPushToken: (token: string, platform: 'ios' | 'android') =>
+    request('/users/me/push-token', { method: 'POST', body: JSON.stringify({ token, platform }) }),
+  unregisterPushToken: (token: string) =>
+    request('/users/me/push-token', { method: 'DELETE', body: JSON.stringify({ token }) }),
   dailyRewardStatus: () => request('/daily-rewards/status'),
   dailyRewardHistory: () => request('/daily-rewards/history?limit=14'),
   claimDailyReward: () => request('/daily-rewards/claim', { method: 'POST' }),
