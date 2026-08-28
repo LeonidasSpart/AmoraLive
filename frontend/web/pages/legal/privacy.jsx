@@ -3,109 +3,23 @@
 import React, { useMemo, useState } from 'react';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
+import { useTranslation } from '../../lib/i18n';
 
-const sections = [
-  { id: 'overview', number: '01', title: 'Privacy at AmoraLive' },
-  { id: 'controller', number: '02', title: 'Who Controls Your Data' },
-  { id: 'data', number: '03', title: 'Information We Collect' },
-  { id: 'sources', number: '04', title: 'How We Receive Information' },
-  { id: 'purposes', number: '05', title: 'How We Use Your Data' },
-  { id: 'legal-bases', number: '06', title: 'Legal Bases for Processing' },
-  { id: 'profile', number: '07', title: 'Profiles & Social Features' },
-  { id: 'live', number: '08', title: 'Livestreaming & Realtime Features' },
-  { id: 'messages', number: '09', title: 'Messages & Communications' },
-  { id: 'gifts', number: '10', title: 'Coins, Gifts & Payments' },
-  { id: 'location', number: '11', title: 'Location Information' },
-  { id: 'device', number: '12', title: 'Device & Technical Data' },
-  { id: 'cookies', number: '13', title: 'Cookies & Similar Technologies' },
-  { id: 'analytics', number: '14', title: 'Analytics & Personalization' },
-  { id: 'ai', number: '15', title: 'AI & Automated Systems' },
-  { id: 'moderation', number: '16', title: 'Safety & Moderation' },
-  { id: 'sharing', number: '17', title: 'When We Share Data' },
-  { id: 'transfers', number: '18', title: 'International Transfers' },
-  { id: 'retention', number: '19', title: 'Data Retention' },
-  { id: 'security', number: '20', title: 'Security' },
-  { id: 'rights', number: '21', title: 'Your Privacy Rights' },
-  { id: 'consent', number: '22', title: 'Consent & Withdrawal' },
-  { id: 'children', number: '23', title: 'Children & Age Protection' },
-  { id: 'thirdparty', number: '24', title: 'Third-Party Services' },
-  { id: 'deletion', number: '25', title: 'Account Deletion' },
-  { id: 'breach', number: '26', title: 'Security Incidents' },
-  { id: 'complaints', number: '27', title: 'Complaints & Authorities' },
-  { id: 'changes', number: '28', title: 'Changes to This Policy' },
-  { id: 'contact', number: '29', title: 'Privacy Contact' }
+const sectionIds = [
+  ['overview', '01'], ['controller', '02'], ['data', '03'], ['sources', '04'], ['purposes', '05'],
+  ['legal-bases', '06'], ['profile', '07'], ['live', '08'], ['messages', '09'], ['gifts', '10'],
+  ['location', '11'], ['device', '12'], ['cookies', '13'], ['analytics', '14'], ['ai', '15'],
+  ['moderation', '16'], ['sharing', '17'], ['transfers', '18'], ['retention', '19'], ['security', '20'],
+  ['rights', '21'], ['consent', '22'], ['children', '23'], ['thirdparty', '24'], ['deletion', '25'],
+  ['breach', '26'], ['complaints', '27'], ['changes', '28'], ['contact', '29']
 ];
 
-const dataCategories = [
-  {
-    title: 'Identity & Account',
-    text: 'Name, username, display name, account identifiers, age or age-related information and authentication information where applicable.'
-  },
-  {
-    title: 'Profile',
-    text: 'Profile photograph, biography, preferences, interests and other information you choose to make available.'
-  },
-  {
-    title: 'Social Activity',
-    text: 'Interactions such as follows, likes, comments, livestream participation, gifts and other platform activity.'
-  },
-  {
-    title: 'Communications',
-    text: 'Messages, chat content and related communication metadata where necessary to provide the communication service and protect users.'
-  },
-  {
-    title: 'Transactions',
-    text: 'Purchase, subscription, virtual-coin and digital-gift information, together with transaction identifiers and payment status.'
-  },
-  {
-    title: 'Technical',
-    text: 'IP address, device information, browser or app information, operating-system information, identifiers, logs and security information.'
-  },
-  {
-    title: 'Usage',
-    text: 'Information about how you interact with AmoraLive, such as pages, features, sessions and technical events.'
-  },
-  {
-    title: 'Location',
-    text: 'Approximate or precise location only where the relevant feature is enabled and the applicable legal requirements are satisfied.'
-  }
-];
-
-const rights = [
-  'Right to be informed about processing of your personal data.',
-  'Right to access personal data held about you.',
-  'Right to request correction of inaccurate or incomplete information.',
-  'Right to request deletion where the legal requirements for erasure are met.',
-  'Right to request restriction of processing in applicable circumstances.',
-  'Right to object to certain processing, including direct marketing.',
-  'Right to data portability where applicable.',
-  'Right to withdraw consent where processing is based on consent.',
-  'Rights concerning certain automated decision-making and profiling where applicable.',
-  'Right to lodge a complaint with a competent data-protection authority.'
-];
-
-const purposes = [
-  'Create and manage your AmoraLive account.',
-  'Provide profiles, livestreams, messaging and social features.',
-  'Process purchases, subscriptions, coins and digital gifts.',
-  'Authenticate users and protect account security.',
-  'Prevent fraud, abuse, spam, bots and malicious activity.',
-  'Moderate content and protect users from harmful conduct.',
-  'Provide customer support and respond to requests.',
-  'Improve reliability, performance and functionality.',
-  'Personalize features and recommendations where permitted.',
-  'Send transactional notifications and service communications.',
-  'Comply with legal and regulatory obligations.',
-  'Establish, exercise or defend legal claims.',
-  'Protect the rights, property and safety of AmoraLive and its users.'
-];
-
-const Section = ({ id, number, title, children }) => (
+const Section = ({ id, number, title, label, children }) => (
   <section id={id} className="privacy-section">
     <div className="privacy-number">{number}</div>
 
     <div className="privacy-content">
-      <div className="privacy-label">DATA PROTECTION</div>
+      <div className="privacy-label">{label}</div>
       <h2>{title}</h2>
       {children}
     </div>
@@ -124,8 +38,11 @@ const BulletList = ({ items }) => (
 );
 
 export default function Privacy() {
+  const { t, lang } = useTranslation();
   const [search, setSearch] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const sections = sectionIds.map(([id, number]) => ({ id, number, title: t(`legalPrivacy.sectionTitles.${id}`) }));
 
   const filteredSections = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -137,7 +54,8 @@ export default function Privacy() {
         section.title.toLowerCase().includes(q) ||
         section.number.includes(q)
     );
-  }, [search]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, lang]);
 
   const scrollTo = (id) => {
     setMenuOpen(false);
@@ -168,36 +86,33 @@ export default function Privacy() {
 
               <div className="privacy-badge">
                 <span className="privacy-badge-dot" />
-                AMORALIVE PRIVACY
+                {t('legalPrivacy.badge')}
               </div>
 
               <h1>
-                Your Data.
-                <span> Your Control.</span>
+                {t('legalPrivacy.heroTitle1')}
+                <span> {t('legalPrivacy.heroTitle2')}</span>
               </h1>
 
               <p className="privacy-hero-description">
-                A transparent explanation of how AmoraLive collects, uses,
-                protects and manages personal data across accounts,
-                livestreaming, messaging, gifts, payments, safety and
-                personalization.
+                {t('legalPrivacy.heroDesc')}
               </p>
 
               <div className="privacy-meta">
 
                 <div>
-                  <span>VERSION</span>
-                  <strong>2026.08</strong>
+                  <span>{t('legalPrivacy.metaVersion')}</span>
+                  <strong>{t('legalPrivacy.metaVersionVal')}</strong>
                 </div>
 
                 <div>
-                  <span>EFFECTIVE</span>
-                  <strong>August 2026</strong>
+                  <span>{t('legalPrivacy.metaEffective')}</span>
+                  <strong>{t('legalPrivacy.metaEffectiveVal')}</strong>
                 </div>
 
                 <div>
-                  <span>FRAMEWORK</span>
-                  <strong>EU • CH • INTERNATIONAL</strong>
+                  <span>{t('legalPrivacy.metaFramework')}</span>
+                  <strong>{t('legalPrivacy.metaFrameworkVal')}</strong>
                 </div>
 
               </div>
@@ -230,8 +145,8 @@ export default function Privacy() {
               <div className="privacy-status-icon">EU</div>
 
               <div>
-                <strong>GDPR Principles</strong>
-                <span>Transparency • Rights • Accountability</span>
+                <strong>{t('legalPrivacy.statusGdprTitle')}</strong>
+                <span>{t('legalPrivacy.statusGdprSub')}</span>
               </div>
             </div>
 
@@ -239,8 +154,8 @@ export default function Privacy() {
               <div className="privacy-status-icon">CH</div>
 
               <div>
-                <strong>Swiss Protection</strong>
-                <span>Swiss data-protection requirements</span>
+                <strong>{t('legalPrivacy.statusSwissTitle')}</strong>
+                <span>{t('legalPrivacy.statusSwissSub')}</span>
               </div>
             </div>
 
@@ -248,8 +163,8 @@ export default function Privacy() {
               <div className="privacy-status-icon">🔐</div>
 
               <div>
-                <strong>Security</strong>
-                <span>Technical & organisational safeguards</span>
+                <strong>{t('legalPrivacy.statusSecurityTitle')}</strong>
+                <span>{t('legalPrivacy.statusSecuritySub')}</span>
               </div>
             </div>
 
@@ -257,8 +172,8 @@ export default function Privacy() {
               <div className="privacy-status-icon">◎</div>
 
               <div>
-                <strong>Your Choices</strong>
-                <span>Access • Delete • Object • Export</span>
+                <strong>{t('legalPrivacy.statusChoicesTitle')}</strong>
+                <span>{t('legalPrivacy.statusChoicesSub')}</span>
               </div>
             </div>
 
@@ -272,19 +187,30 @@ export default function Privacy() {
             </div>
 
             <div>
-              <strong>Privacy should be understandable.</strong>
+              <strong>{t('legalPrivacy.noticeTitle')}</strong>
 
               <p>
-                This Privacy Policy explains the categories of information
-                AmoraLive may process, why processing may occur, the choices
-                available to users, and the circumstances in which information
-                may be shared. Where a particular feature is not enabled,
-                AmoraLive will not process data for that feature merely because
-                it is described in this general policy.
+                {t('legalPrivacy.noticeBody')}
               </p>
             </div>
 
           </div>
+
+          {lang !== 'en' && (
+            <div className="privacy-notice">
+
+              <div className="privacy-notice-icon">EN</div>
+
+              <div>
+                <strong>{t('legalPrivacy.translationNoticeTitle')}</strong>
+
+                <p>
+                  {t('legalPrivacy.translationNoticeBody')}
+                </p>
+              </div>
+
+            </div>
+          )}
 
           <div className="privacy-layout">
 
@@ -300,14 +226,14 @@ export default function Privacy() {
                 onClick={() => setMenuOpen(!menuOpen)}
               >
                 <span>☰</span>
-                Privacy Navigation
+                {t('legalPrivacy.navLabel')}
               </button>
 
               <div className="privacy-sidebar-inner">
 
                 <div className="privacy-sidebar-title">
-                  <span>DOCUMENT</span>
-                  <strong>Privacy Policy</strong>
+                  <span>{t('legalPrivacy.sidebarDocLabel')}</span>
+                  <strong>{t('legalPrivacy.sidebarDocTitle')}</strong>
                 </div>
 
                 <div className="privacy-search">
@@ -317,8 +243,8 @@ export default function Privacy() {
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search privacy..."
-                    aria-label="Search Privacy Policy"
+                    placeholder={t('legalPrivacy.searchPlaceholder')}
+                    aria-label={t('legalPrivacy.searchAriaLabel')}
                   />
 
                 </div>
@@ -340,15 +266,15 @@ export default function Privacy() {
                 <div className="privacy-sidebar-links">
 
                   <Link href="/legal/terms">
-                    Terms of Service
+                    {t('legalPrivacy.linkTerms')}
                   </Link>
 
                   <Link href="/legal/guidelines">
-                    Community Guidelines
+                    {t('legalPrivacy.linkGuidelines')}
                   </Link>
 
                   <Link href="/legal/cookies">
-                    Cookie Policy
+                    {t('legalPrivacy.linkCookies')}
                   </Link>
 
                 </div>
@@ -363,21 +289,12 @@ export default function Privacy() {
               <Section
                 id="overview"
                 number="01"
-                title="Privacy at AmoraLive"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.overview')}
               >
 
-                <p>
-                  AmoraLive respects your privacy and aims to give you
-                  meaningful control over your personal information.
-                </p>
-
-                <p>
-                  This Privacy Policy describes how AmoraLive may collect,
-                  use, disclose, retain and protect personal information when
-                  you use our website, application, livestreaming services,
-                  messaging features, social features, payment functionality
-                  and related services.
-                </p>
+                <p>{t('legalPrivacy.overviewP1')}</p>
+                <p>{t('legalPrivacy.overviewP2')}</p>
 
                 <div className="privacy-quote">
 
@@ -385,10 +302,7 @@ export default function Privacy() {
                     "
                   </span>
 
-                  <p>
-                    We believe privacy should be built into the experience,
-                    not hidden behind complicated language.
-                  </p>
+                  <p>{t('legalPrivacy.overviewQuote')}</p>
 
                 </div>
 
@@ -397,64 +311,56 @@ export default function Privacy() {
               <Section
                 id="controller"
                 number="02"
-                title="Who Controls Your Data"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.controller')}
               >
 
-                <p>
-                  The organisation responsible for determining the purposes and
-                  means of processing your personal data is:
-                </p>
+                <p>{t('legalPrivacy.controllerP1')}</p>
 
                 <div className="privacy-placeholder">
 
-                  <span>CONTROLLER INFORMATION</span>
+                  <span>{t('legalPrivacy.controllerLabel')}</span>
 
                   <strong>
-                    [INSERT AMORALIVE LEGAL ENTITY]
+                    {t('legalPrivacy.controllerEntityPlaceholder')}
                   </strong>
 
                   <p>
-                    Registered address:
+                    {t('legalPrivacy.controllerAddressLabel')}
                     <br />
-                    [INSERT REGISTERED ADDRESS]
+                    {t('legalPrivacy.controllerAddressPlaceholder')}
                   </p>
 
                   <p>
-                    Country:
+                    {t('legalPrivacy.controllerCountryLabel')}
                     <br />
-                    [INSERT COUNTRY]
+                    {t('legalPrivacy.controllerCountryPlaceholder')}
                   </p>
 
                   <p>
-                    Privacy contact:
+                    {t('legalPrivacy.controllerContactLabel')}
                     <br />
-                    [INSERT PRIVACY EMAIL]
+                    {t('legalPrivacy.controllerContactPlaceholder')}
                   </p>
 
                 </div>
 
-                <p>
-                  If AmoraLive appoints a Data Protection Officer or another
-                  formal privacy representative where legally required, the
-                  relevant contact information will be provided here.
-                </p>
+                <p>{t('legalPrivacy.controllerP2')}</p>
 
               </Section>
 
               <Section
                 id="data"
                 number="03"
-                title="Information We Collect"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.data')}
               >
 
-                <p>
-                  Depending on how you use AmoraLive, we may process different
-                  categories of information.
-                </p>
+                <p>{t('legalPrivacy.dataP1')}</p>
 
                 <div className="privacy-data-grid">
 
-                  {dataCategories.map((item, index) => (
+                  {t('legalPrivacy.dataCategories').map((item, index) => (
                     <div
                       className="privacy-data-card"
                       key={index}
@@ -463,45 +369,29 @@ export default function Privacy() {
                         {String(index + 1).padStart(2, '0')}
                       </div>
 
-                      <strong>{item.title}</strong>
+                      <strong>{item[0]}</strong>
 
-                      <span>{item.text}</span>
+                      <span>{item[1]}</span>
                     </div>
                   ))}
 
                 </div>
 
-                <p>
-                  Not every category applies to every user. The information
-                  processed depends on the features you use, your choices and
-                  the legal requirements applicable to your use of AmoraLive.
-                </p>
+                <p>{t('legalPrivacy.dataP2')}</p>
 
               </Section>
 
               <Section
                 id="sources"
                 number="04"
-                title="How We Receive Information"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.sources')}
               >
 
-                <p>
-                  Information may come from several sources, including:
-                </p>
+                <p>{t('legalPrivacy.sourcesP1')}</p>
 
                 <BulletList
-                  items={[
-                    'Information you provide when creating or updating your account.',
-                    'Information you provide in your profile.',
-                    'Content you upload or publish.',
-                    'Messages and interactions you initiate.',
-                    'Information generated when you use AmoraLive features.',
-                    'Information generated by security and fraud-prevention systems.',
-                    'Payment and transaction information received from payment providers.',
-                    'Information from authentication providers when you choose third-party login.',
-                    'Information from service providers acting on our behalf.',
-                    'Information required or permitted by applicable law.'
-                  ]}
+                  items={t('legalPrivacy.sourcesBullets')}
                 />
 
               </Section>
@@ -509,79 +399,33 @@ export default function Privacy() {
               <Section
                 id="purposes"
                 number="05"
-                title="How We Use Your Data"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.purposes')}
               >
 
-                <p>
-                  We may process personal information for the following
-                  purposes, subject to the applicable legal basis:
-                </p>
+                <p>{t('legalPrivacy.purposesP1')}</p>
 
-                <BulletList items={purposes} />
+                <BulletList items={t('legalPrivacy.purposesBullets')} />
 
               </Section>
 
               <Section
                 id="legal-bases"
                 number="06"
-                title="Legal Bases for Processing"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.legal-bases')}
               >
 
-                <p>
-                  Where the GDPR or another law requiring a legal basis applies,
-                  AmoraLive will process personal data on an applicable legal
-                  basis.
-                </p>
+                <p>{t('legalPrivacy.legalBasesP1')}</p>
 
                 <div className="privacy-basis-grid">
 
-                  <div>
-                    <strong>Contract</strong>
-                    <span>
-                      Processing necessary to provide requested services and
-                      operate your account.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Consent</strong>
-                    <span>
-                      Processing where you have freely given informed consent
-                      and consent is the appropriate legal basis.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Legitimate Interests</strong>
-                    <span>
-                      Processing necessary for legitimate interests, balanced
-                      against your rights and freedoms.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Legal Obligation</strong>
-                    <span>
-                      Processing necessary to comply with applicable legal
-                      requirements.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Vital Interests</strong>
-                    <span>
-                      Processing where necessary to protect vital interests
-                      in legally applicable circumstances.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Public Interest</strong>
-                    <span>
-                      Processing where an applicable legal framework permits
-                      or requires it for a public-interest purpose.
-                    </span>
-                  </div>
+                  {t('legalPrivacy.legalBasesGrid').map((item, index) => (
+                    <div key={index}>
+                      <strong>{item[0]}</strong>
+                      <span>{item[1]}</span>
+                    </div>
+                  ))}
 
                 </div>
 
@@ -590,34 +434,20 @@ export default function Privacy() {
               <Section
                 id="profile"
                 number="07"
-                title="Profiles & Social Features"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.profile')}
               >
 
-                <p>
-                  AmoraLive is a social platform. Information that you choose
-                  to place on your public or semi-public profile may be visible
-                  to other users according to your settings and the feature
-                  involved.
-                </p>
-
-                <p>
-                  Before publishing personal information about another person,
-                  you should have an appropriate legal basis or permission to
-                  do so.
-                </p>
+                <p>{t('legalPrivacy.profileP1')}</p>
+                <p>{t('legalPrivacy.profileP2')}</p>
 
                 <div className="privacy-warning">
 
                   <strong>
-                    Think before you publish.
+                    {t('legalPrivacy.profileWarningTitle')}
                   </strong>
 
-                  <p>
-                    Information posted publicly may be copied, screenshotted
-                    or redistributed by other users. Privacy settings cannot
-                    guarantee that other users will not retain information they
-                    have legitimately viewed.
-                  </p>
+                  <p>{t('legalPrivacy.profileWarningBody')}</p>
 
                 </div>
 
@@ -626,53 +456,26 @@ export default function Privacy() {
               <Section
                 id="live"
                 number="08"
-                title="Livestreaming & Realtime Features"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.live')}
               >
 
-                <p>
-                  Livestreaming may involve realtime processing of information
-                  such as account identifiers, viewer interactions, chat,
-                  reactions, gifts, technical connection information and
-                  moderation events.
-                </p>
-
-                <p>
-                  Depending on the feature, livestream content may be visible
-                  to other users and may remain available for a period of time
-                  determined by the product configuration.
-                </p>
-
-                <p>
-                  AmoraLive may process livestream-related information for
-                  safety, moderation, fraud prevention, service operation and
-                  legal compliance.
-                </p>
+                <p>{t('legalPrivacy.liveP1')}</p>
+                <p>{t('legalPrivacy.liveP2')}</p>
+                <p>{t('legalPrivacy.liveP3')}</p>
 
               </Section>
 
               <Section
                 id="messages"
                 number="09"
-                title="Messages & Communications"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.messages')}
               >
 
-                <p>
-                  AmoraLive may provide private messaging, live chat and other
-                  communication features.
-                </p>
-
-                <p>
-                  Messages are processed to provide the communication service,
-                  maintain functionality, prevent abuse and comply with legal
-                  obligations where applicable.
-                </p>
-
-                <p>
-                  AmoraLive does not represent that private messages are
-                  equivalent to end-to-end encrypted communications unless the
-                  specific feature expressly states that it provides
-                  end-to-end encryption.
-                </p>
+                <p>{t('legalPrivacy.messagesP1')}</p>
+                <p>{t('legalPrivacy.messagesP2')}</p>
+                <p>{t('legalPrivacy.messagesP3')}</p>
 
                 <div className="privacy-security-card">
 
@@ -682,15 +485,10 @@ export default function Privacy() {
 
                   <div>
                     <strong>
-                      Security is not the same as anonymity.
+                      {t('legalPrivacy.messagesSecurityTitle')}
                     </strong>
 
-                    <p>
-                      Technical security measures may protect communications
-                      while information may still need to be processed for
-                      authentication, abuse prevention, legal compliance or
-                      delivery.
-                    </p>
+                    <p>{t('legalPrivacy.messagesSecurityBody')}</p>
                   </div>
 
                 </div>
@@ -700,103 +498,56 @@ export default function Privacy() {
               <Section
                 id="gifts"
                 number="10"
-                title="Coins, Gifts & Payments"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.gifts')}
               >
 
-                <p>
-                  If you purchase coins, digital gifts, memberships or other
-                  paid features, AmoraLive and its payment providers may
-                  process transaction-related information.
-                </p>
+                <p>{t('legalPrivacy.giftsP1')}</p>
 
                 <BulletList
-                  items={[
-                    'Transaction identifiers.',
-                    'Purchase amount and currency.',
-                    'Product or package purchased.',
-                    'Subscription status.',
-                    'Payment status.',
-                    'Refund or chargeback information.',
-                    'Fraud-prevention information.'
-                  ]}
+                  items={t('legalPrivacy.giftsBullets')}
                 />
 
-                <p>
-                  Payment-card details may be processed directly by an
-                  authorized payment provider rather than stored by AmoraLive,
-                  depending on the payment method and technical integration.
-                </p>
-
-                <p>
-                  The exact payment information stored by AmoraLive depends on
-                  the payment architecture actually used by the platform.
-                </p>
+                <p>{t('legalPrivacy.giftsP2')}</p>
+                <p>{t('legalPrivacy.giftsP3')}</p>
 
               </Section>
 
               <Section
                 id="location"
                 number="11"
-                title="Location Information"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.location')}
               >
 
-                <p>
-                  Certain AmoraLive features may request location information.
-                  Location processing depends on the feature, your device
-                  permissions and applicable law.
-                </p>
+                <p>{t('legalPrivacy.locationP1')}</p>
 
                 <div className="privacy-location-grid">
 
-                  <div>
-                    <strong>Approximate Location</strong>
-                    <span>
-                      May be derived from technical information such as IP
-                      address where permitted.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Precise Location</strong>
-                    <span>
-                      Processed only where the relevant feature and
-                      permissions permit it.
-                    </span>
-                  </div>
+                  {t('legalPrivacy.locationGrid').map((item, index) => (
+                    <div key={index}>
+                      <strong>{item[0]}</strong>
+                      <span>{item[1]}</span>
+                    </div>
+                  ))}
 
                 </div>
 
-                <p>
-                  You can generally control device-level location permissions
-                  through your operating-system settings.
-                </p>
+                <p>{t('legalPrivacy.locationP2')}</p>
 
               </Section>
 
               <Section
                 id="device"
                 number="12"
-                title="Device & Technical Data"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.device')}
               >
 
-                <p>
-                  When you access AmoraLive, technical information may be
-                  generated automatically.
-                </p>
+                <p>{t('legalPrivacy.deviceP1')}</p>
 
                 <BulletList
-                  items={[
-                    'IP address.',
-                    'Device type.',
-                    'Operating system.',
-                    'Browser or application version.',
-                    'Device and advertising identifiers where applicable.',
-                    'Network information.',
-                    'Language and regional settings.',
-                    'Crash reports and diagnostic information.',
-                    'Security and authentication logs.',
-                    'Approximate location derived from technical information where permitted.'
-                  ]}
+                  items={t('legalPrivacy.deviceBullets')}
                 />
 
               </Section>
@@ -804,98 +555,48 @@ export default function Privacy() {
               <Section
                 id="cookies"
                 number="13"
-                title="Cookies & Similar Technologies"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.cookies')}
               >
 
-                <p>
-                  AmoraLive may use cookies, local storage, SDKs, pixels and
-                  similar technologies to operate the service, remember
-                  preferences, maintain authentication, measure performance,
-                  provide security and, where legally permitted, understand
-                  usage.
-                </p>
+                <p>{t('legalPrivacy.cookiesP1')}</p>
 
                 <div className="privacy-cookie-grid">
 
-                  <div>
-                    <strong>Essential</strong>
-                    <span>
-                      Required for authentication, security and core
-                      functionality.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Preferences</strong>
-                    <span>
-                      Remember choices such as language or interface
-                      preferences.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Analytics</strong>
-                    <span>
-                      Help understand how the service is used where permitted.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Marketing</strong>
-                    <span>
-                      Only where applicable and subject to required consent or
-                      another lawful basis.
-                    </span>
-                  </div>
+                  {t('legalPrivacy.cookiesGrid').map((item, index) => (
+                    <div key={index}>
+                      <strong>{item[0]}</strong>
+                      <span>{item[1]}</span>
+                    </div>
+                  ))}
 
                 </div>
 
-                <p>
-                  Where applicable law requires consent for non-essential
-                  cookies or similar technologies, AmoraLive will request that
-                  consent through an appropriate mechanism.
-                </p>
+                <p>{t('legalPrivacy.cookiesP2')}</p>
 
               </Section>
 
               <Section
                 id="analytics"
                 number="14"
-                title="Analytics & Personalization"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.analytics')}
               >
 
-                <p>
-                  AmoraLive may use analytics and personalization systems to
-                  understand product performance, improve features, detect
-                  technical problems and provide relevant experiences.
-                </p>
-
-                <p>
-                  Where profiling or personalization is subject to specific
-                  legal requirements, AmoraLive will apply the safeguards
-                  required by applicable law.
-                </p>
+                <p>{t('legalPrivacy.analyticsP1')}</p>
+                <p>{t('legalPrivacy.analyticsP2')}</p>
 
               </Section>
 
               <Section
                 id="ai"
                 number="15"
-                title="AI & Automated Systems"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.ai')}
               >
 
-                <p>
-                  AmoraLive may use automated systems or artificial intelligence
-                  for functions such as translation, content moderation,
-                  recommendations, fraud prevention, security, spam detection,
-                  customer support or other product features.
-                </p>
-
-                <p>
-                  Automated systems may produce incorrect results. Appropriate
-                  human review or appeal mechanisms will be provided where
-                  required by applicable law.
-                </p>
+                <p>{t('legalPrivacy.aiP1')}</p>
+                <p>{t('legalPrivacy.aiP2')}</p>
 
                 <div className="privacy-ai-card">
 
@@ -905,13 +606,10 @@ export default function Privacy() {
 
                   <div>
                     <strong>
-                      Automated does not mean unrestricted.
+                      {t('legalPrivacy.aiCardTitle')}
                     </strong>
 
-                    <p>
-                      AmoraLive will use automated technologies subject to
-                      applicable privacy, safety and legal requirements.
-                    </p>
+                    <p>{t('legalPrivacy.aiCardBody')}</p>
                   </div>
 
                 </div>
@@ -921,97 +619,38 @@ export default function Privacy() {
               <Section
                 id="moderation"
                 number="16"
-                title="Safety & Moderation"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.moderation')}
               >
 
-                <p>
-                  AmoraLive may process information to protect users and the
-                  platform from abuse, fraud, harassment, illegal activity,
-                  malicious automation and other security threats.
-                </p>
+                <p>{t('legalPrivacy.moderationP1')}</p>
 
                 <BulletList
-                  items={[
-                    'Detect spam and bot activity.',
-                    'Detect suspicious account behaviour.',
-                    'Protect livestreams and chats.',
-                    'Investigate reports.',
-                    'Enforce Community Guidelines.',
-                    'Protect users from harassment and abuse.',
-                    'Prevent fraudulent payments or gift manipulation.',
-                    'Comply with legal requirements.'
-                  ]}
+                  items={t('legalPrivacy.moderationBullets')}
                 />
 
-                <p>
-                  Safety processing may involve automated systems as well as
-                  human review where appropriate.
-                </p>
+                <p>{t('legalPrivacy.moderationP2')}</p>
 
               </Section>
 
               <Section
                 id="sharing"
                 number="17"
-                title="When We Share Data"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.sharing')}
               >
 
-                <p>
-                  AmoraLive does not sell personal data for money.
-                </p>
-
-                <p>
-                  We may disclose personal information to appropriate
-                  recipients when necessary for legitimate operation,
-                  contractual performance, legal compliance, safety or other
-                  lawful purposes.
-                </p>
+                <p>{t('legalPrivacy.sharingP1')}</p>
+                <p>{t('legalPrivacy.sharingP2')}</p>
 
                 <div className="privacy-recipient-grid">
 
-                  <div>
-                    <strong>Infrastructure Providers</strong>
-                    <span>
-                      Hosting, databases, storage, networking and security.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Payment Providers</strong>
-                    <span>
-                      Processing purchases, subscriptions, refunds and fraud
-                      prevention.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Authentication Providers</strong>
-                    <span>
-                      Login and identity services where you choose them.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Security Providers</strong>
-                    <span>
-                      Fraud prevention, abuse detection and platform security.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Professional Advisers</strong>
-                    <span>
-                      Lawyers, auditors and other professional advisers where
-                      appropriate.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Authorities</strong>
-                    <span>
-                      Where disclosure is required or permitted by law.
-                    </span>
-                  </div>
+                  {t('legalPrivacy.sharingGrid').map((item, index) => (
+                    <div key={index}>
+                      <strong>{item[0]}</strong>
+                      <span>{item[1]}</span>
+                    </div>
+                  ))}
 
                 </div>
 
@@ -1020,107 +659,51 @@ export default function Privacy() {
               <Section
                 id="transfers"
                 number="18"
-                title="International Transfers"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.transfers')}
               >
 
-                <p>
-                  AmoraLive and its service providers may process information
-                  in countries other than the country where you live.
-                </p>
-
-                <p>
-                  Where applicable data-protection law restricts international
-                  transfers, appropriate safeguards will be used as required,
-                  which may include adequacy decisions, standard contractual
-                  clauses or other legally recognized transfer mechanisms.
-                </p>
-
-                <p>
-                  The actual countries and transfer mechanisms depend on the
-                  infrastructure and providers used by AmoraLive.
-                </p>
+                <p>{t('legalPrivacy.transfersP1')}</p>
+                <p>{t('legalPrivacy.transfersP2')}</p>
+                <p>{t('legalPrivacy.transfersP3')}</p>
 
               </Section>
 
               <Section
                 id="retention"
                 number="19"
-                title="Data Retention"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.retention')}
               >
 
-                <p>
-                  We retain personal information only for as long as reasonably
-                  necessary for the purposes described in this policy, unless a
-                  longer period is required or permitted by law.
-                </p>
+                <p>{t('legalPrivacy.retentionP1')}</p>
 
                 <div className="privacy-retention-grid">
 
-                  <div>
-                    <strong>Account Data</strong>
-                    <span>
-                      Generally retained while your account remains active and
-                      for an appropriate period afterward where necessary.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Transactions</strong>
-                    <span>
-                      May be retained for accounting, tax, fraud prevention and
-                      legal obligations.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Security Logs</strong>
-                    <span>
-                      Retained for a period appropriate to security,
-                      investigation and abuse-prevention needs.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Deleted Content</strong>
-                    <span>
-                      Deletion may take time due to backups, legal obligations,
-                      security requirements or technical processes.
-                    </span>
-                  </div>
+                  {t('legalPrivacy.retentionGrid').map((item, index) => (
+                    <div key={index}>
+                      <strong>{item[0]}</strong>
+                      <span>{item[1]}</span>
+                    </div>
+                  ))}
 
                 </div>
 
-                <p>
-                  Specific retention periods should be maintained internally
-                  in AmoraLive's data-retention schedule and updated as the
-                  platform architecture changes.
-                </p>
+                <p>{t('legalPrivacy.retentionP2')}</p>
 
               </Section>
 
               <Section
                 id="security"
                 number="20"
-                title="Security"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.security')}
               >
 
-                <p>
-                  AmoraLive uses technical and organisational measures designed
-                  to protect personal information against unauthorized access,
-                  loss, misuse, alteration or destruction.
-                </p>
+                <p>{t('legalPrivacy.securityP1')}</p>
 
                 <BulletList
-                  items={[
-                    'Access controls.',
-                    'Authentication and authorization mechanisms.',
-                    'Encryption where appropriate.',
-                    'Security monitoring.',
-                    'Infrastructure safeguards.',
-                    'Logging and abuse detection.',
-                    'Operational security procedures.',
-                    'Incident-response processes.'
-                  ]}
+                  items={t('legalPrivacy.securityBullets')}
                 />
 
                 <div className="privacy-security-banner">
@@ -1131,14 +714,10 @@ export default function Privacy() {
 
                   <div>
                     <strong>
-                      No internet service can guarantee absolute security.
+                      {t('legalPrivacy.securityBannerTitle')}
                     </strong>
 
-                    <p>
-                      We continuously work to reduce security risks, but users
-                      should also protect their passwords, devices and account
-                      credentials.
-                    </p>
+                    <p>{t('legalPrivacy.securityBannerBody')}</p>
                   </div>
 
                 </div>
@@ -1148,21 +727,15 @@ export default function Privacy() {
               <Section
                 id="rights"
                 number="21"
-                title="Your Privacy Rights"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.rights')}
               >
 
-                <p>
-                  Depending on your location and the applicable law, you may
-                  have rights over your personal information.
-                </p>
+                <p>{t('legalPrivacy.rightsP1')}</p>
 
-                <BulletList items={rights} />
+                <BulletList items={t('legalPrivacy.rightsBullets')} />
 
-                <p>
-                  The availability and scope of individual rights can depend on
-                  the legal basis and circumstances of processing. Some rights
-                  are not absolute.
-                </p>
+                <p>{t('legalPrivacy.rightsP2')}</p>
 
                 <div className="privacy-rights-card">
 
@@ -1172,14 +745,10 @@ export default function Privacy() {
 
                   <div>
                     <strong>
-                      Access. Correct. Delete. Object. Export.
+                      {t('legalPrivacy.rightsCardTitle')}
                     </strong>
 
-                    <p>
-                      Where applicable, you can exercise your rights by
-                      contacting AmoraLive through the privacy contact provided
-                      in this policy.
-                    </p>
+                    <p>{t('legalPrivacy.rightsCardBody')}</p>
                   </div>
 
                 </div>
@@ -1189,87 +758,49 @@ export default function Privacy() {
               <Section
                 id="consent"
                 number="22"
-                title="Consent & Withdrawal"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.consent')}
               >
 
-                <p>
-                  Where processing is based on consent, you may withdraw that
-                  consent at any time.
-                </p>
-
-                <p>
-                  Withdrawal does not affect the lawfulness of processing that
-                  occurred before consent was withdrawn.
-                </p>
-
-                <p>
-                  Where processing has another lawful basis, withdrawing
-                  consent does not necessarily require that processing to stop.
-                </p>
+                <p>{t('legalPrivacy.consentP1')}</p>
+                <p>{t('legalPrivacy.consentP2')}</p>
+                <p>{t('legalPrivacy.consentP3')}</p>
 
               </Section>
 
               <Section
                 id="children"
                 number="23"
-                title="Children & Age Protection"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.children')}
               >
 
-                <p>
-                  AmoraLive is intended for adults unless a particular
-                  AmoraLive service expressly states otherwise.
-                </p>
-
-                <p>
-                  We do not knowingly seek to collect personal information
-                  from children in violation of applicable law.
-                </p>
-
-                <p>
-                  If you believe a child has provided personal information to
-                  AmoraLive contrary to the applicable age requirements, please
-                  contact our privacy team.
-                </p>
+                <p>{t('legalPrivacy.childrenP1')}</p>
+                <p>{t('legalPrivacy.childrenP2')}</p>
+                <p>{t('legalPrivacy.childrenP3')}</p>
 
               </Section>
 
               <Section
                 id="thirdparty"
                 number="24"
-                title="Third-Party Services"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.thirdparty')}
               >
 
-                <p>
-                  AmoraLive may use third-party providers for hosting,
-                  authentication, payments, analytics, communications,
-                  security and other technical services.
-                </p>
-
-                <p>
-                  Third-party services may process information under their own
-                  privacy policies and contractual obligations.
-                </p>
-
-                <p>
-                  The exact providers used by AmoraLive should be listed in an
-                  internal vendor register and, where appropriate, disclosed in
-                  this policy or a supplementary provider list.
-                </p>
+                <p>{t('legalPrivacy.thirdpartyP1')}</p>
+                <p>{t('legalPrivacy.thirdpartyP2')}</p>
+                <p>{t('legalPrivacy.thirdpartyP3')}</p>
 
                 <div className="privacy-placeholder">
 
-                  <span>VENDOR REGISTER</span>
+                  <span>{t('legalPrivacy.thirdpartyLabel')}</span>
 
                   <strong>
-                    [INSERT ACTUAL SERVICE PROVIDERS]
+                    {t('legalPrivacy.thirdpartyPlaceholder')}
                   </strong>
 
-                  <p>
-                    Examples may include infrastructure, authentication,
-                    payment, email, analytics, monitoring and security
-                    providers — but only list providers actually used by
-                    AmoraLive.
-                  </p>
+                  <p>{t('legalPrivacy.thirdpartyBody')}</p>
 
                 </div>
 
@@ -1278,32 +809,20 @@ export default function Privacy() {
               <Section
                 id="deletion"
                 number="25"
-                title="Account Deletion"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.deletion')}
               >
 
-                <p>
-                  Where supported by the product, you may request deletion of
-                  your AmoraLive account through account settings or by
-                  contacting us.
-                </p>
-
-                <p>
-                  Deleting an account does not necessarily require immediate
-                  deletion of every record. Certain information may need to be
-                  retained for legal obligations, fraud prevention, security,
-                  dispute resolution, accounting or other lawful purposes.
-                </p>
+                <p>{t('legalPrivacy.deletionP1')}</p>
+                <p>{t('legalPrivacy.deletionP2')}</p>
 
                 <div className="privacy-delete-card">
 
                   <strong>
-                    Want to leave AmoraLive?
+                    {t('legalPrivacy.deletionCardTitle')}
                   </strong>
 
-                  <span>
-                    Your deletion request will be handled according to
-                    applicable law and our retention requirements.
-                  </span>
+                  <span>{t('legalPrivacy.deletionCardBody')}</span>
 
                 </div>
 
@@ -1312,56 +831,33 @@ export default function Privacy() {
               <Section
                 id="breach"
                 number="26"
-                title="Security Incidents"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.breach')}
               >
 
-                <p>
-                  AmoraLive maintains processes for identifying, investigating
-                  and responding to security incidents.
-                </p>
-
-                <p>
-                  Where applicable law requires notification of a personal-data
-                  breach to a supervisory authority or affected individuals,
-                  AmoraLive will follow the legally applicable requirements.
-                </p>
+                <p>{t('legalPrivacy.breachP1')}</p>
+                <p>{t('legalPrivacy.breachP2')}</p>
 
               </Section>
 
               <Section
                 id="complaints"
                 number="27"
-                title="Complaints & Authorities"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.complaints')}
               >
 
-                <p>
-                  If you have a concern about how AmoraLive processes your
-                  personal information, please contact us first so that we can
-                  investigate the issue.
-                </p>
-
-                <p>
-                  Where applicable, you may also have the right to lodge a
-                  complaint with the competent data-protection supervisory
-                  authority in your country or jurisdiction.
-                </p>
+                <p>{t('legalPrivacy.complaintsP1')}</p>
+                <p>{t('legalPrivacy.complaintsP2')}</p>
 
                 <div className="privacy-authority-grid">
 
-                  <div>
-                    <strong>European Union / EEA</strong>
-                    <span>
-                      Your competent national data-protection authority.
-                    </span>
-                  </div>
-
-                  <div>
-                    <strong>Switzerland</strong>
-                    <span>
-                      The competent Swiss data-protection authority where
-                      applicable.
-                    </span>
-                  </div>
+                  {t('legalPrivacy.complaintsGrid').map((item, index) => (
+                    <div key={index}>
+                      <strong>{item[0]}</strong>
+                      <span>{item[1]}</span>
+                    </div>
+                  ))}
 
                 </div>
 
@@ -1370,37 +866,24 @@ export default function Privacy() {
               <Section
                 id="changes"
                 number="28"
-                title="Changes to This Policy"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.changes')}
               >
 
-                <p>
-                  AmoraLive may update this Privacy Policy when our services,
-                  technology, legal obligations or data-processing practices
-                  change.
-                </p>
-
-                <p>
-                  Material changes will be communicated in an appropriate
-                  manner where required by applicable law.
-                </p>
-
-                <p>
-                  The effective date at the top of this policy indicates the
-                  current version.
-                </p>
+                <p>{t('legalPrivacy.changesP1')}</p>
+                <p>{t('legalPrivacy.changesP2')}</p>
+                <p>{t('legalPrivacy.changesP3')}</p>
 
               </Section>
 
               <Section
                 id="contact"
                 number="29"
-                title="Privacy Contact"
+                label={t('legalPrivacy.sectionLabel')}
+                title={t('legalPrivacy.sectionTitles.contact')}
               >
 
-                <p>
-                  For privacy questions, data-subject requests or concerns,
-                  contact AmoraLive using the official privacy contact below.
-                </p>
+                <p>{t('legalPrivacy.contactP1')}</p>
 
                 <div className="privacy-contact-card">
 
@@ -1415,29 +898,29 @@ export default function Privacy() {
                   <div>
 
                     <span>
-                      AMORALIVE PRIVACY
+                      {t('legalPrivacy.contactLabel')}
                     </span>
 
                     <strong>
-                      [INSERT AMORALIVE LEGAL ENTITY]
+                      {t('legalPrivacy.contactEntityPlaceholder')}
                     </strong>
 
                     <p>
-                      Privacy email:
+                      {t('legalPrivacy.contactEmailLabel')}
                       <br />
-                      [INSERT PRIVACY EMAIL]
+                      {t('legalPrivacy.contactEmailPlaceholder')}
                     </p>
 
                     <p>
-                      Registered address:
+                      {t('legalPrivacy.contactAddressLabel')}
                       <br />
-                      [INSERT REGISTERED ADDRESS]
+                      {t('legalPrivacy.contactAddressPlaceholder')}
                     </p>
 
                     <p>
-                      Data Protection Officer:
+                      {t('legalPrivacy.contactDpoLabel')}
                       <br />
-                      [INSERT DPO INFORMATION OR "NOT APPOINTED"]
+                      {t('legalPrivacy.contactDpoPlaceholder')}
                     </p>
 
                   </div>
@@ -1462,23 +945,16 @@ export default function Privacy() {
                 <div>
 
                   <div className="privacy-label">
-                    AMORALIVE PRIVACY PRINCIPLE
+                    {t('legalPrivacy.finalLabel')}
                   </div>
 
                   <h2>
-                    Your Data. Your Rights.
+                    {t('legalPrivacy.finalTitle')}
                   </h2>
 
-                  <p>
-                    AmoraLive is committed to building a modern social
-                    experience while respecting privacy, security,
-                    transparency and applicable data-protection law.
-                  </p>
+                  <p>{t('legalPrivacy.finalP1')}</p>
 
-                  <p>
-                    We believe users should understand what happens to their
-                    information and have meaningful choices over their data.
-                  </p>
+                  <p>{t('legalPrivacy.finalP2')}</p>
 
                 </div>
 
@@ -1489,30 +965,30 @@ export default function Privacy() {
 
                 <div>
                   <strong>
-                    AMORALIVE
+                    {t('legalPrivacy.footerBrand')}
                   </strong>
 
                   <span>
-                    Privacy Policy • August 2026
+                    {t('legalPrivacy.footerTagline')}
                   </span>
                 </div>
 
                 <div className="privacy-footer-links">
 
                   <Link href="/legal/terms">
-                    Terms
+                    {t('legalPrivacy.footerLinkTerms')}
                   </Link>
 
                   <Link href="/legal/guidelines">
-                    Community
+                    {t('legalPrivacy.footerLinkCommunity')}
                   </Link>
 
                   <Link href="/legal/cookies">
-                    Cookies
+                    {t('legalPrivacy.footerLinkCookies')}
                   </Link>
 
                   <Link href="/">
-                    Home
+                    {t('legalPrivacy.footerLinkHome')}
                   </Link>
 
                 </div>
