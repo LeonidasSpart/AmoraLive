@@ -4,8 +4,10 @@ import { useLocalSearchParams, router } from "expo-router";
 import AppShell from "../../src/AppShell";
 import { theme } from "../../src/theme";
 import { api } from "../../src/phase2Api";
+import { useTranslation } from "../../src/i18n";
 
 export default function Chat() {
+  const { t } = useTranslation();
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const [messages, setMessages] = useState<any[]>([]);
   const [peer, setPeer] = useState<any>(null);
@@ -47,8 +49,8 @@ export default function Chat() {
       <View style={s.header}>
         <Pressable onPress={() => router.back()}><Text style={s.back}>‹</Text></Pressable>
         <View style={{ flex: 1 }}>
-          <Text style={s.name}>{peer?.display_name || peer?.username || "Chat"}</Text>
-          <Text style={s.status}>Private conversation</Text>
+          <Text style={s.name}>{peer?.display_name || peer?.username || t("chatScreen.chatFallback")}</Text>
+          <Text style={s.status}>{t("chatScreen.privateConversation")}</Text>
         </View>
       </View>
 
@@ -60,11 +62,11 @@ export default function Chat() {
               <Text style={s.bubbleText}>{m.content}</Text>
             </View>;
           })}
-          {!messages.length && <Text style={s.empty}>Start the conversation. Keep it kind. 💗</Text>}
+          {!messages.length && <Text style={s.empty}>{t("chatScreen.startConversation")}</Text>}
         </ScrollView>}
 
       <View style={s.composer}>
-        <TextInput value={text} onChangeText={setText} placeholder="Write a message…" placeholderTextColor={theme.dim} style={s.input} multiline />
+        <TextInput value={text} onChangeText={setText} placeholder={t("chatScreen.messagePlaceholder")} placeholderTextColor={theme.dim} style={s.input} multiline />
         <Pressable disabled={!text.trim() || sending} onPress={send} style={[s.send, (!text.trim() || sending) && s.disabled]}>
           <Text style={s.sendText}>➤</Text>
         </Pressable>

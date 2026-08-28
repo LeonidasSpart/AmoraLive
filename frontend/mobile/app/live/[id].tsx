@@ -8,6 +8,7 @@ import AppShell from "../../src/AppShell";
 import { theme } from "../../src/theme";
 import { api } from "../../src/phase2Api";
 import { API_URL, getValidAccessToken } from "../../src/api/client";
+import { useTranslation } from "../../src/i18n";
 
 // NOTE: the LiveKit *client* calls here (Room/RoomEvent/Track, connect,
 // track-subscription events) are the same stable, version-independent API
@@ -18,6 +19,7 @@ import { API_URL, getValidAccessToken } from "../../src/api/client";
 // first thing to check against an actual build log.
 
 export default function LiveRoom() {
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const [room, setRoom] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -63,7 +65,7 @@ export default function LiveRoom() {
 
       s.on("connect", () => {
         s.emit("authenticate", token, (ack: any) => {
-          if (!ack?.ok) { setVideoError((prev) => prev || "Realtime connection failed to authenticate."); return; }
+          if (!ack?.ok) { setVideoError((prev) => prev || t("liveRoomScreen.errorRealtimeAuth")); return; }
           s.emit("join-live", String(id));
         });
       });
@@ -71,7 +73,7 @@ export default function LiveRoom() {
 
       s.on("battle:invite", (payload: any) => setIncomingInvite(payload));
       s.on("battle:invite_expired", () => setIncomingInvite(null));
-      s.on("battle:invite_declined", () => setVideoError("Your battle invite was declined."));
+      s.on("battle:invite_declined", () => setVideoError(t("liveRoomScreen.inviteDeclined")));
       s.on("battle:invite_cancelled", () => setIncomingInvite(null));
       s.on("battle:started", async (payload: any) => {
         setIncomingInvite(null);
@@ -86,7 +88,7 @@ export default function LiveRoom() {
           if (!prev || prev.battleId !== payload.battleId) return prev;
           const myScore = prev.mySide === "a" ? payload.scoreA : payload.scoreB;
           const oppScore = prev.mySide === "a" ? payload.scoreB : payload.scoreA;
-          setBattleResult(myScore === oppScore ? "🤝 It's a draw!" : myScore > oppScore ? "🏆 You won the battle!" : "😢 You lost the battle.");
+          setBattleResult(myScore === oppScore ? t("liveRoomScreen.battleDraw") : myScore > oppScore ? t("liveRoomScreen.battleWon") : t("liveRoomScreen.battleLost"));
           setTimeout(() => setBattleResult(""), 4000);
           return null;
         });
@@ -149,7 +151,7 @@ export default function LiveRoom() {
           setRemoteTrackRef({ participant: lk.localParticipant, publication: null });
         }
       } catch (e: any) {
-        if (active) setVideoError(e.message || "Unable to connect to the live stream.");
+        if (active) setVideoError(e.message || t("liveRoomScreen.errorConnect"));
       }
     })();
     return () => {
@@ -204,7 +206,7 @@ export default function LiveRoom() {
 
   return <AppShell>
     <ScrollView style={s.page} contentContainerStyle={{ paddingBottom: 30 }}>
-      <View style={s.top}><Pressable onPress={() => router.back()}><Text style={s.back}>‹</Text></Pressable><Text style={s.topTitle}>LIVE</Text><Text style={s.viewer}>👁 {viewerCount}</Text></View>
+      <View style={s.top}><Pressable onPress={() => router.back()}><Text style={s.back}>‹</Text></Pressable><Text style={s.topTitle}>{t("liveRoomScreen.liveWord")}</Text><Text style={s.viewer}>👁 {viewerCount}</Text></View>
 
       <View style={[s.stage, battle && s.stageBattle]}>
         <View style={battle ? s.halfStage : s.fullStage}>
@@ -213,7 +215,7 @@ export default function LiveRoom() {
           ) : room?.thumbnail_url ? (
             <Image source={{ uri: room.thumbnail_url }} style={s.thumb} />
           ) : (
-            <View style={s.placeholder}><Text style={{ fontSize: 50 }}>🔴</Text><Text style={s.liveText}>{videoError ? "Video unavailable" : connected ? "Connecting video…" : "LIVE"}</Text></View>
+            <View style={s.placeholder}><Text style={{ fontSize: 50 }}>🔴</Text><Text style={s.liveText}>{videoError ? t("liveRoomScreen.videoUnavailable") : connected ? t("liveRoomScreen.connectingVideo") : t("liveRoomScreen.liveWord")}</Text></View>
           )}
         </View>
         {battle && (
@@ -222,7 +224,7 @@ export default function LiveRoom() {
             <Text style={s.opponentLabel}>{battle.opponent?.host?.display_name || battle.opponent?.host?.username}</Text>
           </View>
         )}
-        {!battle && <View style={s.overlay}><Text style={s.roomTitle}>{room?.title || "Live room"}</Text><Text style={s.host}>{room?.host?.display_name || room?.host?.username || "Creator"}</Text></View>}
+        {!battle && <View style={s.overlay}><Text style={s.roomTitle}>{room?.title || t("liveRoomScreen.roomTitleFallback")}</Text><Text style={s.host}>{room?.host?.display_name || room?.host?.username || t("liveRoomScreen.creatorFallback")}</Text></View>}
 
         {battle && (
           <View style={s.battleBar}>
@@ -241,23 +243,23 @@ export default function LiveRoom() {
 
       {incomingInvite && (
         <View style={s.inviteBanner}>
-          <Text style={s.inviteText}>⚔️ {incomingInvite.fromHost?.display_name || "A streamer"} wants to battle!</Text>
+          <Text style={s.inviteText}>⚔️ {incomingInvite.fromHost?.display_name || t("liveRoomScreen.streamerFallback")} {t("liveRoomScreen.wantsToBattleSuffix")}</Text>
           <View style={{ flexDirection: "row", gap: 8, marginTop: 8 }}>
-            <Pressable onPress={() => respondToInvite(true)} style={s.acceptBtn}><Text style={s.inviteBtnText}>Accept</Text></Pressable>
-            <Pressable onPress={() => respondToInvite(false)} style={s.declineBtn}><Text style={s.inviteBtnText}>Decline</Text></Pressable>
+            <Pressable onPress={() => respondToInvite(true)} style={s.acceptBtn}><Text style={s.inviteBtnText}>{t("liveRoomScreen.accept")}</Text></Pressable>
+            <Pressable onPress={() => respondToInvite(false)} style={s.declineBtn}><Text style={s.inviteBtnText}>{t("liveRoomScreen.decline")}</Text></Pressable>
           </View>
         </View>
       )}
 
       <View style={s.actions}>
-        {isHost && battle && <Pressable style={s.action} onPress={endBattle}><Text style={s.actionIcon}>🏳️</Text><Text style={s.actionText}>End Battle</Text></Pressable>}
-        <Pressable style={s.action} onPress={() => setGiftOpen(!giftOpen)}><Text style={s.actionIcon}>🎁</Text><Text style={s.actionText}>Gift</Text></Pressable>
-        <Pressable style={s.action} onPress={() => router.push({ pathname: "/chat/[userId]", params: { userId: String(room?.host?.id) } })}><Text style={s.actionIcon}>💬</Text><Text style={s.actionText}>Message</Text></Pressable>
+        {isHost && battle && <Pressable style={s.action} onPress={endBattle}><Text style={s.actionIcon}>🏳️</Text><Text style={s.actionText}>{t("liveRoomScreen.endBattle")}</Text></Pressable>}
+        <Pressable style={s.action} onPress={() => setGiftOpen(!giftOpen)}><Text style={s.actionIcon}>🎁</Text><Text style={s.actionText}>{t("liveRoomScreen.gift")}</Text></Pressable>
+        <Pressable style={s.action} onPress={() => router.push({ pathname: "/chat/[userId]", params: { userId: String(room?.host?.id) } })}><Text style={s.actionIcon}>💬</Text><Text style={s.actionText}>{t("liveRoomScreen.message")}</Text></Pressable>
       </View>
 
       {giftOpen && <View style={s.giftPanel}>{gifts.slice(0, 8).map((g) => <Pressable key={g.id} style={s.gift} onPress={() => sendGift(g)}><Text style={{ fontSize: 25 }}>{g.glyph || "🎁"}</Text><Text style={s.giftName}>{g.name}</Text><Text style={s.coin}>🪙 {g.coin_price || 0}</Text></Pressable>)}</View>}
 
-      <View style={s.info}><Text style={s.section}>About this live</Text><Text style={s.muted}>#{room?.category || "General"} · {viewerCount} watching</Text></View>
+      <View style={s.info}><Text style={s.section}>{t("liveRoomScreen.aboutThisLive")}</Text><Text style={s.muted}>#{room?.category || t("liveRoomScreen.generalFallback")} · {viewerCount} {t("liveRoomScreen.watchingSuffix")}</Text></View>
     </ScrollView>
   </AppShell>;
 }
