@@ -45,10 +45,10 @@ button { -webkit-tap-highlight-color: transparent; }
 .amora-brand-link { display: inline-flex; align-items: center; flex: 0 0 auto; text-decoration: none; }
 .amora-header-logo { display: block; width: 48px; height: 48px; object-fit: contain; border-radius: 50%; box-shadow: 0 8px 28px rgba(255,63,157,.16); }
 .amora-nav-links { display: flex; align-items: center; justify-content: center; gap: 30px; color: var(--amora-muted); font-size: 14px; }
-.amora-nav-links a { text-decoration: none; transition: color .2s ease; }
+.amora-nav-links a { text-decoration: none; transition: color .2s ease; white-space: nowrap; }
 .amora-nav-links a:hover { color: #fff; }
 .amora-mobile-actions { display: none; }
-.amora-actions { display: flex; gap: 10px; align-items: center; }
+.amora-actions { display: flex; gap: 10px; align-items: center; flex-shrink: 0; }
 .amora-btn { display: inline-flex; align-items: center; justify-content: center; min-height: 46px; padding: 0 20px; border-radius: 14px; border: 1px solid var(--amora-border); text-decoration: none; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; font-weight: 700; }
 .amora-btn:hover { transform: translateY(-2px); }
 .amora-btn:focus-visible, .amora-menu-toggle:focus-visible, .amora-password-toggle:focus-visible, .amora-google:focus-visible, .amora-input:focus-visible { outline: 3px solid rgba(255,63,157,.35); outline-offset: 3px; }
@@ -56,6 +56,7 @@ button { -webkit-tap-highlight-color: transparent; }
 .amora-btn-primary { background: var(--amora-gradient); box-shadow: 0 10px 35px rgba(255,63,157,.22); color: #fff; border-color: transparent; }
 .amora-btn-secondary { background: rgba(255,255,255,.04); color: #fff; }
 .amora-btn-large { min-height: 54px; padding: 0 23px; }
+.amora-desktop-actions .amora-btn { white-space: nowrap; }
 .amora-menu-toggle { display: none; width: 44px; height: 44px; padding: 9px; border: 1px solid var(--amora-border); border-radius: 13px; background: rgba(255,255,255,.04); cursor: pointer; }
 .amora-menu-toggle span { display: block; height: 2px; margin: 5px 0; border-radius: 99px; background: #fff; transition: transform .2s ease, opacity .2s ease; }
 .amora-menu-toggle.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
@@ -182,10 +183,13 @@ button { -webkit-tap-highlight-color: transparent; }
   .amora-app-actions { gap: 8px; }
 }
 
-@media (max-width: 720px) {
-  .amora-container { width: min(100% - 28px, 1180px); }
-  .amora-nav-inner { min-height: 68px; }
-  .amora-header-logo { width: 44px; height: 44px; }
+/* Translated nav labels and buttons (Français, Deutsch, Português, etc.)
+   run noticeably longer than the English originals this layout was
+   designed around, so the full desktop nav row switches to the
+   hamburger menu earlier than the 720px mobile breakpoint below —
+   otherwise the row keeps its flex layout but individual items shrink
+   below their text's natural width and wrap onto two lines. */
+@media (max-width: 960px) {
   .amora-desktop-actions { display: none; }
   .amora-menu-toggle { display: block; }
   .amora-nav-links { display: none; position: absolute; left: 14px; right: 14px; top: calc(100% + 8px); flex-direction: column; align-items: stretch; gap: 4px; padding: 10px; border: 1px solid var(--amora-border); border-radius: 18px; background: rgba(15,10,31,.97); box-shadow: 0 25px 60px rgba(0,0,0,.42); }
@@ -193,6 +197,12 @@ button { -webkit-tap-highlight-color: transparent; }
   .amora-nav-links a { padding: 13px 14px; border-radius: 11px; }
   .amora-nav-links a:hover { background: rgba(255,255,255,.04); }
   .amora-mobile-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: 8px; }
+}
+
+@media (max-width: 720px) {
+  .amora-container { width: min(100% - 28px, 1180px); }
+  .amora-nav-inner { min-height: 68px; }
+  .amora-header-logo { width: 44px; height: 44px; }
   .amora-hero { min-height: auto; padding: 38px 0 58px; gap: 32px; }
   .amora-hero h1 { font-size: clamp(42px, 12vw, 58px); }
   .amora-hero p { font-size: 16px; }
