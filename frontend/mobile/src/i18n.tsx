@@ -176,6 +176,148 @@ export const translations: Record<string, Translations> = {
       savingEllipsis: "Saving…", saveChanges: "Save changes",
       membershipRow: "Membership & VIP", walletRow: "Wallet & Coins", notificationsRow: "Notifications",
       logout: "Log out", deleteMyAccount: "Delete my account"
+    },
+    levelsScreen: {
+      kicker: "AMORA ROYAL CLUB", title: "Your level. Your aura.", xpWord: "XP", xpUntilNext: "XP until your next unlock",
+      privileges: "Privileges", unlocked: "UNLOCKED", locked: "LOCKED",
+      perk1Title: "Medal of Honor", perk1Desc: "A signature badge beside your profile",
+      perk2Title: "Glow Entrance", perk2Desc: "A premium entrance effect in live rooms",
+      perk3Title: "Creator Chat", perk3Desc: "Enhanced chat styling",
+      perk4Title: "VIP Gift Set", perk4Desc: "Special gifts reserved for rising stars",
+      perk5Title: "Profile Spotlight", perk5Desc: "A premium profile highlight",
+      perk6Title: "Elite Effects", perk6Desc: "Exclusive live-room effects",
+      perk7Title: "Golden Aura", perk7Desc: "A royal profile aura and badge",
+      perk8Title: "Hidden Status", perk8Desc: "Optional discreet online visibility",
+      perk9Title: "Royal Creator", perk9Desc: "A signature creator identity and premium frame"
+    },
+    membershipScreen: {
+      kicker: "AMORA PRIVILEGE", title: "VIP Membership", sub: "A more beautiful way to enjoy AmoraLive.",
+      errorLoad: "Unable to load membership.", checkoutUnavailable: "Checkout is not available right now.",
+      noReceiptIOS: "No receipt returned from the App Store.", noTokenAndroid: "No purchase token returned from Google Play.",
+      errorStart: "Unable to start membership.",
+      chooseVipTitle: "Choose VIP", subscribeQuestionPrefix: "Subscribe to", thisPlanFallback: "this plan",
+      subscribe: "Subscribe",
+      notAvailableTitle: "Not available", notAvailableBody: "Restore Purchases needs the native app build — it isn't available in this preview.",
+      nothingToRestoreTitle: "Nothing to restore", nothingToRestoreBody: "No active subscription was found for this account.",
+      restoredTitle: "Restored", restoredBody: "Your membership has been restored.",
+      errorRestore: "Unable to restore purchases.",
+      yourMembership: "YOUR MEMBERSHIP", freeWord: "Free",
+      restoring: "Restoring…", restorePurchases: "Restore Purchases",
+      nativeStoreHint: "Native store purchases aren't available in this build — using secure web checkout instead.",
+      defaultPerk1: "VIP badge & profile frame", defaultPerk2: "Exclusive gifts", defaultPerk3: "VIP rooms", defaultPerk4: "Monthly perks",
+      chooseVip: "Choose VIP"
+    },
+    missionsScreen: {
+      kicker: "AMORA PROGRESSION", title: "Missions & Achievements",
+      errorLoad: "Unable to load missions.", errorClaim: "Unable to claim reward.",
+      typeDaily: "📅 Daily", typeWeekly: "🗓️ Weekly", typeLifetime: "🏆 Achievements",
+      claimed: "✓ Claimed", claiming: "Claiming…", claimReward: "Claim reward", inProgress: "In progress"
+    },
+    outfitsScreen: {
+      kicker: "AMORA COLLECTION", title: "Dress your aura.",
+      subtitle: "Frames, effects, badges and profile styles that make your Amora identity yours.",
+      errorLoad: "Unable to load your collection.", errorUpdate: "Unable to update your look.",
+      equipped: "Equipped", equip: "Equip", notOwned: "Not owned", coinsWord: "coins"
+    },
+    rewardsScreen: {
+      kicker: "AMORA REWARDS", title: "Come back. Get rewarded.",
+      errorLoad: "Unable to load rewards.", errorClaimNotAvailable: "Reward is not available yet.",
+      dayStreakSuffix: "day streak", coinsAvailableTodaySuffix: "coins available today",
+      claimedToday: "✓ Claimed today", claiming: "Claiming…", claimDailyReward: "Claim daily reward",
+      historyTitle: "Reward history",
+      rewardFallback: "Reward", dayOfCyclePrefix: "Day", ofCycle: "of cycle", milestoneSuffix: "milestone"
+    },
+    storeScreen: {
+      kicker: "AMORA LUXURY VAULT", title: "Boutique",
+      errorLoad: "Unable to load the store.", errorBuy: "Purchase failed.", errorUpdate: "Unable to update item.",
+      permanent: "Permanent", equippedCheck: "Equipped ✓", equip: "Equip", buying: "Buying…", notEnoughCoins: "Not enough coins", buy: "Buy"
+    },
+    studioScreen: {
+      kicker: "AMORA CREATOR", title: "Creator Studio", errorLoad: "Unable to load Creator Studio.",
+      followers: "Followers", newThisWeek: "New this week", streams: "Streams", liveTime: "Live time",
+      peakViewers: "Peak viewers", giftsReceived: "Gifts received", earnings: "Earnings", level: "Level",
+      quickTools: "Quick tools", goLive: "🔴 Go Live", missionsLink: "🎯 Missions", walletLink: "🎁 Wallet",
+      last30Days: "Last 30 days", followersSuffix: "followers"
+    },
+    withdrawScreen: {
+      kicker: "AMORA CREATOR PAYOUTS", title: "Withdraw",
+      errorLoad: "Unable to load withdrawal information.",
+      minWithdrawalError: "Minimum withdrawal is", coinsWord: "coins",
+      maxBalanceError: "You cannot withdraw more than your balance.",
+      enterPayoutDetails: "Enter your payout details.",
+      requestSubmittedPrefix: "Withdrawal submitted for", errorSubmit: "Unable to submit withdrawal.",
+      minimumPrefix: "Minimum:", ratePrefix: "Rate:", perCoinSuffix: "¢ / coin",
+      coinsAmountLabel: "Coins amount", payoutMethodLabel: "Payout method", payoutDetailsLabel: "Payout details",
+      detailsPlaceholder: "Email or bank details",
+      submitting: "Submitting…", requestWithdrawal: "Request withdrawal", historyTitle: "History",
+      methodPaypal: "PAYPAL", methodBank: "BANK", methodOther: "OTHER"
+    },
+    discoverScreen: {
+      kicker: "AMORA", title: "Discover", subtitle: "Find people, creators and live rooms worth your time.",
+      searchPlaceholder: "Search creators, rooms…",
+      catForYou: "For You", catLive: "Live", catCreators: "Creators", catDating: "Dating", catNew: "New",
+      errorLoad: "Unable to load Discover.", memberFallback: "Amora member", liveTag: "🔴 LIVE",
+      nothingHere: "Nothing here yet. Try another category.",
+      verifiedCreator: "Verified creator", creatorWord: "Creator"
+    },
+    datingScreen: {
+      kicker: "AMORA", title: "Discover Love", matchesLink: "Matches ♡",
+      errorLoad: "Unable to load dating.", memberFallback: "Amora member", compatibleSuffix: "% compatible",
+      allCaughtUp: "You're all caught up", comeBackLater: "Come back later for new connections."
+    },
+    liveScreen: {
+      kicker: "AMORA LIVE", title: "Live now", goLive: "● Go Live",
+      heroKicker: "REAL-TIME CONNECTIONS", heroTitle: "Find a room that feels alive.",
+      heroSub: "Join conversations, meet new people and send premium 3D gifts.",
+      errorLoad: "Unable to load live rooms.",
+      noOneLive: "No one is live right now", beFirst: "Be the first — tap Go Live above.",
+      generalFallback: "General"
+    },
+    storiesScreen: {
+      kicker: "AMORA", title: "Stories", errorLoad: "Unable to load stories.",
+      amoraFallback: "Amora", noStoriesYet: "No stories yet. Be the first to share a moment."
+    },
+    deleteAccountScreen: {
+      kicker: "ACCOUNT PRIVACY", title: "Delete your Amora account.",
+      subtitle: "Enter the email associated with your account. We will send a secure confirmation link.",
+      defaultDoneMessage: "If an Amora account exists for that email, a confirmation link has been sent.",
+      errorGeneric: "Unable to process your request.", checkInbox: "Check your inbox.",
+      emailLabel: "Email address", requestButton: "Request account deletion",
+      note: "Some records may be retained or anonymized where required for security, fraud prevention, financial records or legal obligations."
+    },
+    socialCompleteScreen: {
+      missingSession: "This sign-in session is missing or invalid.",
+      errorContinue: "Unable to continue social registration.",
+      invalidEmail: "Enter a valid email address.",
+      invalidUsername: "Choose a username with 3–20 letters, numbers, dots, dashes or underscores.",
+      invalidDob: "Enter your date of birth as YYYY-MM-DD.",
+      errorFinishPrefix: "Unable to finish", errorFinishSuffix: "registration.",
+      securelyConnectingPrefix: "Securely connecting to",
+      brand: "AMORA", title: "Finish your account.",
+      subtitle: "One last step — choose your Amora username and confirm that you are 18+.",
+      emailPlaceholder: "Email address", usernamePlaceholder: "Username (3-20 characters)", dobPlaceholder: "Date of birth (YYYY-MM-DD)",
+      continueToAmora: "Continue to Amora"
+    },
+    videoMatchScreen: {
+      kicker: "AMORA · VIDEO MATCH", title: "Meet face-to-face.",
+      introTitle: "Quick Video Match", introText: "A short first impression. If you both like each other, Amora creates a match.",
+      startButton: "Start Video Match", findingSomeone: "Finding someone…", connecting: "Connecting…",
+      stayHere: "Stay here while Amora finds a compatible person.",
+      someoneWord: "Someone", isHereSuffix: "is here", readyToMeet: "Ready to meet",
+      waitingForVideo: "Waiting for video…", howDidItFeel: "How did it feel?",
+      pass: "Pass", like: "♥ Like",
+      matchExclaim: "It's a match!", noMatchThisTime: "No match this time",
+      matchedBody: "You both liked each other. Your new connection is ready.",
+      keepExploring: "Keep exploring — there are more people to meet.",
+      openMatches: "Open Matches", tryAgain: "Try Again",
+      errorAuth: "Unable to authenticate. Please sign in again.", errorConnect: "Unable to connect.",
+      errorVideoConnect: "Unable to connect video.", errorMatchFailed: "Video match failed."
+    },
+    videoScreen: {
+      title: "Video call", memberFallback: "Amora member",
+      readyLine: "LiveKit call screen ready.",
+      connectHint: "Connect the existing native LiveKit Room here for the production media session.",
+      endCall: "End call"
     }
   },
   es: {
@@ -325,6 +467,148 @@ export const translations: Record<string, Translations> = {
       savingEllipsis: "Guardando…", saveChanges: "Guardar cambios",
       membershipRow: "Membresía y VIP", walletRow: "Billetera y monedas", notificationsRow: "Notificaciones",
       logout: "Cerrar sesión", deleteMyAccount: "Eliminar mi cuenta"
+    },
+    levelsScreen: {
+      kicker: "CLUB REAL AMORA", title: "Tu nivel. Tu aura.", xpWord: "XP", xpUntilNext: "XP para tu próximo desbloqueo",
+      privileges: "Privilegios", unlocked: "DESBLOQUEADO", locked: "BLOQUEADO",
+      perk1Title: "Medalla de Honor", perk1Desc: "Una insignia distintiva junto a tu perfil",
+      perk2Title: "Entrada Resplandeciente", perk2Desc: "Un efecto de entrada premium en salas en vivo",
+      perk3Title: "Chat de Creador", perk3Desc: "Estilo de chat mejorado",
+      perk4Title: "Set de Regalos VIP", perk4Desc: "Regalos especiales reservados para estrellas en ascenso",
+      perk5Title: "Reflector de Perfil", perk5Desc: "Un destaque premium para tu perfil",
+      perk6Title: "Efectos de Élite", perk6Desc: "Efectos exclusivos en salas en vivo",
+      perk7Title: "Aura Dorada", perk7Desc: "Un aura de perfil real y una insignia",
+      perk8Title: "Estado Oculto", perk8Desc: "Visibilidad en línea discreta opcional",
+      perk9Title: "Creador Real", perk9Desc: "Una identidad de creador distintiva y un marco premium"
+    },
+    membershipScreen: {
+      kicker: "PRIVILEGIO AMORA", title: "Membresía VIP", sub: "Una forma más hermosa de disfrutar AmoraLive.",
+      errorLoad: "No se pudo cargar la membresía.", checkoutUnavailable: "El pago no está disponible en este momento.",
+      noReceiptIOS: "No se recibió el recibo de la App Store.", noTokenAndroid: "No se recibió el token de compra de Google Play.",
+      errorStart: "No se pudo iniciar la membresía.",
+      chooseVipTitle: "Elegir VIP", subscribeQuestionPrefix: "¿Suscribirse a", thisPlanFallback: "este plan",
+      subscribe: "Suscribirse",
+      notAvailableTitle: "No disponible", notAvailableBody: "Restaurar compras necesita la app nativa — no está disponible en esta vista previa.",
+      nothingToRestoreTitle: "Nada que restaurar", nothingToRestoreBody: "No se encontró ninguna suscripción activa para esta cuenta.",
+      restoredTitle: "Restaurado", restoredBody: "Tu membresía ha sido restaurada.",
+      errorRestore: "No se pudieron restaurar las compras.",
+      yourMembership: "TU MEMBRESÍA", freeWord: "Gratis",
+      restoring: "Restaurando…", restorePurchases: "Restaurar compras",
+      nativeStoreHint: "Las compras nativas no están disponibles en esta versión; se usará el pago web seguro.",
+      defaultPerk1: "Insignia VIP y marco de perfil", defaultPerk2: "Regalos exclusivos", defaultPerk3: "Salas VIP", defaultPerk4: "Beneficios mensuales",
+      chooseVip: "Elegir VIP"
+    },
+    missionsScreen: {
+      kicker: "PROGRESIÓN AMORA", title: "Misiones y logros",
+      errorLoad: "No se pudieron cargar las misiones.", errorClaim: "No se pudo reclamar la recompensa.",
+      typeDaily: "📅 Diarias", typeWeekly: "🗓️ Semanales", typeLifetime: "🏆 Logros",
+      claimed: "✓ Reclamado", claiming: "Reclamando…", claimReward: "Reclamar recompensa", inProgress: "En progreso"
+    },
+    outfitsScreen: {
+      kicker: "COLECCIÓN AMORA", title: "Viste tu aura.",
+      subtitle: "Marcos, efectos, insignias y estilos de perfil que hacen tu identidad Amora tuya.",
+      errorLoad: "No se pudo cargar tu colección.", errorUpdate: "No se pudo actualizar tu look.",
+      equipped: "Equipado", equip: "Equipar", notOwned: "No adquirido", coinsWord: "monedas"
+    },
+    rewardsScreen: {
+      kicker: "RECOMPENSAS AMORA", title: "Vuelve. Sé recompensado.",
+      errorLoad: "No se pudieron cargar las recompensas.", errorClaimNotAvailable: "La recompensa aún no está disponible.",
+      dayStreakSuffix: "días de racha", coinsAvailableTodaySuffix: "monedas disponibles hoy",
+      claimedToday: "✓ Reclamado hoy", claiming: "Reclamando…", claimDailyReward: "Reclamar recompensa diaria",
+      historyTitle: "Historial de recompensas",
+      rewardFallback: "Recompensa", dayOfCyclePrefix: "Día", ofCycle: "del ciclo", milestoneSuffix: "hito"
+    },
+    storeScreen: {
+      kicker: "BÓVEDA DE LUJO AMORA", title: "Boutique",
+      errorLoad: "No se pudo cargar la tienda.", errorBuy: "Compra fallida.", errorUpdate: "No se pudo actualizar el artículo.",
+      permanent: "Permanente", equippedCheck: "Equipado ✓", equip: "Equipar", buying: "Comprando…", notEnoughCoins: "Monedas insuficientes", buy: "Comprar"
+    },
+    studioScreen: {
+      kicker: "CREADOR AMORA", title: "Estudio de Creador", errorLoad: "No se pudo cargar el Estudio de Creador.",
+      followers: "Seguidores", newThisWeek: "Nuevos esta semana", streams: "Transmisiones", liveTime: "Tiempo en vivo",
+      peakViewers: "Pico de espectadores", giftsReceived: "Regalos recibidos", earnings: "Ganancias", level: "Nivel",
+      quickTools: "Herramientas rápidas", goLive: "🔴 Ir en vivo", missionsLink: "🎯 Misiones", walletLink: "🎁 Billetera",
+      last30Days: "Últimos 30 días", followersSuffix: "seguidores"
+    },
+    withdrawScreen: {
+      kicker: "PAGOS A CREADORES AMORA", title: "Retirar",
+      errorLoad: "No se pudo cargar la información de retiro.",
+      minWithdrawalError: "El retiro mínimo es", coinsWord: "monedas",
+      maxBalanceError: "No puedes retirar más de tu saldo.",
+      enterPayoutDetails: "Ingresa los detalles de tu pago.",
+      requestSubmittedPrefix: "Retiro enviado por", errorSubmit: "No se pudo enviar el retiro.",
+      minimumPrefix: "Mínimo:", ratePrefix: "Tasa:", perCoinSuffix: "¢ / moneda",
+      coinsAmountLabel: "Cantidad de monedas", payoutMethodLabel: "Método de pago", payoutDetailsLabel: "Detalles de pago",
+      detailsPlaceholder: "Correo o datos bancarios",
+      submitting: "Enviando…", requestWithdrawal: "Solicitar retiro", historyTitle: "Historial",
+      methodPaypal: "PAYPAL", methodBank: "BANCO", methodOther: "OTRO"
+    },
+    discoverScreen: {
+      kicker: "AMORA", title: "Descubrir", subtitle: "Encuentra personas, creadores y salas en vivo que valgan tu tiempo.",
+      searchPlaceholder: "Buscar creadores, salas…",
+      catForYou: "Para ti", catLive: "En vivo", catCreators: "Creadores", catDating: "Citas", catNew: "Nuevo",
+      errorLoad: "No se pudo cargar Descubrir.", memberFallback: "Miembro de Amora", liveTag: "🔴 EN VIVO",
+      nothingHere: "Nada por aquí todavía. Prueba otra categoría.",
+      verifiedCreator: "Creador verificado", creatorWord: "Creador"
+    },
+    datingScreen: {
+      kicker: "AMORA", title: "Descubre el amor", matchesLink: "Matches ♡",
+      errorLoad: "No se pudo cargar las citas.", memberFallback: "Miembro de Amora", compatibleSuffix: "% compatible",
+      allCaughtUp: "Estás al día", comeBackLater: "Vuelve más tarde para nuevas conexiones."
+    },
+    liveScreen: {
+      kicker: "AMORA EN VIVO", title: "En vivo ahora", goLive: "● Ir en vivo",
+      heroKicker: "CONEXIONES EN TIEMPO REAL", heroTitle: "Encuentra una sala que se sienta viva.",
+      heroSub: "Únete a conversaciones, conoce gente nueva y envía regalos 3D premium.",
+      errorLoad: "No se pudieron cargar las salas en vivo.",
+      noOneLive: "Nadie está en vivo ahora", beFirst: "Sé el primero — toca Ir en vivo arriba.",
+      generalFallback: "General"
+    },
+    storiesScreen: {
+      kicker: "AMORA", title: "Historias", errorLoad: "No se pudieron cargar las historias.",
+      amoraFallback: "Amora", noStoriesYet: "Aún no hay historias. Sé el primero en compartir un momento."
+    },
+    deleteAccountScreen: {
+      kicker: "PRIVACIDAD DE CUENTA", title: "Elimina tu cuenta de Amora.",
+      subtitle: "Introduce el correo asociado a tu cuenta. Te enviaremos un enlace de confirmación seguro.",
+      defaultDoneMessage: "Si existe una cuenta de Amora con ese correo, se ha enviado un enlace de confirmación.",
+      errorGeneric: "No se pudo procesar tu solicitud.", checkInbox: "Revisa tu bandeja de entrada.",
+      emailLabel: "Correo electrónico", requestButton: "Solicitar eliminación de cuenta",
+      note: "Algunos registros pueden conservarse o anonimizarse cuando lo exijan la seguridad, la prevención de fraude, registros financieros u obligaciones legales."
+    },
+    socialCompleteScreen: {
+      missingSession: "Esta sesión de inicio de sesión falta o no es válida.",
+      errorContinue: "No se pudo continuar con el registro social.",
+      invalidEmail: "Introduce un correo electrónico válido.",
+      invalidUsername: "Elige un usuario con 3–20 letras, números, puntos, guiones o guiones bajos.",
+      invalidDob: "Introduce tu fecha de nacimiento como AAAA-MM-DD.",
+      errorFinishPrefix: "No se pudo finalizar el registro de", errorFinishSuffix: ".",
+      securelyConnectingPrefix: "Conectando de forma segura con",
+      brand: "AMORA", title: "Finaliza tu cuenta.",
+      subtitle: "Un último paso — elige tu nombre de usuario de Amora y confirma que tienes 18+.",
+      emailPlaceholder: "Correo electrónico", usernamePlaceholder: "Usuario (3-20 caracteres)", dobPlaceholder: "Fecha de nacimiento (AAAA-MM-DD)",
+      continueToAmora: "Continuar a Amora"
+    },
+    videoMatchScreen: {
+      kicker: "AMORA · VIDEO MATCH", title: "Conócete cara a cara.",
+      introTitle: "Video Match rápido", introText: "Una breve primera impresión. Si ambos se gustan, Amora crea un match.",
+      startButton: "Iniciar Video Match", findingSomeone: "Buscando a alguien…", connecting: "Conectando…",
+      stayHere: "Quédate aquí mientras Amora encuentra a alguien compatible.",
+      someoneWord: "Alguien", isHereSuffix: "está aquí", readyToMeet: "Listo para conocerte",
+      waitingForVideo: "Esperando video…", howDidItFeel: "¿Cómo se sintió?",
+      pass: "Pasar", like: "♥ Me gusta",
+      matchExclaim: "¡Es un match!", noMatchThisTime: "Esta vez no hubo match",
+      matchedBody: "Ambos se gustaron. Tu nueva conexión está lista.",
+      keepExploring: "Sigue explorando — hay más personas por conocer.",
+      openMatches: "Abrir Matches", tryAgain: "Intentar de nuevo",
+      errorAuth: "No se pudo autenticar. Inicia sesión de nuevo.", errorConnect: "No se pudo conectar.",
+      errorVideoConnect: "No se pudo conectar el video.", errorMatchFailed: "El video match falló."
+    },
+    videoScreen: {
+      title: "Videollamada", memberFallback: "Miembro de Amora",
+      readyLine: "Pantalla de llamada LiveKit lista.",
+      connectHint: "Conecta la Sala LiveKit nativa existente aquí para la sesión de medios de producción.",
+      endCall: "Finalizar llamada"
     }
   },
   pt: {
@@ -474,6 +758,148 @@ export const translations: Record<string, Translations> = {
       savingEllipsis: "Salvando…", saveChanges: "Salvar alterações",
       membershipRow: "Membresia e VIP", walletRow: "Carteira e moedas", notificationsRow: "Notificações",
       logout: "Sair", deleteMyAccount: "Excluir minha conta"
+    },
+    levelsScreen: {
+      kicker: "CLUBE REAL AMORA", title: "Seu nível. Sua aura.", xpWord: "XP", xpUntilNext: "XP até seu próximo desbloqueio",
+      privileges: "Privilégios", unlocked: "DESBLOQUEADO", locked: "BLOQUEADO",
+      perk1Title: "Medalha de Honra", perk1Desc: "Um emblema exclusivo ao lado do seu perfil",
+      perk2Title: "Entrada Radiante", perk2Desc: "Um efeito de entrada premium em salas ao vivo",
+      perk3Title: "Chat de Criador", perk3Desc: "Estilo de chat aprimorado",
+      perk4Title: "Kit de Presentes VIP", perk4Desc: "Presentes especiais reservados para estrelas em ascensão",
+      perk5Title: "Destaque de Perfil", perk5Desc: "Um destaque premium para o seu perfil",
+      perk6Title: "Efeitos de Elite", perk6Desc: "Efeitos exclusivos em salas ao vivo",
+      perk7Title: "Aura Dourada", perk7Desc: "Uma aura de perfil real e um emblema",
+      perk8Title: "Status Oculto", perk8Desc: "Visibilidade online discreta opcional",
+      perk9Title: "Criador Real", perk9Desc: "Uma identidade de criador exclusiva e uma moldura premium"
+    },
+    membershipScreen: {
+      kicker: "PRIVILÉGIO AMORA", title: "Assinatura VIP", sub: "Uma forma mais bonita de aproveitar a AmoraLive.",
+      errorLoad: "Não foi possível carregar a assinatura.", checkoutUnavailable: "O checkout não está disponível no momento.",
+      noReceiptIOS: "Nenhum recibo retornado pela App Store.", noTokenAndroid: "Nenhum token de compra retornado pelo Google Play.",
+      errorStart: "Não foi possível iniciar a assinatura.",
+      chooseVipTitle: "Escolher VIP", subscribeQuestionPrefix: "Assinar", thisPlanFallback: "este plano",
+      subscribe: "Assinar",
+      notAvailableTitle: "Não disponível", notAvailableBody: "Restaurar compras precisa do app nativo — não está disponível nesta prévia.",
+      nothingToRestoreTitle: "Nada para restaurar", nothingToRestoreBody: "Nenhuma assinatura ativa foi encontrada para esta conta.",
+      restoredTitle: "Restaurado", restoredBody: "Sua assinatura foi restaurada.",
+      errorRestore: "Não foi possível restaurar as compras.",
+      yourMembership: "SUA ASSINATURA", freeWord: "Gratuito",
+      restoring: "Restaurando…", restorePurchases: "Restaurar compras",
+      nativeStoreHint: "Compras nativas não estão disponíveis nesta versão — usando checkout web seguro.",
+      defaultPerk1: "Emblema VIP e moldura de perfil", defaultPerk2: "Presentes exclusivos", defaultPerk3: "Salas VIP", defaultPerk4: "Benefícios mensais",
+      chooseVip: "Escolher VIP"
+    },
+    missionsScreen: {
+      kicker: "PROGRESSÃO AMORA", title: "Missões e Conquistas",
+      errorLoad: "Não foi possível carregar as missões.", errorClaim: "Não foi possível resgatar a recompensa.",
+      typeDaily: "📅 Diárias", typeWeekly: "🗓️ Semanais", typeLifetime: "🏆 Conquistas",
+      claimed: "✓ Resgatado", claiming: "Resgatando…", claimReward: "Resgatar recompensa", inProgress: "Em andamento"
+    },
+    outfitsScreen: {
+      kicker: "COLEÇÃO AMORA", title: "Vista sua aura.",
+      subtitle: "Molduras, efeitos, emblemas e estilos de perfil que tornam sua identidade Amora sua.",
+      errorLoad: "Não foi possível carregar sua coleção.", errorUpdate: "Não foi possível atualizar seu visual.",
+      equipped: "Equipado", equip: "Equipar", notOwned: "Não adquirido", coinsWord: "moedas"
+    },
+    rewardsScreen: {
+      kicker: "RECOMPENSAS AMORA", title: "Volte sempre. Seja recompensado.",
+      errorLoad: "Não foi possível carregar as recompensas.", errorClaimNotAvailable: "A recompensa ainda não está disponível.",
+      dayStreakSuffix: "dias seguidos", coinsAvailableTodaySuffix: "moedas disponíveis hoje",
+      claimedToday: "✓ Resgatado hoje", claiming: "Resgatando…", claimDailyReward: "Resgatar recompensa diária",
+      historyTitle: "Histórico de recompensas",
+      rewardFallback: "Recompensa", dayOfCyclePrefix: "Dia", ofCycle: "do ciclo", milestoneSuffix: "marco"
+    },
+    storeScreen: {
+      kicker: "COFRE DE LUXO AMORA", title: "Boutique",
+      errorLoad: "Não foi possível carregar a loja.", errorBuy: "Falha na compra.", errorUpdate: "Não foi possível atualizar o item.",
+      permanent: "Permanente", equippedCheck: "Equipado ✓", equip: "Equipar", buying: "Comprando…", notEnoughCoins: "Moedas insuficientes", buy: "Comprar"
+    },
+    studioScreen: {
+      kicker: "CRIADOR AMORA", title: "Estúdio do Criador", errorLoad: "Não foi possível carregar o Estúdio do Criador.",
+      followers: "Seguidores", newThisWeek: "Novos esta semana", streams: "Transmissões", liveTime: "Tempo ao vivo",
+      peakViewers: "Pico de espectadores", giftsReceived: "Presentes recebidos", earnings: "Ganhos", level: "Nível",
+      quickTools: "Ferramentas rápidas", goLive: "🔴 Ir ao vivo", missionsLink: "🎯 Missões", walletLink: "🎁 Carteira",
+      last30Days: "Últimos 30 dias", followersSuffix: "seguidores"
+    },
+    withdrawScreen: {
+      kicker: "PAGAMENTOS DE CRIADORES AMORA", title: "Sacar",
+      errorLoad: "Não foi possível carregar as informações de saque.",
+      minWithdrawalError: "O saque mínimo é", coinsWord: "moedas",
+      maxBalanceError: "Você não pode sacar mais do que seu saldo.",
+      enterPayoutDetails: "Insira os detalhes do seu pagamento.",
+      requestSubmittedPrefix: "Saque enviado por", errorSubmit: "Não foi possível enviar o saque.",
+      minimumPrefix: "Mínimo:", ratePrefix: "Taxa:", perCoinSuffix: "¢ / moeda",
+      coinsAmountLabel: "Quantidade de moedas", payoutMethodLabel: "Método de pagamento", payoutDetailsLabel: "Detalhes do pagamento",
+      detailsPlaceholder: "E-mail ou dados bancários",
+      submitting: "Enviando…", requestWithdrawal: "Solicitar saque", historyTitle: "Histórico",
+      methodPaypal: "PAYPAL", methodBank: "BANCO", methodOther: "OUTRO"
+    },
+    discoverScreen: {
+      kicker: "AMORA", title: "Descobrir", subtitle: "Encontre pessoas, criadores e salas ao vivo que valham seu tempo.",
+      searchPlaceholder: "Buscar criadores, salas…",
+      catForYou: "Para você", catLive: "Ao vivo", catCreators: "Criadores", catDating: "Namoro", catNew: "Novo",
+      errorLoad: "Não foi possível carregar o Descobrir.", memberFallback: "Membro Amora", liveTag: "🔴 AO VIVO",
+      nothingHere: "Nada por aqui ainda. Tente outra categoria.",
+      verifiedCreator: "Criador verificado", creatorWord: "Criador"
+    },
+    datingScreen: {
+      kicker: "AMORA", title: "Descubra o Amor", matchesLink: "Combinações ♡",
+      errorLoad: "Não foi possível carregar o namoro.", memberFallback: "Membro Amora", compatibleSuffix: "% compatível",
+      allCaughtUp: "Você está em dia", comeBackLater: "Volte mais tarde para novas conexões."
+    },
+    liveScreen: {
+      kicker: "AMORA AO VIVO", title: "Ao vivo agora", goLive: "● Ir ao vivo",
+      heroKicker: "CONEXÕES EM TEMPO REAL", heroTitle: "Encontre uma sala que pareça viva.",
+      heroSub: "Participe de conversas, conheça novas pessoas e envie presentes 3D premium.",
+      errorLoad: "Não foi possível carregar as salas ao vivo.",
+      noOneLive: "Ninguém está ao vivo agora", beFirst: "Seja o primeiro — toque em Ir ao vivo acima.",
+      generalFallback: "Geral"
+    },
+    storiesScreen: {
+      kicker: "AMORA", title: "Stories", errorLoad: "Não foi possível carregar os stories.",
+      amoraFallback: "Amora", noStoriesYet: "Ainda não há stories. Seja o primeiro a compartilhar um momento."
+    },
+    deleteAccountScreen: {
+      kicker: "PRIVACIDADE DA CONTA", title: "Exclua sua conta Amora.",
+      subtitle: "Digite o e-mail associado à sua conta. Enviaremos um link de confirmação seguro.",
+      defaultDoneMessage: "Se existir uma conta Amora com esse e-mail, um link de confirmação foi enviado.",
+      errorGeneric: "Não foi possível processar sua solicitação.", checkInbox: "Verifique sua caixa de entrada.",
+      emailLabel: "Endereço de e-mail", requestButton: "Solicitar exclusão de conta",
+      note: "Alguns registros podem ser mantidos ou anonimizados quando exigidos por segurança, prevenção de fraude, registros financeiros ou obrigações legais."
+    },
+    socialCompleteScreen: {
+      missingSession: "Esta sessão de login está ausente ou inválida.",
+      errorContinue: "Não foi possível continuar o registro social.",
+      invalidEmail: "Digite um e-mail válido.",
+      invalidUsername: "Escolha um nome de usuário com 3–20 letras, números, pontos, traços ou sublinhados.",
+      invalidDob: "Digite sua data de nascimento como AAAA-MM-DD.",
+      errorFinishPrefix: "Não foi possível concluir o registro do", errorFinishSuffix: ".",
+      securelyConnectingPrefix: "Conectando com segurança ao",
+      brand: "AMORA", title: "Finalize sua conta.",
+      subtitle: "Uma última etapa — escolha seu nome de usuário Amora e confirme que você tem mais de 18 anos.",
+      emailPlaceholder: "Endereço de e-mail", usernamePlaceholder: "Nome de usuário (3-20 caracteres)", dobPlaceholder: "Data de nascimento (AAAA-MM-DD)",
+      continueToAmora: "Continuar para a Amora"
+    },
+    videoMatchScreen: {
+      kicker: "AMORA · VIDEO MATCH", title: "Conheça-se cara a cara.",
+      introTitle: "Video Match rápido", introText: "Uma breve primeira impressão. Se ambos gostarem um do outro, a Amora cria um match.",
+      startButton: "Iniciar Video Match", findingSomeone: "Procurando alguém…", connecting: "Conectando…",
+      stayHere: "Fique aqui enquanto a Amora encontra alguém compatível.",
+      someoneWord: "Alguém", isHereSuffix: "está aqui", readyToMeet: "Pronto para conhecer",
+      waitingForVideo: "Aguardando vídeo…", howDidItFeel: "Como foi?",
+      pass: "Passar", like: "♥ Curtir",
+      matchExclaim: "É um match!", noMatchThisTime: "Nenhum match desta vez",
+      matchedBody: "Vocês dois se curtiram. Sua nova conexão está pronta.",
+      keepExploring: "Continue explorando — há mais pessoas para conhecer.",
+      openMatches: "Abrir Combinações", tryAgain: "Tentar novamente",
+      errorAuth: "Não foi possível autenticar. Faça login novamente.", errorConnect: "Não foi possível conectar.",
+      errorVideoConnect: "Não foi possível conectar o vídeo.", errorMatchFailed: "O video match falhou."
+    },
+    videoScreen: {
+      title: "Chamada de vídeo", memberFallback: "Membro Amora",
+      readyLine: "Tela de chamada LiveKit pronta.",
+      connectHint: "Conecte a Sala LiveKit nativa existente aqui para a sessão de mídia de produção.",
+      endCall: "Encerrar chamada"
     }
   },
   fr: {
@@ -623,6 +1049,148 @@ export const translations: Record<string, Translations> = {
       savingEllipsis: "Enregistrement…", saveChanges: "Enregistrer les modifications",
       membershipRow: "Abonnement et VIP", walletRow: "Portefeuille et pièces", notificationsRow: "Notifications",
       logout: "Se déconnecter", deleteMyAccount: "Supprimer mon compte"
+    },
+    levelsScreen: {
+      kicker: "CLUB ROYAL AMORA", title: "Votre niveau. Votre aura.", xpWord: "XP", xpUntilNext: "XP avant votre prochain déblocage",
+      privileges: "Privilèges", unlocked: "DÉBLOQUÉ", locked: "VERROUILLÉ",
+      perk1Title: "Médaille d'honneur", perk1Desc: "Un badge distinctif à côté de votre profil",
+      perk2Title: "Entrée lumineuse", perk2Desc: "Un effet d'entrée premium dans les salons en direct",
+      perk3Title: "Chat créateur", perk3Desc: "Style de chat amélioré",
+      perk4Title: "Set de cadeaux VIP", perk4Desc: "Des cadeaux spéciaux réservés aux étoiles montantes",
+      perk5Title: "Coup de projecteur", perk5Desc: "Une mise en avant premium pour votre profil",
+      perk6Title: "Effets d'élite", perk6Desc: "Effets exclusifs dans les salons en direct",
+      perk7Title: "Aura dorée", perk7Desc: "Une aura de profil royale et un badge",
+      perk8Title: "Statut caché", perk8Desc: "Visibilité en ligne discrète en option",
+      perk9Title: "Créateur royal", perk9Desc: "Une identité de créateur distinctive et un cadre premium"
+    },
+    membershipScreen: {
+      kicker: "PRIVILÈGE AMORA", title: "Abonnement VIP", sub: "Une plus belle façon de profiter d'AmoraLive.",
+      errorLoad: "Impossible de charger l'abonnement.", checkoutUnavailable: "Le paiement n'est pas disponible pour le moment.",
+      noReceiptIOS: "Aucun reçu renvoyé par l'App Store.", noTokenAndroid: "Aucun jeton d'achat renvoyé par Google Play.",
+      errorStart: "Impossible de démarrer l'abonnement.",
+      chooseVipTitle: "Choisir VIP", subscribeQuestionPrefix: "S'abonner à", thisPlanFallback: "ce forfait",
+      subscribe: "S'abonner",
+      notAvailableTitle: "Non disponible", notAvailableBody: "La restauration des achats nécessite l'application native — non disponible dans cet aperçu.",
+      nothingToRestoreTitle: "Rien à restaurer", nothingToRestoreBody: "Aucun abonnement actif trouvé pour ce compte.",
+      restoredTitle: "Restauré", restoredBody: "Votre abonnement a été restauré.",
+      errorRestore: "Impossible de restaurer les achats.",
+      yourMembership: "VOTRE ABONNEMENT", freeWord: "Gratuit",
+      restoring: "Restauration…", restorePurchases: "Restaurer les achats",
+      nativeStoreHint: "Les achats natifs ne sont pas disponibles dans cette version — utilisation du paiement web sécurisé.",
+      defaultPerk1: "Badge VIP et cadre de profil", defaultPerk2: "Cadeaux exclusifs", defaultPerk3: "Salons VIP", defaultPerk4: "Avantages mensuels",
+      chooseVip: "Choisir VIP"
+    },
+    missionsScreen: {
+      kicker: "PROGRESSION AMORA", title: "Missions et succès",
+      errorLoad: "Impossible de charger les missions.", errorClaim: "Impossible de réclamer la récompense.",
+      typeDaily: "📅 Quotidiennes", typeWeekly: "🗓️ Hebdomadaires", typeLifetime: "🏆 Succès",
+      claimed: "✓ Réclamé", claiming: "Réclamation…", claimReward: "Réclamer la récompense", inProgress: "En cours"
+    },
+    outfitsScreen: {
+      kicker: "COLLECTION AMORA", title: "Habillez votre aura.",
+      subtitle: "Cadres, effets, badges et styles de profil qui rendent votre identité Amora vôtre.",
+      errorLoad: "Impossible de charger votre collection.", errorUpdate: "Impossible de mettre à jour votre look.",
+      equipped: "Équipé", equip: "Équiper", notOwned: "Non possédé", coinsWord: "pièces"
+    },
+    rewardsScreen: {
+      kicker: "RÉCOMPENSES AMORA", title: "Revenez. Soyez récompensé.",
+      errorLoad: "Impossible de charger les récompenses.", errorClaimNotAvailable: "La récompense n'est pas encore disponible.",
+      dayStreakSuffix: "jours de série", coinsAvailableTodaySuffix: "pièces disponibles aujourd'hui",
+      claimedToday: "✓ Réclamé aujourd'hui", claiming: "Réclamation…", claimDailyReward: "Réclamer la récompense quotidienne",
+      historyTitle: "Historique des récompenses",
+      rewardFallback: "Récompense", dayOfCyclePrefix: "Jour", ofCycle: "du cycle", milestoneSuffix: "étape"
+    },
+    storeScreen: {
+      kicker: "COFFRE DE LUXE AMORA", title: "Boutique",
+      errorLoad: "Impossible de charger la boutique.", errorBuy: "Échec de l'achat.", errorUpdate: "Impossible de mettre à jour l'article.",
+      permanent: "Permanent", equippedCheck: "Équipé ✓", equip: "Équiper", buying: "Achat…", notEnoughCoins: "Pièces insuffisantes", buy: "Acheter"
+    },
+    studioScreen: {
+      kicker: "CRÉATEUR AMORA", title: "Studio Créateur", errorLoad: "Impossible de charger le Studio Créateur.",
+      followers: "Abonnés", newThisWeek: "Nouveaux cette semaine", streams: "Diffusions", liveTime: "Temps en direct",
+      peakViewers: "Pic de spectateurs", giftsReceived: "Cadeaux reçus", earnings: "Revenus", level: "Niveau",
+      quickTools: "Outils rapides", goLive: "🔴 Passer en direct", missionsLink: "🎯 Missions", walletLink: "🎁 Portefeuille",
+      last30Days: "30 derniers jours", followersSuffix: "abonnés"
+    },
+    withdrawScreen: {
+      kicker: "PAIEMENTS CRÉATEURS AMORA", title: "Retirer",
+      errorLoad: "Impossible de charger les informations de retrait.",
+      minWithdrawalError: "Le retrait minimum est de", coinsWord: "pièces",
+      maxBalanceError: "Vous ne pouvez pas retirer plus que votre solde.",
+      enterPayoutDetails: "Entrez vos coordonnées de paiement.",
+      requestSubmittedPrefix: "Retrait soumis pour", errorSubmit: "Impossible de soumettre le retrait.",
+      minimumPrefix: "Minimum :", ratePrefix: "Taux :", perCoinSuffix: "¢ / pièce",
+      coinsAmountLabel: "Montant en pièces", payoutMethodLabel: "Méthode de paiement", payoutDetailsLabel: "Détails du paiement",
+      detailsPlaceholder: "E-mail ou coordonnées bancaires",
+      submitting: "Envoi…", requestWithdrawal: "Demander un retrait", historyTitle: "Historique",
+      methodPaypal: "PAYPAL", methodBank: "BANQUE", methodOther: "AUTRE"
+    },
+    discoverScreen: {
+      kicker: "AMORA", title: "Découvrir", subtitle: "Trouvez des personnes, créateurs et salons en direct qui valent votre temps.",
+      searchPlaceholder: "Rechercher créateurs, salons…",
+      catForYou: "Pour vous", catLive: "En direct", catCreators: "Créateurs", catDating: "Rencontres", catNew: "Nouveau",
+      errorLoad: "Impossible de charger Découvrir.", memberFallback: "Membre Amora", liveTag: "🔴 EN DIRECT",
+      nothingHere: "Rien ici pour le moment. Essayez une autre catégorie.",
+      verifiedCreator: "Créateur vérifié", creatorWord: "Créateur"
+    },
+    datingScreen: {
+      kicker: "AMORA", title: "Découvrez l'amour", matchesLink: "Matchs ♡",
+      errorLoad: "Impossible de charger les rencontres.", memberFallback: "Membre Amora", compatibleSuffix: "% compatible",
+      allCaughtUp: "Vous êtes à jour", comeBackLater: "Revenez plus tard pour de nouvelles connexions."
+    },
+    liveScreen: {
+      kicker: "AMORA EN DIRECT", title: "En direct maintenant", goLive: "● Passer en direct",
+      heroKicker: "CONNEXIONS EN TEMPS RÉEL", heroTitle: "Trouvez un salon qui semble vivant.",
+      heroSub: "Rejoignez des conversations, rencontrez de nouvelles personnes et envoyez des cadeaux 3D premium.",
+      errorLoad: "Impossible de charger les salons en direct.",
+      noOneLive: "Personne n'est en direct pour le moment", beFirst: "Soyez le premier — appuyez sur Passer en direct ci-dessus.",
+      generalFallback: "Général"
+    },
+    storiesScreen: {
+      kicker: "AMORA", title: "Stories", errorLoad: "Impossible de charger les stories.",
+      amoraFallback: "Amora", noStoriesYet: "Pas encore de stories. Soyez le premier à partager un moment."
+    },
+    deleteAccountScreen: {
+      kicker: "CONFIDENTIALITÉ DU COMPTE", title: "Supprimez votre compte Amora.",
+      subtitle: "Entrez l'e-mail associé à votre compte. Nous vous enverrons un lien de confirmation sécurisé.",
+      defaultDoneMessage: "Si un compte Amora existe pour cet e-mail, un lien de confirmation a été envoyé.",
+      errorGeneric: "Impossible de traiter votre demande.", checkInbox: "Vérifiez votre boîte de réception.",
+      emailLabel: "Adresse e-mail", requestButton: "Demander la suppression du compte",
+      note: "Certains enregistrements peuvent être conservés ou anonymisés si la sécurité, la prévention de la fraude, les registres financiers ou des obligations légales l'exigent."
+    },
+    socialCompleteScreen: {
+      missingSession: "Cette session de connexion est manquante ou invalide.",
+      errorContinue: "Impossible de continuer l'inscription sociale.",
+      invalidEmail: "Entrez une adresse e-mail valide.",
+      invalidUsername: "Choisissez un nom d'utilisateur avec 3–20 lettres, chiffres, points, tirets ou underscores.",
+      invalidDob: "Entrez votre date de naissance au format AAAA-MM-JJ.",
+      errorFinishPrefix: "Impossible de terminer l'inscription", errorFinishSuffix: ".",
+      securelyConnectingPrefix: "Connexion sécurisée à",
+      brand: "AMORA", title: "Finalisez votre compte.",
+      subtitle: "Une dernière étape — choisissez votre nom d'utilisateur Amora et confirmez que vous avez 18 ans ou plus.",
+      emailPlaceholder: "Adresse e-mail", usernamePlaceholder: "Nom d'utilisateur (3-20 caractères)", dobPlaceholder: "Date de naissance (AAAA-MM-JJ)",
+      continueToAmora: "Continuer vers Amora"
+    },
+    videoMatchScreen: {
+      kicker: "AMORA · VIDEO MATCH", title: "Rencontrez-vous en face à face.",
+      introTitle: "Video Match rapide", introText: "Une brève première impression. Si vous vous plaisez tous les deux, Amora crée un match.",
+      startButton: "Démarrer Video Match", findingSomeone: "Recherche de quelqu'un…", connecting: "Connexion…",
+      stayHere: "Restez ici pendant qu'Amora trouve une personne compatible.",
+      someoneWord: "Quelqu'un", isHereSuffix: "est ici", readyToMeet: "Prêt à se rencontrer",
+      waitingForVideo: "En attente de la vidéo…", howDidItFeel: "Comment était-ce ?",
+      pass: "Passer", like: "♥ J'aime",
+      matchExclaim: "C'est un match !", noMatchThisTime: "Pas de match cette fois",
+      matchedBody: "Vous vous êtes tous les deux plu. Votre nouvelle connexion est prête.",
+      keepExploring: "Continuez à explorer — il y a plus de personnes à rencontrer.",
+      openMatches: "Ouvrir les matchs", tryAgain: "Réessayer",
+      errorAuth: "Impossible de s'authentifier. Reconnectez-vous.", errorConnect: "Impossible de se connecter.",
+      errorVideoConnect: "Impossible de connecter la vidéo.", errorMatchFailed: "Le video match a échoué."
+    },
+    videoScreen: {
+      title: "Appel vidéo", memberFallback: "Membre Amora",
+      readyLine: "Écran d'appel LiveKit prêt.",
+      connectHint: "Connectez ici la salle LiveKit native existante pour la session média de production.",
+      endCall: "Terminer l'appel"
     }
   },
   de: {
@@ -772,6 +1340,148 @@ export const translations: Record<string, Translations> = {
       savingEllipsis: "Wird gespeichert…", saveChanges: "Änderungen speichern",
       membershipRow: "Mitgliedschaft & VIP", walletRow: "Wallet & Coins", notificationsRow: "Benachrichtigungen",
       logout: "Abmelden", deleteMyAccount: "Mein Konto löschen"
+    },
+    levelsScreen: {
+      kicker: "AMORA ROYAL CLUB", title: "Dein Level. Deine Aura.", xpWord: "XP", xpUntilNext: "XP bis zur nächsten Freischaltung",
+      privileges: "Privilegien", unlocked: "FREIGESCHALTET", locked: "GESPERRT",
+      perk1Title: "Ehrenmedaille", perk1Desc: "Ein Erkennungsabzeichen neben deinem Profil",
+      perk2Title: "Lichtvoller Einzug", perk2Desc: "Ein Premium-Eintrittseffekt in Live-Räumen",
+      perk3Title: "Creator-Chat", perk3Desc: "Verbessertes Chat-Styling",
+      perk4Title: "VIP-Geschenkset", perk4Desc: "Spezielle Geschenke nur für aufsteigende Stars",
+      perk5Title: "Spotlight-Hervorhebung", perk5Desc: "Premium-Hervorhebung für dein Profil",
+      perk6Title: "Elite-Effekte", perk6Desc: "Exklusive Effekte in Live-Räumen",
+      perk7Title: "Goldene Aura", perk7Desc: "Eine königliche Profilaura und ein Abzeichen",
+      perk8Title: "Verborgener Status", perk8Desc: "Optionale diskrete Online-Sichtbarkeit",
+      perk9Title: "Royaler Creator", perk9Desc: "Eine unverwechselbare Creator-Identität und ein Premium-Rahmen"
+    },
+    membershipScreen: {
+      kicker: "AMORA PRIVILEG", title: "VIP-Mitgliedschaft", sub: "Ein schönerer Weg, AmoraLive zu genießen.",
+      errorLoad: "Mitgliedschaft konnte nicht geladen werden.", checkoutUnavailable: "Checkout ist derzeit nicht verfügbar.",
+      noReceiptIOS: "Kein Beleg vom App Store erhalten.", noTokenAndroid: "Kein Kauf-Token von Google Play erhalten.",
+      errorStart: "Mitgliedschaft konnte nicht gestartet werden.",
+      chooseVipTitle: "VIP wählen", subscribeQuestionPrefix: "Abonnieren:", thisPlanFallback: "diesen Plan",
+      subscribe: "Abonnieren",
+      notAvailableTitle: "Nicht verfügbar", notAvailableBody: "Käufe wiederherstellen erfordert die native App — in dieser Vorschau nicht verfügbar.",
+      nothingToRestoreTitle: "Nichts wiederherzustellen", nothingToRestoreBody: "Für dieses Konto wurde kein aktives Abonnement gefunden.",
+      restoredTitle: "Wiederhergestellt", restoredBody: "Deine Mitgliedschaft wurde wiederhergestellt.",
+      errorRestore: "Käufe konnten nicht wiederhergestellt werden.",
+      yourMembership: "DEINE MITGLIEDSCHAFT", freeWord: "Kostenlos",
+      restoring: "Wiederherstellen…", restorePurchases: "Käufe wiederherstellen",
+      nativeStoreHint: "Native Store-Käufe sind in diesem Build nicht verfügbar — es wird stattdessen der sichere Web-Checkout verwendet.",
+      defaultPerk1: "VIP-Abzeichen & Profilrahmen", defaultPerk2: "Exklusive Geschenke", defaultPerk3: "VIP-Räume", defaultPerk4: "Monatliche Vorteile",
+      chooseVip: "VIP wählen"
+    },
+    missionsScreen: {
+      kicker: "AMORA PROGRESSION", title: "Missionen & Erfolge",
+      errorLoad: "Missionen konnten nicht geladen werden.", errorClaim: "Belohnung konnte nicht eingelöst werden.",
+      typeDaily: "📅 Täglich", typeWeekly: "🗓️ Wöchentlich", typeLifetime: "🏆 Erfolge",
+      claimed: "✓ Eingelöst", claiming: "Einlösen…", claimReward: "Belohnung einlösen", inProgress: "In Bearbeitung"
+    },
+    outfitsScreen: {
+      kicker: "AMORA KOLLEKTION", title: "Kleide deine Aura.",
+      subtitle: "Rahmen, Effekte, Abzeichen und Profilstile, die deine Amora-Identität ausmachen.",
+      errorLoad: "Deine Sammlung konnte nicht geladen werden.", errorUpdate: "Dein Look konnte nicht aktualisiert werden.",
+      equipped: "Ausgerüstet", equip: "Ausrüsten", notOwned: "Nicht im Besitz", coinsWord: "Münzen"
+    },
+    rewardsScreen: {
+      kicker: "AMORA BELOHNUNGEN", title: "Komm zurück. Werde belohnt.",
+      errorLoad: "Belohnungen konnten nicht geladen werden.", errorClaimNotAvailable: "Belohnung ist noch nicht verfügbar.",
+      dayStreakSuffix: "Tage in Folge", coinsAvailableTodaySuffix: "Münzen heute verfügbar",
+      claimedToday: "✓ Heute eingelöst", claiming: "Einlösen…", claimDailyReward: "Tägliche Belohnung einlösen",
+      historyTitle: "Belohnungsverlauf",
+      rewardFallback: "Belohnung", dayOfCyclePrefix: "Tag", ofCycle: "des Zyklus", milestoneSuffix: "Meilenstein"
+    },
+    storeScreen: {
+      kicker: "AMORA LUXUSGEWÖLBE", title: "Boutique",
+      errorLoad: "Shop konnte nicht geladen werden.", errorBuy: "Kauf fehlgeschlagen.", errorUpdate: "Artikel konnte nicht aktualisiert werden.",
+      permanent: "Dauerhaft", equippedCheck: "Ausgerüstet ✓", equip: "Ausrüsten", buying: "Kaufen…", notEnoughCoins: "Nicht genügend Münzen", buy: "Kaufen"
+    },
+    studioScreen: {
+      kicker: "AMORA CREATOR", title: "Creator Studio", errorLoad: "Creator Studio konnte nicht geladen werden.",
+      followers: "Follower", newThisWeek: "Neu diese Woche", streams: "Streams", liveTime: "Live-Zeit",
+      peakViewers: "Spitzenzuschauer", giftsReceived: "Erhaltene Geschenke", earnings: "Einnahmen", level: "Level",
+      quickTools: "Schnellwerkzeuge", goLive: "🔴 Live gehen", missionsLink: "🎯 Missionen", walletLink: "🎁 Wallet",
+      last30Days: "Letzte 30 Tage", followersSuffix: "Follower"
+    },
+    withdrawScreen: {
+      kicker: "AMORA CREATOR-AUSZAHLUNGEN", title: "Auszahlen",
+      errorLoad: "Auszahlungsinformationen konnten nicht geladen werden.",
+      minWithdrawalError: "Mindestauszahlung ist", coinsWord: "Münzen",
+      maxBalanceError: "Du kannst nicht mehr als dein Guthaben auszahlen.",
+      enterPayoutDetails: "Gib deine Auszahlungsdaten ein.",
+      requestSubmittedPrefix: "Auszahlung eingereicht für", errorSubmit: "Auszahlung konnte nicht eingereicht werden.",
+      minimumPrefix: "Minimum:", ratePrefix: "Rate:", perCoinSuffix: "¢ / Münze",
+      coinsAmountLabel: "Münzenanzahl", payoutMethodLabel: "Auszahlungsmethode", payoutDetailsLabel: "Auszahlungsdetails",
+      detailsPlaceholder: "E-Mail oder Bankdaten",
+      submitting: "Wird gesendet…", requestWithdrawal: "Auszahlung anfordern", historyTitle: "Verlauf",
+      methodPaypal: "PAYPAL", methodBank: "BANK", methodOther: "ANDERE"
+    },
+    discoverScreen: {
+      kicker: "AMORA", title: "Entdecken", subtitle: "Finde Menschen, Creator und Live-Räume, die deine Zeit wert sind.",
+      searchPlaceholder: "Creator, Räume suchen…",
+      catForYou: "Für dich", catLive: "Live", catCreators: "Creator", catDating: "Dating", catNew: "Neu",
+      errorLoad: "Entdecken konnte nicht geladen werden.", memberFallback: "Amora-Mitglied", liveTag: "🔴 LIVE",
+      nothingHere: "Hier ist noch nichts. Versuche eine andere Kategorie.",
+      verifiedCreator: "Verifizierter Creator", creatorWord: "Creator"
+    },
+    datingScreen: {
+      kicker: "AMORA", title: "Liebe entdecken", matchesLink: "Matches ♡",
+      errorLoad: "Dating konnte nicht geladen werden.", memberFallback: "Amora-Mitglied", compatibleSuffix: "% kompatibel",
+      allCaughtUp: "Du bist auf dem neuesten Stand", comeBackLater: "Komm später wieder für neue Verbindungen."
+    },
+    liveScreen: {
+      kicker: "AMORA LIVE", title: "Jetzt live", goLive: "● Live gehen",
+      heroKicker: "ECHTZEIT-VERBINDUNGEN", heroTitle: "Finde einen Raum, der lebendig wirkt.",
+      heroSub: "Nimm an Gesprächen teil, lerne neue Menschen kennen und sende Premium-3D-Geschenke.",
+      errorLoad: "Live-Räume konnten nicht geladen werden.",
+      noOneLive: "Gerade ist niemand live", beFirst: "Sei der Erste — tippe oben auf Live gehen.",
+      generalFallback: "Allgemein"
+    },
+    storiesScreen: {
+      kicker: "AMORA", title: "Stories", errorLoad: "Stories konnten nicht geladen werden.",
+      amoraFallback: "Amora", noStoriesYet: "Noch keine Stories. Sei der Erste, der einen Moment teilt."
+    },
+    deleteAccountScreen: {
+      kicker: "KONTO-PRIVATSPHÄRE", title: "Lösche dein Amora-Konto.",
+      subtitle: "Gib die mit deinem Konto verknüpfte E-Mail-Adresse ein. Wir senden dir einen sicheren Bestätigungslink.",
+      defaultDoneMessage: "Falls ein Amora-Konto für diese E-Mail existiert, wurde ein Bestätigungslink gesendet.",
+      errorGeneric: "Deine Anfrage konnte nicht bearbeitet werden.", checkInbox: "Überprüfe deinen Posteingang.",
+      emailLabel: "E-Mail-Adresse", requestButton: "Kontolöschung beantragen",
+      note: "Einige Daten können aus Sicherheits-, Betrugspräventions-, Finanz- oder rechtlichen Gründen aufbewahrt oder anonymisiert werden."
+    },
+    socialCompleteScreen: {
+      missingSession: "Diese Anmeldesitzung fehlt oder ist ungültig.",
+      errorContinue: "Soziale Registrierung konnte nicht fortgesetzt werden.",
+      invalidEmail: "Gib eine gültige E-Mail-Adresse ein.",
+      invalidUsername: "Wähle einen Benutzernamen mit 3–20 Buchstaben, Zahlen, Punkten, Bindestrichen oder Unterstrichen.",
+      invalidDob: "Gib dein Geburtsdatum im Format JJJJ-MM-TT ein.",
+      errorFinishPrefix: "Registrierung konnte nicht abgeschlossen werden", errorFinishSuffix: ".",
+      securelyConnectingPrefix: "Sichere Verbindung zu",
+      brand: "AMORA", title: "Schließe dein Konto ab.",
+      subtitle: "Ein letzter Schritt — wähle deinen Amora-Benutzernamen und bestätige, dass du 18+ bist.",
+      emailPlaceholder: "E-Mail-Adresse", usernamePlaceholder: "Benutzername (3-20 Zeichen)", dobPlaceholder: "Geburtsdatum (JJJJ-MM-TT)",
+      continueToAmora: "Weiter zu Amora"
+    },
+    videoMatchScreen: {
+      kicker: "AMORA · VIDEO MATCH", title: "Trefft euch von Angesicht zu Angesicht.",
+      introTitle: "Schneller Video Match", introText: "Ein kurzer erster Eindruck. Wenn ihr euch beide mögt, erstellt Amora ein Match.",
+      startButton: "Video Match starten", findingSomeone: "Jemand wird gesucht…", connecting: "Verbindung wird hergestellt…",
+      stayHere: "Bleib hier, während Amora eine passende Person findet.",
+      someoneWord: "Jemand", isHereSuffix: "ist hier", readyToMeet: "Bereit sich zu treffen",
+      waitingForVideo: "Warten auf Video…", howDidItFeel: "Wie hat es sich angefühlt?",
+      pass: "Überspringen", like: "♥ Gefällt mir",
+      matchExclaim: "Es ist ein Match!", noMatchThisTime: "Diesmal kein Match",
+      matchedBody: "Ihr habt euch beide gemocht. Eure neue Verbindung ist bereit.",
+      keepExploring: "Erkunde weiter — es gibt noch mehr Menschen zu treffen.",
+      openMatches: "Matches öffnen", tryAgain: "Erneut versuchen",
+      errorAuth: "Authentifizierung fehlgeschlagen. Bitte melde dich erneut an.", errorConnect: "Verbindung fehlgeschlagen.",
+      errorVideoConnect: "Video konnte nicht verbunden werden.", errorMatchFailed: "Video Match ist fehlgeschlagen."
+    },
+    videoScreen: {
+      title: "Videoanruf", memberFallback: "Amora-Mitglied",
+      readyLine: "LiveKit-Anrufbildschirm bereit.",
+      connectHint: "Verbinde hier den vorhandenen nativen LiveKit-Room für die produktive Mediensitzung.",
+      endCall: "Anruf beenden"
     }
   },
   ar: {
@@ -921,6 +1631,148 @@ export const translations: Record<string, Translations> = {
       savingEllipsis: "جارٍ الحفظ…", saveChanges: "حفظ التغييرات",
       membershipRow: "العضوية وVIP", walletRow: "المحفظة والعملات", notificationsRow: "الإشعارات",
       logout: "تسجيل الخروج", deleteMyAccount: "حذف حسابي"
+    },
+    levelsScreen: {
+      kicker: "نادي أمورا الملكي", title: "مستواك. هالتك.", xpWord: "نقاط الخبرة", xpUntilNext: "نقاط الخبرة حتى فتح المستوى التالي",
+      privileges: "الامتيازات", unlocked: "مفتوح", locked: "مقفل",
+      perk1Title: "وسام الشرف", perk1Desc: "شارة مميزة بجانب ملفك الشخصي",
+      perk2Title: "دخول مضيء", perk2Desc: "تأثير دخول مميز في الغرف المباشرة",
+      perk3Title: "دردشة المبدع", perk3Desc: "تنسيق دردشة محسّن",
+      perk4Title: "مجموعة هدايا VIP", perk4Desc: "هدايا خاصة للنجوم الصاعدة فقط",
+      perk5Title: "تسليط الضوء", perk5Desc: "إبراز مميز لملفك الشخصي",
+      perk6Title: "تأثيرات النخبة", perk6Desc: "تأثيرات حصرية في الغرف المباشرة",
+      perk7Title: "الهالة الذهبية", perk7Desc: "هالة ملفك الشخصي الملكية وشارة",
+      perk8Title: "الحالة الخفية", perk8Desc: "ظهور اتصال اختياري وخفي",
+      perk9Title: "مبدع ملكي", perk9Desc: "هوية مبدع مميزة وإطار فاخر"
+    },
+    membershipScreen: {
+      kicker: "امتياز أمورا", title: "عضوية VIP", sub: "طريقة أجمل للاستمتاع بـ AmoraLive.",
+      errorLoad: "تعذّر تحميل العضوية.", checkoutUnavailable: "الدفع غير متاح حاليًا.",
+      noReceiptIOS: "لم يتم إرجاع إيصال من App Store.", noTokenAndroid: "لم يتم إرجاع رمز شراء من Google Play.",
+      errorStart: "تعذّر بدء العضوية.",
+      chooseVipTitle: "اختر VIP", subscribeQuestionPrefix: "الاشتراك في", thisPlanFallback: "هذه الخطة",
+      subscribe: "اشترك",
+      notAvailableTitle: "غير متاح", notAvailableBody: "استعادة المشتريات يتطلب التطبيق الأصلي — غير متاح في هذه المعاينة.",
+      nothingToRestoreTitle: "لا يوجد ما يُستعاد", nothingToRestoreBody: "لم يتم العثور على اشتراك نشط لهذا الحساب.",
+      restoredTitle: "تمت الاستعادة", restoredBody: "تمت استعادة عضويتك.",
+      errorRestore: "تعذّر استعادة المشتريات.",
+      yourMembership: "عضويتك", freeWord: "مجاني",
+      restoring: "جارٍ الاستعادة…", restorePurchases: "استعادة المشتريات",
+      nativeStoreHint: "مشتريات المتجر الأصلي غير متاحة في هذا الإصدار — سيُستخدم الدفع الآمن عبر الويب بدلاً من ذلك.",
+      defaultPerk1: "شارة VIP وإطار الملف الشخصي", defaultPerk2: "هدايا حصرية", defaultPerk3: "غرف VIP", defaultPerk4: "امتيازات شهرية",
+      chooseVip: "اختر VIP"
+    },
+    missionsScreen: {
+      kicker: "تقدّم أمورا", title: "المهام والإنجازات",
+      errorLoad: "تعذّر تحميل المهام.", errorClaim: "تعذّر استلام المكافأة.",
+      typeDaily: "📅 يومي", typeWeekly: "🗓️ أسبوعي", typeLifetime: "🏆 الإنجازات",
+      claimed: "✓ تم الاستلام", claiming: "جارٍ الاستلام…", claimReward: "استلام المكافأة", inProgress: "قيد التقدم"
+    },
+    outfitsScreen: {
+      kicker: "مجموعة أمورا", title: "زيّن هالتك.",
+      subtitle: "إطارات وتأثيرات وشارات وأنماط ملف شخصي تجعل هوية أمورا خاصة بك.",
+      errorLoad: "تعذّر تحميل مجموعتك.", errorUpdate: "تعذّر تحديث مظهرك.",
+      equipped: "مُجهّز", equip: "تجهيز", notOwned: "غير مملوك", coinsWord: "عملات"
+    },
+    rewardsScreen: {
+      kicker: "مكافآت أمورا", title: "عد. احصل على مكافأة.",
+      errorLoad: "تعذّر تحميل المكافآت.", errorClaimNotAvailable: "المكافأة غير متاحة بعد.",
+      dayStreakSuffix: "أيام متتالية", coinsAvailableTodaySuffix: "عملات متاحة اليوم",
+      claimedToday: "✓ تم الاستلام اليوم", claiming: "جارٍ الاستلام…", claimDailyReward: "استلام المكافأة اليومية",
+      historyTitle: "سجل المكافآت",
+      rewardFallback: "مكافأة", dayOfCyclePrefix: "اليوم", ofCycle: "من الدورة", milestoneSuffix: "إنجاز مرحلي"
+    },
+    storeScreen: {
+      kicker: "خزنة أمورا الفاخرة", title: "المتجر",
+      errorLoad: "تعذّر تحميل المتجر.", errorBuy: "فشل الشراء.", errorUpdate: "تعذّر تحديث العنصر.",
+      permanent: "دائم", equippedCheck: "مُجهّز ✓", equip: "تجهيز", buying: "جارٍ الشراء…", notEnoughCoins: "عملات غير كافية", buy: "شراء"
+    },
+    studioScreen: {
+      kicker: "مبدع أمورا", title: "استوديو المبدعين", errorLoad: "تعذّر تحميل استوديو المبدعين.",
+      followers: "المتابعون", newThisWeek: "جديد هذا الأسبوع", streams: "البثوث", liveTime: "وقت البث المباشر",
+      peakViewers: "ذروة المشاهدين", giftsReceived: "الهدايا المستلمة", earnings: "الأرباح", level: "المستوى",
+      quickTools: "أدوات سريعة", goLive: "🔴 بدء البث المباشر", missionsLink: "🎯 المهام", walletLink: "🎁 المحفظة",
+      last30Days: "آخر 30 يومًا", followersSuffix: "متابع"
+    },
+    withdrawScreen: {
+      kicker: "مدفوعات مبدعي أمورا", title: "سحب",
+      errorLoad: "تعذّر تحميل معلومات السحب.",
+      minWithdrawalError: "الحد الأدنى للسحب هو", coinsWord: "عملات",
+      maxBalanceError: "لا يمكنك سحب أكثر من رصيدك.",
+      enterPayoutDetails: "أدخل تفاصيل الدفع.",
+      requestSubmittedPrefix: "تم تقديم طلب سحب بقيمة", errorSubmit: "تعذّر تقديم طلب السحب.",
+      minimumPrefix: "الحد الأدنى:", ratePrefix: "المعدل:", perCoinSuffix: "¢ / عملة",
+      coinsAmountLabel: "عدد العملات", payoutMethodLabel: "طريقة الدفع", payoutDetailsLabel: "تفاصيل الدفع",
+      detailsPlaceholder: "البريد الإلكتروني أو تفاصيل البنك",
+      submitting: "جارٍ الإرسال…", requestWithdrawal: "طلب سحب", historyTitle: "السجل",
+      methodPaypal: "PAYPAL", methodBank: "بنك", methodOther: "أخرى"
+    },
+    discoverScreen: {
+      kicker: "أمورا", title: "استكشف", subtitle: "اعثر على أشخاص ومبدعين وغرف مباشرة تستحق وقتك.",
+      searchPlaceholder: "ابحث عن مبدعين، غرف…",
+      catForYou: "لك", catLive: "مباشر", catCreators: "مبدعون", catDating: "مواعدة", catNew: "جديد",
+      errorLoad: "تعذّر تحميل الاستكشاف.", memberFallback: "عضو أمورا", liveTag: "🔴 مباشر",
+      nothingHere: "لا يوجد شيء هنا بعد. جرّب فئة أخرى.",
+      verifiedCreator: "مبدع موثّق", creatorWord: "مبدع"
+    },
+    datingScreen: {
+      kicker: "أمورا", title: "اكتشف الحب", matchesLink: "التوافقات ♡",
+      errorLoad: "تعذّر تحميل المواعدة.", memberFallback: "عضو أمورا", compatibleSuffix: "% توافق",
+      allCaughtUp: "لقد اطلعت على كل شيء", comeBackLater: "عد لاحقًا لاتصالات جديدة."
+    },
+    liveScreen: {
+      kicker: "أمورا مباشر", title: "مباشر الآن", goLive: "● بدء البث المباشر",
+      heroKicker: "اتصالات لحظية", heroTitle: "اعثر على غرفة تشعر بالحيوية.",
+      heroSub: "انضم إلى المحادثات، وتعرف على أشخاص جدد، وأرسل هدايا ثلاثية الأبعاد مميزة.",
+      errorLoad: "تعذّر تحميل الغرف المباشرة.",
+      noOneLive: "لا أحد مباشر الآن", beFirst: "كن الأول — اضغط على بدء البث المباشر أعلاه.",
+      generalFallback: "عام"
+    },
+    storiesScreen: {
+      kicker: "أمورا", title: "القصص", errorLoad: "تعذّر تحميل القصص.",
+      amoraFallback: "أمورا", noStoriesYet: "لا توجد قصص بعد. كن أول من يشارك لحظة."
+    },
+    deleteAccountScreen: {
+      kicker: "خصوصية الحساب", title: "احذف حساب أمورا الخاص بك.",
+      subtitle: "أدخل البريد الإلكتروني المرتبط بحسابك. سنرسل لك رابط تأكيد آمن.",
+      defaultDoneMessage: "إذا كان هناك حساب أمورا لهذا البريد الإلكتروني، فقد تم إرسال رابط تأكيد.",
+      errorGeneric: "تعذّر معالجة طلبك.", checkInbox: "تحقق من بريدك الوارد.",
+      emailLabel: "البريد الإلكتروني", requestButton: "طلب حذف الحساب",
+      note: "قد يتم الاحتفاظ ببعض السجلات أو إخفاء هويتها عند الحاجة لأغراض الأمان أو منع الاحتيال أو السجلات المالية أو الالتزامات القانونية."
+    },
+    socialCompleteScreen: {
+      missingSession: "جلسة تسجيل الدخول هذه مفقودة أو غير صالحة.",
+      errorContinue: "تعذّر متابعة التسجيل الاجتماعي.",
+      invalidEmail: "أدخل عنوان بريد إلكتروني صالحًا.",
+      invalidUsername: "اختر اسم مستخدم مكوّنًا من 3–20 حرفًا أو رقمًا أو نقطة أو شرطة أو شرطة سفلية.",
+      invalidDob: "أدخل تاريخ ميلادك بصيغة YYYY-MM-DD.",
+      errorFinishPrefix: "تعذّر إنهاء التسجيل", errorFinishSuffix: ".",
+      securelyConnectingPrefix: "جارٍ الاتصال الآمن بـ",
+      brand: "أمورا", title: "أكمل حسابك.",
+      subtitle: "خطوة أخيرة — اختر اسم مستخدم أمورا الخاص بك وأكّد أن عمرك 18 عامًا أو أكثر.",
+      emailPlaceholder: "البريد الإلكتروني", usernamePlaceholder: "اسم المستخدم (3-20 حرفًا)", dobPlaceholder: "تاريخ الميلاد (YYYY-MM-DD)",
+      continueToAmora: "المتابعة إلى أمورا"
+    },
+    videoMatchScreen: {
+      kicker: "أمورا · فيديو ماتش", title: "التقيا وجهًا لوجه.",
+      introTitle: "فيديو ماتش سريع", introText: "انطباع أول سريع. إذا أعجب كل منكما بالآخر، ينشئ أمورا تطابقًا.",
+      startButton: "ابدأ فيديو ماتش", findingSomeone: "جارٍ البحث عن شخص…", connecting: "جارٍ الاتصال…",
+      stayHere: "ابقَ هنا بينما يجد أمورا شخصًا متوافقًا.",
+      someoneWord: "شخص ما", isHereSuffix: "هنا", readyToMeet: "جاهز للقاء",
+      waitingForVideo: "بانتظار الفيديو…", howDidItFeel: "كيف شعرت بذلك؟",
+      pass: "تخطّي", like: "♥ إعجاب",
+      matchExclaim: "إنها مطابقة!", noMatchThisTime: "لا مطابقة هذه المرة",
+      matchedBody: "أعجب كل منكما بالآخر. اتصالكما الجديد جاهز.",
+      keepExploring: "واصل الاستكشاف — هناك المزيد من الأشخاص لتقابلهم.",
+      openMatches: "فتح التطابقات", tryAgain: "حاول مرة أخرى",
+      errorAuth: "تعذّرت المصادقة. يرجى تسجيل الدخول مرة أخرى.", errorConnect: "تعذّر الاتصال.",
+      errorVideoConnect: "تعذّر الاتصال بالفيديو.", errorMatchFailed: "فشل فيديو ماتش."
+    },
+    videoScreen: {
+      title: "مكالمة فيديو", memberFallback: "عضو أمورا",
+      readyLine: "شاشة مكالمة LiveKit جاهزة.",
+      connectHint: "قم بتوصيل غرفة LiveKit الأصلية الحالية هنا لجلسة الوسائط الإنتاجية.",
+      endCall: "إنهاء المكالمة"
     }
   },
   hi: {
@@ -1070,6 +1922,148 @@ export const translations: Record<string, Translations> = {
       savingEllipsis: "सहेजा जा रहा है…", saveChanges: "बदलाव सहेजें",
       membershipRow: "सदस्यता और VIP", walletRow: "वॉलेट और कॉइन", notificationsRow: "सूचनाएं",
       logout: "लॉग आउट करें", deleteMyAccount: "मेरा खाता हटाएं"
+    },
+    levelsScreen: {
+      kicker: "अमोरा रॉयल क्लब", title: "आपका स्तर। आपकी आभा।", xpWord: "XP", xpUntilNext: "अगले अनलॉक तक XP",
+      privileges: "विशेषाधिकार", unlocked: "अनलॉक किया गया", locked: "लॉक्ड",
+      perk1Title: "सम्मान पदक", perk1Desc: "आपकी प्रोफ़ाइल के बगल में एक विशिष्ट बैज",
+      perk2Title: "चमकदार प्रवेश", perk2Desc: "लाइव रूम में एक प्रीमियम एंट्री इफेक्ट",
+      perk3Title: "क्रिएटर चैट", perk3Desc: "बेहतर चैट स्टाइलिंग",
+      perk4Title: "VIP गिफ्ट सेट", perk4Desc: "उभरते सितारों के लिए विशेष उपहार",
+      perk5Title: "स्पॉटलाइट हाइलाइट", perk5Desc: "आपकी प्रोफ़ाइल के लिए प्रीमियम हाइलाइट",
+      perk6Title: "एलीट इफेक्ट्स", perk6Desc: "लाइव रूम में विशेष प्रभाव",
+      perk7Title: "गोल्डन आभा", perk7Desc: "एक शाही प्रोफ़ाइल आभा और बैज",
+      perk8Title: "छिपी हुई स्थिति", perk8Desc: "वैकल्पिक विवेकपूर्ण ऑनलाइन दृश्यता",
+      perk9Title: "रॉयल क्रिएटर", perk9Desc: "एक विशिष्ट क्रिएटर पहचान और प्रीमियम फ्रेम"
+    },
+    membershipScreen: {
+      kicker: "अमोरा प्रिविलेज", title: "VIP सदस्यता", sub: "AmoraLive का आनंद लेने का एक बेहतर तरीका।",
+      errorLoad: "सदस्यता लोड करने में असमर्थ।", checkoutUnavailable: "चेकआउट अभी उपलब्ध नहीं है।",
+      noReceiptIOS: "App Store से कोई रसीद नहीं मिली।", noTokenAndroid: "Google Play से कोई खरीद टोकन नहीं मिला।",
+      errorStart: "सदस्यता शुरू करने में असमर्थ।",
+      chooseVipTitle: "VIP चुनें", subscribeQuestionPrefix: "सदस्यता लें", thisPlanFallback: "इस योजना की",
+      subscribe: "सदस्यता लें",
+      notAvailableTitle: "उपलब्ध नहीं", notAvailableBody: "खरीदारी पुनर्स्थापित करने के लिए नेटिव ऐप की आवश्यकता है — यह प्रीव्यू में उपलब्ध नहीं है।",
+      nothingToRestoreTitle: "पुनर्स्थापित करने के लिए कुछ नहीं", nothingToRestoreBody: "इस खाते के लिए कोई सक्रिय सदस्यता नहीं मिली।",
+      restoredTitle: "पुनर्स्थापित", restoredBody: "आपकी सदस्यता पुनर्स्थापित कर दी गई है।",
+      errorRestore: "खरीदारी पुनर्स्थापित करने में असमर्थ।",
+      yourMembership: "आपकी सदस्यता", freeWord: "मुफ़्त",
+      restoring: "पुनर्स्थापित हो रहा है…", restorePurchases: "खरीदारी पुनर्स्थापित करें",
+      nativeStoreHint: "इस बिल्ड में नेटिव स्टोर खरीदारी उपलब्ध नहीं है — इसके बजाय सुरक्षित वेब चेकआउट का उपयोग किया जा रहा है।",
+      defaultPerk1: "VIP बैज और प्रोफ़ाइल फ्रेम", defaultPerk2: "विशेष उपहार", defaultPerk3: "VIP रूम", defaultPerk4: "मासिक लाभ",
+      chooseVip: "VIP चुनें"
+    },
+    missionsScreen: {
+      kicker: "अमोरा प्रोग्रेशन", title: "मिशन और उपलब्धियां",
+      errorLoad: "मिशन लोड करने में असमर्थ।", errorClaim: "पुरस्कार का दावा करने में असमर्थ।",
+      typeDaily: "📅 दैनिक", typeWeekly: "🗓️ साप्ताहिक", typeLifetime: "🏆 उपलब्धियां",
+      claimed: "✓ दावा किया गया", claiming: "दावा किया जा रहा है…", claimReward: "पुरस्कार का दावा करें", inProgress: "प्रगति पर"
+    },
+    outfitsScreen: {
+      kicker: "अमोरा कलेक्शन", title: "अपनी आभा को सजाएं।",
+      subtitle: "फ्रेम, प्रभाव, बैज और प्रोफ़ाइल शैलियां जो आपकी अमोरा पहचान बनाती हैं।",
+      errorLoad: "आपका संग्रह लोड करने में असमर्थ।", errorUpdate: "आपका लुक अपडेट करने में असमर्थ।",
+      equipped: "इक्विप्ड", equip: "इक्विप करें", notOwned: "स्वामित्व में नहीं", coinsWord: "कॉइन"
+    },
+    rewardsScreen: {
+      kicker: "अमोरा रिवॉर्ड्स", title: "वापस आएं। पुरस्कृत हों।",
+      errorLoad: "पुरस्कार लोड करने में असमर्थ।", errorClaimNotAvailable: "पुरस्कार अभी उपलब्ध नहीं है।",
+      dayStreakSuffix: "दिन की स्ट्रीक", coinsAvailableTodaySuffix: "आज उपलब्ध कॉइन",
+      claimedToday: "✓ आज दावा किया गया", claiming: "दावा किया जा रहा है…", claimDailyReward: "दैनिक पुरस्कार का दावा करें",
+      historyTitle: "पुरस्कार इतिहास",
+      rewardFallback: "पुरस्कार", dayOfCyclePrefix: "दिन", ofCycle: "चक्र का", milestoneSuffix: "मील का पत्थर"
+    },
+    storeScreen: {
+      kicker: "अमोरा लक्जरी वॉल्ट", title: "बुटीक",
+      errorLoad: "स्टोर लोड करने में असमर्थ।", errorBuy: "खरीदारी विफल।", errorUpdate: "आइटम अपडेट करने में असमर्थ।",
+      permanent: "स्थायी", equippedCheck: "इक्विप्ड ✓", equip: "इक्विप करें", buying: "खरीदा जा रहा है…", notEnoughCoins: "पर्याप्त कॉइन नहीं", buy: "खरीदें"
+    },
+    studioScreen: {
+      kicker: "अमोरा क्रिएटर", title: "क्रिएटर स्टूडियो", errorLoad: "क्रिएटर स्टूडियो लोड करने में असमर्थ।",
+      followers: "फॉलोअर्स", newThisWeek: "इस सप्ताह नए", streams: "स्ट्रीम्स", liveTime: "लाइव समय",
+      peakViewers: "पीक व्यूअर्स", giftsReceived: "प्राप्त उपहार", earnings: "कमाई", level: "स्तर",
+      quickTools: "त्वरित उपकरण", goLive: "🔴 लाइव जाएं", missionsLink: "🎯 मिशन", walletLink: "🎁 वॉलेट",
+      last30Days: "पिछले 30 दिन", followersSuffix: "फॉलोअर्स"
+    },
+    withdrawScreen: {
+      kicker: "अमोरा क्रिएटर पेआउट", title: "निकासी",
+      errorLoad: "निकासी जानकारी लोड करने में असमर्थ।",
+      minWithdrawalError: "न्यूनतम निकासी है", coinsWord: "कॉइन",
+      maxBalanceError: "आप अपने बैलेंस से अधिक निकासी नहीं कर सकते।",
+      enterPayoutDetails: "अपना भुगतान विवरण दर्ज करें।",
+      requestSubmittedPrefix: "निकासी सबमिट की गई", errorSubmit: "निकासी सबमिट करने में असमर्थ।",
+      minimumPrefix: "न्यूनतम:", ratePrefix: "दर:", perCoinSuffix: "¢ / कॉइन",
+      coinsAmountLabel: "कॉइन राशि", payoutMethodLabel: "भुगतान विधि", payoutDetailsLabel: "भुगतान विवरण",
+      detailsPlaceholder: "ईमेल या बैंक विवरण",
+      submitting: "सबमिट किया जा रहा है…", requestWithdrawal: "निकासी का अनुरोध करें", historyTitle: "इतिहास",
+      methodPaypal: "PAYPAL", methodBank: "बैंक", methodOther: "अन्य"
+    },
+    discoverScreen: {
+      kicker: "अमोरा", title: "खोजें", subtitle: "ऐसे लोग, क्रिएटर्स और लाइव रूम खोजें जो आपके समय के लायक हों।",
+      searchPlaceholder: "क्रिएटर्स, रूम खोजें…",
+      catForYou: "आपके लिए", catLive: "लाइव", catCreators: "क्रिएटर्स", catDating: "डेटिंग", catNew: "नया",
+      errorLoad: "खोज लोड करने में असमर्थ।", memberFallback: "अमोरा सदस्य", liveTag: "🔴 लाइव",
+      nothingHere: "यहां अभी तक कुछ भी नहीं है। कोई अन्य श्रेणी आज़माएं।",
+      verifiedCreator: "सत्यापित क्रिएटर", creatorWord: "क्रिएटर"
+    },
+    datingScreen: {
+      kicker: "अमोरा", title: "प्यार खोजें", matchesLink: "मैच ♡",
+      errorLoad: "डेटिंग लोड करने में असमर्थ।", memberFallback: "अमोरा सदस्य", compatibleSuffix: "% संगत",
+      allCaughtUp: "आप पूरी तरह अपडेट हैं", comeBackLater: "नए कनेक्शन के लिए बाद में वापस आएं।"
+    },
+    liveScreen: {
+      kicker: "अमोरा लाइव", title: "अभी लाइव", goLive: "● लाइव जाएं",
+      heroKicker: "रीयल-टाइम कनेक्शन", heroTitle: "एक ऐसा रूम खोजें जो जीवंत लगे।",
+      heroSub: "बातचीत में शामिल हों, नए लोगों से मिलें और प्रीमियम 3D उपहार भेजें।",
+      errorLoad: "लाइव रूम लोड करने में असमर्थ।",
+      noOneLive: "अभी कोई लाइव नहीं है", beFirst: "पहले बनें — ऊपर लाइव जाएं पर टैप करें।",
+      generalFallback: "सामान्य"
+    },
+    storiesScreen: {
+      kicker: "अमोरा", title: "स्टोरीज़", errorLoad: "स्टोरीज़ लोड करने में असमर्थ।",
+      amoraFallback: "अमोरा", noStoriesYet: "अभी तक कोई स्टोरी नहीं है। एक पल साझा करने वाले पहले व्यक्ति बनें।"
+    },
+    deleteAccountScreen: {
+      kicker: "खाता गोपनीयता", title: "अपना अमोरा खाता हटाएं।",
+      subtitle: "अपने खाते से जुड़ा ईमेल दर्ज करें। हम आपको एक सुरक्षित पुष्टिकरण लिंक भेजेंगे।",
+      defaultDoneMessage: "यदि उस ईमेल के लिए कोई अमोरा खाता मौजूद है, तो एक पुष्टिकरण लिंक भेजा गया है।",
+      errorGeneric: "आपके अनुरोध को संसाधित करने में असमर्थ।", checkInbox: "अपना इनबॉक्स जांचें।",
+      emailLabel: "ईमेल पता", requestButton: "खाता हटाने का अनुरोध करें",
+      note: "सुरक्षा, धोखाधड़ी रोकथाम, वित्तीय रिकॉर्ड या कानूनी दायित्वों के लिए आवश्यक होने पर कुछ रिकॉर्ड बनाए रखे जा सकते हैं या गुमनाम किए जा सकते हैं।"
+    },
+    socialCompleteScreen: {
+      missingSession: "यह साइन-इन सत्र गुम या अमान्य है।",
+      errorContinue: "सामाजिक पंजीकरण जारी रखने में असमर्थ।",
+      invalidEmail: "एक वैध ईमेल पता दर्ज करें।",
+      invalidUsername: "3–20 अक्षरों, संख्याओं, बिंदुओं, डैश या अंडरस्कोर वाला उपयोगकर्ता नाम चुनें।",
+      invalidDob: "अपनी जन्मतिथि YYYY-MM-DD के रूप में दर्ज करें।",
+      errorFinishPrefix: "पंजीकरण समाप्त करने में असमर्थ", errorFinishSuffix: "।",
+      securelyConnectingPrefix: "सुरक्षित रूप से कनेक्ट हो रहा है",
+      brand: "अमोरा", title: "अपना खाता पूरा करें।",
+      subtitle: "एक आखिरी कदम — अपना अमोरा उपयोगकर्ता नाम चुनें और पुष्टि करें कि आप 18+ हैं।",
+      emailPlaceholder: "ईमेल पता", usernamePlaceholder: "उपयोगकर्ता नाम (3-20 अक्षर)", dobPlaceholder: "जन्मतिथि (YYYY-MM-DD)",
+      continueToAmora: "अमोरा जारी रखें"
+    },
+    videoMatchScreen: {
+      kicker: "अमोरा · वीडियो मैच", title: "आमने-सामने मिलें।",
+      introTitle: "क्विक वीडियो मैच", introText: "एक संक्षिप्त पहली छाप। यदि आप दोनों एक-दूसरे को पसंद करते हैं, तो अमोरा एक मैच बनाता है।",
+      startButton: "वीडियो मैच शुरू करें", findingSomeone: "किसी को ढूंढा जा रहा है…", connecting: "कनेक्ट हो रहा है…",
+      stayHere: "यहीं रहें जब तक अमोरा एक संगत व्यक्ति खोजता है।",
+      someoneWord: "कोई व्यक्ति", isHereSuffix: "यहां है", readyToMeet: "मिलने के लिए तैयार",
+      waitingForVideo: "वीडियो का इंतज़ार…", howDidItFeel: "कैसा महसूस हुआ?",
+      pass: "छोड़ें", like: "♥ पसंद है",
+      matchExclaim: "यह एक मैच है!", noMatchThisTime: "इस बार कोई मैच नहीं",
+      matchedBody: "आप दोनों को एक-दूसरे पसंद आए। आपका नया कनेक्शन तैयार है।",
+      keepExploring: "खोजते रहें — मिलने के लिए और भी लोग हैं।",
+      openMatches: "मैच खोलें", tryAgain: "पुनः प्रयास करें",
+      errorAuth: "प्रमाणित करने में असमर्थ। कृपया फिर से साइन इन करें।", errorConnect: "कनेक्ट करने में असमर्थ।",
+      errorVideoConnect: "वीडियो कनेक्ट करने में असमर्थ।", errorMatchFailed: "वीडियो मैच विफल रहा।"
+    },
+    videoScreen: {
+      title: "वीडियो कॉल", memberFallback: "अमोरा सदस्य",
+      readyLine: "LiveKit कॉल स्क्रीन तैयार है।",
+      connectHint: "प्रोडक्शन मीडिया सत्र के लिए यहां मौजूदा नेटिव LiveKit रूम कनेक्ट करें।",
+      endCall: "कॉल समाप्त करें"
     }
   },
   id: {
@@ -1219,6 +2213,148 @@ export const translations: Record<string, Translations> = {
       savingEllipsis: "Menyimpan…", saveChanges: "Simpan perubahan",
       membershipRow: "Keanggotaan & VIP", walletRow: "Dompet & Koin", notificationsRow: "Notifikasi",
       logout: "Keluar", deleteMyAccount: "Hapus akun saya"
+    },
+    levelsScreen: {
+      kicker: "AMORA ROYAL CLUB", title: "Level Anda. Aura Anda.", xpWord: "XP", xpUntilNext: "XP hingga pembukaan berikutnya",
+      privileges: "Hak istimewa", unlocked: "TERBUKA", locked: "TERKUNCI",
+      perk1Title: "Medali Kehormatan", perk1Desc: "Lencana khas di samping profil Anda",
+      perk2Title: "Masuk Bercahaya", perk2Desc: "Efek masuk premium di ruang langsung",
+      perk3Title: "Chat Kreator", perk3Desc: "Gaya chat yang ditingkatkan",
+      perk4Title: "Set Hadiah VIP", perk4Desc: "Hadiah khusus hanya untuk bintang yang sedang naik daun",
+      perk5Title: "Sorotan Spotlight", perk5Desc: "Sorotan premium untuk profil Anda",
+      perk6Title: "Efek Elit", perk6Desc: "Efek eksklusif di ruang langsung",
+      perk7Title: "Aura Emas", perk7Desc: "Aura profil kerajaan dan lencana",
+      perk8Title: "Status Tersembunyi", perk8Desc: "Visibilitas online yang diam-diam opsional",
+      perk9Title: "Kreator Kerajaan", perk9Desc: "Identitas kreator yang khas dan bingkai premium"
+    },
+    membershipScreen: {
+      kicker: "HAK ISTIMEWA AMORA", title: "Keanggotaan VIP", sub: "Cara yang lebih indah untuk menikmati AmoraLive.",
+      errorLoad: "Tidak dapat memuat keanggotaan.", checkoutUnavailable: "Checkout tidak tersedia saat ini.",
+      noReceiptIOS: "Tidak ada tanda terima yang dikembalikan dari App Store.", noTokenAndroid: "Tidak ada token pembelian yang dikembalikan dari Google Play.",
+      errorStart: "Tidak dapat memulai keanggotaan.",
+      chooseVipTitle: "Pilih VIP", subscribeQuestionPrefix: "Berlangganan", thisPlanFallback: "paket ini",
+      subscribe: "Berlangganan",
+      notAvailableTitle: "Tidak tersedia", notAvailableBody: "Memulihkan Pembelian memerlukan build aplikasi native — tidak tersedia dalam pratinjau ini.",
+      nothingToRestoreTitle: "Tidak ada yang dipulihkan", nothingToRestoreBody: "Tidak ditemukan langganan aktif untuk akun ini.",
+      restoredTitle: "Dipulihkan", restoredBody: "Keanggotaan Anda telah dipulihkan.",
+      errorRestore: "Tidak dapat memulihkan pembelian.",
+      yourMembership: "KEANGGOTAAN ANDA", freeWord: "Gratis",
+      restoring: "Memulihkan…", restorePurchases: "Pulihkan Pembelian",
+      nativeStoreHint: "Pembelian toko native tidak tersedia di build ini — menggunakan checkout web aman sebagai gantinya.",
+      defaultPerk1: "Lencana VIP & bingkai profil", defaultPerk2: "Hadiah eksklusif", defaultPerk3: "Ruang VIP", defaultPerk4: "Keuntungan bulanan",
+      chooseVip: "Pilih VIP"
+    },
+    missionsScreen: {
+      kicker: "PROGRESI AMORA", title: "Misi & Pencapaian",
+      errorLoad: "Tidak dapat memuat misi.", errorClaim: "Tidak dapat mengklaim hadiah.",
+      typeDaily: "📅 Harian", typeWeekly: "🗓️ Mingguan", typeLifetime: "🏆 Pencapaian",
+      claimed: "✓ Diklaim", claiming: "Mengklaim…", claimReward: "Klaim hadiah", inProgress: "Sedang berlangsung"
+    },
+    outfitsScreen: {
+      kicker: "KOLEKSI AMORA", title: "Dandani aura Anda.",
+      subtitle: "Bingkai, efek, lencana, dan gaya profil yang membuat identitas Amora Anda menjadi milik Anda.",
+      errorLoad: "Tidak dapat memuat koleksi Anda.", errorUpdate: "Tidak dapat memperbarui tampilan Anda.",
+      equipped: "Terpasang", equip: "Pasang", notOwned: "Tidak dimiliki", coinsWord: "koin"
+    },
+    rewardsScreen: {
+      kicker: "HADIAH AMORA", title: "Kembali. Dapatkan hadiah.",
+      errorLoad: "Tidak dapat memuat hadiah.", errorClaimNotAvailable: "Hadiah belum tersedia.",
+      dayStreakSuffix: "hari beruntun", coinsAvailableTodaySuffix: "koin tersedia hari ini",
+      claimedToday: "✓ Diklaim hari ini", claiming: "Mengklaim…", claimDailyReward: "Klaim hadiah harian",
+      historyTitle: "Riwayat hadiah",
+      rewardFallback: "Hadiah", dayOfCyclePrefix: "Hari", ofCycle: "dari siklus", milestoneSuffix: "tonggak"
+    },
+    storeScreen: {
+      kicker: "BRANKAS MEWAH AMORA", title: "Butik",
+      errorLoad: "Tidak dapat memuat toko.", errorBuy: "Pembelian gagal.", errorUpdate: "Tidak dapat memperbarui item.",
+      permanent: "Permanen", equippedCheck: "Terpasang ✓", equip: "Pasang", buying: "Membeli…", notEnoughCoins: "Koin tidak cukup", buy: "Beli"
+    },
+    studioScreen: {
+      kicker: "KREATOR AMORA", title: "Studio Kreator", errorLoad: "Tidak dapat memuat Studio Kreator.",
+      followers: "Pengikut", newThisWeek: "Baru minggu ini", streams: "Siaran", liveTime: "Waktu siaran langsung",
+      peakViewers: "Puncak penonton", giftsReceived: "Hadiah diterima", earnings: "Pendapatan", level: "Level",
+      quickTools: "Alat cepat", goLive: "🔴 Mulai Siaran Langsung", missionsLink: "🎯 Misi", walletLink: "🎁 Dompet",
+      last30Days: "30 hari terakhir", followersSuffix: "pengikut"
+    },
+    withdrawScreen: {
+      kicker: "PEMBAYARAN KREATOR AMORA", title: "Tarik",
+      errorLoad: "Tidak dapat memuat informasi penarikan.",
+      minWithdrawalError: "Penarikan minimum adalah", coinsWord: "koin",
+      maxBalanceError: "Anda tidak dapat menarik lebih dari saldo Anda.",
+      enterPayoutDetails: "Masukkan detail pembayaran Anda.",
+      requestSubmittedPrefix: "Penarikan diajukan untuk", errorSubmit: "Tidak dapat mengajukan penarikan.",
+      minimumPrefix: "Minimum:", ratePrefix: "Tarif:", perCoinSuffix: "¢ / koin",
+      coinsAmountLabel: "Jumlah koin", payoutMethodLabel: "Metode pembayaran", payoutDetailsLabel: "Detail pembayaran",
+      detailsPlaceholder: "Email atau detail bank",
+      submitting: "Mengirim…", requestWithdrawal: "Ajukan penarikan", historyTitle: "Riwayat",
+      methodPaypal: "PAYPAL", methodBank: "BANK", methodOther: "LAINNYA"
+    },
+    discoverScreen: {
+      kicker: "AMORA", title: "Jelajahi", subtitle: "Temukan orang, kreator, dan ruang langsung yang layak untuk waktu Anda.",
+      searchPlaceholder: "Cari kreator, ruang…",
+      catForYou: "Untuk Anda", catLive: "Langsung", catCreators: "Kreator", catDating: "Kencan", catNew: "Baru",
+      errorLoad: "Tidak dapat memuat Jelajahi.", memberFallback: "Anggota Amora", liveTag: "🔴 LANGSUNG",
+      nothingHere: "Belum ada apa-apa di sini. Coba kategori lain.",
+      verifiedCreator: "Kreator terverifikasi", creatorWord: "Kreator"
+    },
+    datingScreen: {
+      kicker: "AMORA", title: "Temukan Cinta", matchesLink: "Kecocokan ♡",
+      errorLoad: "Tidak dapat memuat kencan.", memberFallback: "Anggota Amora", compatibleSuffix: "% cocok",
+      allCaughtUp: "Anda sudah update", comeBackLater: "Kembali lagi nanti untuk koneksi baru."
+    },
+    liveScreen: {
+      kicker: "AMORA LANGSUNG", title: "Langsung sekarang", goLive: "● Mulai Siaran Langsung",
+      heroKicker: "KONEKSI WAKTU NYATA", heroTitle: "Temukan ruang yang terasa hidup.",
+      heroSub: "Bergabung dalam percakapan, temui orang baru, dan kirim hadiah 3D premium.",
+      errorLoad: "Tidak dapat memuat ruang langsung.",
+      noOneLive: "Tidak ada yang siaran langsung sekarang", beFirst: "Jadilah yang pertama — ketuk Mulai Siaran Langsung di atas.",
+      generalFallback: "Umum"
+    },
+    storiesScreen: {
+      kicker: "AMORA", title: "Cerita", errorLoad: "Tidak dapat memuat cerita.",
+      amoraFallback: "Amora", noStoriesYet: "Belum ada cerita. Jadilah yang pertama membagikan momen."
+    },
+    deleteAccountScreen: {
+      kicker: "PRIVASI AKUN", title: "Hapus akun Amora Anda.",
+      subtitle: "Masukkan email yang terkait dengan akun Anda. Kami akan mengirimkan tautan konfirmasi yang aman.",
+      defaultDoneMessage: "Jika akun Amora ada untuk email tersebut, tautan konfirmasi telah dikirim.",
+      errorGeneric: "Tidak dapat memproses permintaan Anda.", checkInbox: "Periksa kotak masuk Anda.",
+      emailLabel: "Alamat email", requestButton: "Ajukan penghapusan akun",
+      note: "Beberapa catatan dapat disimpan atau dianonimkan jika diperlukan untuk keamanan, pencegahan penipuan, catatan keuangan, atau kewajiban hukum."
+    },
+    socialCompleteScreen: {
+      missingSession: "Sesi masuk ini hilang atau tidak valid.",
+      errorContinue: "Tidak dapat melanjutkan pendaftaran sosial.",
+      invalidEmail: "Masukkan alamat email yang valid.",
+      invalidUsername: "Pilih nama pengguna dengan 3–20 huruf, angka, titik, tanda hubung, atau garis bawah.",
+      invalidDob: "Masukkan tanggal lahir Anda sebagai YYYY-MM-DD.",
+      errorFinishPrefix: "Tidak dapat menyelesaikan pendaftaran", errorFinishSuffix: ".",
+      securelyConnectingPrefix: "Terhubung dengan aman ke",
+      brand: "AMORA", title: "Selesaikan akun Anda.",
+      subtitle: "Satu langkah terakhir — pilih nama pengguna Amora Anda dan konfirmasi bahwa Anda berusia 18+.",
+      emailPlaceholder: "Alamat email", usernamePlaceholder: "Nama pengguna (3-20 karakter)", dobPlaceholder: "Tanggal lahir (YYYY-MM-DD)",
+      continueToAmora: "Lanjutkan ke Amora"
+    },
+    videoMatchScreen: {
+      kicker: "AMORA · VIDEO MATCH", title: "Bertemu langsung.",
+      introTitle: "Video Match Cepat", introText: "Kesan pertama yang singkat. Jika kalian berdua saling menyukai, Amora akan membuat kecocokan.",
+      startButton: "Mulai Video Match", findingSomeone: "Mencari seseorang…", connecting: "Menghubungkan…",
+      stayHere: "Tetap di sini sementara Amora mencari orang yang cocok.",
+      someoneWord: "Seseorang", isHereSuffix: "ada di sini", readyToMeet: "Siap bertemu",
+      waitingForVideo: "Menunggu video…", howDidItFeel: "Bagaimana rasanya?",
+      pass: "Lewati", like: "♥ Suka",
+      matchExclaim: "Ini cocok!", noMatchThisTime: "Tidak cocok kali ini",
+      matchedBody: "Kalian berdua saling menyukai. Koneksi baru Anda sudah siap.",
+      keepExploring: "Terus jelajahi — masih ada lebih banyak orang untuk ditemui.",
+      openMatches: "Buka Kecocokan", tryAgain: "Coba Lagi",
+      errorAuth: "Tidak dapat mengautentikasi. Silakan masuk lagi.", errorConnect: "Tidak dapat terhubung.",
+      errorVideoConnect: "Tidak dapat menghubungkan video.", errorMatchFailed: "Video match gagal."
+    },
+    videoScreen: {
+      title: "Panggilan video", memberFallback: "Anggota Amora",
+      readyLine: "Layar panggilan LiveKit siap.",
+      connectHint: "Hubungkan Room LiveKit native yang ada di sini untuk sesi media produksi.",
+      endCall: "Akhiri panggilan"
     }
   }
 };
