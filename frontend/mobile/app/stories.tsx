@@ -4,18 +4,20 @@ import {router} from "expo-router";
 import AppShell from "../src/AppShell";
 import {theme} from "../src/theme";
 import {phase3Api} from "../src/phase3Api";
+import {useTranslation} from "../src/i18n";
 
 export default function Stories(){
+ const {t}=useTranslation();
  const [stories,setStories]=useState<any[]>([]),[loading,setLoading]=useState(true),[selected,setSelected]=useState<any>(null),[error,setError]=useState("");
- const load=useCallback(async()=>{try{const r=await phase3Api.stories();setStories(r?.stories||r||[])}catch(e:any){setError(e.message||"Unable to load stories.")}finally{setLoading(false)}},[]);
+ const load=useCallback(async()=>{try{const r=await phase3Api.stories();setStories(r?.stories||r||[])}catch(e:any){setError(e.message||t("storiesScreen.errorLoad"))}finally{setLoading(false)}},[]);
  useEffect(()=>{load()},[load]);
  const open=async(st:any)=>{setSelected(st);try{await phase3Api.viewStory(String(st.id))}catch{}};
  return <AppShell><ScrollView style={s.page} contentContainerStyle={{paddingBottom:30}}>
-  <View style={s.header}><Pressable onPress={()=>router.back()}><Text style={s.back}>‹</Text></Pressable><View><Text style={s.kicker}>AMORA</Text><Text style={s.title}>Stories</Text></View><Pressable style={s.add} onPress={()=>router.push("/stories/create")}><Text style={s.addText}>＋</Text></Pressable></View>
+  <View style={s.header}><Pressable onPress={()=>router.back()}><Text style={s.back}>‹</Text></Pressable><View><Text style={s.kicker}>{t("storiesScreen.kicker")}</Text><Text style={s.title}>{t("storiesScreen.title")}</Text></View><Pressable style={s.add} onPress={()=>router.push("/stories/create")}><Text style={s.addText}>＋</Text></Pressable></View>
   {loading?<ActivityIndicator color={theme.pink}/>:error?<Text style={s.error}>{error}</Text>:<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{gap:10,paddingVertical:18}}>
-   {stories.map((x,i)=><Pressable key={x.id||i} onPress={()=>open(x)} style={s.story}><View style={s.ring}><Image source={{uri:x.profile_photo||x.user?.profile_photo||x.thumbnail_url}} style={s.avatar}/></View><Text numberOfLines={1} style={s.user}>{x.display_name||x.username||x.user?.display_name||"Amora"}</Text></Pressable>)}
+   {stories.map((x,i)=><Pressable key={x.id||i} onPress={()=>open(x)} style={s.story}><View style={s.ring}><Image source={{uri:x.profile_photo||x.user?.profile_photo||x.thumbnail_url}} style={s.avatar}/></View><Text numberOfLines={1} style={s.user}>{x.display_name||x.username||x.user?.display_name||t("storiesScreen.amoraFallback")}</Text></Pressable>)}
   </ScrollView>}
-  {!stories.length&&!loading&&<Text style={s.empty}>No stories yet. Be the first to share a moment.</Text>}
+  {!stories.length&&!loading&&<Text style={s.empty}>{t("storiesScreen.noStoriesYet")}</Text>}
   {selected&&<View style={s.viewer}><Image source={{uri:selected.media_url||selected.image_url||selected.video_url}} style={s.media}/><View style={s.viewerBar}><Text style={s.viewerName}>{selected.display_name||selected.username||selected.user?.display_name}</Text><Pressable onPress={()=>setSelected(null)}><Text style={s.close}>×</Text></Pressable></View><Text style={s.caption}>{selected.caption||""}</Text><View style={s.reactions}>{["❤️","🔥","😍","👏"].map(r=><Pressable key={r} onPress={()=>phase3Api.reactStory(String(selected.id),r)}><Text style={s.react}>{r}</Text></Pressable>)}</View></View>}
  </ScrollView></AppShell>
 }

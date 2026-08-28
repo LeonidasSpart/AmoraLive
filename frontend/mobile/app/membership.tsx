@@ -6,6 +6,7 @@ import AppShell from "../src/AppShell";
 import { theme } from "../src/theme";
 import { phase4Api } from "../src/phase4Api";
 import { api } from "../src/api/client";
+import { useTranslation } from "../src/i18n";
 
 // Same defensive load as app/wallet.tsx — react-native-iap needs native
 // modules and won't load in Expo Go.
@@ -17,6 +18,7 @@ try {
 }
 
 export default function Membership() {
+  const { t } = useTranslation();
   const [plans, setPlans] = useState<any[]>([]);
   const [current, setCurrent] = useState<any>();
   const [loading, setLoading] = useState(true);
@@ -29,7 +31,7 @@ export default function Membership() {
       setPlans(p?.plans || p || []);
       setCurrent(m?.membership || m);
     } catch (e: any) {
-      setError(e.message || "Unable to load membership.");
+      setError(e.message || t("membershipScreen.errorLoad"));
     } finally {
       setLoading(false);
     }
@@ -38,7 +40,7 @@ export default function Membership() {
 
   const subscribeViaWebCheckout = async (tier: string) => {
     const { checkoutUrl } = await api.membershipCheckout(tier);
-    if (!checkoutUrl) throw new Error("Checkout is not available right now.");
+    if (!checkoutUrl) throw new Error(t("membershipScreen.checkoutUnavailable"));
     await WebBrowser.openBrowserAsync(checkoutUrl);
     await load();
   };
@@ -62,13 +64,13 @@ export default function Membership() {
 
         if (Platform.OS === "ios") {
           const receiptData = result?.transactionReceipt;
-          if (!receiptData) throw new Error("No receipt returned from the App Store.");
+          if (!receiptData) throw new Error(t("membershipScreen.noReceiptIOS"));
           const verified = await api.verifyAppleSubscription(receiptData);
           await RNIap.finishTransaction({ purchase: result, isConsumable: false });
           setCurrent(verified.membership);
         } else {
           const purchaseToken = result?.purchaseToken;
-          if (!purchaseToken) throw new Error("No purchase token returned from Google Play.");
+          if (!purchaseToken) throw new Error(t("membershipScreen.noTokenAndroid"));
           const verified = await api.verifyGoogleSubscription(tier, purchaseToken);
           await RNIap.finishTransaction({ purchase: result, isConsumable: false });
           setCurrent(verified.membership);
@@ -78,16 +80,16 @@ export default function Membership() {
         await RNIap.endConnection();
       }
     } catch (e: any) {
-      if (e?.code !== "E_USER_CANCELLED") setError(e.message || "Unable to start membership.");
+      if (e?.code !== "E_USER_CANCELLED") setError(e.message || t("membershipScreen.errorStart"));
     } finally {
       setBusyTier("");
     }
   };
 
   const confirmSubscribe = (plan: any) => {
-    Alert.alert("Choose VIP", `Subscribe to ${plan.name || plan.label || "this plan"}?`, [
-      { text: "Cancel", style: "cancel" },
-      { text: "Subscribe", onPress: () => subscribe(plan) }
+    Alert.alert(t("membershipScreen.chooseVipTitle"), `${t("membershipScreen.subscribeQuestionPrefix")} ${plan.name || plan.label || t("membershipScreen.thisPlanFallback")}?`, [
+      { text: t("common.cancel"), style: "cancel" },
+      { text: t("membershipScreen.subscribe"), onPress: () => subscribe(plan) }
     ]);
   };
 
@@ -101,7 +103,7 @@ export default function Membership() {
   const [restoring, setRestoring] = useState(false);
   const restore = async () => {
     if (!RNIap) {
-      Alert.alert("Not available", "Restore Purchases needs the native app build — it isn't available in this preview.");
+      Alert.alert(t("membershipScreen.notAvailableTitle"), t("membershipScreen.notAvailableBody"));
       return;
     }
     setRestoring(true);
@@ -111,7 +113,7 @@ export default function Membership() {
       try {
         const purchases = await RNIap.getAvailablePurchases();
         if (!purchases?.length) {
-          Alert.alert("Nothing to restore", "No active subscription was found for this account.");
+          Alert.alert(t("membershipScreen.nothingToRestoreTitle"), t("membershipScreen.nothingToRestoreBody"));
           return;
         }
 
@@ -139,16 +141,16 @@ export default function Membership() {
         }
 
         if (restoredAny) {
-          Alert.alert("Restored", "Your membership has been restored.");
+          Alert.alert(t("membershipScreen.restoredTitle"), t("membershipScreen.restoredBody"));
           await load();
         } else {
-          Alert.alert("Nothing to restore", "No active subscription was found for this account.");
+          Alert.alert(t("membershipScreen.nothingToRestoreTitle"), t("membershipScreen.nothingToRestoreBody"));
         }
       } finally {
         await RNIap.endConnection();
       }
     } catch (e: any) {
-      setError(e.message || "Unable to restore purchases.");
+      setError(e.message || t("membershipScreen.errorRestore"));
     } finally {
       setRestoring(false);
     }
@@ -157,23 +159,24 @@ export default function Membership() {
   return <AppShell>
     <ScrollView style={s.page}>
       <Pressable onPress={() => router.back()}><Text style={s.back}>‹</Text></Pressable>
-      <Text style={s.kicker}>AMORA PRIVILEGE</Text>
-      <Text style={s.title}>VIP Membership</Text>
-      <Text style={s.sub}>A more beautiful way to enjoy AmoraLive.</Text>
+      <Text style={s.kicker}>{t("membershipScreen.kicker")}</Text>
+      <Text style={s.title}>{t("membershipScreen.title")}</Text>
+      <Text style={s.sub}>{t("membershipScreen.sub")}</Text>
       {loading ? <ActivityIndicator color={theme.pink} /> : error ? <Text style={s.error}>{error}</Text> : <>
-        <View style={s.current}><Text style={s.label}>YOUR MEMBERSHIP</Text><Text style={s.vip}>{current?.name || current?.plan?.name || current?.tier || "Free"}</Text></View>
-        <Pressable onPress={restore} disabled={restoring} style={s.restoreBtn}><Text style={s.restoreText}>{restoring ? "Restoring…" : "Restore Purchases"}</Text></Pressable>
-        {!RNIap && <Text style={s.hint}>Native store purchases aren't available in this build — using secure web checkout instead.</Text>}
+        <View style={s.current}><Text style={s.label}>{t("membershipScreen.yourMembership")}</Text><Text style={s.vip}>{current?.name || current?.plan?.name || current?.tier || t("membershipScreen.freeWord")}</Text></View>
+        <Pressable onPress={restore} disabled={restoring} style={s.restoreBtn}><Text style={s.restoreText}>{restoring ? t("membershipScreen.restoring") : t("membershipScreen.restorePurchases")}</Text></Pressable>
+        {!RNIap && <Text style={s.hint}>{t("membershipScreen.nativeStoreHint")}</Text>}
         {plans.map((p, i) => {
           const tier = String(p.tier || p.id);
+          const defaultPerks = [t("membershipScreen.defaultPerk1"), t("membershipScreen.defaultPerk2"), t("membershipScreen.defaultPerk3"), t("membershipScreen.defaultPerk4")];
           return <View style={s.card} key={p.id || p.tier || i}>
             <Text style={s.plan}>{p.name || p.title || p.label || "VIP"}</Text>
             <Text style={s.price}>{p.price_display || p.price || "Premium"}</Text>
-            {(p.benefits || p.perks || ["VIP badge & profile frame", "Exclusive gifts", "VIP rooms", "Monthly perks"]).slice(0, 5).map((x: any, j: number) => (
+            {(p.benefits || p.perks || defaultPerks).slice(0, 5).map((x: any, j: number) => (
               <Text style={s.perk} key={j}>✓ {typeof x === "string" ? x : x.name}</Text>
             ))}
             <Pressable style={s.button} disabled={busyTier === tier} onPress={() => confirmSubscribe(p)}>
-              <Text style={s.bt}>{busyTier === tier ? "…" : "Choose VIP"}</Text>
+              <Text style={s.bt}>{busyTier === tier ? "…" : t("membershipScreen.chooseVip")}</Text>
             </Pressable>
           </View>;
         })}

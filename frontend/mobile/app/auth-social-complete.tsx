@@ -4,8 +4,10 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 
 import { api } from "../src/api/client";
 import { registerForPushNotifications } from "../src/push";
 import { theme } from "../src/theme";
+import { useTranslation } from "../src/i18n";
 
 export default function SocialComplete() {
+  const { t } = useTranslation();
   const { code, provider } = useLocalSearchParams<{ code?: string; provider?: string }>();
   const [completionToken, setCompletionToken] = useState("");
   const [username, setUsername] = useState("");
@@ -20,7 +22,7 @@ export default function SocialComplete() {
 
   useEffect(() => {
     if (!code) {
-      setError("This sign-in session is missing or invalid.");
+      setError(t("socialCompleteScreen.missingSession"));
       setLoading(false);
       return;
     }
@@ -32,12 +34,12 @@ export default function SocialComplete() {
           router.replace("/home");
           return;
         }
-        if (!result.completionToken) throw new Error("Unable to continue social registration.");
+        if (!result.completionToken) throw new Error(t("socialCompleteScreen.errorContinue"));
         setCompletionToken(String(result.completionToken));
         setNeedsEmail(Boolean(result.needsEmail));
         if (result.email) setEmail(String(result.email));
       } catch (e: any) {
-        setError(e.message || "Unable to continue social registration.");
+        setError(e.message || t("socialCompleteScreen.errorContinue"));
       } finally {
         setLoading(false);
       }
@@ -47,15 +49,15 @@ export default function SocialComplete() {
   const complete = async () => {
     setError("");
     if (needsEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-      setError("Enter a valid email address.");
+      setError(t("socialCompleteScreen.invalidEmail"));
       return;
     }
     if (!/^[A-Za-z0-9_.-]{3,20}$/.test(username.trim())) {
-      setError("Choose a username with 3–20 letters, numbers, dots, dashes or underscores.");
+      setError(t("socialCompleteScreen.invalidUsername"));
       return;
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dateOfBirth)) {
-      setError("Enter your date of birth as YYYY-MM-DD.");
+      setError(t("socialCompleteScreen.invalidDob"));
       return;
     }
     setSaving(true);
@@ -69,7 +71,7 @@ export default function SocialComplete() {
       registerForPushNotifications();
       router.replace("/home");
     } catch (e: any) {
-      setError(e.message || `Unable to finish ${providerName} registration.`);
+      setError(e.message || `${t("socialCompleteScreen.errorFinishPrefix")} ${providerName}${t("socialCompleteScreen.errorFinishSuffix")}`);
     } finally {
       setSaving(false);
     }
@@ -79,22 +81,22 @@ export default function SocialComplete() {
     return (
       <View style={s.center}>
         <ActivityIndicator color={theme.pink} size="large" />
-        <Text style={s.text}>Securely connecting to {providerName}…</Text>
+        <Text style={s.text}>{t("socialCompleteScreen.securelyConnectingPrefix")} {providerName}…</Text>
       </View>
     );
   }
 
   return (
     <View style={s.page}>
-      <Text style={s.brand}>AMORA</Text>
-      <Text style={s.title}>Finish your account.</Text>
-      <Text style={s.subtitle}>One last step — choose your Amora username and confirm that you are 18+.</Text>
+      <Text style={s.brand}>{t("socialCompleteScreen.brand")}</Text>
+      <Text style={s.title}>{t("socialCompleteScreen.title")}</Text>
+      <Text style={s.subtitle}>{t("socialCompleteScreen.subtitle")}</Text>
 
       {!!error && <Text style={s.error}>{error}</Text>}
 
       {needsEmail && (
         <TextInput
-          placeholder="Email address"
+          placeholder={t("socialCompleteScreen.emailPlaceholder")}
           placeholderTextColor="#8d849b"
           style={s.input}
           autoCapitalize="none"
@@ -105,7 +107,7 @@ export default function SocialComplete() {
         />
       )}
       <TextInput
-        placeholder="Username (3-20 characters)"
+        placeholder={t("socialCompleteScreen.usernamePlaceholder")}
         placeholderTextColor="#8d849b"
         style={s.input}
         autoCapitalize="none"
@@ -114,7 +116,7 @@ export default function SocialComplete() {
         onChangeText={setUsername}
       />
       <TextInput
-        placeholder="Date of birth (YYYY-MM-DD)"
+        placeholder={t("socialCompleteScreen.dobPlaceholder")}
         placeholderTextColor="#8d849b"
         style={s.input}
         autoCapitalize="none"
@@ -123,7 +125,7 @@ export default function SocialComplete() {
       />
 
       <Pressable style={s.primary} onPress={complete} disabled={saving}>
-        {saving ? <ActivityIndicator color="#fff" /> : <Text style={s.primaryText}>Continue to Amora</Text>}
+        {saving ? <ActivityIndicator color="#fff" /> : <Text style={s.primaryText}>{t("socialCompleteScreen.continueToAmora")}</Text>}
       </Pressable>
     </View>
   );

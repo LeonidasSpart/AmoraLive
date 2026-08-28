@@ -7,6 +7,7 @@ import { VideoTrack } from "@livekit/react-native";
 import AppShell from "../src/AppShell";
 import { theme } from "../src/theme";
 import { API_URL, getValidAccessToken } from "../src/api/client";
+import { useTranslation } from "../src/i18n";
 
 // Same LiveKit client pattern verified in app/live/[id].tsx: Room/RoomEvent/
 // Track are the stable, version-independent core API. VideoTrack rendering
@@ -21,6 +22,7 @@ import { API_URL, getValidAccessToken } from "../src/api/client";
 // forever with no error at all.
 
 export default function VideoMatch() {
+  const { t } = useTranslation();
   const socket = useRef<Socket | null>(null);
   const lkRoom = useRef<Room | null>(null);
   const [phase, setPhase] = useState("intro");
@@ -52,7 +54,7 @@ export default function VideoMatch() {
       await room.localParticipant.setMicrophoneEnabled(true);
       setMyTrackRef({ participant: room.localParticipant, publication: null });
     } catch (e: any) {
-      setError(e.message || "Unable to connect video.");
+      setError(e.message || t("videoMatchScreen.errorVideoConnect"));
     }
   };
 
@@ -74,12 +76,12 @@ export default function VideoMatch() {
 
     s.on("connect", () => {
       s.emit("authenticate", token, (ack: any) => {
-        if (!ack?.ok) { setError("Unable to authenticate. Please sign in again."); setPhase("intro"); return; }
+        if (!ack?.ok) { setError(t("videoMatchScreen.errorAuth")); setPhase("intro"); return; }
         setPhase("queued");
         s.emit("video_match:queue_join");
       });
     });
-    s.on("connect_error", (e: any) => { setError(e.message || "Unable to connect."); setPhase("intro"); });
+    s.on("connect_error", (e: any) => { setError(e.message || t("videoMatchScreen.errorConnect")); setPhase("intro"); });
     s.on("video_match:queued", () => setPhase("queued"));
     s.on("video_match:paired", (p: any) => {
       setPeer(p.peerPreview);
@@ -91,7 +93,7 @@ export default function VideoMatch() {
     s.on("video_match:decide_now", ({ deadline: d }: any) => { setDeadline(d); setPhase("deciding"); });
     s.on("video_match:result", (r: any) => { setResult(r); setPhase("result"); disconnectVideo(); });
     s.on("video_match:peer_left", () => { setPhase("result"); disconnectVideo(); });
-    s.on("video_match:error", (e: any) => { setError(e.error || "Video match failed."); setPhase("intro"); });
+    s.on("video_match:error", (e: any) => { setError(e.error || t("videoMatchScreen.errorMatchFailed")); setPhase("intro"); });
   };
 
   const decide = (d: "like" | "pass") => {
@@ -110,47 +112,47 @@ export default function VideoMatch() {
   return <AppShell>
     <View style={s.p}>
       <Pressable onPress={() => router.back()}><Text style={s.back}>‹</Text></Pressable>
-      <Text style={s.k}>AMORA · VIDEO MATCH</Text>
-      <Text style={s.t}>Meet face-to-face.</Text>
+      <Text style={s.k}>{t("videoMatchScreen.kicker")}</Text>
+      <Text style={s.t}>{t("videoMatchScreen.title")}</Text>
 
       {phase === "intro" && <View style={s.center}>
         <Text style={s.icon}>📹</Text>
-        <Text style={s.title}>Quick Video Match</Text>
-        <Text style={s.muted}>A short first impression. If you both like each other, Amora creates a match.</Text>
-        <Pressable onPress={start} style={s.button}><Text style={s.bt}>Start Video Match</Text></Pressable>
+        <Text style={s.title}>{t("videoMatchScreen.introTitle")}</Text>
+        <Text style={s.muted}>{t("videoMatchScreen.introText")}</Text>
+        <Pressable onPress={start} style={s.button}><Text style={s.bt}>{t("videoMatchScreen.startButton")}</Text></Pressable>
       </View>}
 
       {(phase === "connecting" || phase === "queued") && <View style={s.center}>
         <ActivityIndicator color={theme.pink} />
-        <Text style={s.title}>{phase === "queued" ? "Finding someone…" : "Connecting…"}</Text>
-        <Text style={s.muted}>Stay here while Amora finds a compatible person.</Text>
+        <Text style={s.title}>{phase === "queued" ? t("videoMatchScreen.findingSomeone") : t("videoMatchScreen.connecting")}</Text>
+        <Text style={s.muted}>{t("videoMatchScreen.stayHere")}</Text>
       </View>}
 
       {showVideo && <View style={s.videoStage}>
-        {peerTrackRef ? <VideoTrack trackRef={peerTrackRef} style={s.videoFill} /> : <View style={s.videoPlaceholder}><Text style={{ fontSize: 40 }}>♡</Text><Text style={s.muted}>Waiting for video…</Text></View>}
+        {peerTrackRef ? <VideoTrack trackRef={peerTrackRef} style={s.videoFill} /> : <View style={s.videoPlaceholder}><Text style={{ fontSize: 40 }}>♡</Text><Text style={s.muted}>{t("videoMatchScreen.waitingForVideo")}</Text></View>}
         {myTrackRef && <View style={s.selfPip}><VideoTrack trackRef={myTrackRef} style={s.videoFill} /></View>}
         <View style={s.videoOverlay}>
-          <Text style={s.title}>{peer?.age ? `${peer.age}` : "Someone"} is here</Text>
-          <Text style={s.muted}>{peer?.location || "Ready to meet"}{peer?.interests?.length ? ` · ${peer.interests.join(" · ")}` : ""}</Text>
+          <Text style={s.title}>{peer?.age ? `${peer.age}` : t("videoMatchScreen.someoneWord")} {t("videoMatchScreen.isHereSuffix")}</Text>
+          <Text style={s.muted}>{peer?.location || t("videoMatchScreen.readyToMeet")}{peer?.interests?.length ? ` · ${peer.interests.join(" · ")}` : ""}</Text>
           <Text style={s.timer}>{secs}s</Text>
         </View>
       </View>}
 
       {phase === "deciding" && <View style={s.decideBar}>
-        <Text style={s.title}>How did it feel?</Text>
+        <Text style={s.title}>{t("videoMatchScreen.howDidItFeel")}</Text>
         <Text style={s.timer}>{secs}s</Text>
         <View style={s.actions}>
-          <Pressable onPress={() => decide("pass")} style={s.pass}><Text style={s.actionText}>Pass</Text></Pressable>
-          <Pressable onPress={() => decide("like")} style={s.like}><Text style={s.actionText}>♥ Like</Text></Pressable>
+          <Pressable onPress={() => decide("pass")} style={s.pass}><Text style={s.actionText}>{t("videoMatchScreen.pass")}</Text></Pressable>
+          <Pressable onPress={() => decide("like")} style={s.like}><Text style={s.actionText}>{t("videoMatchScreen.like")}</Text></Pressable>
         </View>
       </View>}
 
       {phase === "result" && <View style={s.center}>
         <Text style={s.icon}>{result?.matched ? "💕" : "♡"}</Text>
-        <Text style={s.title}>{result?.matched ? "It's a match!" : "No match this time"}</Text>
-        <Text style={s.muted}>{result?.matched ? "You both liked each other. Your new connection is ready." : "Keep exploring — there are more people to meet."}</Text>
-        {result?.matched && <Pressable onPress={() => router.push("/matches")} style={s.button}><Text style={s.bt}>Open Matches</Text></Pressable>}
-        <Pressable onPress={() => { socket.current?.disconnect(); setResult(null); setSession(null); setPhase("intro"); }} style={s.secondary}><Text style={s.bt}>Try Again</Text></Pressable>
+        <Text style={s.title}>{result?.matched ? t("videoMatchScreen.matchExclaim") : t("videoMatchScreen.noMatchThisTime")}</Text>
+        <Text style={s.muted}>{result?.matched ? t("videoMatchScreen.matchedBody") : t("videoMatchScreen.keepExploring")}</Text>
+        {result?.matched && <Pressable onPress={() => router.push("/matches")} style={s.button}><Text style={s.bt}>{t("videoMatchScreen.openMatches")}</Text></Pressable>}
+        <Pressable onPress={() => { socket.current?.disconnect(); setResult(null); setSession(null); setPhase("intro"); }} style={s.secondary}><Text style={s.bt}>{t("videoMatchScreen.tryAgain")}</Text></Pressable>
       </View>}
 
       {!!error && <Text style={s.err}>{error}</Text>}
