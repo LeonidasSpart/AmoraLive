@@ -103,7 +103,13 @@ export const translations = {
       loadingWallet: 'Loading wallet...', errorPrefix: 'Error:', retry: 'Retry', title: 'My Wallet', profile: 'Profile',
       availableCoins: 'Available Coins', hidePackages: 'Hide Packages', buyCoins: 'Buy Coins', withdraw: 'Withdraw', buy: 'Buy',
       promotion: '🔥 Promotion', allTransactions: 'All Transactions', giftHistory: 'Gift History',
-      noTransactionsYet: 'No transactions yet', transactionFallback: 'Transaction'
+      noTransactionsYet: 'No transactions yet', transactionFallback: 'Transaction',
+      errorFetchWallet: 'Unable to load your wallet.', errorFetchTransactions: 'Unable to load your transactions.',
+      errorStartCheckoutFallback: 'Unable to start checkout.', purchaseFailedPrefix: 'Purchase failed:'
+    },
+    walletPackages: {
+      'Starter Pack': 'Starter Pack', 'Popular Pack': 'Popular Pack', 'Value Pack': 'Value Pack',
+      'Big Spender': 'Big Spender', 'Whale Pack': 'Whale Pack'
     },
     store: {
       kicker: 'AMORA • LUXURY VAULT', title: 'The Amora Boutique', subtitle: 'Collect luminous profile effects, royal identities and premium cosmetics.',
@@ -1475,7 +1481,13 @@ export const translations = {
       loadingWallet: 'Cargando billetera...', errorPrefix: 'Error:', retry: 'Reintentar', title: 'Mi billetera', profile: 'Perfil',
       availableCoins: 'Monedas disponibles', hidePackages: 'Ocultar paquetes', buyCoins: 'Comprar monedas', withdraw: 'Retirar', buy: 'Comprar',
       promotion: '🔥 Promoción', allTransactions: 'Todas las transacciones', giftHistory: 'Historial de regalos',
-      noTransactionsYet: 'Aún no hay transacciones', transactionFallback: 'Transacción'
+      noTransactionsYet: 'Aún no hay transacciones', transactionFallback: 'Transacción',
+      errorFetchWallet: 'No se pudo cargar tu billetera.', errorFetchTransactions: 'No se pudieron cargar tus transacciones.',
+      errorStartCheckoutFallback: 'No se pudo iniciar el pago.', purchaseFailedPrefix: 'Compra fallida:'
+    },
+    walletPackages: {
+      'Starter Pack': 'Paquete Inicial', 'Popular Pack': 'Paquete Popular', 'Value Pack': 'Paquete Ventajoso',
+      'Big Spender': 'Gran Gastador', 'Whale Pack': 'Paquete Ballena'
     },
     store: {
       kicker: 'AMORA • BÓVEDA DE LUJO', title: 'La Boutique Amora', subtitle: 'Colecciona efectos de perfil luminosos, identidades reales y cosméticos premium.',
@@ -2847,7 +2859,13 @@ export const translations = {
       loadingWallet: 'Carregando carteira...', errorPrefix: 'Erro:', retry: 'Tentar novamente', title: 'Minha carteira', profile: 'Perfil',
       availableCoins: 'Moedas disponíveis', hidePackages: 'Ocultar pacotes', buyCoins: 'Comprar moedas', withdraw: 'Sacar', buy: 'Comprar',
       promotion: '🔥 Promoção', allTransactions: 'Todas as transações', giftHistory: 'Histórico de presentes',
-      noTransactionsYet: 'Ainda sem transações', transactionFallback: 'Transação'
+      noTransactionsYet: 'Ainda sem transações', transactionFallback: 'Transação',
+      errorFetchWallet: 'Não foi possível carregar sua carteira.', errorFetchTransactions: 'Não foi possível carregar suas transações.',
+      errorStartCheckoutFallback: 'Não foi possível iniciar o checkout.', purchaseFailedPrefix: 'Compra falhou:'
+    },
+    walletPackages: {
+      'Starter Pack': 'Pacote Inicial', 'Popular Pack': 'Pacote Popular', 'Value Pack': 'Pacote Vantajoso',
+      'Big Spender': 'Grande Gastador', 'Whale Pack': 'Pacote Baleia'
     },
     store: {
       kicker: 'AMORA • COFRE DE LUXO', title: 'A Boutique Amora', subtitle: 'Colecione efeitos de perfil luminosos, identidades reais e cosméticos premium.',
@@ -4219,7 +4237,13 @@ export const translations = {
       loadingWallet: 'Chargement du portefeuille...', errorPrefix: 'Erreur :', retry: 'Réessayer', title: 'Mon portefeuille', profile: 'Profil',
       availableCoins: 'Pièces disponibles', hidePackages: 'Masquer les offres', buyCoins: 'Acheter des pièces', withdraw: 'Retirer', buy: 'Acheter',
       promotion: '🔥 Promotion', allTransactions: 'Toutes les transactions', giftHistory: 'Historique des cadeaux',
-      noTransactionsYet: 'Aucune transaction pour le moment', transactionFallback: 'Transaction'
+      noTransactionsYet: 'Aucune transaction pour le moment', transactionFallback: 'Transaction',
+      errorFetchWallet: 'Impossible de charger votre portefeuille.', errorFetchTransactions: 'Impossible de charger vos transactions.',
+      errorStartCheckoutFallback: "Impossible de démarrer le paiement.", purchaseFailedPrefix: "Échec de l'achat :"
+    },
+    walletPackages: {
+      'Starter Pack': 'Pack Débutant', 'Popular Pack': 'Pack Populaire', 'Value Pack': 'Pack Avantage',
+      'Big Spender': 'Grand Dépensier', 'Whale Pack': 'Pack Baleine'
     },
     store: {
       kicker: 'AMORA • COFFRE DE LUXE', title: 'La Boutique Amora', subtitle: 'Collectionnez des effets de profil lumineux, des identités royales et des cosmétiques premium.',
@@ -5591,7 +5615,13 @@ export const translations = {
       loadingWallet: 'Wallet wird geladen...', errorPrefix: 'Fehler:', retry: 'Erneut versuchen', title: 'Meine Wallet', profile: 'Profil',
       availableCoins: 'Verfügbare Coins', hidePackages: 'Pakete ausblenden', buyCoins: 'Coins kaufen', withdraw: 'Auszahlen', buy: 'Kaufen',
       promotion: '🔥 Aktion', allTransactions: 'Alle Transaktionen', giftHistory: 'Geschenkverlauf',
-      noTransactionsYet: 'Noch keine Transaktionen', transactionFallback: 'Transaktion'
+      noTransactionsYet: 'Noch keine Transaktionen', transactionFallback: 'Transaktion',
+      errorFetchWallet: 'Deine Wallet konnte nicht geladen werden.', errorFetchTransactions: 'Deine Transaktionen konnten nicht geladen werden.',
+      errorStartCheckoutFallback: 'Der Bezahlvorgang konnte nicht gestartet werden.', purchaseFailedPrefix: 'Kauf fehlgeschlagen:'
+    },
+    walletPackages: {
+      'Starter Pack': 'Starter-Paket', 'Popular Pack': 'Beliebtes Paket', 'Value Pack': 'Sparpaket',
+      'Big Spender': 'Großzügiger Spender', 'Whale Pack': 'Wal-Paket'
     },
     store: {
       kicker: 'AMORA • LUXUS-TRESOR', title: 'Die Amora Boutique', subtitle: 'Sammle leuchtende Profileffekte, königliche Identitäten und Premium-Kosmetik.',
@@ -6963,7 +6993,13 @@ export const translations = {
       loadingWallet: 'جارٍ تحميل المحفظة...', errorPrefix: 'خطأ:', retry: 'إعادة المحاولة', title: 'محفظتي', profile: 'الملف الشخصي',
       availableCoins: 'العملات المتاحة', hidePackages: 'إخفاء الباقات', buyCoins: 'شراء عملات', withdraw: 'سحب', buy: 'شراء',
       promotion: '🔥 عرض ترويجي', allTransactions: 'كل المعاملات', giftHistory: 'سجل الهدايا',
-      noTransactionsYet: 'لا توجد معاملات بعد', transactionFallback: 'معاملة'
+      noTransactionsYet: 'لا توجد معاملات بعد', transactionFallback: 'معاملة',
+      errorFetchWallet: 'تعذّر تحميل محفظتك.', errorFetchTransactions: 'تعذّر تحميل معاملاتك.',
+      errorStartCheckoutFallback: 'تعذّر بدء عملية الدفع.', purchaseFailedPrefix: 'فشلت عملية الشراء:'
+    },
+    walletPackages: {
+      'Starter Pack': 'باقة البداية', 'Popular Pack': 'الباقة الشائعة', 'Value Pack': 'باقة القيمة',
+      'Big Spender': 'منفق كبير', 'Whale Pack': 'باقة الحوت'
     },
     store: {
       kicker: 'أمورا • الخزنة الفاخرة', title: 'بوتيك أمورا', subtitle: 'اجمع تأثيرات ملف شخصي مضيئة وهويات ملكية ومستحضرات تجميل مميزة.',
@@ -8335,7 +8371,13 @@ export const translations = {
       loadingWallet: 'वॉलेट लोड हो रहा है...', errorPrefix: 'त्रुटि:', retry: 'पुनः प्रयास करें', title: 'मेरा वॉलेट', profile: 'प्रोफ़ाइल',
       availableCoins: 'उपलब्ध कॉइन', hidePackages: 'पैकेज छिपाएं', buyCoins: 'कॉइन खरीदें', withdraw: 'निकासी', buy: 'खरीदें',
       promotion: '🔥 प्रचार', allTransactions: 'सभी लेनदेन', giftHistory: 'गिफ्ट इतिहास',
-      noTransactionsYet: 'अभी तक कोई लेनदेन नहीं', transactionFallback: 'लेनदेन'
+      noTransactionsYet: 'अभी तक कोई लेनदेन नहीं', transactionFallback: 'लेनदेन',
+      errorFetchWallet: 'आपका वॉलेट लोड करने में असमर्थ।', errorFetchTransactions: 'आपके लेनदेन लोड करने में असमर्थ।',
+      errorStartCheckoutFallback: 'चेकआउट शुरू करने में असमर्थ।', purchaseFailedPrefix: 'खरीदारी विफल:'
+    },
+    walletPackages: {
+      'Starter Pack': 'स्टार्टर पैक', 'Popular Pack': 'लोकप्रिय पैक', 'Value Pack': 'वैल्यू पैक',
+      'Big Spender': 'बड़ा खर्च करने वाला', 'Whale Pack': 'व्हेल पैक'
     },
     store: {
       kicker: 'अमोरा • लक्ज़री वॉल्ट', title: 'द अमोरा बुटीक', subtitle: 'चमकदार प्रोफ़ाइल इफ़ेक्ट, शाही पहचान और प्रीमियम कॉस्मेटिक्स इकट्ठा करें।',
@@ -9707,7 +9749,13 @@ export const translations = {
       loadingWallet: 'Memuat dompet...', errorPrefix: 'Kesalahan:', retry: 'Coba lagi', title: 'Dompet Saya', profile: 'Profil',
       availableCoins: 'Koin tersedia', hidePackages: 'Sembunyikan paket', buyCoins: 'Beli koin', withdraw: 'Tarik dana', buy: 'Beli',
       promotion: '🔥 Promosi', allTransactions: 'Semua transaksi', giftHistory: 'Riwayat hadiah',
-      noTransactionsYet: 'Belum ada transaksi', transactionFallback: 'Transaksi'
+      noTransactionsYet: 'Belum ada transaksi', transactionFallback: 'Transaksi',
+      errorFetchWallet: 'Tidak dapat memuat dompet Anda.', errorFetchTransactions: 'Tidak dapat memuat transaksi Anda.',
+      errorStartCheckoutFallback: 'Tidak dapat memulai checkout.', purchaseFailedPrefix: 'Pembelian gagal:'
+    },
+    walletPackages: {
+      'Starter Pack': 'Paket Pemula', 'Popular Pack': 'Paket Populer', 'Value Pack': 'Paket Hemat',
+      'Big Spender': 'Pengeluar Besar', 'Whale Pack': 'Paket Whale'
     },
     store: {
       kicker: 'AMORA • BRANKAS MEWAH', title: 'Butik Amora', subtitle: 'Kumpulkan efek profil bercahaya, identitas kerajaan, dan kosmetik premium.',

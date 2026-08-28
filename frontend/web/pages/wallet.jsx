@@ -5,8 +5,10 @@ import { useRouter } from 'next/router';
 import { apiFetch } from '../lib/api';
 import { useTranslation } from '../lib/i18n';
 
+const LOCALE_MAP = { en: 'en-US', es: 'es-ES', pt: 'pt-PT', fr: 'fr-FR', de: 'de-DE', ar: 'ar-SA', hi: 'hi-IN', id: 'id-ID' };
+
 export default function Wallet() {
-  const { t } = useTranslation();
+  const { t, lang } = useTranslation();
   const router = useRouter();
   const [balance, setBalance] = useState(0);
   const [transactions, setTransactions] = useState([]);
@@ -26,14 +28,14 @@ export default function Wallet() {
     try {
       // Get balance
       const balanceRes = await apiFetch('/wallet/me');
-      if (!balanceRes.ok) throw new Error('Failed to fetch wallet');
+      if (!balanceRes.ok) throw new Error(t('wallet.errorFetchWallet'));
       const wallet = await balanceRes.json();
       setBalance(wallet.balance);
 
       // Get transactions (or gifts based on tab)
       const endpoint = activeTab === 'transactions' ? 'transactions' : 'gifts';
       const txRes = await apiFetch(`/wallet/${endpoint}?limit=100`);
-      if (!txRes.ok) throw new Error('Failed to fetch transactions');
+      if (!txRes.ok) throw new Error(t('wallet.errorFetchTransactions'));
       const data = await txRes.json();
       setTransactions(data);
 
@@ -61,15 +63,15 @@ export default function Wallet() {
         body: JSON.stringify({ packageId })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Unable to start checkout.');
+      if (!res.ok) throw new Error(data.error || t('wallet.errorStartCheckoutFallback'));
       window.location.href = data.checkoutUrl;
     } catch (err) {
-      alert('Purchase failed: ' + err.message);
+      alert(`${t('wallet.purchaseFailedPrefix')} ${err.message}`);
     }
   };
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString('en-US', {
+    return new Date(date).toLocaleDateString(LOCALE_MAP[lang] || 'en-US', {
       month: 'short', day: 'numeric', year: 'numeric',
       hour: '2-digit', minute: '2-digit'
     });
@@ -219,7 +221,7 @@ export default function Wallet() {
           border: pkg.is_promotion ? '2px solid #FF6B9D' : '1px solid #333'
         }
       }, [
-        React.createElement('div', { key: 'name', style: { color: '#fff', fontWeight: 'bold' } }, pkg.name),
+        React.createElement('div', { key: 'name', style: { color: '#fff', fontWeight: 'bold' } }, t(`walletPackages.${pkg.name}`) !== `walletPackages.${pkg.name}` ? t(`walletPackages.${pkg.name}`) : pkg.name),
         React.createElement('div', { key: 'coins', style: { color: '#FFD700', fontSize: '24px', margin: '4px 0' } }, pkg.coins_amount + (pkg.bonus_coins || 0)),
         React.createElement('div', { key: 'price', style: { color: '#aaa' } }, `$${(pkg.price_cents / 100).toFixed(2)}`),
         pkg.is_promotion && React.createElement('div', { key: 'promo', style: { color: '#FF6B9D', fontSize: '12px' } }, t('wallet.promotion')),
