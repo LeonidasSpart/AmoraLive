@@ -3,8 +3,10 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { apiFetch, clearSession } from '../lib/api';
+import { useTranslation } from '../lib/i18n';
 
 export default function Settings() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [activeSection, setActiveSection] = useState('account');
   const [user, setUser] = useState(null);
@@ -39,7 +41,7 @@ export default function Settings() {
     setLoading(true);
     try {
       const res = await apiFetch('/users/me');
-      if (!res.ok) throw new Error('Failed to fetch user');
+      if (!res.ok) throw new Error(t('settings.errorLoadUser'));
       const data = await res.json();
       setUser(data);
     } catch (err) {
@@ -83,11 +85,11 @@ export default function Settings() {
   const handlePasswordChange = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
+      setError(t('settings.passwordsDontMatch'));
       return;
     }
     if (newPassword.length < 10) {
-      setError('New password must be at least 10 characters');
+      setError(t('settings.passwordMinLength'));
       return;
     }
     setPasswordLoading(true);
@@ -99,9 +101,9 @@ export default function Settings() {
         body: JSON.stringify({ currentPassword, newPassword })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to change password');
+      if (!res.ok) throw new Error(data.error || t('settings.errorChangePassword'));
       clearSession();
-      setSuccess('Password updated successfully. Please sign in again.');
+      setSuccess(t('settings.passwordUpdatedSuccess'));
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
@@ -123,8 +125,8 @@ export default function Settings() {
         method: 'PATCH',
         body: JSON.stringify(updated)
       });
-      if (!res.ok) throw new Error('Failed to update privacy');
-      setSuccess('Privacy settings updated');
+      if (!res.ok) throw new Error(t('settings.errorUpdatePrivacy'));
+      setSuccess(t('settings.privacyUpdatedSuccess'));
     } catch (err) {
       setError(err.message);
       fetchPrivacy();
@@ -151,8 +153,8 @@ export default function Settings() {
         body: JSON.stringify({ tier })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Unable to start checkout.');
-      if (!data.checkoutUrl) throw new Error('Checkout is not available right now.');
+      if (!res.ok) throw new Error(data.error || t('settings.errorStartCheckout'));
+      if (!data.checkoutUrl) throw new Error(t('settings.checkoutUnavailable'));
       window.location.href = data.checkoutUrl;
     } catch (err) {
       setError(err.message);
@@ -161,7 +163,7 @@ export default function Settings() {
   };
 
   const deleteAccount = async () => {
-    if (!confirm('Are you sure? This action is permanent and cannot be undone.')) return;
+    if (!confirm(t('settings.deleteConfirm'))) return;
     try {
       const res = await apiFetch('/users/me', { method: 'DELETE' });
       if (res.ok) {
@@ -184,15 +186,15 @@ export default function Settings() {
         justifyContent: 'center',
         fontFamily: 'sans-serif'
       }
-    }, 'Loading settings...');
+    }, t('settings.loadingSettings'));
   }
 
   // Helper: sidebar navigation
   const sidebarItems = [
-    ['account', 'Account'],
-    ['privacy', 'Privacy'],
-    ['membership', 'Membership'],
-    ['support', 'Support & Legal']
+    ['account', t('settings.sidebarAccount')],
+    ['privacy', t('settings.sidebarPrivacy')],
+    ['membership', t('settings.sidebarMembership')],
+    ['support', t('settings.sidebarSupport')]
   ];
 
   const sidebarChildren = [];
@@ -239,7 +241,7 @@ export default function Settings() {
         textAlign: 'left',
         fontSize: '14px'
       }
-    }, 'Logout'),
+    }, t('settings.logout')),
     React.createElement('button', {
       key: 'delete',
       onClick: deleteAccount,
@@ -255,7 +257,7 @@ export default function Settings() {
         textAlign: 'left',
         fontSize: '14px'
       }
-    }, 'Delete Account')
+    }, t('settings.deleteAccount'))
   ];
 
   const sidebar = React.createElement('nav', {
@@ -268,21 +270,21 @@ export default function Settings() {
   // Account section
   if (activeSection === 'account') {
     contentChildren = [
-      React.createElement('h2', { key: 'title', style: { color: '#fff', marginBottom: '16px' } }, 'Account Settings'),
+      React.createElement('h2', { key: 'title', style: { color: '#fff', marginBottom: '16px' } }, t('settings.accountSettingsTitle')),
       React.createElement('div', {
         key: 'info',
         style: { background: '#1a1a2e', padding: '20px', borderRadius: '8px', marginBottom: '16px' }
       }, [
         React.createElement('div', { key: 'email', style: { display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #222' } },
-          React.createElement('span', { style: { color: '#aaa' } }, 'Email'),
+          React.createElement('span', { style: { color: '#aaa' } }, t('settings.emailLabel')),
           React.createElement('span', { style: { color: '#fff' } }, user?.email)
         ),
         React.createElement('div', { key: 'username', style: { display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #222' } },
-          React.createElement('span', { style: { color: '#aaa' } }, 'Username'),
+          React.createElement('span', { style: { color: '#aaa' } }, t('settings.usernameLabel')),
           React.createElement('span', { style: { color: '#fff' } }, user?.username)
         ),
         React.createElement('div', { key: 'display', style: { display: 'flex', justifyContent: 'space-between', padding: '8px 0' } },
-          React.createElement('span', { style: { color: '#aaa' } }, 'Display Name'),
+          React.createElement('span', { style: { color: '#aaa' } }, t('settings.displayNameLabel')),
           React.createElement('span', { style: { color: '#fff' } }, user?.display_name)
         )
       ]),
@@ -290,7 +292,7 @@ export default function Settings() {
         key: 'password',
         style: { background: '#1a1a2e', padding: '20px', borderRadius: '8px' }
       }, [
-        React.createElement('h3', { key: 'pwd-title', style: { color: '#fff', marginBottom: '12px' } }, 'Change Password'),
+        React.createElement('h3', { key: 'pwd-title', style: { color: '#fff', marginBottom: '12px' } }, t('settings.changePasswordTitle')),
         React.createElement('form', {
           key: 'pwd-form',
           onSubmit: handlePasswordChange,
@@ -299,7 +301,7 @@ export default function Settings() {
           React.createElement('input', {
             key: 'current',
             type: 'password',
-            placeholder: 'Current password',
+            placeholder: t('settings.currentPasswordPlaceholder'),
             value: currentPassword,
             onChange: (e) => setCurrentPassword(e.target.value),
             required: true,
@@ -308,7 +310,7 @@ export default function Settings() {
           React.createElement('input', {
             key: 'new',
             type: 'password',
-            placeholder: 'New password (min 10 chars)',
+            placeholder: t('settings.newPasswordPlaceholder'),
             value: newPassword,
             onChange: (e) => setNewPassword(e.target.value),
             required: true,
@@ -318,7 +320,7 @@ export default function Settings() {
           React.createElement('input', {
             key: 'confirm',
             type: 'password',
-            placeholder: 'Confirm new password',
+            placeholder: t('settings.confirmPasswordPlaceholder'),
             value: confirmPassword,
             onChange: (e) => setConfirmPassword(e.target.value),
             required: true,
@@ -338,7 +340,7 @@ export default function Settings() {
               fontWeight: 'bold',
               opacity: passwordLoading ? 0.7 : 1
             }
-          }, passwordLoading ? 'Updating...' : 'Update Password')
+          }, passwordLoading ? t('settings.updating') : t('settings.updatePassword'))
         ])
       ])
     ];
@@ -347,10 +349,10 @@ export default function Settings() {
   // Privacy section
   if (activeSection === 'privacy') {
     const privacyOptions = [
-      ['online_status_visible', 'Show online status'],
-      ['profile_visible', 'Profile visible to others'],
-      ['show_age', 'Show age on profile'],
-      ['show_location', 'Show location on profile']
+      ['online_status_visible', t('settings.showOnlineStatus')],
+      ['profile_visible', t('settings.profileVisibleToOthers')],
+      ['show_age', t('settings.showAgeOnProfile')],
+      ['show_location', t('settings.showLocationOnProfile')]
     ];
     const optChildren = privacyOptions.map(([key, label]) =>
       React.createElement('div', {
@@ -370,7 +372,7 @@ export default function Settings() {
       ])
     );
     contentChildren = [
-      React.createElement('h2', { key: 'title', style: { color: '#fff', marginBottom: '16px' } }, 'Privacy Settings'),
+      React.createElement('h2', { key: 'title', style: { color: '#fff', marginBottom: '16px' } }, t('settings.privacySettingsTitle')),
       React.createElement('div', {
         key: 'options',
         style: { background: '#1a1a2e', padding: '20px', borderRadius: '8px' }
@@ -383,7 +385,7 @@ export default function Settings() {
           React.createElement(Link, {
             href: '/profile',
             style: { color: '#FF6B9D', textDecoration: 'none' }
-          }, 'Manage Block List →')
+          }, t('settings.manageBlockList'))
         ])
       ])
     ];
@@ -392,9 +394,9 @@ export default function Settings() {
   // Membership section
   if (activeSection === 'membership') {
     const plans = [
-      ['premium', 'Premium', '$9.99/month', 'Ad-free, exclusive gifts, priority support'],
-      ['vip', 'VIP', '$29.99/month', 'All Premium benefits + extra coins, profile boost'],
-      ['svip', 'SVIP', '$59.99/month', 'All VIP benefits + private shows, unlimited gifts']
+      ['premium', t('settings.premiumName'), '$9.99/month', t('settings.premiumDesc')],
+      ['vip', t('settings.vipName'), '$29.99/month', t('settings.vipDesc')],
+      ['svip', t('settings.svipName'), '$59.99/month', t('settings.svipDesc')]
     ];
     const planChildren = plans.map(([tierKey, tier, price, desc]) =>
       React.createElement('div', {
@@ -412,22 +414,22 @@ export default function Settings() {
             onClick: () => upgradeMembership(tierKey),
             disabled: upgrading === tierKey,
             style: { padding: '4px 16px', borderRadius: '4px', border: 'none', background: 'linear-gradient(135deg, #ff3f9d 0%, #ff5da8 35%, #9b35ff 100%)', color: '#fff', cursor: upgrading === tierKey ? 'wait' : 'pointer', opacity: upgrading === tierKey ? 0.6 : 1 }
-          }, upgrading === tierKey ? 'Redirecting…' : 'Upgrade')
+          }, upgrading === tierKey ? t('settings.redirecting') : t('settings.upgrade'))
         ])
       ])
     );
     contentChildren = [
-      React.createElement('h2', { key: 'title', style: { color: '#fff', marginBottom: '16px' } }, 'Membership'),
+      React.createElement('h2', { key: 'title', style: { color: '#fff', marginBottom: '16px' } }, t('settings.membershipTitle')),
       React.createElement('div', {
         key: 'current',
         style: { background: '#1a1a2e', padding: '20px', borderRadius: '8px', marginBottom: '16px' }
       }, [
         React.createElement('div', { key: 'tier', style: { display: 'flex', justifyContent: 'space-between', padding: '8px 0' } },
-          React.createElement('span', { style: { color: '#aaa' } }, 'Current Plan'),
-          React.createElement('span', { style: { color: '#FFD700', fontWeight: 'bold' } }, membership?.tier || 'Free')
+          React.createElement('span', { style: { color: '#aaa' } }, t('settings.currentPlan')),
+          React.createElement('span', { style: { color: '#FFD700', fontWeight: 'bold' } }, membership?.tier || t('settings.freeWord'))
         ),
         membership?.end_date && React.createElement('div', { key: 'expires', style: { display: 'flex', justifyContent: 'space-between', padding: '8px 0' } },
-          React.createElement('span', { style: { color: '#aaa' } }, 'Expires'),
+          React.createElement('span', { style: { color: '#aaa' } }, t('settings.expires')),
           React.createElement('span', { style: { color: '#fff' } }, new Date(membership.end_date).toLocaleDateString())
         )
       ]),
@@ -435,7 +437,7 @@ export default function Settings() {
         key: 'upgrade',
         style: { background: '#1a1a2e', padding: '20px', borderRadius: '8px' }
       }, [
-        React.createElement('h3', { key: 'plans', style: { color: '#fff', marginBottom: '12px' } }, 'Upgrade Your Plan'),
+        React.createElement('h3', { key: 'plans', style: { color: '#fff', marginBottom: '12px' } }, t('settings.upgradeYourPlan')),
         React.createElement('div', {
           key: 'plan-list',
           style: { display: 'flex', flexDirection: 'column', gap: '12px' }
@@ -447,11 +449,11 @@ export default function Settings() {
   // Support section
   if (activeSection === 'support') {
     const links = [
-      ['Terms of Service', '/legal/terms'],
-      ['Privacy Policy', '/legal/privacy'],
-      ['Community Guidelines', '/legal/guidelines'],
-      ['Cookie Policy', '/legal/cookies'],
-      ['Contact Support', 'mailto:support@amoramatch.one']
+      [t('settings.termsOfService'), '/legal/terms'],
+      [t('settings.privacyPolicy'), '/legal/privacy'],
+      [t('settings.communityGuidelines'), '/legal/guidelines'],
+      [t('settings.cookiePolicy'), '/legal/cookies'],
+      [t('settings.contactSupport'), 'mailto:support@amoramatch.one']
     ];
     const linkChildren = links.map(([label, href]) =>
       React.createElement('div', {
@@ -465,7 +467,7 @@ export default function Settings() {
       ])
     );
     contentChildren = [
-      React.createElement('h2', { key: 'title', style: { color: '#fff', marginBottom: '16px' } }, 'Support & Legal'),
+      React.createElement('h2', { key: 'title', style: { color: '#fff', marginBottom: '16px' } }, t('settings.supportLegalTitle')),
       React.createElement('div', {
         key: 'links',
         style: { background: '#1a1a2e', padding: '20px', borderRadius: '8px' }
@@ -484,7 +486,7 @@ export default function Settings() {
       href: '/discover',
       style: { color: '#888', textDecoration: 'none', fontSize: '20px' }
     }, '←'),
-    React.createElement('h1', { key: 'title', style: { color: '#fff', fontSize: '24px', margin: 0 } }, 'Settings')
+    React.createElement('h1', { key: 'title', style: { color: '#fff', fontSize: '24px', margin: 0 } }, t('settings.title'))
   ];
 
   const layoutChildren = [

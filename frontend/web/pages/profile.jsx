@@ -5,10 +5,12 @@ import { apiFetch, clearSession } from '../lib/api';
 import VerifiedBadge from '../components/VerifiedBadge';
 import ProfileFrame from '../components/ProfileFrame';
 import LuxuryGiftShowcase from '../components/LuxuryGiftShowcase';
+import { useTranslation } from '../lib/i18n';
 
 const gradient = 'linear-gradient(135deg,#ff3f9d 0%,#ff5da8 35%,#9b35ff 100%)';
 
 export default function Profile() {
+  const { t } = useTranslation();
   const router = useRouter();
   const fileInputRef = useRef(null);
 
@@ -37,7 +39,7 @@ export default function Profile() {
 
     try {
       const res = await apiFetch('/users/me');
-      if (!res.ok) throw new Error('Failed to fetch profile');
+      if (!res.ok) throw new Error(t('profile.errorLoad'));
 
       const data = await res.json();
       setUser(data);
@@ -50,7 +52,7 @@ export default function Profile() {
         location: data.location || { city: '', country: '' }
       });
     } catch (err) {
-      setError(err.message || 'Unable to load profile');
+      setError(err.message || t('profile.fallbackErrorLoad'));
     } finally {
       setLoading(false);
     }
@@ -107,12 +109,12 @@ export default function Profile() {
         body: JSON.stringify(editForm)
       });
 
-      if (!res.ok) throw new Error('Update failed');
+      if (!res.ok) throw new Error(t('profile.errorUpdate'));
 
       setUser(await res.json());
       setIsEditing(false);
     } catch (err) {
-      setError(err.message || 'Update failed');
+      setError(err.message || t('profile.errorUpdate'));
     }
   };
 
@@ -131,11 +133,11 @@ export default function Profile() {
       });
 
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      if (!res.ok) throw new Error(data.error || t('profile.errorUpload'));
 
       setUser((current) => ({ ...current, profile_photo: data.url }));
     } catch (err) {
-      setError(err.message || 'Upload failed');
+      setError(err.message || t('profile.errorUpload'));
     } finally {
       setUploading(false);
     }
@@ -155,7 +157,7 @@ export default function Profile() {
   };
 
   const deleteAccount = async () => {
-    if (!confirm('Are you sure? This action is permanent.')) return;
+    if (!confirm(t('profile.deleteConfirm'))) return;
 
     const res = await apiFetch('/users/me', { method: 'DELETE' });
 
@@ -168,7 +170,7 @@ export default function Profile() {
   if (loading) {
     return (
       <Layout>
-        <div className="state">Loading your Amora profile…</div>
+        <div className="state">{t('profile.loadingProfile')}</div>
         <style jsx>{`
           .state {
             min-height: calc(100vh - 80px);
@@ -186,8 +188,8 @@ export default function Profile() {
       <Layout>
         <div className="state">
           <div>
-            <p>{error || 'User not found'}</p>
-            <button onClick={fetchProfile}>Retry</button>
+            <p>{error || t('profile.userNotFound')}</p>
+            <button onClick={fetchProfile}>{t('profile.retry')}</button>
           </div>
         </div>
         <style jsx>{`
@@ -215,7 +217,7 @@ export default function Profile() {
   const membership = String(user.membership_tier || 'free').toUpperCase();
   const location = user.location?.city
     ? `${user.location.city}${user.location.country ? `, ${user.location.country}` : ''}`
-    : 'Location not set';
+    : t('profile.locationNotSet');
 
   return (
     <Layout>
@@ -249,7 +251,7 @@ export default function Profile() {
                       className="camera"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={uploading}
-                      aria-label="Change profile photo"
+                      aria-label={t('profile.changePhotoAria')}
                     >
                       {uploading ? '…' : '＋'}
                     </button>
@@ -282,23 +284,23 @@ export default function Profile() {
               <div className="heroActions">
                 {!isEditing && (
                   <button className="primary" onClick={() => setIsEditing(true)}>
-                    Edit profile
+                    {t('profile.editProfile')}
                   </button>
                 )}
                 <button className="secondary" onClick={() => router.push('/settings')}>
-                  Settings
+                  {t('profile.settings')}
                 </button>
                 <button className="secondary" onClick={() => router.push('/safety')}>
-                  🛡️ Security
+                  {t('profile.security')}
                 </button>
               </div>
             </div>
 
             <div className="stats">
-              <div><strong>{followers.length}</strong><span>Followers</span></div>
-              <div><strong>{following.length}</strong><span>Following</span></div>
-              <div><strong>{user.xp || 0}</strong><span>XP</span></div>
-              <div><strong>{user.level || 0}</strong><span>Level</span></div>
+              <div><strong>{followers.length}</strong><span>{t('profile.followers')}</span></div>
+              <div><strong>{following.length}</strong><span>{t('profile.following')}</span></div>
+              <div><strong>{user.xp || 0}</strong><span>{t('profile.xpWord')}</span></div>
+              <div><strong>{user.level || 0}</strong><span>{t('profile.levelWord')}</span></div>
             </div>
           </div>
         </section>
@@ -308,14 +310,14 @@ export default function Profile() {
             <div className="panel editPanel">
               <div className="sectionTitle">
                 <div>
-                  <span>PROFILE STUDIO</span>
-                  <h2>Edit your profile</h2>
+                  <span>{t('profile.profileStudio')}</span>
+                  <h2>{t('profile.editYourProfile')}</h2>
                 </div>
               </div>
 
               <form onSubmit={updateProfile} className="form">
                 <label>
-                  Display name
+                  {t('profile.displayNameLabel')}
                   <input
                     value={editForm.display_name || ''}
                     onChange={(e) =>
@@ -325,7 +327,7 @@ export default function Profile() {
                 </label>
 
                 <label>
-                  Bio
+                  {t('profile.bioLabel')}
                   <textarea
                     value={editForm.bio || ''}
                     onChange={(e) =>
@@ -335,7 +337,7 @@ export default function Profile() {
                 </label>
 
                 <label>
-                  Relationship intent
+                  {t('profile.relationshipIntentLabel')}
                   <input
                     value={editForm.relationship_intent || ''}
                     onChange={(e) =>
@@ -348,7 +350,7 @@ export default function Profile() {
                 </label>
 
                 <label>
-                  Interests
+                  {t('profile.interestsLabel')}
                   <input
                     value={(editForm.interests || []).join(', ')}
                     onChange={(e) =>
@@ -364,7 +366,7 @@ export default function Profile() {
                 </label>
 
                 <label>
-                  Languages
+                  {t('profile.languagesLabel')}
                   <input
                     value={(editForm.languages || []).join(', ')}
                     onChange={(e) =>
@@ -380,13 +382,13 @@ export default function Profile() {
                 </label>
 
                 <div className="formButtons">
-                  <button className="primary" type="submit">Save changes</button>
+                  <button className="primary" type="submit">{t('profile.saveChanges')}</button>
                   <button
                     className="secondary"
                     type="button"
                     onClick={() => setIsEditing(false)}
                   >
-                    Cancel
+                    {t('profile.cancel')}
                   </button>
                 </div>
               </form>
@@ -397,22 +399,22 @@ export default function Profile() {
                 <div className="panel bioPanel">
                   <div className="sectionTitle">
                     <div>
-                      <span>ABOUT</span>
-                      <h2>Personal space</h2>
+                      <span>{t('profile.aboutKicker')}</span>
+                      <h2>{t('profile.personalSpace')}</h2>
                     </div>
                     <span className="diamond">◆</span>
                   </div>
 
                   <p className="bio">
-                    {user.bio || 'No bio yet. Add something that tells people what makes you, you.'}
+                    {user.bio || t('profile.noBioYet')}
                   </p>
 
                   <div className="details">
                     {[
-                      ['Location', location],
-                      ['Intent', user.relationship_intent || 'Not set'],
-                      ['Member since', user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'],
-                      ['Membership', membership]
+                      [t('profile.locationDetail'), location],
+                      [t('profile.intentDetail'), user.relationship_intent || t('profile.notSet')],
+                      [t('profile.memberSinceDetail'), user.created_at ? new Date(user.created_at).toLocaleDateString() : '—'],
+                      [t('profile.membershipDetail'), membership]
                     ].map(([label, value]) => (
                       <div className="detail" key={label}>
                         <span>{label}</span>
@@ -425,8 +427,8 @@ export default function Profile() {
                 <div className="panel levelPanel">
                   <div className="sectionTitle">
                     <div>
-                      <span>AMORA STATUS</span>
-                      <h2>Level progress</h2>
+                      <span>{t('profile.amoraStatusKicker')}</span>
+                      <h2>{t('profile.levelProgress')}</h2>
                     </div>
                     <span className="levelBadge">LV {xpProgress?.level || user.level || 0}</span>
                   </div>
@@ -460,7 +462,7 @@ export default function Profile() {
                     onClick={() => router.push('/levels')}
                     style={{ background: 'none', border: 'none', padding: 0, marginTop: 10, color: 'var(--amora-pink-2)', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
                   >
-                    View level rewards →
+                    {t('profile.viewLevelRewards')}
                   </button>
                 </div>
               </div>
@@ -471,8 +473,8 @@ export default function Profile() {
                 <div className="panel tagsPanel">
                   <div className="sectionTitle">
                     <div>
-                      <span>IDENTITY</span>
-                      <h2>Interests & badges</h2>
+                      <span>{t('profile.identityKicker')}</span>
+                      <h2>{t('profile.interestsAndBadges')}</h2>
                     </div>
                   </div>
 
@@ -489,27 +491,27 @@ export default function Profile() {
                   className="utility"
                   onClick={() => setShowBlockList((v) => !v)}
                 >
-                  🚫 Block list ({blockedUsers.length})
+                  {t('profile.blockListPrefix')} ({blockedUsers.length})
                 </button>
 
                 <button className="danger" onClick={deleteAccount}>
-                  Delete account
+                  {t('profile.deleteAccount')}
                 </button>
               </div>
 
               {showBlockList && (
                 <div className="panel blocks">
-                  <h3>Blocked users</h3>
+                  <h3>{t('profile.blockedUsersTitle')}</h3>
                   {blockedUsers.length === 0 ? (
-                    <p>No blocked users.</p>
+                    <p>{t('profile.noBlockedUsers')}</p>
                   ) : (
                     blockedUsers.map((block) => (
                       <div className="blockRow" key={block.id || block.blocked_id}>
-                        <span>@{block.username || 'user'}</span>
+                        <span>@{block.username || t('profile.unknownUserFallback')}</span>
                         <button
                           onClick={() => unblock(block.blocked_id || block.id)}
                         >
-                          Unblock
+                          {t('profile.unblock')}
                         </button>
                       </div>
                     ))
