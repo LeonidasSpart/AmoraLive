@@ -4,16 +4,18 @@ import { router, useLocalSearchParams } from "expo-router";
 import AppShell from "../../src/AppShell";
 import { theme } from "../../src/theme";
 import { api } from "../../src/api/client";
+import { useTranslation } from "../../src/i18n";
 
 export default function CreatorProfile(){
+ const {t}=useTranslation();
  const {userId}=useLocalSearchParams<{userId:string}>(); const [user,setUser]=useState<any>(null),[following,setFollowing]=useState(false),[loading,setLoading]=useState(true),[error,setError]=useState("");
- const load=useCallback(async()=>{if(!userId)return;try{const [u,f]=await Promise.all([api.user(String(userId)),api.followStatus(String(userId))]);setUser(u);setFollowing(!!(f?.following??f?.isFollowing));}catch(e:any){setError(e.message||"Unable to load profile.");}finally{setLoading(false);}},[userId]);
+ const load=useCallback(async()=>{if(!userId)return;try{const [u,f]=await Promise.all([api.user(String(userId)),api.followStatus(String(userId))]);setUser(u);setFollowing(!!(f?.following??f?.isFollowing));}catch(e:any){setError(e.message||t("creatorProfileScreen.errorLoad"));}finally{setLoading(false);}},[userId]);
  useEffect(()=>{load();},[load]);
- const toggle=async()=>{try{if(following)await api.unfollowUser(String(userId));else await api.followUser(String(userId));setFollowing(!following);}catch(e:any){setError(e.message||"Unable to update follow.");}};
+ const toggle=async()=>{try{if(following)await api.unfollowUser(String(userId));else await api.followUser(String(userId));setFollowing(!following);}catch(e:any){setError(e.message||t("creatorProfileScreen.errorUpdateFollow"));}};
  if(loading)return <AppShell><View style={s.center}><ActivityIndicator color={theme.pink}/></View></AppShell>;
- if(!user)return <AppShell><Text style={s.error}>{error||"Creator not found."}</Text></AppShell>;
+ if(!user)return <AppShell><Text style={s.error}>{error||t("creatorProfileScreen.notFound")}</Text></AppShell>;
  return <AppShell><ScrollView style={s.page} contentContainerStyle={{paddingBottom:40}}><Pressable onPress={()=>router.back()}><Text style={s.back}>‹</Text></Pressable>
-  <View style={s.hero}>{user.profile_photo?<Image source={{uri:user.profile_photo}} style={s.avatar}/>:<View style={[s.avatar,s.placeholder]}><Text style={{fontSize:48}}>👤</Text></View>}<Text style={s.name}>{user.display_name||user.username}</Text><Text style={s.handle}>@{user.username}</Text>{user.bio&&<Text style={s.bio}>{user.bio}</Text>}<View style={s.stats}><Text style={s.stat}>{user.follower_count??user.followerCount??0}{"\n"}followers</Text><Text style={s.stat}>{user.level??0}{"\n"}level</Text></View><View style={s.actions}><Pressable style={s.primary} onPress={toggle}><Text style={s.btn}>{following?"Following":"Follow"}</Text></Pressable><Pressable style={s.secondary} onPress={()=>router.push({pathname:"/chat/[userId]",params:{userId:String(userId)}})}><Text style={s.btn}>Message</Text></Pressable></View></View>
+  <View style={s.hero}>{user.profile_photo?<Image source={{uri:user.profile_photo}} style={s.avatar}/>:<View style={[s.avatar,s.placeholder]}><Text style={{fontSize:48}}>👤</Text></View>}<Text style={s.name}>{user.display_name||user.username}</Text><Text style={s.handle}>@{user.username}</Text>{user.bio&&<Text style={s.bio}>{user.bio}</Text>}<View style={s.stats}><Text style={s.stat}>{user.follower_count??user.followerCount??0}{"\n"}{t("creatorProfileScreen.followersSuffix")}</Text><Text style={s.stat}>{user.level??0}{"\n"}{t("creatorProfileScreen.levelWord")}</Text></View><View style={s.actions}><Pressable style={s.primary} onPress={toggle}><Text style={s.btn}>{following?t("creatorProfileScreen.following"):t("creatorProfileScreen.follow")}</Text></Pressable><Pressable style={s.secondary} onPress={()=>router.push({pathname:"/chat/[userId]",params:{userId:String(userId)}})}><Text style={s.btn}>{t("creatorProfileScreen.message")}</Text></Pressable></View></View>
   {!!error&&<Text style={s.error}>{error}</Text>}
  </ScrollView></AppShell>;
 }

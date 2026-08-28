@@ -6,12 +6,14 @@ import { VideoTrack } from "@livekit/react-native";
 import AppShell from "../../../src/AppShell";
 import { theme } from "../../../src/theme";
 import { phase5Api } from "../../../src/phase5Api";
+import { useTranslation } from "../../../src/i18n";
 
 // Same verified LiveKit connection pattern as app/live/[id].tsx and
 // app/video-match.tsx — both people in the match connect to the same
 // deterministic room name the backend derives from the match id, and both
 // can publish (unlike the host/viewer live-room model).
 export default function VideoDate() {
+  const { t } = useTranslation();
   const { matchId } = useLocalSearchParams<{ matchId: string }>();
   const [connected, setConnected] = useState(false);
   const [error, setError] = useState("");
@@ -42,7 +44,7 @@ export default function VideoDate() {
         await room.localParticipant.setMicrophoneEnabled(true);
         setMyTrackRef({ participant: room.localParticipant, publication: null });
       } catch (e: any) {
-        if (active) setError(e.message || "Unable to start this video date.");
+        if (active) setError(e.message || t("videoDateScreen.errorStart"));
       }
     })();
     return () => {
@@ -59,14 +61,14 @@ export default function VideoDate() {
       {error ? (
         <View style={s.center}>
           <Text style={s.err}>{error}</Text>
-          <Pressable onPress={() => router.back()} style={s.button}><Text style={s.bt}>Back to Matches</Text></Pressable>
+          <Pressable onPress={() => router.back()} style={s.button}><Text style={s.bt}>{t("videoDateScreen.backToMatches")}</Text></Pressable>
         </View>
       ) : (
         <View style={s.videoStage}>
           {peerTrackRef ? <VideoTrack trackRef={peerTrackRef} style={s.videoFill} /> : (
             <View style={s.center}>
               <ActivityIndicator color={theme.pink} />
-              <Text style={s.muted}>{connected ? "Waiting for the other person…" : "Connecting…"}</Text>
+              <Text style={s.muted}>{connected ? t("videoDateScreen.waitingOtherPerson") : t("videoDateScreen.connecting")}</Text>
             </View>
           )}
           {myTrackRef && <View style={s.selfPip}><VideoTrack trackRef={myTrackRef} style={s.videoFill} /></View>}

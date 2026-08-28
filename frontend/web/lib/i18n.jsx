@@ -347,6 +347,57 @@ export const translations = {
       paypalPlaceholder: 'you@example.com', accountDetailsPlaceholder: 'Account details for payout',
       submitting: 'Submitting…', requestWithdrawal: 'Request Withdrawal',
       historyTitle: 'Withdrawal History', noWithdrawalsYet: 'No withdrawal requests yet.', coinsWord: 'coins'
+    },
+    creatorProfile: {
+      loading: 'Loading…', errorNotFound: 'This profile could not be found.', profileNotFound: 'Profile not found',
+      backToDiscover: '← Back to Discover', levelPrefix: 'Level', followersSuffix: 'followers',
+      memberSincePrefix: 'Member since', following: 'Following', follow: '+ Follow', message: 'Message',
+      reportSubmitted: 'Report submitted. Our team will review it.', reportPrefix: 'Report', cancel: 'Cancel',
+      submitReport: 'Submit Report', liveNowBanner: '🔴 Live now — tap to watch', achievements: '🏅 Achievements',
+      giftWall: '🎁 Gift Wall', coinsReceivedSuffix: 'coins received', noGiftsYet: 'No gifts received yet.', fromPrefix: 'from',
+      reportCatHarassment: 'harassment', reportCatSpam: 'spam', reportCatNudity: 'nudity or sexual content',
+      reportCatHateSpeech: 'hate speech', reportCatViolence: 'violence', reportCatScam: 'scam or fraud',
+      reportCatUnderage: 'underage', reportCatImpersonation: 'impersonation', reportCatOther: 'other'
+    },
+    liveRoom: {
+      filterNormal: 'Normal', filterWarm: 'Warm', filterCool: 'Cool', filterVivid: 'Vivid', filterBw: 'B&W',
+      filterVintage: 'Vintage', filterSoft: 'Soft', filterDramatic: 'Dramatic', filterMoody: 'Moody',
+      filterBright: 'Bright', filterNoir: 'Noir', filterSepia: 'Sepia', filterSunset: 'Sunset',
+      errorBattleInvite: 'Unable to send battle invite.', errorSessionExpired: 'Your session expired. Please sign in again.',
+      streamEnded: 'This stream has ended.', inviteDeclined: 'Your battle invite was declined.',
+      battleDraw: "🤝 It's a draw!", battleWon: '🏆 You won the battle!', battleLost: '😢 You lost the battle.',
+      roomNotFoundError: 'Live room not found', someoneFallback: 'Someone', giftFallback: 'a gift', sentGiftSuffix: 'sent',
+      errorEndRoom: 'Unable to end this room.', confirmEndLive: 'End this live stream now?',
+      linkCopied: 'Link copied — share it anywhere!', liveOnAmoraSuffix: '— live on Amora', liveOnAmora: 'Live on Amora',
+      loadingRoom: 'Loading live room…', roomNotFound: 'Room not found', back: '← Back',
+      connectingCamera: 'Connecting your camera and microphone…', waitingHostVideo: 'Waiting for the host video…',
+      tapToLike: 'Tap to like', battleInviteSent: '⚔️ Battle invite sent — waiting for a response…',
+      wantsToBattleSuffix: 'wants to battle!', accept: 'Accept', decline: 'Decline',
+      railTop: 'Top', railShare: 'Share', railFilter: 'Filter', railBattle: 'Battle', railEnd: 'End',
+      topGiftersTitle: 'Top gifters this stream', noGiftsYetFirst: 'No gifts yet — be the first!',
+      catRomance: 'Romance', catLuxury: 'Luxury', catCosmic: 'Cosmic', catPower: 'Power', catFun: 'Fun',
+      toPrefix: 'to', sendingGift: 'Sending…', sendGift: 'Send Gift',
+      challengeTitle: '⚔️ Challenge a live streamer', noStreamersLive: 'No other streamers are live right now.',
+      sayPlaceholder: 'Say something…', send: 'Send', errorGiftFailed: 'Gift failed'
+    },
+    videoDate: {
+      videoLoadError: 'Video could not load — please refresh.', startError: 'Unable to start this video date.',
+      readyTitle: 'Ready for your video date?',
+      readyBody: 'This will turn on your camera and microphone so you and your match can see each other.',
+      startButton: 'Start video date', connecting: 'Connecting…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'Failed to load messages', errorLoadChat: 'Unable to load chat',
+      errorRealtimeAuth: 'Realtime authentication failed. Please sign in again.',
+      errorRealtimeUnavailable: 'Realtime connection unavailable. Trying again…',
+      errorSendMessage: 'Unable to send message.', errorRealtimeNotReady: 'Realtime connection is not ready.',
+      errorUploadFile: 'Unable to upload that file.', openingSpace: 'Opening your private space…', retry: 'Retry',
+      userFallback: 'User', typingIndicator: 'typing…', onlineStatus: 'Private conversation • Online',
+      connectingSecurely: 'Connecting securely…', viewProfile: 'View profile',
+      privateSpacePill: 'PRIVATE • END-TO-END SPACE', welcomeTitle: 'Start something beautiful.',
+      welcomeBody: 'Your first message begins this private conversation.', sendLuxuryGift: 'Send luxury gift',
+      attach: 'Attach', messagePlaceholder: 'Write a private message…', sendMessage: 'Send message',
+      giftSent: 'GIFT SENT', giftDeliveredSuffix: 'A little luxury, delivered.'
     }
   },
 
@@ -675,6 +726,57 @@ export const translations = {
       paypalPlaceholder: 'tucorreo@ejemplo.com', accountDetailsPlaceholder: 'Detalles de la cuenta para el pago',
       submitting: 'Enviando…', requestWithdrawal: 'Solicitar retiro',
       historyTitle: 'Historial de retiros', noWithdrawalsYet: 'Aún no hay solicitudes de retiro.', coinsWord: 'monedas'
+    },
+    creatorProfile: {
+      loading: 'Cargando…', errorNotFound: 'No se pudo encontrar este perfil.', profileNotFound: 'Perfil no encontrado',
+      backToDiscover: '← Volver a Descubrir', levelPrefix: 'Nivel', followersSuffix: 'seguidores',
+      memberSincePrefix: 'Miembro desde', following: 'Siguiendo', follow: '+ Seguir', message: 'Mensaje',
+      reportSubmitted: 'Reporte enviado. Nuestro equipo lo revisará.', reportPrefix: 'Reportar', cancel: 'Cancelar',
+      submitReport: 'Enviar reporte', liveNowBanner: '🔴 En vivo ahora — toca para ver', achievements: '🏅 Logros',
+      giftWall: '🎁 Muro de regalos', coinsReceivedSuffix: 'monedas recibidas', noGiftsYet: 'Aún no se han recibido regalos.', fromPrefix: 'de',
+      reportCatHarassment: 'acoso', reportCatSpam: 'spam', reportCatNudity: 'desnudez o contenido sexual',
+      reportCatHateSpeech: 'discurso de odio', reportCatViolence: 'violencia', reportCatScam: 'estafa o fraude',
+      reportCatUnderage: 'menor de edad', reportCatImpersonation: 'suplantación de identidad', reportCatOther: 'otro'
+    },
+    liveRoom: {
+      filterNormal: 'Normal', filterWarm: 'Cálido', filterCool: 'Frío', filterVivid: 'Vívido', filterBw: 'B&N',
+      filterVintage: 'Vintage', filterSoft: 'Suave', filterDramatic: 'Dramático', filterMoody: 'Sombrío',
+      filterBright: 'Brillante', filterNoir: 'Noir', filterSepia: 'Sepia', filterSunset: 'Atardecer',
+      errorBattleInvite: 'No se pudo enviar la invitación a la batalla.', errorSessionExpired: 'Tu sesión expiró. Vuelve a iniciar sesión.',
+      streamEnded: 'Esta transmisión ha terminado.', inviteDeclined: 'Tu invitación a la batalla fue rechazada.',
+      battleDraw: '🤝 ¡Es un empate!', battleWon: '🏆 ¡Ganaste la batalla!', battleLost: '😢 Perdiste la batalla.',
+      roomNotFoundError: 'Sala en vivo no encontrada', someoneFallback: 'Alguien', giftFallback: 'un regalo', sentGiftSuffix: 'envió',
+      errorEndRoom: 'No se pudo finalizar esta sala.', confirmEndLive: '¿Finalizar esta transmisión en vivo ahora?',
+      linkCopied: '¡Enlace copiado — compártelo donde quieras!', liveOnAmoraSuffix: '— en vivo en Amora', liveOnAmora: 'En vivo en Amora',
+      loadingRoom: 'Cargando sala en vivo…', roomNotFound: 'Sala no encontrada', back: '← Volver',
+      connectingCamera: 'Conectando tu cámara y micrófono…', waitingHostVideo: 'Esperando el video del anfitrión…',
+      tapToLike: 'Toca para dar me gusta', battleInviteSent: '⚔️ Invitación a batalla enviada — esperando respuesta…',
+      wantsToBattleSuffix: '¡quiere batallar!', accept: 'Aceptar', decline: 'Rechazar',
+      railTop: 'Top', railShare: 'Compartir', railFilter: 'Filtro', railBattle: 'Batalla', railEnd: 'Terminar',
+      topGiftersTitle: 'Mejores donantes de esta transmisión', noGiftsYetFirst: 'Aún no hay regalos — ¡sé el primero!',
+      catRomance: 'Romance', catLuxury: 'Lujo', catCosmic: 'Cósmico', catPower: 'Poder', catFun: 'Diversión',
+      toPrefix: 'para', sendingGift: 'Enviando…', sendGift: 'Enviar regalo',
+      challengeTitle: '⚔️ Desafiar a un streamer en vivo', noStreamersLive: 'No hay otros streamers en vivo en este momento.',
+      sayPlaceholder: 'Di algo…', send: 'Enviar', errorGiftFailed: 'Error al enviar el regalo'
+    },
+    videoDate: {
+      videoLoadError: 'No se pudo cargar el video — por favor recarga la página.', startError: 'No se pudo iniciar esta videocita.',
+      readyTitle: '¿Listo para tu videocita?',
+      readyBody: 'Esto activará tu cámara y micrófono para que tú y tu match puedan verse.',
+      startButton: 'Iniciar videocita', connecting: 'Conectando…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'Error al cargar los mensajes', errorLoadChat: 'No se pudo cargar el chat',
+      errorRealtimeAuth: 'Falló la autenticación en tiempo real. Vuelve a iniciar sesión.',
+      errorRealtimeUnavailable: 'Conexión en tiempo real no disponible. Reintentando…',
+      errorSendMessage: 'No se pudo enviar el mensaje.', errorRealtimeNotReady: 'La conexión en tiempo real no está lista.',
+      errorUploadFile: 'No se pudo subir ese archivo.', openingSpace: 'Abriendo tu espacio privado…', retry: 'Reintentar',
+      userFallback: 'Usuario', typingIndicator: 'escribiendo…', onlineStatus: 'Conversación privada • En línea',
+      connectingSecurely: 'Conectando de forma segura…', viewProfile: 'Ver perfil',
+      privateSpacePill: 'PRIVADO • ESPACIO CIFRADO', welcomeTitle: 'Comienza algo hermoso.',
+      welcomeBody: 'Tu primer mensaje inicia esta conversación privada.', sendLuxuryGift: 'Enviar regalo de lujo',
+      attach: 'Adjuntar', messagePlaceholder: 'Escribe un mensaje privado…', sendMessage: 'Enviar mensaje',
+      giftSent: 'REGALO ENVIADO', giftDeliveredSuffix: 'Un pequeño lujo, entregado.'
     }
   },
 
@@ -1003,6 +1105,57 @@ export const translations = {
       paypalPlaceholder: 'voce@exemplo.com', accountDetailsPlaceholder: 'Detalhes da conta para pagamento',
       submitting: 'Enviando…', requestWithdrawal: 'Solicitar saque',
       historyTitle: 'Histórico de saques', noWithdrawalsYet: 'Ainda não há solicitações de saque.', coinsWord: 'moedas'
+    },
+    creatorProfile: {
+      loading: 'Carregando…', errorNotFound: 'Não foi possível encontrar este perfil.', profileNotFound: 'Perfil não encontrado',
+      backToDiscover: '← Voltar para Descobrir', levelPrefix: 'Nível', followersSuffix: 'seguidores',
+      memberSincePrefix: 'Membro desde', following: 'Seguindo', follow: '+ Seguir', message: 'Mensagem',
+      reportSubmitted: 'Denúncia enviada. Nossa equipe irá analisá-la.', reportPrefix: 'Denunciar', cancel: 'Cancelar',
+      submitReport: 'Enviar denúncia', liveNowBanner: '🔴 Ao vivo agora — toque para assistir', achievements: '🏅 Conquistas',
+      giftWall: '🎁 Mural de presentes', coinsReceivedSuffix: 'moedas recebidas', noGiftsYet: 'Nenhum presente recebido ainda.', fromPrefix: 'de',
+      reportCatHarassment: 'assédio', reportCatSpam: 'spam', reportCatNudity: 'nudez ou conteúdo sexual',
+      reportCatHateSpeech: 'discurso de ódio', reportCatViolence: 'violência', reportCatScam: 'golpe ou fraude',
+      reportCatUnderage: 'menor de idade', reportCatImpersonation: 'personificação', reportCatOther: 'outro'
+    },
+    liveRoom: {
+      filterNormal: 'Normal', filterWarm: 'Quente', filterCool: 'Frio', filterVivid: 'Vívido', filterBw: 'P&B',
+      filterVintage: 'Vintage', filterSoft: 'Suave', filterDramatic: 'Dramático', filterMoody: 'Sombrio',
+      filterBright: 'Claro', filterNoir: 'Noir', filterSepia: 'Sépia', filterSunset: 'Pôr do sol',
+      errorBattleInvite: 'Não foi possível enviar o convite de batalha.', errorSessionExpired: 'Sua sessão expirou. Faça login novamente.',
+      streamEnded: 'Esta transmissão terminou.', inviteDeclined: 'Seu convite de batalha foi recusado.',
+      battleDraw: '🤝 Empate!', battleWon: '🏆 Você venceu a batalha!', battleLost: '😢 Você perdeu a batalha.',
+      roomNotFoundError: 'Sala ao vivo não encontrada', someoneFallback: 'Alguém', giftFallback: 'um presente', sentGiftSuffix: 'enviou',
+      errorEndRoom: 'Não foi possível encerrar esta sala.', confirmEndLive: 'Encerrar esta transmissão ao vivo agora?',
+      linkCopied: 'Link copiado — compartilhe em qualquer lugar!', liveOnAmoraSuffix: '— ao vivo na Amora', liveOnAmora: 'Ao vivo na Amora',
+      loadingRoom: 'Carregando sala ao vivo…', roomNotFound: 'Sala não encontrada', back: '← Voltar',
+      connectingCamera: 'Conectando sua câmera e microfone…', waitingHostVideo: 'Aguardando o vídeo do anfitrião…',
+      tapToLike: 'Toque para curtir', battleInviteSent: '⚔️ Convite de batalha enviado — aguardando resposta…',
+      wantsToBattleSuffix: 'quer batalhar!', accept: 'Aceitar', decline: 'Recusar',
+      railTop: 'Top', railShare: 'Compartilhar', railFilter: 'Filtro', railBattle: 'Batalha', railEnd: 'Encerrar',
+      topGiftersTitle: 'Maiores doadores desta transmissão', noGiftsYetFirst: 'Nenhum presente ainda — seja o primeiro!',
+      catRomance: 'Romance', catLuxury: 'Luxo', catCosmic: 'Cósmico', catPower: 'Poder', catFun: 'Diversão',
+      toPrefix: 'para', sendingGift: 'Enviando…', sendGift: 'Enviar presente',
+      challengeTitle: '⚔️ Desafiar um streamer ao vivo', noStreamersLive: 'Nenhum outro streamer está ao vivo no momento.',
+      sayPlaceholder: 'Diga algo…', send: 'Enviar', errorGiftFailed: 'Falha ao enviar presente'
+    },
+    videoDate: {
+      videoLoadError: 'Não foi possível carregar o vídeo — atualize a página.', startError: 'Não foi possível iniciar este encontro por vídeo.',
+      readyTitle: 'Pronto para o seu encontro por vídeo?',
+      readyBody: 'Isso ativará sua câmera e microfone para que você e seu match possam se ver.',
+      startButton: 'Iniciar encontro por vídeo', connecting: 'Conectando…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'Falha ao carregar mensagens', errorLoadChat: 'Não foi possível carregar o chat',
+      errorRealtimeAuth: 'Falha na autenticação em tempo real. Faça login novamente.',
+      errorRealtimeUnavailable: 'Conexão em tempo real indisponível. Tentando novamente…',
+      errorSendMessage: 'Não foi possível enviar a mensagem.', errorRealtimeNotReady: 'A conexão em tempo real não está pronta.',
+      errorUploadFile: 'Não foi possível enviar esse arquivo.', openingSpace: 'Abrindo seu espaço privado…', retry: 'Tentar novamente',
+      userFallback: 'Usuário', typingIndicator: 'digitando…', onlineStatus: 'Conversa privada • Online',
+      connectingSecurely: 'Conectando com segurança…', viewProfile: 'Ver perfil',
+      privateSpacePill: 'PRIVADO • ESPAÇO CRIPTOGRAFADO', welcomeTitle: 'Comece algo bonito.',
+      welcomeBody: 'Sua primeira mensagem inicia esta conversa privada.', sendLuxuryGift: 'Enviar presente de luxo',
+      attach: 'Anexar', messagePlaceholder: 'Escreva uma mensagem privada…', sendMessage: 'Enviar mensagem',
+      giftSent: 'PRESENTE ENVIADO', giftDeliveredSuffix: 'Um pequeno luxo, entregue.'
     }
   },
 
@@ -1331,6 +1484,57 @@ export const translations = {
       paypalPlaceholder: 'vous@exemple.com', accountDetailsPlaceholder: 'Coordonnées du compte pour le paiement',
       submitting: 'Envoi…', requestWithdrawal: 'Demander un retrait',
       historyTitle: 'Historique des retraits', noWithdrawalsYet: 'Aucune demande de retrait pour le moment.', coinsWord: 'pièces'
+    },
+    creatorProfile: {
+      loading: 'Chargement…', errorNotFound: "Ce profil n'a pas pu être trouvé.", profileNotFound: 'Profil introuvable',
+      backToDiscover: '← Retour à Découvrir', levelPrefix: 'Niveau', followersSuffix: 'abonnés',
+      memberSincePrefix: 'Membre depuis', following: 'Abonné(e)', follow: '+ Suivre', message: 'Message',
+      reportSubmitted: 'Signalement envoyé. Notre équipe va l\'examiner.', reportPrefix: 'Signaler', cancel: 'Annuler',
+      submitReport: 'Envoyer le signalement', liveNowBanner: '🔴 En direct maintenant — appuyez pour regarder', achievements: '🏅 Succès',
+      giftWall: '🎁 Mur des cadeaux', coinsReceivedSuffix: 'pièces reçues', noGiftsYet: 'Aucun cadeau reçu pour le moment.', fromPrefix: 'de',
+      reportCatHarassment: 'harcèlement', reportCatSpam: 'spam', reportCatNudity: 'nudité ou contenu sexuel',
+      reportCatHateSpeech: 'discours de haine', reportCatViolence: 'violence', reportCatScam: 'arnaque ou fraude',
+      reportCatUnderage: 'mineur', reportCatImpersonation: 'usurpation d\'identité', reportCatOther: 'autre'
+    },
+    liveRoom: {
+      filterNormal: 'Normal', filterWarm: 'Chaud', filterCool: 'Froid', filterVivid: 'Vif', filterBw: 'N&B',
+      filterVintage: 'Vintage', filterSoft: 'Doux', filterDramatic: 'Dramatique', filterMoody: 'Sombre',
+      filterBright: 'Lumineux', filterNoir: 'Noir', filterSepia: 'Sépia', filterSunset: 'Coucher de soleil',
+      errorBattleInvite: "Impossible d'envoyer l'invitation au battle.", errorSessionExpired: 'Votre session a expiré. Veuillez vous reconnecter.',
+      streamEnded: 'Ce direct est terminé.', inviteDeclined: 'Votre invitation au battle a été refusée.',
+      battleDraw: '🤝 Égalité !', battleWon: '🏆 Vous avez gagné le battle !', battleLost: '😢 Vous avez perdu le battle.',
+      roomNotFoundError: 'Salon en direct introuvable', someoneFallback: 'Quelqu\'un', giftFallback: 'un cadeau', sentGiftSuffix: 'a envoyé',
+      errorEndRoom: 'Impossible de terminer ce salon.', confirmEndLive: 'Terminer ce direct maintenant ?',
+      linkCopied: 'Lien copié — partagez-le où vous voulez !', liveOnAmoraSuffix: '— en direct sur Amora', liveOnAmora: 'En direct sur Amora',
+      loadingRoom: 'Chargement du salon en direct…', roomNotFound: 'Salon introuvable', back: '← Retour',
+      connectingCamera: 'Connexion à votre caméra et micro…', waitingHostVideo: "En attente de la vidéo de l'hôte…",
+      tapToLike: 'Appuyez pour aimer', battleInviteSent: '⚔️ Invitation au battle envoyée — en attente de réponse…',
+      wantsToBattleSuffix: 'veut vous défier !', accept: 'Accepter', decline: 'Refuser',
+      railTop: 'Top', railShare: 'Partager', railFilter: 'Filtre', railBattle: 'Battle', railEnd: 'Terminer',
+      topGiftersTitle: 'Meilleurs donateurs de ce direct', noGiftsYetFirst: 'Aucun cadeau pour le moment — soyez le premier !',
+      catRomance: 'Romance', catLuxury: 'Luxe', catCosmic: 'Cosmique', catPower: 'Puissance', catFun: 'Fun',
+      toPrefix: 'à', sendingGift: 'Envoi…', sendGift: 'Envoyer le cadeau',
+      challengeTitle: '⚔️ Défier un streamer en direct', noStreamersLive: "Aucun autre streamer n'est en direct actuellement.",
+      sayPlaceholder: 'Dites quelque chose…', send: 'Envoyer', errorGiftFailed: "Échec de l'envoi du cadeau"
+    },
+    videoDate: {
+      videoLoadError: 'Impossible de charger la vidéo — veuillez actualiser la page.', startError: 'Impossible de démarrer ce rendez-vous vidéo.',
+      readyTitle: 'Prêt pour votre rendez-vous vidéo ?',
+      readyBody: 'Cela activera votre caméra et votre micro afin que vous et votre match puissiez vous voir.',
+      startButton: 'Démarrer le rendez-vous vidéo', connecting: 'Connexion…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'Échec du chargement des messages', errorLoadChat: 'Impossible de charger le chat',
+      errorRealtimeAuth: "L'authentification en temps réel a échoué. Veuillez vous reconnecter.",
+      errorRealtimeUnavailable: 'Connexion en temps réel indisponible. Nouvelle tentative…',
+      errorSendMessage: "Impossible d'envoyer le message.", errorRealtimeNotReady: "La connexion en temps réel n'est pas prête.",
+      errorUploadFile: 'Impossible de télécharger ce fichier.', openingSpace: 'Ouverture de votre espace privé…', retry: 'Réessayer',
+      userFallback: 'Utilisateur', typingIndicator: 'en train d\'écrire…', onlineStatus: 'Conversation privée • En ligne',
+      connectingSecurely: 'Connexion sécurisée…', viewProfile: 'Voir le profil',
+      privateSpacePill: 'PRIVÉ • ESPACE CHIFFRÉ', welcomeTitle: 'Commencez quelque chose de beau.',
+      welcomeBody: 'Votre premier message lance cette conversation privée.', sendLuxuryGift: 'Envoyer un cadeau de luxe',
+      attach: 'Joindre', messagePlaceholder: 'Écrivez un message privé…', sendMessage: 'Envoyer le message',
+      giftSent: 'CADEAU ENVOYÉ', giftDeliveredSuffix: 'Un petit luxe, livré.'
     }
   },
 
@@ -1659,6 +1863,57 @@ export const translations = {
       paypalPlaceholder: 'du@beispiel.com', accountDetailsPlaceholder: 'Kontodaten für die Auszahlung',
       submitting: 'Wird gesendet…', requestWithdrawal: 'Auszahlung beantragen',
       historyTitle: 'Auszahlungsverlauf', noWithdrawalsYet: 'Noch keine Auszahlungsanträge.', coinsWord: 'Coins'
+    },
+    creatorProfile: {
+      loading: 'Wird geladen…', errorNotFound: 'Dieses Profil konnte nicht gefunden werden.', profileNotFound: 'Profil nicht gefunden',
+      backToDiscover: '← Zurück zu Entdecken', levelPrefix: 'Level', followersSuffix: 'Follower',
+      memberSincePrefix: 'Mitglied seit', following: 'Gefolgt', follow: '+ Folgen', message: 'Nachricht',
+      reportSubmitted: 'Meldung gesendet. Unser Team wird sie prüfen.', reportPrefix: 'Melden', cancel: 'Abbrechen',
+      submitReport: 'Meldung senden', liveNowBanner: '🔴 Jetzt live — zum Ansehen tippen', achievements: '🏅 Erfolge',
+      giftWall: '🎁 Geschenkwand', coinsReceivedSuffix: 'Coins erhalten', noGiftsYet: 'Noch keine Geschenke erhalten.', fromPrefix: 'von',
+      reportCatHarassment: 'Belästigung', reportCatSpam: 'Spam', reportCatNudity: 'Nacktheit oder sexueller Inhalt',
+      reportCatHateSpeech: 'Hassrede', reportCatViolence: 'Gewalt', reportCatScam: 'Betrug',
+      reportCatUnderage: 'minderjährig', reportCatImpersonation: 'Identitätsdiebstahl', reportCatOther: 'Sonstiges'
+    },
+    liveRoom: {
+      filterNormal: 'Normal', filterWarm: 'Warm', filterCool: 'Kühl', filterVivid: 'Lebhaft', filterBw: 'S&W',
+      filterVintage: 'Vintage', filterSoft: 'Sanft', filterDramatic: 'Dramatisch', filterMoody: 'Düster',
+      filterBright: 'Hell', filterNoir: 'Noir', filterSepia: 'Sepia', filterSunset: 'Sonnenuntergang',
+      errorBattleInvite: 'Battle-Einladung konnte nicht gesendet werden.', errorSessionExpired: 'Deine Sitzung ist abgelaufen. Bitte melde dich erneut an.',
+      streamEnded: 'Dieser Stream ist beendet.', inviteDeclined: 'Deine Battle-Einladung wurde abgelehnt.',
+      battleDraw: '🤝 Unentschieden!', battleWon: '🏆 Du hast das Battle gewonnen!', battleLost: '😢 Du hast das Battle verloren.',
+      roomNotFoundError: 'Live-Raum nicht gefunden', someoneFallback: 'Jemand', giftFallback: 'ein Geschenk', sentGiftSuffix: 'hat gesendet',
+      errorEndRoom: 'Dieser Raum konnte nicht beendet werden.', confirmEndLive: 'Diesen Livestream jetzt beenden?',
+      linkCopied: 'Link kopiert — teile ihn überall!', liveOnAmoraSuffix: '— live auf Amora', liveOnAmora: 'Live auf Amora',
+      loadingRoom: 'Live-Raum wird geladen…', roomNotFound: 'Raum nicht gefunden', back: '← Zurück',
+      connectingCamera: 'Kamera und Mikrofon werden verbunden…', waitingHostVideo: 'Warten auf das Video des Hosts…',
+      tapToLike: 'Zum Liken tippen', battleInviteSent: '⚔️ Battle-Einladung gesendet — warte auf Antwort…',
+      wantsToBattleSuffix: 'möchte kämpfen!', accept: 'Annehmen', decline: 'Ablehnen',
+      railTop: 'Top', railShare: 'Teilen', railFilter: 'Filter', railBattle: 'Battle', railEnd: 'Beenden',
+      topGiftersTitle: 'Top-Unterstützer dieses Streams', noGiftsYetFirst: 'Noch keine Geschenke — sei der Erste!',
+      catRomance: 'Romantik', catLuxury: 'Luxus', catCosmic: 'Kosmisch', catPower: 'Kraft', catFun: 'Spaß',
+      toPrefix: 'an', sendingGift: 'Wird gesendet…', sendGift: 'Geschenk senden',
+      challengeTitle: '⚔️ Einen Live-Streamer herausfordern', noStreamersLive: 'Gerade ist kein anderer Streamer live.',
+      sayPlaceholder: 'Sag etwas…', send: 'Senden', errorGiftFailed: 'Geschenk fehlgeschlagen'
+    },
+    videoDate: {
+      videoLoadError: 'Video konnte nicht geladen werden — bitte Seite neu laden.', startError: 'Dieses Video-Date konnte nicht gestartet werden.',
+      readyTitle: 'Bereit für dein Video-Date?',
+      readyBody: 'Dadurch werden deine Kamera und dein Mikrofon aktiviert, damit du und dein Match euch sehen könnt.',
+      startButton: 'Video-Date starten', connecting: 'Verbindung wird hergestellt…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'Nachrichten konnten nicht geladen werden', errorLoadChat: 'Chat konnte nicht geladen werden',
+      errorRealtimeAuth: 'Echtzeit-Authentifizierung fehlgeschlagen. Bitte melde dich erneut an.',
+      errorRealtimeUnavailable: 'Echtzeitverbindung nicht verfügbar. Erneuter Versuch…',
+      errorSendMessage: 'Nachricht konnte nicht gesendet werden.', errorRealtimeNotReady: 'Echtzeitverbindung ist noch nicht bereit.',
+      errorUploadFile: 'Diese Datei konnte nicht hochgeladen werden.', openingSpace: 'Dein privater Bereich wird geöffnet…', retry: 'Erneut versuchen',
+      userFallback: 'Nutzer', typingIndicator: 'schreibt…', onlineStatus: 'Privates Gespräch • Online',
+      connectingSecurely: 'Sichere Verbindung wird hergestellt…', viewProfile: 'Profil ansehen',
+      privateSpacePill: 'PRIVAT • VERSCHLÜSSELTER RAUM', welcomeTitle: 'Beginne etwas Schönes.',
+      welcomeBody: 'Deine erste Nachricht beginnt dieses private Gespräch.', sendLuxuryGift: 'Luxusgeschenk senden',
+      attach: 'Anhängen', messagePlaceholder: 'Schreibe eine private Nachricht…', sendMessage: 'Nachricht senden',
+      giftSent: 'GESCHENK GESENDET', giftDeliveredSuffix: 'Ein kleiner Luxus, geliefert.'
     }
   },
 
@@ -1987,6 +2242,57 @@ export const translations = {
       paypalPlaceholder: 'anta@example.com', accountDetailsPlaceholder: 'تفاصيل الحساب للدفع',
       submitting: 'جارٍ الإرسال…', requestWithdrawal: 'طلب السحب',
       historyTitle: 'سجل السحب', noWithdrawalsYet: 'لا توجد طلبات سحب بعد.', coinsWord: 'عملة'
+    },
+    creatorProfile: {
+      loading: 'جارٍ التحميل…', errorNotFound: 'تعذّر العثور على هذا الملف الشخصي.', profileNotFound: 'الملف الشخصي غير موجود',
+      backToDiscover: '← العودة إلى استكشف', levelPrefix: 'المستوى', followersSuffix: 'متابع',
+      memberSincePrefix: 'عضو منذ', following: 'متابَع', follow: '+ متابعة', message: 'رسالة',
+      reportSubmitted: 'تم إرسال البلاغ. سيقوم فريقنا بمراجعته.', reportPrefix: 'إبلاغ عن', cancel: 'إلغاء',
+      submitReport: 'إرسال البلاغ', liveNowBanner: '🔴 مباشر الآن — اضغط للمشاهدة', achievements: '🏅 الإنجازات',
+      giftWall: '🎁 جدار الهدايا', coinsReceivedSuffix: 'عملة مستلمة', noGiftsYet: 'لم يتم استلام أي هدايا بعد.', fromPrefix: 'من',
+      reportCatHarassment: 'تحرش', reportCatSpam: 'رسائل مزعجة', reportCatNudity: 'عري أو محتوى جنسي',
+      reportCatHateSpeech: 'خطاب كراهية', reportCatViolence: 'عنف', reportCatScam: 'احتيال أو نصب',
+      reportCatUnderage: 'قاصر', reportCatImpersonation: 'انتحال شخصية', reportCatOther: 'أخرى'
+    },
+    liveRoom: {
+      filterNormal: 'عادي', filterWarm: 'دافئ', filterCool: 'بارد', filterVivid: 'حيوي', filterBw: 'أبيض وأسود',
+      filterVintage: 'قديم', filterSoft: 'ناعم', filterDramatic: 'درامي', filterMoody: 'كئيب',
+      filterBright: 'ساطع', filterNoir: 'نوار', filterSepia: 'بني داكن', filterSunset: 'غروب',
+      errorBattleInvite: 'تعذّر إرسال دعوة المعركة.', errorSessionExpired: 'انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى.',
+      streamEnded: 'انتهى هذا البث.', inviteDeclined: 'تم رفض دعوة المعركة الخاصة بك.',
+      battleDraw: '🤝 إنه تعادل!', battleWon: '🏆 لقد فزت بالمعركة!', battleLost: '😢 لقد خسرت المعركة.',
+      roomNotFoundError: 'غرفة البث المباشر غير موجودة', someoneFallback: 'شخص ما', giftFallback: 'هدية', sentGiftSuffix: 'أرسل',
+      errorEndRoom: 'تعذّر إنهاء هذه الغرفة.', confirmEndLive: 'هل تريد إنهاء هذا البث المباشر الآن؟',
+      linkCopied: 'تم نسخ الرابط — شاركه في أي مكان!', liveOnAmoraSuffix: '— مباشر على أمورا', liveOnAmora: 'مباشر على أمورا',
+      loadingRoom: 'جارٍ تحميل غرفة البث المباشر…', roomNotFound: 'الغرفة غير موجودة', back: '← رجوع',
+      connectingCamera: 'جارٍ توصيل الكاميرا والميكروفون…', waitingHostVideo: 'في انتظار فيديو المضيف…',
+      tapToLike: 'اضغط للإعجاب', battleInviteSent: '⚔️ تم إرسال دعوة المعركة — في انتظار الرد…',
+      wantsToBattleSuffix: 'يريد المعركة!', accept: 'قبول', decline: 'رفض',
+      railTop: 'الأعلى', railShare: 'مشاركة', railFilter: 'فلتر', railBattle: 'معركة', railEnd: 'إنهاء',
+      topGiftersTitle: 'أفضل المتبرعين في هذا البث', noGiftsYetFirst: 'لا توجد هدايا بعد — كن الأول!',
+      catRomance: 'رومانسي', catLuxury: 'فاخر', catCosmic: 'كوني', catPower: 'قوة', catFun: 'مرح',
+      toPrefix: 'إلى', sendingGift: 'جارٍ الإرسال…', sendGift: 'إرسال الهدية',
+      challengeTitle: '⚔️ تحدَّ مذيعًا مباشرًا', noStreamersLive: 'لا يوجد مذيعون آخرون مباشرون حاليًا.',
+      sayPlaceholder: 'قل شيئًا…', send: 'إرسال', errorGiftFailed: 'فشل إرسال الهدية'
+    },
+    videoDate: {
+      videoLoadError: 'تعذّر تحميل الفيديو — يرجى تحديث الصفحة.', startError: 'تعذّر بدء هذا الموعد بالفيديو.',
+      readyTitle: 'هل أنت مستعد لموعدك بالفيديو؟',
+      readyBody: 'سيؤدي هذا إلى تشغيل الكاميرا والميكروفون لديك حتى تتمكن أنت ومطابقتك من رؤية بعضكما البعض.',
+      startButton: 'بدء الموعد بالفيديو', connecting: 'جارٍ الاتصال…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'فشل تحميل الرسائل', errorLoadChat: 'تعذّر تحميل الدردشة',
+      errorRealtimeAuth: 'فشلت المصادقة اللحظية. يرجى تسجيل الدخول مرة أخرى.',
+      errorRealtimeUnavailable: 'الاتصال اللحظي غير متاح. تتم إعادة المحاولة…',
+      errorSendMessage: 'تعذّر إرسال الرسالة.', errorRealtimeNotReady: 'الاتصال اللحظي غير جاهز.',
+      errorUploadFile: 'تعذّر رفع هذا الملف.', openingSpace: 'جارٍ فتح مساحتك الخاصة…', retry: 'إعادة المحاولة',
+      userFallback: 'مستخدم', typingIndicator: 'يكتب…', onlineStatus: 'محادثة خاصة • متصل',
+      connectingSecurely: 'جارٍ الاتصال بأمان…', viewProfile: 'عرض الملف الشخصي',
+      privateSpacePill: 'خاص • مساحة مشفرة', welcomeTitle: 'ابدأ شيئًا جميلاً.',
+      welcomeBody: 'رسالتك الأولى تبدأ هذه المحادثة الخاصة.', sendLuxuryGift: 'إرسال هدية فاخرة',
+      attach: 'إرفاق', messagePlaceholder: 'اكتب رسالة خاصة…', sendMessage: 'إرسال الرسالة',
+      giftSent: 'تم إرسال الهدية', giftDeliveredSuffix: 'رفاهية صغيرة، تم توصيلها.'
     }
   },
 
@@ -2315,6 +2621,57 @@ export const translations = {
       paypalPlaceholder: 'aap@example.com', accountDetailsPlaceholder: 'भुगतान के लिए खाता विवरण',
       submitting: 'सबमिट हो रहा है…', requestWithdrawal: 'निकासी का अनुरोध करें',
       historyTitle: 'निकासी इतिहास', noWithdrawalsYet: 'अभी तक कोई निकासी अनुरोध नहीं।', coinsWord: 'कॉइन'
+    },
+    creatorProfile: {
+      loading: 'लोड हो रहा है…', errorNotFound: 'यह प्रोफ़ाइल नहीं मिल सकी।', profileNotFound: 'प्रोफ़ाइल नहीं मिली',
+      backToDiscover: '← खोजें पर वापस जाएं', levelPrefix: 'स्तर', followersSuffix: 'फॉलोअर्स',
+      memberSincePrefix: 'सदस्य बने', following: 'फॉलो कर रहे हैं', follow: '+ फॉलो करें', message: 'संदेश',
+      reportSubmitted: 'रिपोर्ट सबमिट की गई। हमारी टीम इसकी समीक्षा करेगी।', reportPrefix: 'रिपोर्ट करें', cancel: 'रद्द करें',
+      submitReport: 'रिपोर्ट सबमिट करें', liveNowBanner: '🔴 अभी लाइव — देखने के लिए टैप करें', achievements: '🏅 उपलब्धियां',
+      giftWall: '🎁 गिफ्ट वॉल', coinsReceivedSuffix: 'कॉइन प्राप्त हुए', noGiftsYet: 'अभी तक कोई उपहार प्राप्त नहीं हुआ।', fromPrefix: 'से',
+      reportCatHarassment: 'उत्पीड़न', reportCatSpam: 'स्पैम', reportCatNudity: 'नग्नता या यौन सामग्री',
+      reportCatHateSpeech: 'नफरत भरा भाषण', reportCatViolence: 'हिंसा', reportCatScam: 'धोखाधड़ी',
+      reportCatUnderage: 'नाबालिग', reportCatImpersonation: 'प्रतिरूपण', reportCatOther: 'अन्य'
+    },
+    liveRoom: {
+      filterNormal: 'सामान्य', filterWarm: 'गर्म', filterCool: 'ठंडा', filterVivid: 'जीवंत', filterBw: 'ब्लैक एंड व्हाइट',
+      filterVintage: 'विंटेज', filterSoft: 'सॉफ्ट', filterDramatic: 'नाटकीय', filterMoody: 'गंभीर',
+      filterBright: 'चमकदार', filterNoir: 'नॉयर', filterSepia: 'सीपिया', filterSunset: 'सूर्यास्त',
+      errorBattleInvite: 'बैटल आमंत्रण भेजने में असमर्थ।', errorSessionExpired: 'आपका सत्र समाप्त हो गया। कृपया फिर से साइन इन करें।',
+      streamEnded: 'यह स्ट्रीम समाप्त हो गई है।', inviteDeclined: 'आपका बैटल आमंत्रण अस्वीकार कर दिया गया।',
+      battleDraw: '🤝 यह बराबरी है!', battleWon: '🏆 आपने बैटल जीत ली!', battleLost: '😢 आप बैटल हार गए।',
+      roomNotFoundError: 'लाइव रूम नहीं मिला', someoneFallback: 'कोई व्यक्ति', giftFallback: 'एक उपहार', sentGiftSuffix: 'ने भेजा',
+      errorEndRoom: 'इस रूम को समाप्त करने में असमर्थ।', confirmEndLive: 'क्या अभी इस लाइव स्ट्रीम को समाप्त करें?',
+      linkCopied: 'लिंक कॉपी हो गया — इसे कहीं भी साझा करें!', liveOnAmoraSuffix: '— अमोरा पर लाइव', liveOnAmora: 'अमोरा पर लाइव',
+      loadingRoom: 'लाइव रूम लोड हो रहा है…', roomNotFound: 'रूम नहीं मिला', back: '← वापस',
+      connectingCamera: 'आपका कैमरा और माइक्रोफ़ोन कनेक्ट किया जा रहा है…', waitingHostVideo: 'होस्ट के वीडियो का इंतज़ार…',
+      tapToLike: 'पसंद करने के लिए टैप करें', battleInviteSent: '⚔️ बैटल आमंत्रण भेजा गया — प्रतिक्रिया का इंतज़ार…',
+      wantsToBattleSuffix: 'बैटल करना चाहता है!', accept: 'स्वीकार करें', decline: 'अस्वीकार करें',
+      railTop: 'टॉप', railShare: 'साझा करें', railFilter: 'फ़िल्टर', railBattle: 'बैटल', railEnd: 'समाप्त करें',
+      topGiftersTitle: 'इस स्ट्रीम के टॉप गिफ्टर्स', noGiftsYetFirst: 'अभी तक कोई उपहार नहीं — पहले बनें!',
+      catRomance: 'रोमांस', catLuxury: 'लक्ज़री', catCosmic: 'कॉस्मिक', catPower: 'पावर', catFun: 'मज़ा',
+      toPrefix: 'को', sendingGift: 'भेजा जा रहा है…', sendGift: 'उपहार भेजें',
+      challengeTitle: '⚔️ किसी लाइव स्ट्रीमर को चुनौती दें', noStreamersLive: 'अभी कोई अन्य स्ट्रीमर लाइव नहीं है।',
+      sayPlaceholder: 'कुछ कहें…', send: 'भेजें', errorGiftFailed: 'उपहार भेजने में विफल'
+    },
+    videoDate: {
+      videoLoadError: 'वीडियो लोड नहीं हो सका — कृपया पेज रीफ्रेश करें।', startError: 'यह वीडियो डेट शुरू करने में असमर्थ।',
+      readyTitle: 'क्या आप अपनी वीडियो डेट के लिए तैयार हैं?',
+      readyBody: 'इससे आपका कैमरा और माइक्रोफ़ोन चालू हो जाएगा ताकि आप और आपका मैच एक-दूसरे को देख सकें।',
+      startButton: 'वीडियो डेट शुरू करें', connecting: 'कनेक्ट हो रहा है…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'संदेश लोड करने में विफल', errorLoadChat: 'चैट लोड करने में असमर्थ',
+      errorRealtimeAuth: 'रीयल-टाइम प्रमाणीकरण विफल रहा। कृपया फिर से साइन इन करें।',
+      errorRealtimeUnavailable: 'रीयल-टाइम कनेक्शन उपलब्ध नहीं है। पुनः प्रयास किया जा रहा है…',
+      errorSendMessage: 'संदेश भेजने में असमर्थ।', errorRealtimeNotReady: 'रीयल-टाइम कनेक्शन तैयार नहीं है।',
+      errorUploadFile: 'उस फ़ाइल को अपलोड करने में असमर्थ।', openingSpace: 'आपका निजी स्थान खोला जा रहा है…', retry: 'पुनः प्रयास करें',
+      userFallback: 'उपयोगकर्ता', typingIndicator: 'टाइप कर रहा है…', onlineStatus: 'निजी बातचीत • ऑनलाइन',
+      connectingSecurely: 'सुरक्षित रूप से कनेक्ट हो रहा है…', viewProfile: 'प्रोफ़ाइल देखें',
+      privateSpacePill: 'निजी • एंड-टू-एंड स्पेस', welcomeTitle: 'कुछ खूबसूरत शुरू करें।',
+      welcomeBody: 'आपका पहला संदेश इस निजी बातचीत की शुरुआत करता है।', sendLuxuryGift: 'लक्जरी उपहार भेजें',
+      attach: 'संलग्न करें', messagePlaceholder: 'एक निजी संदेश लिखें…', sendMessage: 'संदेश भेजें',
+      giftSent: 'उपहार भेजा गया', giftDeliveredSuffix: 'एक छोटी सी विलासिता, पहुंचाई गई।'
     }
   },
 
@@ -2643,6 +3000,57 @@ export const translations = {
       paypalPlaceholder: 'anda@contoh.com', accountDetailsPlaceholder: 'Detail akun untuk pembayaran',
       submitting: 'Mengirimkan…', requestWithdrawal: 'Ajukan Penarikan',
       historyTitle: 'Riwayat Penarikan', noWithdrawalsYet: 'Belum ada permintaan penarikan.', coinsWord: 'koin'
+    },
+    creatorProfile: {
+      loading: 'Memuat…', errorNotFound: 'Profil ini tidak dapat ditemukan.', profileNotFound: 'Profil tidak ditemukan',
+      backToDiscover: '← Kembali ke Jelajahi', levelPrefix: 'Level', followersSuffix: 'pengikut',
+      memberSincePrefix: 'Anggota sejak', following: 'Mengikuti', follow: '+ Ikuti', message: 'Pesan',
+      reportSubmitted: 'Laporan terkirim. Tim kami akan meninjaunya.', reportPrefix: 'Laporkan', cancel: 'Batal',
+      submitReport: 'Kirim Laporan', liveNowBanner: '🔴 Sedang live — ketuk untuk menonton', achievements: '🏅 Pencapaian',
+      giftWall: '🎁 Dinding Hadiah', coinsReceivedSuffix: 'koin diterima', noGiftsYet: 'Belum ada hadiah diterima.', fromPrefix: 'dari',
+      reportCatHarassment: 'pelecehan', reportCatSpam: 'spam', reportCatNudity: 'ketelanjangan atau konten seksual',
+      reportCatHateSpeech: 'ujaran kebencian', reportCatViolence: 'kekerasan', reportCatScam: 'penipuan',
+      reportCatUnderage: 'di bawah umur', reportCatImpersonation: 'peniruan identitas', reportCatOther: 'lainnya'
+    },
+    liveRoom: {
+      filterNormal: 'Normal', filterWarm: 'Hangat', filterCool: 'Sejuk', filterVivid: 'Cerah', filterBw: 'H&P',
+      filterVintage: 'Vintage', filterSoft: 'Lembut', filterDramatic: 'Dramatis', filterMoody: 'Suram',
+      filterBright: 'Terang', filterNoir: 'Noir', filterSepia: 'Sepia', filterSunset: 'Matahari Terbenam',
+      errorBattleInvite: 'Tidak dapat mengirim undangan battle.', errorSessionExpired: 'Sesi Anda telah berakhir. Silakan masuk lagi.',
+      streamEnded: 'Siaran ini telah berakhir.', inviteDeclined: 'Undangan battle Anda ditolak.',
+      battleDraw: '🤝 Seri!', battleWon: '🏆 Anda memenangkan battle!', battleLost: '😢 Anda kalah dalam battle.',
+      roomNotFoundError: 'Ruang live tidak ditemukan', someoneFallback: 'Seseorang', giftFallback: 'sebuah hadiah', sentGiftSuffix: 'mengirim',
+      errorEndRoom: 'Tidak dapat mengakhiri ruang ini.', confirmEndLive: 'Akhiri siaran langsung ini sekarang?',
+      linkCopied: 'Tautan disalin — bagikan di mana saja!', liveOnAmoraSuffix: '— live di Amora', liveOnAmora: 'Live di Amora',
+      loadingRoom: 'Memuat ruang live…', roomNotFound: 'Ruang tidak ditemukan', back: '← Kembali',
+      connectingCamera: 'Menghubungkan kamera dan mikrofon Anda…', waitingHostVideo: 'Menunggu video host…',
+      tapToLike: 'Ketuk untuk menyukai', battleInviteSent: '⚔️ Undangan battle terkirim — menunggu respons…',
+      wantsToBattleSuffix: 'ingin battle!', accept: 'Terima', decline: 'Tolak',
+      railTop: 'Top', railShare: 'Bagikan', railFilter: 'Filter', railBattle: 'Battle', railEnd: 'Akhiri',
+      topGiftersTitle: 'Penyumbang teratas siaran ini', noGiftsYetFirst: 'Belum ada hadiah — jadilah yang pertama!',
+      catRomance: 'Romansa', catLuxury: 'Mewah', catCosmic: 'Kosmik', catPower: 'Kekuatan', catFun: 'Seru',
+      toPrefix: 'kepada', sendingGift: 'Mengirim…', sendGift: 'Kirim Hadiah',
+      challengeTitle: '⚔️ Tantang seorang streamer live', noStreamersLive: 'Tidak ada streamer lain yang sedang live saat ini.',
+      sayPlaceholder: 'Katakan sesuatu…', send: 'Kirim', errorGiftFailed: 'Gagal mengirim hadiah'
+    },
+    videoDate: {
+      videoLoadError: 'Video tidak dapat dimuat — silakan muat ulang halaman.', startError: 'Tidak dapat memulai video date ini.',
+      readyTitle: 'Siap untuk video date Anda?',
+      readyBody: 'Ini akan mengaktifkan kamera dan mikrofon Anda agar Anda dan match Anda dapat saling melihat.',
+      startButton: 'Mulai Video Date', connecting: 'Menghubungkan…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'Gagal memuat pesan', errorLoadChat: 'Tidak dapat memuat chat',
+      errorRealtimeAuth: 'Autentikasi real-time gagal. Silakan masuk lagi.',
+      errorRealtimeUnavailable: 'Koneksi real-time tidak tersedia. Mencoba lagi…',
+      errorSendMessage: 'Tidak dapat mengirim pesan.', errorRealtimeNotReady: 'Koneksi real-time belum siap.',
+      errorUploadFile: 'Tidak dapat mengunggah file itu.', openingSpace: 'Membuka ruang pribadi Anda…', retry: 'Coba Lagi',
+      userFallback: 'Pengguna', typingIndicator: 'sedang mengetik…', onlineStatus: 'Percakapan pribadi • Online',
+      connectingSecurely: 'Menghubungkan dengan aman…', viewProfile: 'Lihat profil',
+      privateSpacePill: 'PRIBADI • RUANG TERENKRIPSI', welcomeTitle: 'Mulailah sesuatu yang indah.',
+      welcomeBody: 'Pesan pertama Anda memulai percakapan pribadi ini.', sendLuxuryGift: 'Kirim hadiah mewah',
+      attach: 'Lampirkan', messagePlaceholder: 'Tulis pesan pribadi…', sendMessage: 'Kirim pesan',
+      giftSent: 'HADIAH TERKIRIM', giftDeliveredSuffix: 'Kemewahan kecil, telah dikirim.'
     }
   }
 };

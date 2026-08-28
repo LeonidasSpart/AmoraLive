@@ -318,6 +318,27 @@ export const translations: Record<string, Translations> = {
       readyLine: "LiveKit call screen ready.",
       connectHint: "Connect the existing native LiveKit Room here for the production media session.",
       endCall: "End call"
+    },
+    chatScreen: {
+      chatFallback: "Chat", privateConversation: "Private conversation",
+      startConversation: "Start the conversation. Keep it kind. 💗", messagePlaceholder: "Write a message…"
+    },
+    creatorProfileScreen: {
+      errorLoad: "Unable to load profile.", errorUpdateFollow: "Unable to update follow.", notFound: "Creator not found.",
+      followersSuffix: "followers", levelWord: "level", following: "Following", follow: "Follow", message: "Message"
+    },
+    liveRoomScreen: {
+      errorRealtimeAuth: "Realtime connection failed to authenticate.", inviteDeclined: "Your battle invite was declined.",
+      battleDraw: "🤝 It's a draw!", battleWon: "🏆 You won the battle!", battleLost: "😢 You lost the battle.",
+      errorConnect: "Unable to connect to the live stream.", liveWord: "LIVE",
+      videoUnavailable: "Video unavailable", connectingVideo: "Connecting video…",
+      roomTitleFallback: "Live room", creatorFallback: "Creator", wantsToBattleSuffix: "wants to battle!",
+      streamerFallback: "A streamer", accept: "Accept", decline: "Decline", endBattle: "End Battle",
+      gift: "Gift", message: "Message", aboutThisLive: "About this live", generalFallback: "General", watchingSuffix: "watching"
+    },
+    videoDateScreen: {
+      errorStart: "Unable to start this video date.", backToMatches: "Back to Matches",
+      waitingOtherPerson: "Waiting for the other person…", connecting: "Connecting…"
     }
   },
   es: {
@@ -609,6 +630,27 @@ export const translations: Record<string, Translations> = {
       readyLine: "Pantalla de llamada LiveKit lista.",
       connectHint: "Conecta la Sala LiveKit nativa existente aquí para la sesión de medios de producción.",
       endCall: "Finalizar llamada"
+    },
+    chatScreen: {
+      chatFallback: "Chat", privateConversation: "Conversación privada",
+      startConversation: "Comienza la conversación. Sé amable. 💗", messagePlaceholder: "Escribe un mensaje…"
+    },
+    creatorProfileScreen: {
+      errorLoad: "No se pudo cargar el perfil.", errorUpdateFollow: "No se pudo actualizar el seguimiento.", notFound: "Creador no encontrado.",
+      followersSuffix: "seguidores", levelWord: "nivel", following: "Siguiendo", follow: "Seguir", message: "Mensaje"
+    },
+    liveRoomScreen: {
+      errorRealtimeAuth: "La conexión en tiempo real no pudo autenticarse.", inviteDeclined: "Tu invitación a la batalla fue rechazada.",
+      battleDraw: "🤝 ¡Es un empate!", battleWon: "🏆 ¡Ganaste la batalla!", battleLost: "😢 Perdiste la batalla.",
+      errorConnect: "No se pudo conectar a la transmisión en vivo.", liveWord: "EN VIVO",
+      videoUnavailable: "Video no disponible", connectingVideo: "Conectando video…",
+      roomTitleFallback: "Sala en vivo", creatorFallback: "Creador", wantsToBattleSuffix: "¡quiere batallar!",
+      streamerFallback: "Un streamer", accept: "Aceptar", decline: "Rechazar", endBattle: "Terminar batalla",
+      gift: "Regalo", message: "Mensaje", aboutThisLive: "Acerca de este directo", generalFallback: "General", watchingSuffix: "viendo"
+    },
+    videoDateScreen: {
+      errorStart: "No se pudo iniciar esta videocita.", backToMatches: "Volver a Matches",
+      waitingOtherPerson: "Esperando a la otra persona…", connecting: "Conectando…"
     }
   },
   pt: {
@@ -900,6 +942,27 @@ export const translations: Record<string, Translations> = {
       readyLine: "Tela de chamada LiveKit pronta.",
       connectHint: "Conecte a Sala LiveKit nativa existente aqui para a sessão de mídia de produção.",
       endCall: "Encerrar chamada"
+    },
+    chatScreen: {
+      chatFallback: "Chat", privateConversation: "Conversa privada",
+      startConversation: "Comece a conversa. Seja gentil. 💗", messagePlaceholder: "Escreva uma mensagem…"
+    },
+    creatorProfileScreen: {
+      errorLoad: "Não foi possível carregar o perfil.", errorUpdateFollow: "Não foi possível atualizar o seguir.", notFound: "Criador não encontrado.",
+      followersSuffix: "seguidores", levelWord: "nível", following: "Seguindo", follow: "Seguir", message: "Mensagem"
+    },
+    liveRoomScreen: {
+      errorRealtimeAuth: "A conexão em tempo real falhou ao autenticar.", inviteDeclined: "Seu convite de batalha foi recusado.",
+      battleDraw: "🤝 Empate!", battleWon: "🏆 Você venceu a batalha!", battleLost: "😢 Você perdeu a batalha.",
+      errorConnect: "Não foi possível conectar à transmissão ao vivo.", liveWord: "AO VIVO",
+      videoUnavailable: "Vídeo indisponível", connectingVideo: "Conectando vídeo…",
+      roomTitleFallback: "Sala ao vivo", creatorFallback: "Criador", wantsToBattleSuffix: "quer batalhar!",
+      streamerFallback: "Um streamer", accept: "Aceitar", decline: "Recusar", endBattle: "Encerrar batalha",
+      gift: "Presente", message: "Mensagem", aboutThisLive: "Sobre esta transmissão", generalFallback: "Geral", watchingSuffix: "assistindo"
+    },
+    videoDateScreen: {
+      errorStart: "Não foi possível iniciar este encontro por vídeo.", backToMatches: "Voltar para Matches",
+      waitingOtherPerson: "Aguardando a outra pessoa…", connecting: "Conectando…"
     }
   },
   fr: {
@@ -1191,6 +1254,27 @@ export const translations: Record<string, Translations> = {
       readyLine: "Écran d'appel LiveKit prêt.",
       connectHint: "Connectez ici la salle LiveKit native existante pour la session média de production.",
       endCall: "Terminer l'appel"
+    },
+    chatScreen: {
+      chatFallback: "Chat", privateConversation: "Conversation privée",
+      startConversation: "Commencez la conversation. Restez bienveillant. 💗", messagePlaceholder: "Écrivez un message…"
+    },
+    creatorProfileScreen: {
+      errorLoad: "Impossible de charger le profil.", errorUpdateFollow: "Impossible de mettre à jour le suivi.", notFound: "Créateur introuvable.",
+      followersSuffix: "abonnés", levelWord: "niveau", following: "Abonné(e)", follow: "Suivre", message: "Message"
+    },
+    liveRoomScreen: {
+      errorRealtimeAuth: "L'authentification de la connexion en temps réel a échoué.", inviteDeclined: "Votre invitation au battle a été refusée.",
+      battleDraw: "🤝 Égalité !", battleWon: "🏆 Vous avez gagné le battle !", battleLost: "😢 Vous avez perdu le battle.",
+      errorConnect: "Impossible de se connecter au direct.", liveWord: "EN DIRECT",
+      videoUnavailable: "Vidéo indisponible", connectingVideo: "Connexion de la vidéo…",
+      roomTitleFallback: "Salon en direct", creatorFallback: "Créateur", wantsToBattleSuffix: "veut vous défier !",
+      streamerFallback: "Un streamer", accept: "Accepter", decline: "Refuser", endBattle: "Terminer le battle",
+      gift: "Cadeau", message: "Message", aboutThisLive: "À propos de ce direct", generalFallback: "Général", watchingSuffix: "en train de regarder"
+    },
+    videoDateScreen: {
+      errorStart: "Impossible de démarrer ce rendez-vous vidéo.", backToMatches: "Retour aux Matchs",
+      waitingOtherPerson: "En attente de l'autre personne…", connecting: "Connexion…"
     }
   },
   de: {
@@ -1482,6 +1566,27 @@ export const translations: Record<string, Translations> = {
       readyLine: "LiveKit-Anrufbildschirm bereit.",
       connectHint: "Verbinde hier den vorhandenen nativen LiveKit-Room für die produktive Mediensitzung.",
       endCall: "Anruf beenden"
+    },
+    chatScreen: {
+      chatFallback: "Chat", privateConversation: "Privates Gespräch",
+      startConversation: "Beginne das Gespräch. Bleib freundlich. 💗", messagePlaceholder: "Schreibe eine Nachricht…"
+    },
+    creatorProfileScreen: {
+      errorLoad: "Profil konnte nicht geladen werden.", errorUpdateFollow: "Folgen konnte nicht aktualisiert werden.", notFound: "Creator nicht gefunden.",
+      followersSuffix: "Follower", levelWord: "Level", following: "Gefolgt", follow: "Folgen", message: "Nachricht"
+    },
+    liveRoomScreen: {
+      errorRealtimeAuth: "Die Echtzeitverbindung konnte sich nicht authentifizieren.", inviteDeclined: "Deine Battle-Einladung wurde abgelehnt.",
+      battleDraw: "🤝 Unentschieden!", battleWon: "🏆 Du hast das Battle gewonnen!", battleLost: "😢 Du hast das Battle verloren.",
+      errorConnect: "Verbindung zum Livestream fehlgeschlagen.", liveWord: "LIVE",
+      videoUnavailable: "Video nicht verfügbar", connectingVideo: "Video wird verbunden…",
+      roomTitleFallback: "Live-Raum", creatorFallback: "Creator", wantsToBattleSuffix: "möchte kämpfen!",
+      streamerFallback: "Ein Streamer", accept: "Annehmen", decline: "Ablehnen", endBattle: "Battle beenden",
+      gift: "Geschenk", message: "Nachricht", aboutThisLive: "Über diesen Livestream", generalFallback: "Allgemein", watchingSuffix: "schauen zu"
+    },
+    videoDateScreen: {
+      errorStart: "Dieses Video-Date konnte nicht gestartet werden.", backToMatches: "Zurück zu Matches",
+      waitingOtherPerson: "Warten auf die andere Person…", connecting: "Verbindung wird hergestellt…"
     }
   },
   ar: {
@@ -1773,6 +1878,27 @@ export const translations: Record<string, Translations> = {
       readyLine: "شاشة مكالمة LiveKit جاهزة.",
       connectHint: "قم بتوصيل غرفة LiveKit الأصلية الحالية هنا لجلسة الوسائط الإنتاجية.",
       endCall: "إنهاء المكالمة"
+    },
+    chatScreen: {
+      chatFallback: "دردشة", privateConversation: "محادثة خاصة",
+      startConversation: "ابدأ المحادثة. كن لطيفًا. 💗", messagePlaceholder: "اكتب رسالة…"
+    },
+    creatorProfileScreen: {
+      errorLoad: "تعذّر تحميل الملف الشخصي.", errorUpdateFollow: "تعذّر تحديث المتابعة.", notFound: "المبدع غير موجود.",
+      followersSuffix: "متابع", levelWord: "المستوى", following: "متابَع", follow: "متابعة", message: "رسالة"
+    },
+    liveRoomScreen: {
+      errorRealtimeAuth: "فشلت مصادقة الاتصال اللحظي.", inviteDeclined: "تم رفض دعوة المعركة الخاصة بك.",
+      battleDraw: "🤝 إنه تعادل!", battleWon: "🏆 لقد فزت بالمعركة!", battleLost: "😢 لقد خسرت المعركة.",
+      errorConnect: "تعذّر الاتصال بالبث المباشر.", liveWord: "مباشر",
+      videoUnavailable: "الفيديو غير متاح", connectingVideo: "جارٍ توصيل الفيديو…",
+      roomTitleFallback: "غرفة مباشرة", creatorFallback: "مبدع", wantsToBattleSuffix: "يريد المعركة!",
+      streamerFallback: "أحد المذيعين", accept: "قبول", decline: "رفض", endBattle: "إنهاء المعركة",
+      gift: "هدية", message: "رسالة", aboutThisLive: "حول هذا البث المباشر", generalFallback: "عام", watchingSuffix: "يشاهدون"
+    },
+    videoDateScreen: {
+      errorStart: "تعذّر بدء هذا الموعد بالفيديو.", backToMatches: "العودة إلى التطابقات",
+      waitingOtherPerson: "في انتظار الشخص الآخر…", connecting: "جارٍ الاتصال…"
     }
   },
   hi: {
@@ -2064,6 +2190,27 @@ export const translations: Record<string, Translations> = {
       readyLine: "LiveKit कॉल स्क्रीन तैयार है।",
       connectHint: "प्रोडक्शन मीडिया सत्र के लिए यहां मौजूदा नेटिव LiveKit रूम कनेक्ट करें।",
       endCall: "कॉल समाप्त करें"
+    },
+    chatScreen: {
+      chatFallback: "चैट", privateConversation: "निजी बातचीत",
+      startConversation: "बातचीत शुरू करें। दयालु रहें। 💗", messagePlaceholder: "एक संदेश लिखें…"
+    },
+    creatorProfileScreen: {
+      errorLoad: "प्रोफ़ाइल लोड करने में असमर्थ।", errorUpdateFollow: "फॉलो अपडेट करने में असमर्थ।", notFound: "क्रिएटर नहीं मिला।",
+      followersSuffix: "फॉलोअर्स", levelWord: "स्तर", following: "फॉलो कर रहे हैं", follow: "फॉलो करें", message: "संदेश"
+    },
+    liveRoomScreen: {
+      errorRealtimeAuth: "रीयल-टाइम कनेक्शन प्रमाणित करने में विफल रहा।", inviteDeclined: "आपका बैटल आमंत्रण अस्वीकार कर दिया गया।",
+      battleDraw: "🤝 यह बराबरी है!", battleWon: "🏆 आपने बैटल जीत ली!", battleLost: "😢 आप बैटल हार गए।",
+      errorConnect: "लाइव स्ट्रीम से कनेक्ट करने में असमर्थ।", liveWord: "लाइव",
+      videoUnavailable: "वीडियो उपलब्ध नहीं है", connectingVideo: "वीडियो कनेक्ट हो रहा है…",
+      roomTitleFallback: "लाइव रूम", creatorFallback: "क्रिएटर", wantsToBattleSuffix: "बैटल करना चाहता है!",
+      streamerFallback: "एक स्ट्रीमर", accept: "स्वीकार करें", decline: "अस्वीकार करें", endBattle: "बैटल समाप्त करें",
+      gift: "उपहार", message: "संदेश", aboutThisLive: "इस लाइव के बारे में", generalFallback: "सामान्य", watchingSuffix: "देख रहे हैं"
+    },
+    videoDateScreen: {
+      errorStart: "यह वीडियो डेट शुरू करने में असमर्थ।", backToMatches: "मैचों पर वापस जाएं",
+      waitingOtherPerson: "दूसरे व्यक्ति का इंतज़ार…", connecting: "कनेक्ट हो रहा है…"
     }
   },
   id: {
@@ -2355,6 +2502,27 @@ export const translations: Record<string, Translations> = {
       readyLine: "Layar panggilan LiveKit siap.",
       connectHint: "Hubungkan Room LiveKit native yang ada di sini untuk sesi media produksi.",
       endCall: "Akhiri panggilan"
+    },
+    chatScreen: {
+      chatFallback: "Chat", privateConversation: "Percakapan pribadi",
+      startConversation: "Mulai percakapan. Bersikaplah baik. 💗", messagePlaceholder: "Tulis pesan…"
+    },
+    creatorProfileScreen: {
+      errorLoad: "Tidak dapat memuat profil.", errorUpdateFollow: "Tidak dapat memperbarui status ikuti.", notFound: "Kreator tidak ditemukan.",
+      followersSuffix: "pengikut", levelWord: "level", following: "Mengikuti", follow: "Ikuti", message: "Pesan"
+    },
+    liveRoomScreen: {
+      errorRealtimeAuth: "Koneksi real-time gagal melakukan autentikasi.", inviteDeclined: "Undangan battle Anda ditolak.",
+      battleDraw: "🤝 Seri!", battleWon: "🏆 Anda memenangkan battle!", battleLost: "😢 Anda kalah dalam battle.",
+      errorConnect: "Tidak dapat terhubung ke siaran langsung.", liveWord: "LANGSUNG",
+      videoUnavailable: "Video tidak tersedia", connectingVideo: "Menghubungkan video…",
+      roomTitleFallback: "Ruang live", creatorFallback: "Kreator", wantsToBattleSuffix: "ingin battle!",
+      streamerFallback: "Seorang streamer", accept: "Terima", decline: "Tolak", endBattle: "Akhiri Battle",
+      gift: "Hadiah", message: "Pesan", aboutThisLive: "Tentang siaran ini", generalFallback: "Umum", watchingSuffix: "menonton"
+    },
+    videoDateScreen: {
+      errorStart: "Tidak dapat memulai video date ini.", backToMatches: "Kembali ke Kecocokan",
+      waitingOtherPerson: "Menunggu orang lain…", connecting: "Menghubungkan…"
     }
   }
 };
