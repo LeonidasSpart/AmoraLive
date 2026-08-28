@@ -339,6 +339,53 @@ export const translations: Record<string, Translations> = {
     videoDateScreen: {
       errorStart: "Unable to start this video date.", backToMatches: "Back to Matches",
       waitingOtherPerson: "Waiting for the other person…", connecting: "Connecting…"
+    },
+    legalSummary: {
+      kicker: "AMORALIVE · LEGAL",
+      footer: "Please use the current web policy as the authoritative full text if you need the complete legal document.",
+      terms: {
+        title: "Terms of Service",
+        intro: "These Terms govern your use of AmoraLive and the services we provide.",
+        sections: [
+          ["Use of AmoraLive", "You must use AmoraLive lawfully, respectfully and in accordance with the Community Guidelines. You are responsible for activity on your account."],
+          ["Accounts & age", "AmoraLive is an 18+ service. Keep your login details secure and provide accurate account information."],
+          ["Coins, gifts & memberships", "Virtual coins, gifts and memberships are digital services. Purchases and subscription handling are subject to the applicable purchase terms and payment provider rules."],
+          ["Safety & moderation", "We may restrict, suspend or remove accounts and content when necessary to protect users, enforce our rules or comply with law."],
+          ["Contact", "For questions about these Terms, use the support/contact channels provided by AmoraLive."]
+        ]
+      },
+      privacy: {
+        title: "Privacy Policy",
+        intro: "This page explains the categories of information AmoraLive uses to provide the service and protect the community.",
+        sections: [
+          ["Identity & account", "We may process account identifiers, authentication information, age-related information and profile information."],
+          ["Social activity", "Interactions such as follows, likes, livestream participation, gifts and other platform activity may be processed to operate the service."],
+          ["Communications", "Messages and related communication metadata are processed to provide messaging and protect users."],
+          ["Transactions", "Purchase, subscription, virtual-coin and digital-gift information may be processed together with transaction status and identifiers."],
+          ["Security & rights", "Technical and security information may be used for fraud prevention, account protection and service reliability. Applicable privacy rights and account-deletion options remain available."]
+        ]
+      },
+      guidelines: {
+        title: "Community Guidelines",
+        intro: "AmoraLive is built for meaningful connections. Treat people with respect and help keep the platform safe.",
+        sections: [
+          ["Respect", "Harassment, bullying, stalking, intimidation and targeted abuse are not allowed."],
+          ["Safety", "Threats, violence, exploitation, trafficking and dangerous criminal activity are prohibited."],
+          ["Adult & minors", "Pornography, explicit sexual content and sexualization or exploitation of minors are prohibited. AmoraLive is 18+."],
+          ["Fraud & privacy", "Scams, phishing, impersonation, doxxing, malicious disclosure of private information and account compromise are prohibited."],
+          ["Reporting", "Use the reporting and blocking tools when you encounter harmful content or behavior. Moderation may remove content or restrict accounts."]
+        ]
+      },
+      cookies: {
+        title: "Cookies & Similar Technologies",
+        intro: "AmoraLive uses necessary technologies to provide secure sessions and core functionality, with optional technologies handled according to applicable consent requirements.",
+        sections: [
+          ["Strictly necessary", "Authentication, session security, fraud prevention, load balancing and essential service functionality."],
+          ["Preferences", "Language, interface and other choices may be remembered."],
+          ["Analytics", "Where used, analytics can help improve performance, reliability and usability."],
+          ["Your choices", "Where consent is required, optional technologies can be refused and preferences can be changed later."]
+        ]
+      }
     }
   },
   es: {
@@ -651,6 +698,53 @@ export const translations: Record<string, Translations> = {
     videoDateScreen: {
       errorStart: "No se pudo iniciar esta videocita.", backToMatches: "Volver a Matches",
       waitingOtherPerson: "Esperando a la otra persona…", connecting: "Conectando…"
+    },
+    legalSummary: {
+      kicker: "AMORALIVE · LEGAL",
+      footer: "Utiliza la política web actual como el texto completo y autorizado si necesitas el documento legal completo.",
+      terms: {
+        title: "Términos del Servicio",
+        intro: "Estos Términos rigen tu uso de AmoraLive y los servicios que ofrecemos.",
+        sections: [
+          ["Uso de AmoraLive", "Debes usar AmoraLive de forma legal, respetuosa y de acuerdo con las Directrices de la Comunidad. Eres responsable de la actividad en tu cuenta."],
+          ["Cuentas y edad", "AmoraLive es un servicio para mayores de 18 años. Mantén tus datos de acceso seguros y proporciona información de cuenta precisa."],
+          ["Monedas, regalos y membresías", "Las monedas virtuales, regalos y membresías son servicios digitales. Las compras y la gestión de suscripciones están sujetas a los términos de compra aplicables y a las reglas del proveedor de pagos."],
+          ["Seguridad y moderación", "Podemos restringir, suspender o eliminar cuentas y contenido cuando sea necesario para proteger a los usuarios, hacer cumplir nuestras reglas o cumplir con la ley."],
+          ["Contacto", "Para preguntas sobre estos Términos, utiliza los canales de soporte/contacto proporcionados por AmoraLive."]
+        ]
+      },
+      privacy: {
+        title: "Política de Privacidad",
+        intro: "Esta página explica las categorías de información que AmoraLive utiliza para prestar el servicio y proteger a la comunidad.",
+        sections: [
+          ["Identidad y cuenta", "Podemos procesar identificadores de cuenta, información de autenticación, información relacionada con la edad e información de perfil."],
+          ["Actividad social", "Interacciones como seguimientos, me gusta, participación en transmisiones en vivo, regalos y otra actividad en la plataforma pueden procesarse para operar el servicio."],
+          ["Comunicaciones", "Los mensajes y los metadatos de comunicación relacionados se procesan para proporcionar mensajería y proteger a los usuarios."],
+          ["Transacciones", "La información de compras, suscripciones, monedas virtuales y regalos digitales puede procesarse junto con el estado de la transacción e identificadores."],
+          ["Seguridad y derechos", "La información técnica y de seguridad puede utilizarse para la prevención de fraude, la protección de la cuenta y la fiabilidad del servicio. Los derechos de privacidad aplicables y las opciones de eliminación de cuenta siguen disponibles."]
+        ]
+      },
+      guidelines: {
+        title: "Directrices de la Comunidad",
+        intro: "AmoraLive está diseñada para conexiones significativas. Trata a las personas con respeto y ayuda a mantener la plataforma segura.",
+        sections: [
+          ["Respeto", "No se permiten el acoso, el bullying, el acecho, la intimidación ni el abuso dirigido."],
+          ["Seguridad", "Se prohíben las amenazas, la violencia, la explotación, la trata de personas y la actividad criminal peligrosa."],
+          ["Adultos y menores", "Se prohíben la pornografía, el contenido sexual explícito y la sexualización o explotación de menores. AmoraLive es para mayores de 18 años."],
+          ["Fraude y privacidad", "Se prohíben las estafas, el phishing, la suplantación de identidad, el doxxing, la divulgación maliciosa de información privada y el compromiso de cuentas."],
+          ["Reportes", "Utiliza las herramientas de reporte y bloqueo cuando encuentres contenido o comportamiento dañino. La moderación puede eliminar contenido o restringir cuentas."]
+        ]
+      },
+      cookies: {
+        title: "Cookies y Tecnologías Similares",
+        intro: "AmoraLive utiliza tecnologías necesarias para proporcionar sesiones seguras y funcionalidad principal, con tecnologías opcionales gestionadas según los requisitos de consentimiento aplicables.",
+        sections: [
+          ["Estrictamente necesarias", "Autenticación, seguridad de sesión, prevención de fraude, balanceo de carga y funcionalidad esencial del servicio."],
+          ["Preferencias", "Se pueden recordar el idioma, la interfaz y otras elecciones."],
+          ["Análisis", "Cuando se utilizan, los análisis pueden ayudar a mejorar el rendimiento, la fiabilidad y la usabilidad."],
+          ["Tus opciones", "Cuando se requiere consentimiento, las tecnologías opcionales pueden rechazarse y las preferencias pueden cambiarse más tarde."]
+        ]
+      }
     }
   },
   pt: {
@@ -963,6 +1057,53 @@ export const translations: Record<string, Translations> = {
     videoDateScreen: {
       errorStart: "Não foi possível iniciar este encontro por vídeo.", backToMatches: "Voltar para Matches",
       waitingOtherPerson: "Aguardando a outra pessoa…", connecting: "Conectando…"
+    },
+    legalSummary: {
+      kicker: "AMORALIVE · LEGAL",
+      footer: "Use a política web atual como o texto completo e autoritativo caso precise do documento legal completo.",
+      terms: {
+        title: "Termos de Serviço",
+        intro: "Estes Termos regem o seu uso da AmoraLive e dos serviços que oferecemos.",
+        sections: [
+          ["Uso da AmoraLive", "Você deve usar a AmoraLive de forma legal, respeitosa e de acordo com as Diretrizes da Comunidade. Você é responsável pela atividade em sua conta."],
+          ["Contas e idade", "A AmoraLive é um serviço para maiores de 18 anos. Mantenha seus dados de login seguros e forneça informações de conta precisas."],
+          ["Moedas, presentes e assinaturas", "Moedas virtuais, presentes e assinaturas são serviços digitais. Compras e gerenciamento de assinaturas estão sujeitos aos termos de compra aplicáveis e às regras do provedor de pagamento."],
+          ["Segurança e moderação", "Podemos restringir, suspender ou remover contas e conteúdo quando necessário para proteger os usuários, aplicar nossas regras ou cumprir a lei."],
+          ["Contato", "Para dúvidas sobre estes Termos, use os canais de suporte/contato fornecidos pela AmoraLive."]
+        ]
+      },
+      privacy: {
+        title: "Política de Privacidade",
+        intro: "Esta página explica as categorias de informações que a AmoraLive usa para prestar o serviço e proteger a comunidade.",
+        sections: [
+          ["Identidade e conta", "Podemos processar identificadores de conta, informações de autenticação, informações relacionadas à idade e informações de perfil."],
+          ["Atividade social", "Interações como seguir, curtir, participar de transmissões ao vivo, presentes e outras atividades na plataforma podem ser processadas para operar o serviço."],
+          ["Comunicações", "Mensagens e metadados de comunicação relacionados são processados para fornecer mensagens e proteger os usuários."],
+          ["Transações", "Informações de compras, assinaturas, moedas virtuais e presentes digitais podem ser processadas junto com o status e identificadores da transação."],
+          ["Segurança e direitos", "Informações técnicas e de segurança podem ser usadas para prevenção de fraude, proteção de conta e confiabilidade do serviço. Os direitos de privacidade aplicáveis e as opções de exclusão de conta permanecem disponíveis."]
+        ]
+      },
+      guidelines: {
+        title: "Diretrizes da Comunidade",
+        intro: "A AmoraLive é construída para conexões significativas. Trate as pessoas com respeito e ajude a manter a plataforma segura.",
+        sections: [
+          ["Respeito", "Assédio, bullying, perseguição, intimidação e abuso direcionado não são permitidos."],
+          ["Segurança", "Ameaças, violência, exploração, tráfico e atividade criminosa perigosa são proibidos."],
+          ["Adultos e menores", "Pornografia, conteúdo sexual explícito e sexualização ou exploração de menores são proibidos. A AmoraLive é para maiores de 18 anos."],
+          ["Fraude e privacidade", "Golpes, phishing, falsidade ideológica, doxxing, divulgação maliciosa de informações privadas e comprometimento de contas são proibidos."],
+          ["Denúncias", "Use as ferramentas de denúncia e bloqueio quando encontrar conteúdo ou comportamento prejudicial. A moderação pode remover conteúdo ou restringir contas."]
+        ]
+      },
+      cookies: {
+        title: "Cookies e Tecnologias Semelhantes",
+        intro: "A AmoraLive usa tecnologias necessárias para fornecer sessões seguras e funcionalidade principal, com tecnologias opcionais tratadas de acordo com os requisitos de consentimento aplicáveis.",
+        sections: [
+          ["Estritamente necessárias", "Autenticação, segurança de sessão, prevenção de fraude, balanceamento de carga e funcionalidade essencial do serviço."],
+          ["Preferências", "Idioma, interface e outras escolhas podem ser lembradas."],
+          ["Análises", "Quando usadas, as análises podem ajudar a melhorar o desempenho, a confiabilidade e a usabilidade."],
+          ["Suas escolhas", "Quando o consentimento é necessário, tecnologias opcionais podem ser recusadas e as preferências podem ser alteradas posteriormente."]
+        ]
+      }
     }
   },
   fr: {
@@ -1275,6 +1416,53 @@ export const translations: Record<string, Translations> = {
     videoDateScreen: {
       errorStart: "Impossible de démarrer ce rendez-vous vidéo.", backToMatches: "Retour aux Matchs",
       waitingOtherPerson: "En attente de l'autre personne…", connecting: "Connexion…"
+    },
+    legalSummary: {
+      kicker: "AMORALIVE · LÉGAL",
+      footer: "Veuillez utiliser la politique web actuelle comme texte complet faisant autorité si vous avez besoin du document juridique complet.",
+      terms: {
+        title: "Conditions d'Utilisation",
+        intro: "Ces Conditions régissent votre utilisation d'AmoraLive et des services que nous fournissons.",
+        sections: [
+          ["Utilisation d'AmoraLive", "Vous devez utiliser AmoraLive de manière légale, respectueuse et conforme aux Règles de la Communauté. Vous êtes responsable de l'activité sur votre compte."],
+          ["Comptes et âge", "AmoraLive est un service réservé aux personnes de 18 ans et plus. Gardez vos identifiants de connexion en sécurité et fournissez des informations de compte exactes."],
+          ["Pièces, cadeaux et abonnements", "Les pièces virtuelles, cadeaux et abonnements sont des services numériques. Les achats et la gestion des abonnements sont soumis aux conditions d'achat applicables et aux règles du fournisseur de paiement."],
+          ["Sécurité et modération", "Nous pouvons restreindre, suspendre ou supprimer des comptes et du contenu lorsque cela est nécessaire pour protéger les utilisateurs, faire respecter nos règles ou nous conformer à la loi."],
+          ["Contact", "Pour toute question concernant ces Conditions, utilisez les canaux d'assistance/contact fournis par AmoraLive."]
+        ]
+      },
+      privacy: {
+        title: "Politique de Confidentialité",
+        intro: "Cette page explique les catégories d'informations qu'AmoraLive utilise pour fournir le service et protéger la communauté.",
+        sections: [
+          ["Identité et compte", "Nous pouvons traiter des identifiants de compte, des informations d'authentification, des informations liées à l'âge et des informations de profil."],
+          ["Activité sociale", "Des interactions telles que les abonnements, les mentions J'aime, la participation aux diffusions en direct, les cadeaux et d'autres activités sur la plateforme peuvent être traitées pour exploiter le service."],
+          ["Communications", "Les messages et les métadonnées de communication associées sont traités pour fournir la messagerie et protéger les utilisateurs."],
+          ["Transactions", "Les informations relatives aux achats, abonnements, pièces virtuelles et cadeaux numériques peuvent être traitées avec le statut et les identifiants de transaction."],
+          ["Sécurité et droits", "Les informations techniques et de sécurité peuvent être utilisées pour la prévention de la fraude, la protection du compte et la fiabilité du service. Les droits de confidentialité applicables et les options de suppression de compte restent disponibles."]
+        ]
+      },
+      guidelines: {
+        title: "Règles de la Communauté",
+        intro: "AmoraLive est conçue pour des connexions significatives. Traitez les gens avec respect et aidez à maintenir la plateforme sûre.",
+        sections: [
+          ["Respect", "Le harcèlement, l'intimidation, la traque et les abus ciblés ne sont pas autorisés."],
+          ["Sécurité", "Les menaces, la violence, l'exploitation, la traite et les activités criminelles dangereuses sont interdites."],
+          ["Adultes et mineurs", "La pornographie, le contenu sexuel explicite et la sexualisation ou l'exploitation des mineurs sont interdits. AmoraLive est réservée aux personnes de 18 ans et plus."],
+          ["Fraude et confidentialité", "Les escroqueries, l'hameçonnage, l'usurpation d'identité, le doxxing, la divulgation malveillante d'informations privées et la compromission de comptes sont interdits."],
+          ["Signalement", "Utilisez les outils de signalement et de blocage lorsque vous rencontrez du contenu ou un comportement nuisible. La modération peut supprimer du contenu ou restreindre des comptes."]
+        ]
+      },
+      cookies: {
+        title: "Cookies et Technologies Similaires",
+        intro: "AmoraLive utilise des technologies nécessaires pour fournir des sessions sécurisées et des fonctionnalités essentielles, les technologies optionnelles étant gérées conformément aux exigences de consentement applicables.",
+        sections: [
+          ["Strictement nécessaires", "Authentification, sécurité de session, prévention de la fraude, répartition de charge et fonctionnalités essentielles du service."],
+          ["Préférences", "La langue, l'interface et d'autres choix peuvent être mémorisés."],
+          ["Analyse", "Lorsqu'elle est utilisée, l'analyse peut aider à améliorer les performances, la fiabilité et la facilité d'utilisation."],
+          ["Vos choix", "Lorsque le consentement est requis, les technologies optionnelles peuvent être refusées et les préférences peuvent être modifiées ultérieurement."]
+        ]
+      }
     }
   },
   de: {
@@ -1587,6 +1775,53 @@ export const translations: Record<string, Translations> = {
     videoDateScreen: {
       errorStart: "Dieses Video-Date konnte nicht gestartet werden.", backToMatches: "Zurück zu Matches",
       waitingOtherPerson: "Warten auf die andere Person…", connecting: "Verbindung wird hergestellt…"
+    },
+    legalSummary: {
+      kicker: "AMORALIVE · RECHTLICHES",
+      footer: "Bitte verwende die aktuelle Web-Richtlinie als maßgeblichen Volltext, falls du das vollständige Rechtsdokument benötigst.",
+      terms: {
+        title: "Nutzungsbedingungen",
+        intro: "Diese Nutzungsbedingungen regeln deine Nutzung von AmoraLive und der von uns bereitgestellten Dienste.",
+        sections: [
+          ["Nutzung von AmoraLive", "Du musst AmoraLive rechtmäßig, respektvoll und gemäß den Community-Richtlinien nutzen. Du bist für die Aktivität auf deinem Konto verantwortlich."],
+          ["Konten & Alter", "AmoraLive ist ein Dienst für Personen ab 18 Jahren. Halte deine Anmeldedaten sicher und gib genaue Kontoinformationen an."],
+          ["Münzen, Geschenke & Mitgliedschaften", "Virtuelle Münzen, Geschenke und Mitgliedschaften sind digitale Dienste. Käufe und die Verwaltung von Abonnements unterliegen den geltenden Kaufbedingungen und den Regeln des Zahlungsanbieters."],
+          ["Sicherheit & Moderation", "Wir können Konten und Inhalte einschränken, sperren oder entfernen, wenn dies zum Schutz der Nutzer, zur Durchsetzung unserer Regeln oder zur Einhaltung des Gesetzes erforderlich ist."],
+          ["Kontakt", "Bei Fragen zu diesen Nutzungsbedingungen nutze die von AmoraLive bereitgestellten Support-/Kontaktkanäle."]
+        ]
+      },
+      privacy: {
+        title: "Datenschutzerklärung",
+        intro: "Diese Seite erklärt die Kategorien von Informationen, die AmoraLive verwendet, um den Dienst bereitzustellen und die Community zu schützen.",
+        sections: [
+          ["Identität & Konto", "Wir können Kontokennungen, Authentifizierungsinformationen, altersbezogene Informationen und Profilinformationen verarbeiten."],
+          ["Soziale Aktivität", "Interaktionen wie Folgen, Likes, Teilnahme an Livestreams, Geschenke und andere Plattformaktivitäten können zum Betrieb des Dienstes verarbeitet werden."],
+          ["Kommunikation", "Nachrichten und zugehörige Kommunikationsmetadaten werden verarbeitet, um Messaging bereitzustellen und Nutzer zu schützen."],
+          ["Transaktionen", "Informationen zu Käufen, Abonnements, virtuellen Münzen und digitalen Geschenken können zusammen mit dem Transaktionsstatus und Kennungen verarbeitet werden."],
+          ["Sicherheit & Rechte", "Technische und Sicherheitsinformationen können zur Betrugsprävention, zum Kontoschutz und zur Zuverlässigkeit des Dienstes verwendet werden. Geltende Datenschutzrechte und Optionen zur Kontolöschung bleiben verfügbar."]
+        ]
+      },
+      guidelines: {
+        title: "Community-Richtlinien",
+        intro: "AmoraLive wurde für bedeutungsvolle Verbindungen entwickelt. Behandle Menschen mit Respekt und hilf mit, die Plattform sicher zu halten.",
+        sections: [
+          ["Respekt", "Belästigung, Mobbing, Stalking, Einschüchterung und gezielter Missbrauch sind nicht erlaubt."],
+          ["Sicherheit", "Drohungen, Gewalt, Ausbeutung, Menschenhandel und gefährliche kriminelle Aktivitäten sind verboten."],
+          ["Erwachsene & Minderjährige", "Pornografie, explizite sexuelle Inhalte sowie Sexualisierung oder Ausbeutung von Minderjährigen sind verboten. AmoraLive ist für Personen ab 18 Jahren."],
+          ["Betrug & Datenschutz", "Betrug, Phishing, Identitätsdiebstahl, Doxxing, böswillige Offenlegung privater Informationen und Kontokompromittierung sind verboten."],
+          ["Meldungen", "Nutze die Melde- und Blockierungstools, wenn du schädliche Inhalte oder Verhalten feststellst. Die Moderation kann Inhalte entfernen oder Konten einschränken."]
+        ]
+      },
+      cookies: {
+        title: "Cookies und Ähnliche Technologien",
+        intro: "AmoraLive verwendet notwendige Technologien, um sichere Sitzungen und Kernfunktionen bereitzustellen, wobei optionale Technologien gemäß den geltenden Einwilligungsanforderungen behandelt werden.",
+        sections: [
+          ["Unbedingt erforderlich", "Authentifizierung, Sitzungssicherheit, Betrugsprävention, Lastverteilung und wesentliche Dienstfunktionalität."],
+          ["Einstellungen", "Sprache, Oberfläche und andere Entscheidungen können gespeichert werden."],
+          ["Analyse", "Sofern verwendet, kann Analyse dabei helfen, Leistung, Zuverlässigkeit und Benutzerfreundlichkeit zu verbessern."],
+          ["Deine Entscheidungen", "Sofern eine Einwilligung erforderlich ist, können optionale Technologien abgelehnt und Einstellungen später geändert werden."]
+        ]
+      }
     }
   },
   ar: {
@@ -1899,6 +2134,53 @@ export const translations: Record<string, Translations> = {
     videoDateScreen: {
       errorStart: "تعذّر بدء هذا الموعد بالفيديو.", backToMatches: "العودة إلى التطابقات",
       waitingOtherPerson: "في انتظار الشخص الآخر…", connecting: "جارٍ الاتصال…"
+    },
+    legalSummary: {
+      kicker: "أمورالايف · قانوني",
+      footer: "يرجى استخدام السياسة الحالية على الموقع الإلكتروني باعتبارها النص الكامل والموثوق إذا كنت بحاجة إلى المستند القانوني الكامل.",
+      terms: {
+        title: "شروط الخدمة",
+        intro: "تحكم هذه الشروط استخدامك لأمورالايف والخدمات التي نقدمها.",
+        sections: [
+          ["استخدام أمورالايف", "يجب عليك استخدام أمورالايف بشكل قانوني ومحترم ووفقًا لإرشادات المجتمع. أنت مسؤول عن النشاط في حسابك."],
+          ["الحسابات والعمر", "أمورالايف خدمة مخصصة لمن هم فوق 18 عامًا. حافظ على بيانات تسجيل الدخول الخاصة بك آمنة وقدّم معلومات حساب دقيقة."],
+          ["العملات والهدايا والعضويات", "العملات الافتراضية والهدايا والعضويات هي خدمات رقمية. تخضع عمليات الشراء وإدارة الاشتراكات لشروط الشراء المعمول بها وقواعد مزود الدفع."],
+          ["السلامة والإشراف", "يجوز لنا تقييد الحسابات والمحتوى أو تعليقها أو إزالتها عند الضرورة لحماية المستخدمين أو تطبيق قواعدنا أو الامتثال للقانون."],
+          ["اتصل بنا", "للأسئلة حول هذه الشروط، استخدم قنوات الدعم/الاتصال المقدمة من أمورالايف."]
+        ]
+      },
+      privacy: {
+        title: "سياسة الخصوصية",
+        intro: "توضح هذه الصفحة فئات المعلومات التي تستخدمها أمورالايف لتقديم الخدمة وحماية المجتمع.",
+        sections: [
+          ["الهوية والحساب", "قد نعالج معرّفات الحساب ومعلومات المصادقة والمعلومات المتعلقة بالعمر ومعلومات الملف الشخصي."],
+          ["النشاط الاجتماعي", "قد يتم معالجة تفاعلات مثل المتابعات والإعجابات والمشاركة في البث المباشر والهدايا وأنشطة المنصة الأخرى لتشغيل الخدمة."],
+          ["الاتصالات", "تتم معالجة الرسائل والبيانات الوصفية المتعلقة بالاتصال لتوفير خدمة المراسلة وحماية المستخدمين."],
+          ["المعاملات", "يمكن معالجة معلومات الشراء والاشتراك والعملات الافتراضية والهدايا الرقمية جنبًا إلى جنب مع حالة المعاملة ومعرّفاتها."],
+          ["الأمان والحقوق", "يمكن استخدام المعلومات التقنية والأمنية لمنع الاحتيال وحماية الحساب وموثوقية الخدمة. تظل حقوق الخصوصية المعمول بها وخيارات حذف الحساب متاحة."]
+        ]
+      },
+      guidelines: {
+        title: "إرشادات المجتمع",
+        intro: "تم بناء أمورالايف من أجل التواصل الهادف. عامل الناس باحترام وساعد في الحفاظ على أمان المنصة.",
+        sections: [
+          ["الاحترام", "لا يُسمح بالتحرش أو التنمر أو المطاردة أو التخويف أو الإساءة الموجهة."],
+          ["السلامة", "يُحظر التهديد والعنف والاستغلال والاتجار بالبشر والنشاط الإجرامي الخطير."],
+          ["البالغون والقاصرون", "يُحظر المحتوى الإباحي والمحتوى الجنسي الصريح وتجنيس أو استغلال القاصرين. أمورالايف مخصصة لمن هم فوق 18 عامًا."],
+          ["الاحتيال والخصوصية", "يُحظر الاحتيال والتصيد الاحتيالي وانتحال الشخصية والدوكسينغ والإفصاح الخبيث عن المعلومات الخاصة واختراق الحسابات."],
+          ["الإبلاغ", "استخدم أدوات الإبلاغ والحظر عند مواجهة محتوى أو سلوك ضار. قد يزيل الإشراف المحتوى أو يقيّد الحسابات."]
+        ]
+      },
+      cookies: {
+        title: "ملفات تعريف الارتباط والتقنيات المماثلة",
+        intro: "تستخدم أمورالايف التقنيات الضرورية لتوفير جلسات آمنة ووظائف أساسية، مع التعامل مع التقنيات الاختيارية وفقًا لمتطلبات الموافقة المعمول بها.",
+        sections: [
+          ["ضرورية بشكل صارم", "المصادقة، وأمان الجلسة، ومنع الاحتيال، وموازنة الأحمال، والوظائف الأساسية للخدمة."],
+          ["التفضيلات", "يمكن تذكر اللغة والواجهة والاختيارات الأخرى."],
+          ["التحليلات", "عند استخدامها، يمكن أن تساعد التحليلات في تحسين الأداء والموثوقية وسهولة الاستخدام."],
+          ["اختياراتك", "عندما تكون الموافقة مطلوبة، يمكن رفض التقنيات الاختيارية ويمكن تغيير التفضيلات لاحقًا."]
+        ]
+      }
     }
   },
   hi: {
@@ -2211,6 +2493,53 @@ export const translations: Record<string, Translations> = {
     videoDateScreen: {
       errorStart: "यह वीडियो डेट शुरू करने में असमर्थ।", backToMatches: "मैचों पर वापस जाएं",
       waitingOtherPerson: "दूसरे व्यक्ति का इंतज़ार…", connecting: "कनेक्ट हो रहा है…"
+    },
+    legalSummary: {
+      kicker: "अमोरालाइव · कानूनी",
+      footer: "यदि आपको पूर्ण कानूनी दस्तावेज़ की आवश्यकता है, तो कृपया वर्तमान वेब नीति को आधिकारिक पूर्ण पाठ के रूप में उपयोग करें।",
+      terms: {
+        title: "सेवा की शर्तें",
+        intro: "ये शर्तें अमोरालाइव और हमारी सेवाओं के आपके उपयोग को नियंत्रित करती हैं।",
+        sections: [
+          ["अमोरालाइव का उपयोग", "आपको अमोरालाइव का उपयोग कानूनी रूप से, सम्मानपूर्वक और सामुदायिक दिशानिर्देशों के अनुसार करना चाहिए। आपके खाते पर गतिविधि के लिए आप जिम्मेदार हैं।"],
+          ["खाते और उम्र", "अमोरालाइव 18+ सेवा है। अपनी लॉगिन जानकारी सुरक्षित रखें और सटीक खाता जानकारी प्रदान करें।"],
+          ["कॉइन, उपहार और सदस्यताएं", "वर्चुअल कॉइन, उपहार और सदस्यताएं डिजिटल सेवाएं हैं। खरीदारी और सदस्यता प्रबंधन लागू खरीद शर्तों और भुगतान प्रदाता नियमों के अधीन हैं।"],
+          ["सुरक्षा और मॉडरेशन", "उपयोगकर्ताओं की सुरक्षा, हमारे नियमों को लागू करने या कानून का पालन करने के लिए आवश्यक होने पर हम खातों और सामग्री को प्रतिबंधित, निलंबित या हटा सकते हैं।"],
+          ["संपर्क करें", "इन शर्तों के बारे में प्रश्नों के लिए, अमोरालाइव द्वारा प्रदान किए गए सहायता/संपर्क चैनलों का उपयोग करें।"]
+        ]
+      },
+      privacy: {
+        title: "गोपनीयता नीति",
+        intro: "यह पृष्ठ उन सूचना श्रेणियों को बताता है जिनका उपयोग अमोरालाइव सेवा प्रदान करने और समुदाय की सुरक्षा के लिए करता है।",
+        sections: [
+          ["पहचान और खाता", "हम खाता पहचानकर्ता, प्रमाणीकरण जानकारी, उम्र संबंधी जानकारी और प्रोफ़ाइल जानकारी को संसाधित कर सकते हैं।"],
+          ["सामाजिक गतिविधि", "सेवा को संचालित करने के लिए फॉलो, लाइक, लाइवस्ट्रीम भागीदारी, उपहार और अन्य प्लेटफ़ॉर्म गतिविधि जैसी बातचीत को संसाधित किया जा सकता है।"],
+          ["संचार", "मैसेजिंग प्रदान करने और उपयोगकर्ताओं की सुरक्षा के लिए संदेश और संबंधित संचार मेटाडेटा को संसाधित किया जाता है।"],
+          ["लेनदेन", "खरीद, सदस्यता, वर्चुअल-कॉइन और डिजिटल-उपहार जानकारी को लेनदेन की स्थिति और पहचानकर्ताओं के साथ संसाधित किया जा सकता है।"],
+          ["सुरक्षा और अधिकार", "तकनीकी और सुरक्षा जानकारी का उपयोग धोखाधड़ी रोकथाम, खाता सुरक्षा और सेवा विश्वसनीयता के लिए किया जा सकता है। लागू गोपनीयता अधिकार और खाता-हटाने के विकल्प उपलब्ध रहते हैं।"]
+        ]
+      },
+      guidelines: {
+        title: "सामुदायिक दिशानिर्देश",
+        intro: "अमोरालाइव सार्थक संबंधों के लिए बनाया गया है। लोगों के साथ सम्मान से पेश आएं और प्लेटफ़ॉर्म को सुरक्षित रखने में मदद करें।",
+        sections: [
+          ["सम्मान", "उत्पीड़न, बदमाशी, पीछा करना, धमकाना और लक्षित दुर्व्यवहार की अनुमति नहीं है।"],
+          ["सुरक्षा", "धमकियां, हिंसा, शोषण, तस्करी और खतरनाक आपराधिक गतिविधि प्रतिबंधित हैं।"],
+          ["वयस्क और नाबालिग", "अश्लील सामग्री, स्पष्ट यौन सामग्री और नाबालिगों का यौनीकरण या शोषण प्रतिबंधित है। अमोरालाइव 18+ है।"],
+          ["धोखाधड़ी और गोपनीयता", "घोटाले, फ़िशिंग, प्रतिरूपण, डॉक्सिंग, निजी जानकारी का दुर्भावनापूर्ण खुलासा और खाता समझौता प्रतिबंधित हैं।"],
+          ["रिपोर्टिंग", "जब आपको हानिकारक सामग्री या व्यवहार मिले तो रिपोर्टिंग और ब्लॉकिंग टूल का उपयोग करें। मॉडरेशन सामग्री हटा सकता है या खातों को प्रतिबंधित कर सकता है।"]
+        ]
+      },
+      cookies: {
+        title: "कुकीज़ और समान तकनीकें",
+        intro: "अमोरालाइव सुरक्षित सत्र और मुख्य कार्यक्षमता प्रदान करने के लिए आवश्यक तकनीकों का उपयोग करता है, जिसमें वैकल्पिक तकनीकों को लागू सहमति आवश्यकताओं के अनुसार संभाला जाता है।",
+        sections: [
+          ["अत्यंत आवश्यक", "प्रमाणीकरण, सत्र सुरक्षा, धोखाधड़ी रोकथाम, लोड बैलेंसिंग और आवश्यक सेवा कार्यक्षमता।"],
+          ["प्राथमिकताएं", "भाषा, इंटरफ़ेस और अन्य विकल्पों को याद रखा जा सकता है।"],
+          ["विश्लेषण", "उपयोग किए जाने पर, विश्लेषण प्रदर्शन, विश्वसनीयता और उपयोगिता में सुधार करने में मदद कर सकता है।"],
+          ["आपके विकल्प", "जहां सहमति आवश्यक है, वैकल्पिक तकनीकों को अस्वीकार किया जा सकता है और प्राथमिकताओं को बाद में बदला जा सकता है।"]
+        ]
+      }
     }
   },
   id: {
@@ -2523,6 +2852,53 @@ export const translations: Record<string, Translations> = {
     videoDateScreen: {
       errorStart: "Tidak dapat memulai video date ini.", backToMatches: "Kembali ke Kecocokan",
       waitingOtherPerson: "Menunggu orang lain…", connecting: "Menghubungkan…"
+    },
+    legalSummary: {
+      kicker: "AMORALIVE · HUKUM",
+      footer: "Silakan gunakan kebijakan web saat ini sebagai teks lengkap yang berwenang jika Anda memerlukan dokumen hukum lengkap.",
+      terms: {
+        title: "Syarat Layanan",
+        intro: "Syarat ini mengatur penggunaan Anda atas AmoraLive dan layanan yang kami sediakan.",
+        sections: [
+          ["Penggunaan AmoraLive", "Anda harus menggunakan AmoraLive secara sah, dengan hormat, dan sesuai dengan Pedoman Komunitas. Anda bertanggung jawab atas aktivitas di akun Anda."],
+          ["Akun & usia", "AmoraLive adalah layanan untuk usia 18+. Jaga keamanan detail login Anda dan berikan informasi akun yang akurat."],
+          ["Koin, hadiah & keanggotaan", "Koin virtual, hadiah, dan keanggotaan adalah layanan digital. Pembelian dan penanganan langganan tunduk pada syarat pembelian yang berlaku dan aturan penyedia pembayaran."],
+          ["Keamanan & moderasi", "Kami dapat membatasi, menangguhkan, atau menghapus akun dan konten jika diperlukan untuk melindungi pengguna, menegakkan aturan kami, atau mematuhi hukum."],
+          ["Kontak", "Untuk pertanyaan tentang Syarat ini, gunakan saluran dukungan/kontak yang disediakan oleh AmoraLive."]
+        ]
+      },
+      privacy: {
+        title: "Kebijakan Privasi",
+        intro: "Halaman ini menjelaskan kategori informasi yang digunakan AmoraLive untuk menyediakan layanan dan melindungi komunitas.",
+        sections: [
+          ["Identitas & akun", "Kami dapat memproses pengidentifikasi akun, informasi autentikasi, informasi terkait usia, dan informasi profil."],
+          ["Aktivitas sosial", "Interaksi seperti mengikuti, menyukai, berpartisipasi dalam siaran langsung, hadiah, dan aktivitas platform lainnya dapat diproses untuk mengoperasikan layanan."],
+          ["Komunikasi", "Pesan dan metadata komunikasi terkait diproses untuk menyediakan perpesanan dan melindungi pengguna."],
+          ["Transaksi", "Informasi pembelian, langganan, koin virtual, dan hadiah digital dapat diproses bersama dengan status dan pengidentifikasi transaksi."],
+          ["Keamanan & hak", "Informasi teknis dan keamanan dapat digunakan untuk pencegahan penipuan, perlindungan akun, dan keandalan layanan. Hak privasi yang berlaku dan opsi penghapusan akun tetap tersedia."]
+        ]
+      },
+      guidelines: {
+        title: "Pedoman Komunitas",
+        intro: "AmoraLive dibangun untuk koneksi yang bermakna. Perlakukan orang lain dengan hormat dan bantu menjaga platform tetap aman.",
+        sections: [
+          ["Rasa hormat", "Pelecehan, perundungan, penguntitan, intimidasi, dan penyalahgunaan yang ditargetkan tidak diizinkan."],
+          ["Keamanan", "Ancaman, kekerasan, eksploitasi, perdagangan manusia, dan aktivitas kriminal berbahaya dilarang."],
+          ["Dewasa & di bawah umur", "Pornografi, konten seksual eksplisit, serta seksualisasi atau eksploitasi anak di bawah umur dilarang. AmoraLive adalah untuk usia 18+."],
+          ["Penipuan & privasi", "Penipuan, phishing, peniruan identitas, doxxing, pengungkapan informasi pribadi secara berbahaya, dan peretasan akun dilarang."],
+          ["Pelaporan", "Gunakan alat pelaporan dan pemblokiran saat Anda menemukan konten atau perilaku berbahaya. Moderasi dapat menghapus konten atau membatasi akun."]
+        ]
+      },
+      cookies: {
+        title: "Cookie & Teknologi Serupa",
+        intro: "AmoraLive menggunakan teknologi yang diperlukan untuk menyediakan sesi aman dan fungsionalitas inti, dengan teknologi opsional ditangani sesuai dengan persyaratan persetujuan yang berlaku.",
+        sections: [
+          ["Sangat diperlukan", "Autentikasi, keamanan sesi, pencegahan penipuan, penyeimbangan beban, dan fungsionalitas layanan penting."],
+          ["Preferensi", "Bahasa, antarmuka, dan pilihan lainnya dapat diingat."],
+          ["Analitik", "Jika digunakan, analitik dapat membantu meningkatkan kinerja, keandalan, dan kegunaan."],
+          ["Pilihan Anda", "Jika persetujuan diperlukan, teknologi opsional dapat ditolak dan preferensi dapat diubah nanti."]
+        ]
+      }
     }
   }
 };
