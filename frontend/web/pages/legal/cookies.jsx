@@ -3,110 +3,9 @@
 import React, { useState } from 'react';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
+import { useTranslation } from '../../lib/i18n';
 
 const AMORA_LOGO = '/brand/amora-logo.png';
-
-const cookieCategories = [
-  {
-    icon: '◆',
-    title: 'Strictly Necessary',
-    badge: 'ALWAYS ACTIVE',
-    color: 'pink',
-    description:
-      'These technologies are necessary for AmoraLive to operate securely and provide core functionality requested by users.',
-    examples: [
-      'Authentication and login sessions',
-      'Account and session security',
-      'Fraud and abuse prevention',
-      'Load balancing and service availability',
-      'Security tokens and request protection',
-      'Cookie-consent preferences',
-      'Basic functionality required to deliver the service'
-    ],
-    consent: 'These technologies may operate without consent where legally permitted because they are necessary for the service requested by the user.'
-  },
-  {
-    icon: '✦',
-    title: 'Preferences',
-    badge: 'OPTIONAL',
-    color: 'purple',
-    description:
-      'These technologies remember choices you make so AmoraLive can provide a more personalized experience.',
-    examples: [
-      'Language preferences',
-      'Interface preferences',
-      'Display settings',
-      'Selected region or settings',
-      'Previously selected cookie preferences',
-      'Other functionality preferences'
-    ],
-    consent:
-      'Where required by applicable law, these technologies are activated only after you provide the appropriate consent.'
-  },
-  {
-    icon: '◌',
-    title: 'Analytics',
-    badge: 'OPTIONAL',
-    color: 'blue',
-    description:
-      'Analytics technologies help us understand how users interact with AmoraLive so we can improve performance, reliability and usability.',
-    examples: [
-      'Page and feature usage',
-      'Performance measurements',
-      'Error and diagnostic information',
-      'Traffic patterns',
-      'Feature engagement',
-      'Aggregated usage statistics'
-    ],
-    consent:
-      'Where analytics involves non-essential cookies or similar technologies, AmoraLive will request consent where required by applicable law.'
-  },
-  {
-    icon: '◇',
-    title: 'Advertising & Personalisation',
-    badge: 'OPTIONAL',
-    color: 'gold',
-    description:
-      'If AmoraLive introduces advertising or personalisation technologies that use cookies or similar tracking technologies, they may be used to measure advertising performance or personalise advertising.',
-    examples: [
-      'Advertising measurement',
-      'Campaign attribution',
-      'Frequency management',
-      'Advertising personalisation',
-      'Cross-site or cross-service measurement where applicable'
-    ],
-    consent:
-      'These technologies will not be activated where consent is legally required unless the required consent has been obtained.'
-  }
-];
-
-const commonQuestions = [
-  {
-    question: 'Can I refuse optional cookies?',
-    answer:
-      'Yes. Where consent is required, you can refuse optional cookies and similar technologies. Refusing optional technologies should not prevent access to core AmoraLive functionality unless a particular feature genuinely depends on the technology.'
-  },
-  {
-    question: 'Can I change my decision later?',
-    answer:
-      'Yes. Where AmoraLive provides a cookie-preference mechanism, you can revisit your choices and withdraw or modify consent. Withdrawal should be as easy as giving consent where consent is required.'
-  },
-  {
-    question: 'Does deleting cookies log me out?',
-    answer:
-      'It may. If authentication or security information is stored using cookies or similar technologies, deleting those technologies may require you to sign in again or reset certain preferences.'
-  },
-  {
-    question: 'Does AmoraLive use cookies to sell my personal data?',
-    answer:
-      'AmoraLive does not intend to sell personal data through cookies. Any processing involving third-party technologies remains subject to applicable privacy, data-protection and consumer-protection requirements.'
-  },
-  {
-    question: 'Are cookies the only tracking technology?',
-    answer:
-      'No. Websites and applications may also use technologies such as pixels, SDKs, local storage, device identifiers, tags or similar technologies. This policy uses “cookies and similar technologies” where appropriate.'
-  }
-];
 
 function Section({ number, eyebrow, title, children }) {
   return (
@@ -122,7 +21,7 @@ function Section({ number, eyebrow, title, children }) {
   );
 }
 
-function CookieCategoryCard({ category }) {
+function CookieCategoryCard({ category, typicalPurposesLabel, consentLabel }) {
   return (
     <div className={`cookie-category-card ${category.color}`}>
       <div className="cookie-category-top">
@@ -142,7 +41,7 @@ function CookieCategoryCard({ category }) {
       <p>{category.description}</p>
 
       <div className="cookie-example-title">
-        TYPICAL PURPOSES
+        {typicalPurposesLabel}
       </div>
 
       <ul>
@@ -155,7 +54,7 @@ function CookieCategoryCard({ category }) {
       </ul>
 
       <div className="cookie-consent-note">
-        <strong>Consent</strong>
+        <strong>{consentLabel}</strong>
         <span>{category.consent}</span>
       </div>
     </div>
@@ -163,6 +62,7 @@ function CookieCategoryCard({ category }) {
 }
 
 export default function Cookies() {
+  const { t, lang } = useTranslation();
   const [openQuestion, setOpenQuestion] = useState(null);
 
   const toggleQuestion = (index) => {
@@ -191,37 +91,34 @@ export default function Cookies() {
 
               <div className="cookies-badge">
                 <span />
-                AMORALIVE PRIVACY & CONTROL
+                {t('legalCookies.badge')}
               </div>
 
               <h1>
-                Cookie
+                {t('legalCookies.heroTitle1')}
                 <br />
-                <em>Policy.</em>
+                <em>{t('legalCookies.heroTitle2')}</em>
               </h1>
 
               <p>
-                This Cookie Policy explains how AmoraLive uses cookies and
-                similar technologies to operate, secure, improve and
-                personalise our services, and how you can control optional
-                technologies where applicable.
+                {t('legalCookies.heroDesc')}
               </p>
 
               <div className="cookies-meta">
 
                 <div>
-                  <span>VERSION</span>
-                  <strong>V1.0.1</strong>
+                  <span>{t('legalCookies.metaVersion')}</span>
+                  <strong>{t('legalCookies.metaVersionVal')}</strong>
                 </div>
 
                 <div>
-                  <span>UPDATED</span>
-                  <strong>August 2026</strong>
+                  <span>{t('legalCookies.metaUpdated')}</span>
+                  <strong>{t('legalCookies.metaUpdatedVal')}</strong>
                 </div>
 
                 <div>
-                  <span>APPLIES TO</span>
-                  <strong>AMORALIVE SERVICES</strong>
+                  <span>{t('legalCookies.metaApplies')}</span>
+                  <strong>{t('legalCookies.metaAppliesVal')}</strong>
                 </div>
 
               </div>
@@ -252,37 +149,23 @@ export default function Cookies() {
 
           <div className="cookies-summary-grid">
 
-            <div className="cookies-summary-card">
-              <div className="summary-icon">✓</div>
-              <strong>Necessary</strong>
-              <span>
-                Core security and functionality.
-              </span>
-            </div>
-
-            <div className="cookies-summary-card">
-              <div className="summary-icon">⚙</div>
-              <strong>Choice</strong>
-              <span>
-                Control optional technologies.
-              </span>
-            </div>
-
-            <div className="cookies-summary-card">
-              <div className="summary-icon">◌</div>
-              <strong>Transparency</strong>
-              <span>
-                Know what technologies do.
-              </span>
-            </div>
-
-            <div className="cookies-summary-card">
-              <div className="summary-icon">⌁</div>
-              <strong>Control</strong>
-              <span>
-                Change preferences where available.
-              </span>
-            </div>
+            {[
+              { icon: '✓' },
+              { icon: '⚙' },
+              { icon: '◌' },
+              { icon: '⌁' }
+            ].map((item, index) => {
+              const [title, desc] = t('legalCookies.summaryGrid')[index];
+              return (
+                <div className="cookies-summary-card" key={index}>
+                  <div className="summary-icon">{item.icon}</div>
+                  <strong>{title}</strong>
+                  <span>
+                    {desc}
+                  </span>
+                </div>
+              );
+            })}
 
           </div>
 
@@ -298,19 +181,35 @@ export default function Cookies() {
 
             <div>
               <strong>
-                Your choices matter.
+                {t('legalCookies.noticeTitle')}
               </strong>
 
               <p>
-                AmoraLive distinguishes between technologies that are necessary
-                to provide a service and optional technologies used for
-                purposes such as preferences, analytics or advertising. Where
-                applicable law requires consent, optional technologies should
-                only be activated after the appropriate choice has been made.
+                {t('legalCookies.noticeBody')}
               </p>
             </div>
 
           </div>
+
+          {lang !== 'en' && (
+            <div className="cookies-notice">
+
+              <div className="cookies-notice-icon">
+                !
+              </div>
+
+              <div>
+                <strong>
+                  {t('legalCookies.translationNoticeTitle')}
+                </strong>
+
+                <p>
+                  {t('legalCookies.translationNoticeBody')}
+                </p>
+              </div>
+
+            </div>
+          )}
 
           {/* =========================================================
               DOCUMENT
@@ -320,28 +219,20 @@ export default function Cookies() {
 
             <Section
               number="01"
-              eyebrow="OVERVIEW"
-              title="What Are Cookies?"
+              eyebrow={t('legalCookies.s01Eyebrow')}
+              title={t('legalCookies.s01Title')}
             >
 
               <p>
-                Cookies are small data files that websites and online services
-                may store on a user's device. They can help a service remember
-                information, maintain a session, provide security and
-                understand how a website or application is being used.
+                {t('legalCookies.s01P1')}
               </p>
 
               <p>
-                Cookies may be temporary or persistent. A session cookie may
-                normally disappear when a browser session ends, while a
-                persistent cookie can remain until it expires or is deleted.
+                {t('legalCookies.s01P2')}
               </p>
 
               <p>
-                AmoraLive may also use technologies that perform functions
-                similar to cookies, including pixels, local storage,
-                identifiers, tags, SDKs and other tracking or storage
-                mechanisms.
+                {t('legalCookies.s01P3')}
               </p>
 
               <div className="info-card">
@@ -352,14 +243,11 @@ export default function Cookies() {
 
                 <div>
                   <strong>
-                    Cookies are not automatically “good” or “bad”.
+                    {t('legalCookies.s01InfoTitle')}
                   </strong>
 
                   <span>
-                    What matters is why they are used, what information they
-                    process, who can access the information and whether the
-                    technology is necessary or requires user choice under
-                    applicable law.
+                    {t('legalCookies.s01InfoBody')}
                   </span>
                 </div>
 
@@ -369,66 +257,24 @@ export default function Cookies() {
 
             <Section
               number="02"
-              eyebrow="WHY WE USE THEM"
-              title="How AmoraLive Uses Cookies"
+              eyebrow={t('legalCookies.s02Eyebrow')}
+              title={t('legalCookies.s02Title')}
             >
 
               <p>
-                Depending on the services and features you use, AmoraLive may
-                use cookies and similar technologies for the following
-                purposes:
+                {t('legalCookies.s02P1')}
               </p>
 
               <div className="purpose-grid">
 
-                <div className="purpose-card">
-                  <strong>Authentication</strong>
-                  <span>
-                    Maintain your login session and help recognise your
-                    authenticated session.
-                  </span>
-                </div>
-
-                <div className="purpose-card">
-                  <strong>Security</strong>
-                  <span>
-                    Help detect abuse, suspicious activity, fraudulent
-                    behaviour and unauthorised access.
-                  </span>
-                </div>
-
-                <div className="purpose-card">
-                  <strong>Preferences</strong>
-                  <span>
-                    Remember choices such as language, interface settings and
-                    other preferences.
-                  </span>
-                </div>
-
-                <div className="purpose-card">
-                  <strong>Performance</strong>
-                  <span>
-                    Help us understand errors, reliability and technical
-                    performance.
-                  </span>
-                </div>
-
-                <div className="purpose-card">
-                  <strong>Analytics</strong>
-                  <span>
-                    Understand how features are used so AmoraLive can improve
-                    the service.
-                  </span>
-                </div>
-
-                <div className="purpose-card">
-                  <strong>Advertising</strong>
-                  <span>
-                    If advertising technologies are used, measure campaigns and
-                    potentially personalise advertising where legally
-                    permitted.
-                  </span>
-                </div>
+                {t('legalCookies.purposeGrid').map((item, index) => (
+                  <div className="purpose-card" key={index}>
+                    <strong>{item[0]}</strong>
+                    <span>
+                      {item[1]}
+                    </span>
+                  </div>
+                ))}
 
               </div>
 
@@ -436,22 +282,22 @@ export default function Cookies() {
 
             <Section
               number="03"
-              eyebrow="CATEGORIES"
-              title="Types of Cookies & Similar Technologies"
+              eyebrow={t('legalCookies.s03Eyebrow')}
+              title={t('legalCookies.s03Title')}
             >
 
               <p>
-                The exact technologies used by AmoraLive may change as the
-                platform evolves. The categories below describe the purposes
-                for which technologies may be used.
+                {t('legalCookies.s03P1')}
               </p>
 
               <div className="category-grid">
 
-                {cookieCategories.map((category) => (
+                {t('legalCookies.categoryCards').map((category) => (
                   <CookieCategoryCard
                     key={category.title}
                     category={category}
+                    typicalPurposesLabel={t('legalCookies.typicalPurposesLabel')}
+                    consentLabel={t('legalCookies.consentLabel')}
                   />
                 ))}
 
@@ -461,34 +307,26 @@ export default function Cookies() {
 
             <Section
               number="04"
-              eyebrow="NECESSARY TECHNOLOGIES"
-              title="Strictly Necessary Cookies"
+              eyebrow={t('legalCookies.s04Eyebrow')}
+              title={t('legalCookies.s04Title')}
             >
 
               <p>
-                Some cookies and similar technologies are necessary for the
-                operation of AmoraLive. They can support functions such as
-                authentication, security, session management, fraud prevention,
-                load balancing and remembering a user's cookie choices.
+                {t('legalCookies.s04P1')}
               </p>
 
               <p>
-                Depending on the applicable legal framework and the specific
-                technology, consent may not be required for a technology that
-                is genuinely necessary to provide a service explicitly
-                requested by the user.
+                {t('legalCookies.s04P2')}
               </p>
 
               <div className="legal-highlight">
 
                 <strong>
-                  IMPORTANT
+                  {t('legalCookies.s04ImportantTitle')}
                 </strong>
 
                 <span>
-                  AmoraLive does not treat every cookie as “necessary”. A
-                  technology should only be considered necessary where its use
-                  is genuinely required for the relevant service or function.
+                  {t('legalCookies.s04ImportantBody')}
                 </span>
 
               </div>
@@ -497,135 +335,83 @@ export default function Cookies() {
 
             <Section
               number="05"
-              eyebrow="OPTIONAL TECHNOLOGIES"
-              title="Analytics, Preferences & Advertising"
+              eyebrow={t('legalCookies.s05Eyebrow')}
+              title={t('legalCookies.s05Title')}
             >
 
               <p>
-                Optional technologies may provide additional functionality or
-                help AmoraLive understand and improve its services.
+                {t('legalCookies.s05P1')}
               </p>
 
               <p>
-                Where applicable law requires consent before a particular
-                cookie or similar technology is stored or accessed, AmoraLive
-                will request the required consent before activating that
-                technology.
+                {t('legalCookies.s05P2')}
               </p>
 
               <p>
-                Refusing optional technologies should not prevent access to
-                core AmoraLive services unless a particular feature genuinely
-                requires the relevant technology.
+                {t('legalCookies.s05P3')}
               </p>
 
             </Section>
 
             <Section
               number="06"
-              eyebrow="YOUR CHOICES"
-              title="Cookie Consent & Your Control"
+              eyebrow={t('legalCookies.s06Eyebrow')}
+              title={t('legalCookies.s06Title')}
             >
 
               <p>
-                Where consent is required, AmoraLive aims to provide users with
-                meaningful choices about optional cookies and similar
-                technologies.
+                {t('legalCookies.s06P1')}
               </p>
 
               <div className="choice-grid">
 
-                <div className="choice-card">
-                  <div className="choice-number">01</div>
-                  <strong>Accept</strong>
-                  <span>
-                    Allow the optional categories presented in the consent
-                    interface.
-                  </span>
-                </div>
-
-                <div className="choice-card">
-                  <div className="choice-number">02</div>
-                  <strong>Reject</strong>
-                  <span>
-                    Refuse optional technologies where the consent interface
-                    provides that choice.
-                  </span>
-                </div>
-
-                <div className="choice-card">
-                  <div className="choice-number">03</div>
-                  <strong>Customise</strong>
-                  <span>
-                    Select individual optional categories when granular
-                    controls are available.
-                  </span>
-                </div>
-
-                <div className="choice-card">
-                  <div className="choice-number">04</div>
-                  <strong>Withdraw</strong>
-                  <span>
-                    Revisit your preferences and withdraw consent where the
-                    relevant consent mechanism is available.
-                  </span>
-                </div>
+                {t('legalCookies.choiceGrid').map((item, index) => (
+                  <div className="choice-card" key={index}>
+                    <div className="choice-number">{String(index + 1).padStart(2, '0')}</div>
+                    <strong>{item[0]}</strong>
+                    <span>
+                      {item[1]}
+                    </span>
+                  </div>
+                ))}
 
               </div>
 
               <p>
-                Consent should not be inferred merely from continued browsing
-                where applicable law requires an affirmative consent action.
-                AmoraLive will not describe browsing alone as consent where
-                doing so would conflict with applicable requirements.
+                {t('legalCookies.s06P2')}
               </p>
 
             </Section>
 
             <Section
               number="07"
-              eyebrow="BROWSER CONTROLS"
-              title="Managing Cookies in Your Browser"
+              eyebrow={t('legalCookies.s07Eyebrow')}
+              title={t('legalCookies.s07Title')}
             >
 
               <p>
-                Most modern browsers allow users to block, delete or manage
-                cookies. Browser controls vary between providers and versions.
+                {t('legalCookies.s07P1')}
               </p>
 
               <ul className="large-list">
 
-                <li>
-                  <span />
-                  Delete existing cookies from your device.
-                </li>
-
-                <li>
-                  <span />
-                  Block some or all cookies.
-                </li>
-
-                <li>
-                  <span />
-                  Receive warnings when cookies are being stored.
-                </li>
-
-                <li>
-                  <span />
-                  Configure site-specific cookie permissions.
-                </li>
+                {t('legalCookies.browserBullets').map((item, index) => (
+                  <li key={index}>
+                    <span />
+                    {item}
+                  </li>
+                ))}
 
               </ul>
 
               <div className="warning-card">
 
                 <strong>
-                  PLEASE NOTE
+                  {t('legalCookies.s07WarningTitle')}
                 </strong>
 
                 <span>
-                  Blocking necessary cookies may affect authentication,
-                  security, account access or other core functionality.
+                  {t('legalCookies.s07WarningBody')}
                 </span>
 
               </div>
@@ -634,41 +420,30 @@ export default function Cookies() {
 
             <Section
               number="08"
-              eyebrow="THIRD PARTIES"
-              title="Third-Party Technologies"
+              eyebrow={t('legalCookies.s08Eyebrow')}
+              title={t('legalCookies.s08Title')}
             >
 
               <p>
-                Some AmoraLive features may depend on services provided by
-                third parties. Those providers may use cookies or similar
-                technologies when their services are integrated into AmoraLive.
+                {t('legalCookies.s08P1')}
               </p>
 
               <p>
-                Examples may include authentication providers, analytics
-                providers, security services, content delivery services,
-                payment-related services or advertising partners, depending on
-                which features AmoraLive operates at a particular time.
+                {t('legalCookies.s08P2')}
               </p>
 
               <p>
-                Third-party providers may process information under their own
-                privacy policies and contractual arrangements. AmoraLive does
-                not control every technology or practice used by independent
-                third parties.
+                {t('legalCookies.s08P3')}
               </p>
 
               <div className="third-party-note">
 
                 <strong>
-                  THIRD-PARTY TRANSPARENCY
+                  {t('legalCookies.s08NoteTitle')}
                 </strong>
 
                 <span>
-                  The final cookie inventory displayed to users should identify
-                  relevant third-party technologies actually deployed on the
-                  AmoraLive service, their purposes, providers and applicable
-                  retention periods.
+                  {t('legalCookies.s08NoteBody')}
                 </span>
 
               </div>
@@ -677,52 +452,32 @@ export default function Cookies() {
 
             <Section
               number="09"
-              eyebrow="DATA PROTECTION"
-              title="Cookies & Personal Data"
+              eyebrow={t('legalCookies.s09Eyebrow')}
+              title={t('legalCookies.s09Title')}
             >
 
               <p>
-                A cookie identifier or information associated with a cookie can
-                constitute personal data when it can be linked, directly or
-                indirectly, to an identifiable person.
+                {t('legalCookies.s09P1')}
               </p>
 
               <p>
-                Where cookies or similar technologies involve personal data,
-                AmoraLive processes that information in accordance with its
-                Privacy Policy and applicable data-protection law.
+                {t('legalCookies.s09P2')}
               </p>
 
               <p>
-                Depending on the circumstances, applicable legal frameworks may
-                include European data-protection requirements such as the GDPR,
-                national ePrivacy rules, and Swiss data-protection requirements
-                where they apply.
+                {t('legalCookies.s09P3')}
               </p>
 
               <div className="law-grid">
 
-                <div className="law-box">
-                  <span>EU / EEA</span>
-                  <strong>
-                    GDPR + applicable ePrivacy rules
-                  </strong>
-                </div>
-
-                <div className="law-box">
-                  <span>SWITZERLAND</span>
-                  <strong>
-                    FADP + applicable Swiss requirements
-                  </strong>
-                </div>
-
-                <div className="law-box">
-                  <span>OTHER JURISDICTIONS</span>
-                  <strong>
-                    Applicable local privacy and electronic-communications
-                    requirements
-                  </strong>
-                </div>
+                {t('legalCookies.lawGrid').map((item, index) => (
+                  <div className="law-box" key={index}>
+                    <span>{item[0]}</span>
+                    <strong>
+                      {item[1]}
+                    </strong>
+                  </div>
+                ))}
 
               </div>
 
@@ -730,130 +485,75 @@ export default function Cookies() {
 
             <Section
               number="10"
-              eyebrow="RETENTION"
-              title="How Long Cookies Remain"
+              eyebrow={t('legalCookies.s10Eyebrow')}
+              title={t('legalCookies.s10Title')}
             >
 
               <p>
-                Cookies may be session-based or persistent. The period for
-                which a particular technology remains active depends on its
-                purpose and technical configuration.
+                {t('legalCookies.s10P1')}
               </p>
 
               <p>
-                AmoraLive may use short-lived technologies for a single session
-                and longer-lived technologies for preferences, security,
-                consent records or other legitimate purposes.
+                {t('legalCookies.s10P2')}
               </p>
 
               <div className="retention-table">
 
                 <div className="retention-row retention-header">
-                  <span>TYPE</span>
-                  <span>GENERAL PURPOSE</span>
-                  <span>LIFETIME</span>
+                  <span>{t('legalCookies.retentionHeader')[0]}</span>
+                  <span>{t('legalCookies.retentionHeader')[1]}</span>
+                  <span>{t('legalCookies.retentionHeader')[2]}</span>
                 </div>
 
-                <div className="retention-row">
-                  <strong>Session</strong>
-                  <span>Authentication / functionality</span>
-                  <span>Session-dependent</span>
-                </div>
-
-                <div className="retention-row">
-                  <strong>Preference</strong>
-                  <span>User settings</span>
-                  <span>Configuration-dependent</span>
-                </div>
-
-                <div className="retention-row">
-                  <strong>Analytics</strong>
-                  <span>Service measurement</span>
-                  <span>Provider-dependent</span>
-                </div>
-
-                <div className="retention-row">
-                  <strong>Consent</strong>
-                  <span>Remembering choices</span>
-                  <span>Configuration-dependent</span>
-                </div>
+                {t('legalCookies.retentionRows').map((row, index) => (
+                  <div className="retention-row" key={index}>
+                    <strong>{row[0]}</strong>
+                    <span>{row[1]}</span>
+                    <span>{row[2]}</span>
+                  </div>
+                ))}
 
               </div>
 
               <p className="small-note">
-                The table above describes categories rather than a definitive
-                technical inventory. The actual cookie inventory should be
-                maintained based on the technologies currently deployed by
-                AmoraLive.
+                {t('legalCookies.s10Note')}
               </p>
 
             </Section>
 
             <Section
               number="11"
-              eyebrow="PRIVACY RIGHTS"
-              title="Your Data Protection Rights"
+              eyebrow={t('legalCookies.s11Eyebrow')}
+              title={t('legalCookies.s11Title')}
             >
 
               <p>
-                Depending on your location and applicable law, you may have
-                rights concerning personal data processed through cookies or
-                similar technologies.
+                {t('legalCookies.s11P1')}
               </p>
 
               <ul className="large-list">
 
-                <li>
-                  <span />
-                  Access information about personal data processing.
-                </li>
-
-                <li>
-                  <span />
-                  Request correction of inaccurate personal data.
-                </li>
-
-                <li>
-                  <span />
-                  Request deletion where legally applicable.
-                </li>
-
-                <li>
-                  <span />
-                  Request restriction of processing in certain circumstances.
-                </li>
-
-                <li>
-                  <span />
-                  Object to certain processing activities.
-                </li>
-
-                <li>
-                  <span />
-                  Request data portability where applicable.
-                </li>
-
-                <li>
-                  <span />
-                  Withdraw consent where processing relies on consent.
-                </li>
+                {t('legalCookies.rightsBullets').map((item, index) => (
+                  <li key={index}>
+                    <span />
+                    {item}
+                  </li>
+                ))}
 
               </ul>
 
               <p>
-                Additional information about your privacy rights, legal bases
-                and how to exercise them is available in the AmoraLive Privacy
-                Policy.
+                {t('legalCookies.s11P2')}
               </p>
 
               <div className="policy-links">
 
                 <Link href="/legal/privacy">
-                  Read Privacy Policy →
+                  {t('legalCookies.readPrivacyPolicy')}
                 </Link>
 
                 <Link href="/legal/terms">
-                  Read Terms of Service →
+                  {t('legalCookies.readTermsOfService')}
                 </Link>
 
               </div>
@@ -862,89 +562,44 @@ export default function Cookies() {
 
             <Section
               number="12"
-              eyebrow="SECURITY"
-              title="Security & Fraud Prevention"
+              eyebrow={t('legalCookies.s12Eyebrow')}
+              title={t('legalCookies.s12Title')}
             >
 
               <p>
-                AmoraLive may use cookies and similar technologies as part of
-                security controls designed to protect accounts, sessions and
-                the platform from abuse.
+                {t('legalCookies.s12P1')}
               </p>
 
               <p>
-                These technologies may help identify suspicious activity,
-                protect authentication sessions, prevent automated abuse and
-                support the integrity of the AmoraLive service.
+                {t('legalCookies.s12P2')}
               </p>
 
               <p>
-                No security system can guarantee absolute security. Users
-                should protect their account credentials and report suspicious
-                activity through the available AmoraLive reporting or support
-                mechanisms.
+                {t('legalCookies.s12P3')}
               </p>
 
             </Section>
 
             <Section
               number="13"
-              eyebrow="SPECIAL CASES"
-              title="Cookies on Livestreaming, Dating & Social Features"
+              eyebrow={t('legalCookies.s13Eyebrow')}
+              title={t('legalCookies.s13Title')}
             >
 
               <p>
-                AmoraLive contains social, dating, communication,
-                livestreaming, entertainment and virtual-item functionality.
-                Different parts of the service may use different technologies.
+                {t('legalCookies.s13P1')}
               </p>
 
               <div className="feature-grid">
 
-                <div>
-                  <strong>Livestreaming</strong>
-                  <span>
-                    Security, session management, performance and feature
-                    functionality.
-                  </span>
-                </div>
-
-                <div>
-                  <strong>Dating</strong>
-                  <span>
-                    Authentication, preferences, safety and service
-                    functionality.
-                  </span>
-                </div>
-
-                <div>
-                  <strong>Chat</strong>
-                  <span>
-                    Session, security and communication functionality.
-                  </span>
-                </div>
-
-                <div>
-                  <strong>Gifts</strong>
-                  <span>
-                    Security, fraud prevention and transaction-related
-                    functionality.
-                  </span>
-                </div>
-
-                <div>
-                  <strong>Battles</strong>
-                  <span>
-                    Session integrity, anti-abuse and feature functionality.
-                  </span>
-                </div>
-
-                <div>
-                  <strong>Account</strong>
-                  <span>
-                    Authentication, preferences and security.
-                  </span>
-                </div>
+                {t('legalCookies.featureGrid').map((item, index) => (
+                  <div key={index}>
+                    <strong>{item[0]}</strong>
+                    <span>
+                      {item[1]}
+                    </span>
+                  </div>
+                ))}
 
               </div>
 
@@ -952,54 +607,40 @@ export default function Cookies() {
 
             <Section
               number="14"
-              eyebrow="CHILDREN & SAFETY"
-              title="Children & Cookies"
+              eyebrow={t('legalCookies.s14Eyebrow')}
+              title={t('legalCookies.s14Title')}
             >
 
               <p>
-                AmoraLive is intended for users who satisfy the minimum age
-                requirements stated in our Terms of Service. We do not
-                knowingly design optional tracking technologies to target
-                children in violation of applicable law.
+                {t('legalCookies.s14P1')}
               </p>
 
               <p>
-                If you believe a child has provided information to AmoraLive in
-                circumstances where this should not have occurred, please
-                contact us through the appropriate privacy or safety channel.
+                {t('legalCookies.s14P2')}
               </p>
 
             </Section>
 
             <Section
               number="15"
-              eyebrow="LEGAL FRAMEWORK"
-              title="European & Swiss Compliance"
+              eyebrow={t('legalCookies.s15Eyebrow')}
+              title={t('legalCookies.s15Title')}
             >
 
               <p>
-                AmoraLive aims to operate its cookie and similar-technology
-                practices consistently with applicable legal requirements.
+                {t('legalCookies.s15P1')}
               </p>
 
               <p>
-                For users in the European Union and European Economic Area,
-                requirements may arise from the GDPR together with applicable
-                rules governing access to or storage of information on user
-                devices, including national implementations of the ePrivacy
-                framework.
+                {t('legalCookies.s15P2')}
               </p>
 
               <p>
-                For users in Switzerland, AmoraLive also considers applicable
-                requirements under Swiss data-protection law and the guidance
-                of the Federal Data Protection and Information Commissioner
-                concerning cookies and similar technologies.
+                {t('legalCookies.s15P3')}
               </p>
 
               <p>
-                Mandatory rights and protections under applicable law prevail
-                over any conflicting statement in this policy.
+                {t('legalCookies.s15P4')}
               </p>
 
               <div className="europe-card">
@@ -1010,13 +651,11 @@ export default function Cookies() {
 
                 <div>
                   <strong>
-                    EUROPEAN & SWISS USERS
+                    {t('legalCookies.europeCardTitle')}
                   </strong>
 
                   <span>
-                    AmoraLive seeks to provide transparent information and
-                    meaningful choices concerning optional cookies and similar
-                    technologies wherever applicable law requires them.
+                    {t('legalCookies.europeCardBody')}
                   </span>
                 </div>
 
@@ -1026,24 +665,20 @@ export default function Cookies() {
 
             <Section
               number="16"
-              eyebrow="UPDATES"
-              title="Changes to This Cookie Policy"
+              eyebrow={t('legalCookies.s16Eyebrow')}
+              title={t('legalCookies.s16Title')}
             >
 
               <p>
-                AmoraLive may update this Cookie Policy when our technology,
-                services, business practices or legal requirements change.
+                {t('legalCookies.s16P1')}
               </p>
 
               <p>
-                When material changes are made, we may provide additional
-                notice or request updated consent where required by applicable
-                law.
+                {t('legalCookies.s16P2')}
               </p>
 
               <p>
-                The version and date displayed at the beginning of this policy
-                identify the current version.
+                {t('legalCookies.s16P3')}
               </p>
 
             </Section>
@@ -1055,16 +690,16 @@ export default function Cookies() {
             <section className="cookie-faq">
 
               <div className="cookie-eyebrow">
-                FREQUENT QUESTIONS
+                {t('legalCookies.faqEyebrow')}
               </div>
 
               <h2>
-                Cookie Questions.
+                {t('legalCookies.faqTitle')}
               </h2>
 
               <div className="faq-list">
 
-                {commonQuestions.map((item, index) => (
+                {t('legalCookies.faqItems').map((item, index) => (
                   <div
                     className={`faq-item ${
                       openQuestion === index ? 'faq-open' : ''
@@ -1119,17 +754,15 @@ export default function Cookies() {
               <div>
 
                 <div className="cookie-eyebrow">
-                  AMORALIVE PRIVACY PROMISE
+                  {t('legalCookies.finalLabel')}
                 </div>
 
                 <h2>
-                  Your Data. Your Choice.
+                  {t('legalCookies.finalTitle')}
                 </h2>
 
                 <p>
-                  We believe privacy should be understandable, transparent
-                  and controllable. AmoraLive will continue improving the way
-                  we explain and manage cookies and similar technologies.
+                  {t('legalCookies.finalBody')}
                 </p>
 
               </div>
@@ -1145,11 +778,11 @@ export default function Cookies() {
               <div>
 
                 <strong>
-                  AMORALIVE
+                  {t('legalCookies.footerBrand')}
                 </strong>
 
                 <span>
-                  Cookie Policy • V1.0.1 • August 2026
+                  {t('legalCookies.footerTagline')}
                 </span>
 
               </div>
@@ -1157,19 +790,19 @@ export default function Cookies() {
               <div className="cookie-footer-links">
 
                 <Link href="/legal/terms">
-                  Terms
+                  {t('legalCookies.footerLinkTerms')}
                 </Link>
 
                 <Link href="/legal/privacy">
-                  Privacy
+                  {t('legalCookies.footerLinkPrivacy')}
                 </Link>
 
                 <Link href="/legal/guidelines">
-                  Guidelines
+                  {t('legalCookies.footerLinkGuidelines')}
                 </Link>
 
                 <Link href="/">
-                  Home
+                  {t('legalCookies.footerLinkHome')}
                 </Link>
 
               </div>
