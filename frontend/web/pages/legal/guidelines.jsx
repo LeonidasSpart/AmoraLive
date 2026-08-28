@@ -1,69 +1,49 @@
 import React, { useMemo, useState } from 'react';
 import Layout from '../../components/Layout';
+import { useTranslation } from '../../lib/i18n';
 
 const AMORA_LOGO = '/brand/amora-logo.png';
 
-const sections = [
-  { id: 'welcome', number: '01', title: 'Our Community' },
-  { id: 'principles', number: '02', title: 'Our Core Principles' },
-  { id: 'authenticity', number: '03', title: 'Authenticity & Identity' },
-  { id: 'respect', number: '04', title: 'Respect & Harassment' },
-  { id: 'hate', number: '05', title: 'Hate & Discrimination' },
-  { id: 'sexual', number: '06', title: 'Sexual & Adult Content' },
-  { id: 'minors', number: '07', title: 'Children & Minors' },
-  { id: 'exploitation', number: '08', title: 'Exploitation & Trafficking' },
-  { id: 'violence', number: '09', title: 'Violence & Threats' },
-  { id: 'selfharm', number: '10', title: 'Self-Harm & Dangerous Acts' },
-  { id: 'illegal', number: '11', title: 'Illegal Activities' },
-  { id: 'drugs', number: '12', title: 'Drugs & Controlled Substances' },
-  { id: 'fraud', number: '13', title: 'Fraud, Scams & Deception' },
-  { id: 'spam', number: '14', title: 'Spam & Manipulation' },
-  { id: 'privacy', number: '15', title: 'Privacy & Personal Data' },
-  { id: 'doxxing', number: '16', title: 'Doxxing & Exposure' },
-  { id: 'impersonation', number: '17', title: 'Impersonation' },
-  { id: 'copyright', number: '18', title: 'Copyright & Intellectual Property' },
-  { id: 'livestreams', number: '19', title: 'Livestream Rules' },
-  { id: 'battles', number: '20', title: 'Battles & Competitions' },
-  { id: 'gifts', number: '21', title: 'Gifts & Virtual Items' },
-  { id: 'dating', number: '22', title: 'Dating & Romantic Interactions' },
-  { id: 'messages', number: '23', title: 'Messages & Private Communication' },
-  { id: 'ai', number: '24', title: 'AI, Deepfakes & Synthetic Media' },
-  { id: 'platform', number: '25', title: 'Platform Manipulation' },
-  { id: 'security', number: '26', title: 'Cybersecurity & Abuse' },
-  { id: 'reporting', number: '27', title: 'Reporting Violations' },
-  { id: 'moderation', number: '28', title: 'Moderation & Enforcement' },
-  { id: 'appeals', number: '29', title: 'Appeals' },
-  { id: 'law', number: '30', title: 'Legal Compliance' },
-  { id: 'changes', number: '31', title: 'Updates' }
+const sectionIds = [
+  ['welcome', '01'],
+  ['principles', '02'],
+  ['authenticity', '03'],
+  ['respect', '04'],
+  ['hate', '05'],
+  ['sexual', '06'],
+  ['minors', '07'],
+  ['exploitation', '08'],
+  ['violence', '09'],
+  ['selfharm', '10'],
+  ['illegal', '11'],
+  ['drugs', '12'],
+  ['fraud', '13'],
+  ['spam', '14'],
+  ['privacy', '15'],
+  ['doxxing', '16'],
+  ['impersonation', '17'],
+  ['copyright', '18'],
+  ['livestreams', '19'],
+  ['battles', '20'],
+  ['gifts', '21'],
+  ['dating', '22'],
+  ['messages', '23'],
+  ['ai', '24'],
+  ['platform', '25'],
+  ['security', '26'],
+  ['reporting', '27'],
+  ['moderation', '28'],
+  ['appeals', '29'],
+  ['law', '30'],
+  ['changes', '31']
 ];
 
-const prohibited = [
-  'Harassment, bullying, stalking, intimidation or targeted abuse.',
-  'Credible threats of violence or encouragement of violence.',
-  'Hate speech targeting protected characteristics.',
-  'Pornography, explicit sexual acts or sexually explicit livestreams.',
-  'Sexual exploitation or sexualization of minors.',
-  'Child sexual abuse material or attempts to obtain it.',
-  'Human trafficking or sexual trafficking.',
-  'Non-consensual intimate imagery.',
-  'Sextortion, blackmail or threats to expose intimate material.',
-  'Fraud, phishing, impersonation and financial scams.',
-  'Illegal drug sales or distribution.',
-  'Weapons trafficking or instructions intended to facilitate serious criminal activity.',
-  'Doxxing or malicious disclosure of private information.',
-  'Malware, credential theft or attempts to compromise accounts.',
-  'Artificial manipulation intended to deceive or seriously harm others.',
-  'Spam, fake engagement and coordinated platform manipulation.',
-  'Copyright infringement and unauthorized distribution of protected content.',
-  'Any other content or activity prohibited by applicable law.'
-];
-
-const Section = ({ id, number, title, children }) => (
+const Section = ({ id, number, title, label, children }) => (
   <section id={id} className="guidelines-section">
     <div className="guidelines-number">{number}</div>
 
     <div className="guidelines-content">
-      <div className="guidelines-label">AMORALIVE COMMUNITY</div>
+      <div className="guidelines-label">{label}</div>
       <h2>{title}</h2>
       {children}
     </div>
@@ -119,8 +99,19 @@ const AmoraLogo = ({
 };
 
 export default function Guidelines() {
+  const { t, lang } = useTranslation();
   const [search, setSearch] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const sections = useMemo(
+    () =>
+      sectionIds.map(([id, number]) => ({
+        id,
+        number,
+        title: t(`legalGuidelines.sectionTitles.${id}`)
+      })),
+    [t]
+  );
 
   const filteredSections = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -172,37 +163,34 @@ export default function Guidelines() {
 
               <div className="hero-badge">
                 <span />
-                AMORALIVE COMMUNITY SAFETY
+                {t('legalGuidelines.badge')}
               </div>
 
               <h1>
-                Community
+                {t('legalGuidelines.heroTitle1')}
                 <br />
-                <em>Guidelines.</em>
+                <em>{t('legalGuidelines.heroTitle2')}</em>
               </h1>
 
               <p>
-                AmoraLive is built for connection, creativity, livestreaming,
-                entertainment and genuine human interaction. These guidelines
-                define the standards that keep our community safe, respectful,
-                authentic and enjoyable.
+                {t('legalGuidelines.heroDesc')}
               </p>
 
               <div className="hero-meta">
 
                 <div>
-                  <span>VERSION</span>
-                  <strong>V1.0.1</strong>
+                  <span>{t('legalGuidelines.metaVersion')}</span>
+                  <strong>{t('legalGuidelines.metaVersionVal')}</strong>
                 </div>
 
                 <div>
-                  <span>UPDATED</span>
-                  <strong>August 2026</strong>
+                  <span>{t('legalGuidelines.metaUpdated')}</span>
+                  <strong>{t('legalGuidelines.metaUpdatedVal')}</strong>
                 </div>
 
                 <div>
-                  <span>APPLIES TO</span>
-                  <strong>ALL AMORALIVE SERVICES</strong>
+                  <span>{t('legalGuidelines.metaApplies')}</span>
+                  <strong>{t('legalGuidelines.metaAppliesVal')}</strong>
                 </div>
 
               </div>
@@ -237,29 +225,21 @@ export default function Guidelines() {
 
           <div className="principle-grid">
 
-            <div className="principle-card">
-              <div className="principle-icon">♥</div>
-              <strong>Respect</strong>
-              <span>Treat people with dignity.</span>
-            </div>
-
-            <div className="principle-card">
-              <div className="principle-icon">✦</div>
-              <strong>Authenticity</strong>
-              <span>Be genuine and transparent.</span>
-            </div>
-
-            <div className="principle-card">
-              <div className="principle-icon">◈</div>
-              <strong>Safety</strong>
-              <span>Protect yourself and others.</span>
-            </div>
-
-            <div className="principle-card">
-              <div className="principle-icon">⌁</div>
-              <strong>Responsibility</strong>
-              <span>Own what you publish.</span>
-            </div>
+            {[
+              { icon: '♥' },
+              { icon: '✦' },
+              { icon: '◈' },
+              { icon: '⌁' }
+            ].map((item, index) => {
+              const [title, desc] = t('legalGuidelines.principleGrid')[index];
+              return (
+                <div className="principle-card" key={index}>
+                  <div className="principle-icon">{item.icon}</div>
+                  <strong>{title}</strong>
+                  <span>{desc}</span>
+                </div>
+              );
+            })}
 
           </div>
 
@@ -273,19 +253,33 @@ export default function Guidelines() {
 
             <div>
               <strong>
-                AmoraLive has zero tolerance for exploitation.
+                {t('legalGuidelines.safetyBannerTitle')}
               </strong>
 
               <p>
-                Sexual exploitation of minors, child sexual abuse material,
-                trafficking, credible threats of serious violence and other
-                severe illegal activity may result in immediate removal,
-                permanent account termination and referral to appropriate
-                authorities where required or permitted by law.
+                {t('legalGuidelines.safetyBannerBody')}
               </p>
             </div>
 
           </div>
+
+          {lang !== 'en' && (
+            <div className="safety-banner">
+
+              <div className="safety-icon">!</div>
+
+              <div>
+                <strong>
+                  {t('legalGuidelines.translationNoticeTitle')}
+                </strong>
+
+                <p>
+                  {t('legalGuidelines.translationNoticeBody')}
+                </p>
+              </div>
+
+            </div>
+          )}
 
           <div className="guidelines-layout">
 
@@ -304,17 +298,17 @@ export default function Guidelines() {
                 className="mobile-menu-button"
                 onClick={() => setMenuOpen(!menuOpen)}
                 aria-expanded={menuOpen}
-                aria-label="Toggle community navigation"
+                aria-label={t('legalGuidelines.navAriaLabel')}
               >
                 <span>☰</span>
-                Community Navigation
+                {t('legalGuidelines.navLabel')}
               </button>
 
               <div className="sidebar-inner">
 
                 <div className="sidebar-heading">
-                  <span>DOCUMENT</span>
-                  <strong>Community Guidelines</strong>
+                  <span>{t('legalGuidelines.sidebarDocLabel')}</span>
+                  <strong>{t('legalGuidelines.sidebarDocTitle')}</strong>
                 </div>
 
                 <div className="guidelines-search">
@@ -325,8 +319,8 @@ export default function Guidelines() {
                     type="search"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search guidelines..."
-                    aria-label="Search Community Guidelines"
+                    placeholder={t('legalGuidelines.searchPlaceholder')}
+                    aria-label={t('legalGuidelines.searchAriaLabel')}
                   />
 
                 </div>
@@ -349,15 +343,15 @@ export default function Guidelines() {
                 <div className="sidebar-links">
 
                   <a href="/legal/terms">
-                    Terms of Service
+                    {t('legalGuidelines.linkTerms')}
                   </a>
 
                   <a href="/legal/privacy">
-                    Privacy Policy
+                    {t('legalGuidelines.linkPrivacy')}
                   </a>
 
                   <a href="/legal/cookies">
-                    Cookie Policy
+                    {t('legalGuidelines.linkCookies')}
                   </a>
 
                 </div>
@@ -375,29 +369,23 @@ export default function Guidelines() {
               <Section
                 id="welcome"
                 number="01"
-                title="Our Community"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.welcome')}
               >
 
                 <p>
-                  AmoraLive is a social and livestreaming platform designed to
-                  help people connect, communicate, entertain, create and share
-                  experiences.
+                  {t('legalGuidelines.welcomeP1')}
                 </p>
 
                 <p>
-                  Every person using AmoraLive contributes to the environment
-                  that everyone else experiences. These guidelines therefore
-                  apply to accounts, profiles, livestreams, chats, comments,
-                  messages, gifts, battles, media, links and other
-                  interactions.
+                  {t('legalGuidelines.welcomeP2')}
                 </p>
 
                 <div className="quote-card">
                   <span>"</span>
 
                   <p>
-                    Freedom to express yourself comes with responsibility for
-                    the impact your behaviour has on other people.
+                    {t('legalGuidelines.welcomeQuote')}
                   </p>
                 </div>
 
@@ -406,40 +394,17 @@ export default function Guidelines() {
               <Section
                 id="principles"
                 number="02"
-                title="Our Core Principles"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.principles')}
               >
 
                 <div className="rule-grid">
 
-                  <RuleCard number="01" title="Respect">
-                    Do not harass, threaten, humiliate or deliberately harm
-                    other people.
-                  </RuleCard>
-
-                  <RuleCard number="02" title="Authenticity">
-                    Do not manipulate people through deceptive identities,
-                    impersonation or fraudulent claims.
-                  </RuleCard>
-
-                  <RuleCard number="03" title="Safety">
-                    Do not use AmoraLive to facilitate violence, exploitation,
-                    illegal activity or dangerous conduct.
-                  </RuleCard>
-
-                  <RuleCard number="04" title="Consent">
-                    Respect personal, sexual, financial and communication
-                    boundaries.
-                  </RuleCard>
-
-                  <RuleCard number="05" title="Privacy">
-                    Do not expose private information belonging to another
-                    person without authorization.
-                  </RuleCard>
-
-                  <RuleCard number="06" title="Lawfulness">
-                    Do not use AmoraLive to facilitate conduct that violates
-                    applicable law.
-                  </RuleCard>
+                  {t('legalGuidelines.principlesGrid').map((item, index) => (
+                    <RuleCard number={String(index + 1).padStart(2, '0')} title={item[0]} key={index}>
+                      {item[1]}
+                    </RuleCard>
+                  ))}
 
                 </div>
 
@@ -448,28 +413,18 @@ export default function Guidelines() {
               <Section
                 id="authenticity"
                 number="03"
-                title="Authenticity & Identity"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.authenticity')}
               >
 
                 <p>
-                  Users should represent themselves honestly and avoid
-                  misleading others about who they are.
+                  {t('legalGuidelines.authenticityP1')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Do not impersonate another person.',
-                    'Do not impersonate AmoraLive staff, moderators or officials.',
-                    'Do not create deceptive accounts intended to defraud people.',
-                    'Do not use fake identities to conduct scams or manipulation.',
-                    'Do not falsely claim professional, governmental or organisational authority.',
-                    'Do not use another person’s photograph or identity in a misleading way.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.authenticityBullets')} />
 
                 <p>
-                  Fan, parody or fictional accounts may be permitted where
-                  they are clearly presented and do not deceive users.
+                  {t('legalGuidelines.authenticityP2')}
                 </p>
 
               </Section>
@@ -477,53 +432,35 @@ export default function Guidelines() {
               <Section
                 id="respect"
                 number="04"
-                title="Respect & Harassment"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.respect')}
               >
 
                 <p>
-                  AmoraLive does not permit targeted harassment or abusive
-                  behaviour designed to intimidate, humiliate or silence
-                  another person.
+                  {t('legalGuidelines.respectP1')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Repeated unwanted contact after someone has asked you to stop.',
-                    'Threats or intimidation.',
-                    'Targeted insults intended to harass.',
-                    'Stalking or monitoring someone in a threatening manner.',
-                    'Encouraging others to attack or harass a person.',
-                    'Sharing humiliating material to deliberately harm someone.',
-                    'Sexual harassment.',
-                    'Blackmail or coercion.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.respectBullets')} />
 
               </Section>
 
               <Section
                 id="hate"
                 number="05"
-                title="Hate & Discrimination"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.hate')}
               >
 
                 <p>
-                  AmoraLive does not permit hateful attacks or dehumanizing
-                  content directed at people because of protected or sensitive
-                  characteristics.
+                  {t('legalGuidelines.hateP1')}
                 </p>
 
                 <p>
-                  This includes attacks targeting characteristics such as
-                  race, ethnicity, nationality, religion, disability, sex,
-                  sexual orientation or other characteristics protected by
-                  applicable law.
+                  {t('legalGuidelines.hateP2')}
                 </p>
 
                 <p>
-                  Discussion, criticism or disagreement about ideas, beliefs,
-                  governments or institutions is not automatically hate speech.
-                  Context matters.
+                  {t('legalGuidelines.hateP3')}
                 </p>
 
               </Section>
@@ -531,37 +468,22 @@ export default function Guidelines() {
               <Section
                 id="sexual"
                 number="06"
-                title="Sexual & Adult Content"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.sexual')}
               >
 
                 <p>
-                  AmoraLive is designed to provide a safe social and
-                  livestreaming environment. Pornography and sexually explicit
-                  content are prohibited.
+                  {t('legalGuidelines.sexualP1')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Pornographic videos or images.',
-                    'Explicit sexual acts.',
-                    'Explicit sexual livestreams.',
-                    'Sexual solicitation.',
-                    'Sexual services or prostitution offers.',
-                    'Sexual exploitation.',
-                    'Non-consensual intimate imagery.',
-                    'Sexual blackmail or sextortion.',
-                    'Sexualized content involving minors.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.sexualBullets')} />
 
                 <div className="critical-card">
 
-                  <strong>ZERO TOLERANCE</strong>
+                  <strong>{t('legalGuidelines.sexualCriticalTitle')}</strong>
 
                   <span>
-                    Any sexual content involving minors is strictly prohibited
-                    and may be reported to appropriate authorities as required
-                    by applicable law.
+                    {t('legalGuidelines.sexualCriticalBody')}
                   </span>
 
                 </div>
@@ -571,36 +493,22 @@ export default function Guidelines() {
               <Section
                 id="minors"
                 number="07"
-                title="Children & Minors"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.minors')}
               >
 
                 <p>
-                  AmoraLive takes the protection of children and minors
-                  extremely seriously.
+                  {t('legalGuidelines.minorsP1')}
                 </p>
 
                 <p>
-                  Users must not sexualize, exploit, groom, solicit or
-                  otherwise endanger minors.
+                  {t('legalGuidelines.minorsP2')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'No sexual conversations with minors.',
-                    'No sexual solicitation of minors.',
-                    'No grooming.',
-                    'No attempts to obtain sexual images from minors.',
-                    'No sexualized depictions of minors.',
-                    'No child sexual abuse material.',
-                    'No trafficking or exploitation of minors.',
-                    'No encouragement of dangerous contact between adults and minors.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.minorsBullets')} />
 
                 <p>
-                  Severe violations may result in immediate permanent
-                  termination and reporting to competent authorities where
-                  legally required or appropriate.
+                  {t('legalGuidelines.minorsP3')}
                 </p>
 
               </Section>
@@ -608,53 +516,33 @@ export default function Guidelines() {
               <Section
                 id="exploitation"
                 number="08"
-                title="Exploitation & Trafficking"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.exploitation')}
               >
 
                 <p>
-                  AmoraLive prohibits content or behaviour that facilitates
-                  human trafficking, sexual exploitation, forced labour,
-                  coercion or exploitation of vulnerable people.
+                  {t('legalGuidelines.exploitationP1')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Human trafficking offers or recruitment.',
-                    'Sex trafficking.',
-                    'Forced labour.',
-                    'Commercial sexual exploitation.',
-                    'Coercive recruitment.',
-                    'Exploitation of vulnerable people.',
-                    'Offers involving forced or controlled sexual activity.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.exploitationBullets')} />
 
               </Section>
 
               <Section
                 id="violence"
                 number="09"
-                title="Violence & Threats"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.violence')}
               >
 
                 <p>
-                  Threats of serious violence are prohibited.
+                  {t('legalGuidelines.violenceP1')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Credible threats to kill or seriously injure another person.',
-                    'Instructions intended to facilitate serious violence.',
-                    'Celebration or encouragement of real-world violent attacks.',
-                    'Threats against protected or vulnerable groups.',
-                    'Coordinating violent criminal activity.',
-                    'Threatening livestream participants or creators.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.violenceBullets')} />
 
                 <p>
-                  Legitimate discussion of news, history, politics or fictional
-                  violence is not automatically prohibited.
+                  {t('legalGuidelines.violenceP2')}
                 </p>
 
               </Section>
@@ -662,17 +550,16 @@ export default function Guidelines() {
               <Section
                 id="selfharm"
                 number="10"
-                title="Self-Harm & Dangerous Acts"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.selfharm')}
               >
 
                 <p>
-                  AmoraLive does not permit content that encourages or
-                  facilitates suicide, self-harm or dangerous challenges.
+                  {t('legalGuidelines.selfharmP1')}
                 </p>
 
                 <p>
-                  Educational, supportive and recovery-oriented discussion may
-                  be allowed when it does not encourage harmful behaviour.
+                  {t('legalGuidelines.selfharmP2')}
                 </p>
 
               </Section>
@@ -680,19 +567,18 @@ export default function Guidelines() {
               <Section
                 id="illegal"
                 number="11"
-                title="Illegal Activities"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.illegal')}
               >
 
                 <p>
-                  AmoraLive must not be used to facilitate serious criminal
-                  activity or transactions that violate applicable law.
+                  {t('legalGuidelines.illegalP1')}
                 </p>
 
-                <BulletList items={prohibited.slice(10, 13)} />
+                <BulletList items={t('legalGuidelines.illegalBullets')} />
 
                 <p>
-                  Where applicable law requires AmoraLive to respond to lawful
-                  requests from authorities, we may do so.
+                  {t('legalGuidelines.illegalP2')}
                 </p>
 
               </Section>
@@ -700,106 +586,63 @@ export default function Guidelines() {
               <Section
                 id="drugs"
                 number="12"
-                title="Drugs & Controlled Substances"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.drugs')}
               >
 
                 <p>
-                  AmoraLive prohibits the sale, distribution or facilitation of
-                  illegal controlled substances.
+                  {t('legalGuidelines.drugsP1')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Drug sales or distribution.',
-                    'Requests to purchase illegal controlled substances.',
-                    'Drug trafficking.',
-                    'Instructions intended to facilitate illegal drug production.',
-                    'Promotion of criminal drug transactions.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.drugsBullets')} />
 
               </Section>
 
               <Section
                 id="fraud"
                 number="13"
-                title="Fraud, Scams & Deception"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.fraud')}
               >
 
                 <p>
-                  Users must not use AmoraLive to deceive people for financial,
-                  personal or other unlawful gain.
+                  {t('legalGuidelines.fraudP1')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Investment scams.',
-                    'Romance scams.',
-                    'Phishing.',
-                    'Fake giveaways.',
-                    'Fake prizes.',
-                    'Fake charity campaigns.',
-                    'Payment fraud.',
-                    'Account takeover scams.',
-                    'Identity theft.',
-                    'Fraudulent gift or coin schemes.',
-                    'False claims intended to obtain money or property.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.fraudBullets')} />
 
               </Section>
 
               <Section
                 id="spam"
                 number="14"
-                title="Spam & Manipulation"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.spam')}
               >
 
                 <p>
-                  AmoraLive should reflect genuine human interaction rather
-                  than artificial manipulation.
+                  {t('legalGuidelines.spamP1')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Bot-generated spam.',
-                    'Fake followers.',
-                    'Artificial likes or engagement.',
-                    'Coordinated manipulation of rankings.',
-                    'Mass unsolicited messages.',
-                    'Repeated promotional abuse.',
-                    'Automated account creation.',
-                    'Manipulation of battles or gift rankings.',
-                    'Attempts to artificially inflate popularity.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.spamBullets')} />
 
               </Section>
 
               <Section
                 id="privacy"
                 number="15"
-                title="Privacy & Personal Data"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.privacy')}
               >
 
                 <p>
-                  Respect other people's privacy.
+                  {t('legalGuidelines.privacyP1')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Do not publish private contact information without authorization.',
-                    'Do not expose private conversations maliciously.',
-                    'Do not share private photographs without permission.',
-                    'Do not collect personal information for harassment.',
-                    'Do not attempt to obtain passwords or authentication credentials.',
-                    'Do not misuse personal data obtained through AmoraLive.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.privacyBullets')} />
 
                 <p>
-                  Privacy rights and data processing are also governed by the
-                  AmoraLive Privacy Policy.
+                  {t('legalGuidelines.privacyP2')}
                 </p>
 
               </Section>
@@ -807,19 +650,16 @@ export default function Guidelines() {
               <Section
                 id="doxxing"
                 number="16"
-                title="Doxxing & Exposure"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.doxxing')}
               >
 
                 <p>
-                  Doxxing means maliciously exposing private or sensitive
-                  information about another person.
+                  {t('legalGuidelines.doxxingP1')}
                 </p>
 
                 <p>
-                  Prohibited examples may include publishing someone's private
-                  address, telephone number, private email, financial
-                  information or other sensitive personal information with the
-                  intention of causing harm.
+                  {t('legalGuidelines.doxxingP2')}
                 </p>
 
               </Section>
@@ -827,18 +667,16 @@ export default function Guidelines() {
               <Section
                 id="impersonation"
                 number="17"
-                title="Impersonation"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.impersonation')}
               >
 
                 <p>
-                  Do not pretend to be another person, creator, celebrity,
-                  employee, moderator, company or government representative in
-                  a way that deceives users.
+                  {t('legalGuidelines.impersonationP1')}
                 </p>
 
                 <p>
-                  Accounts may be required to clearly distinguish themselves
-                  from official AmoraLive accounts.
+                  {t('legalGuidelines.impersonationP2')}
                 </p>
 
               </Section>
@@ -846,27 +684,18 @@ export default function Guidelines() {
               <Section
                 id="copyright"
                 number="18"
-                title="Copyright & Intellectual Property"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.copyright')}
               >
 
                 <p>
-                  Users must respect copyright, trademark and other intellectual
-                  property rights.
+                  {t('legalGuidelines.copyrightP1')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Do not upload content you do not have permission to use.',
-                    'Do not deliberately distribute pirated material.',
-                    'Do not impersonate brands or rights holders.',
-                    'Do not use protected content to mislead users about affiliation.',
-                    'Respect valid copyright complaints and legal processes.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.copyrightBullets')} />
 
                 <p>
-                  AmoraLive may remove content or restrict accounts when
-                  appropriate under applicable law and platform policy.
+                  {t('legalGuidelines.copyrightP2')}
                 </p>
 
               </Section>
@@ -874,35 +703,21 @@ export default function Guidelines() {
               <Section
                 id="livestreams"
                 number="19"
-                title="Livestream Rules"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.livestreams')}
               >
 
                 <p>
-                  Livestream creators are responsible for the content they
-                  broadcast and for reasonable efforts to maintain a safe
-                  environment.
+                  {t('legalGuidelines.livestreamsP1')}
                 </p>
 
                 <div className="rule-grid">
 
-                  <RuleCard number="01" title="Keep It Legal">
-                    Do not use livestreams to facilitate illegal activity.
-                  </RuleCard>
-
-                  <RuleCard number="02" title="Protect Others">
-                    Do not expose private information or deliberately target
-                    viewers.
-                  </RuleCard>
-
-                  <RuleCard number="03" title="No Explicit Content">
-                    Pornographic and explicit sexual livestreams are
-                    prohibited.
-                  </RuleCard>
-
-                  <RuleCard number="04" title="Moderate Your Room">
-                    Creators should use available moderation and reporting
-                    tools.
-                  </RuleCard>
+                  {t('legalGuidelines.livestreamsGrid').map((item, index) => (
+                    <RuleCard number={String(index + 1).padStart(2, '0')} title={item[0]} key={index}>
+                      {item[1]}
+                    </RuleCard>
+                  ))}
 
                 </div>
 
@@ -911,147 +726,90 @@ export default function Guidelines() {
               <Section
                 id="battles"
                 number="20"
-                title="Battles & Competitions"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.battles')}
               >
 
                 <p>
-                  AmoraLive battles are intended to be competitive,
-                  entertaining and fair.
+                  {t('legalGuidelines.battlesP1')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Do not use bots to manipulate battle results.',
-                    'Do not purchase or generate fraudulent engagement.',
-                    'Do not threaten opponents.',
-                    'Do not encourage harassment of another creator.',
-                    'Do not exploit technical vulnerabilities to alter results.',
-                    'Do not use fraudulent payment activity to manipulate rankings.',
-                    'Respect the rules of each individual battle feature.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.battlesBullets')} />
 
               </Section>
 
               <Section
                 id="gifts"
                 number="21"
-                title="Gifts & Virtual Items"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.gifts')}
               >
 
                 <p>
-                  AmoraLive may provide virtual gifts, coins, rewards and other
-                  digital features.
+                  {t('legalGuidelines.giftsP1')}
                 </p>
 
                 <p>
-                  Users must not exploit bugs, payment vulnerabilities,
-                  fraudulent transactions or automated systems to manipulate
-                  virtual items.
+                  {t('legalGuidelines.giftsP2')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'No fraudulent coin purchases.',
-                    'No chargeback abuse.',
-                    'No manipulation of gift rankings.',
-                    'No automated gift farming.',
-                    'No fake gift transactions.',
-                    'No attempts to exploit pricing or technical bugs.',
-                    'No deceptive promises involving gifts or virtual items.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.giftsBullets')} />
 
               </Section>
 
               <Section
                 id="dating"
                 number="22"
-                title="Dating & Romantic Interactions"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.dating')}
               >
 
                 <p>
-                  AmoraLive may enable people to meet, communicate and develop
-                  relationships.
+                  {t('legalGuidelines.datingP1')}
                 </p>
 
                 <p>
-                  Users should communicate honestly and respect consent and
-                  boundaries.
+                  {t('legalGuidelines.datingP2')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Do not pressure someone into romantic or sexual interaction.',
-                    'Do not manipulate people for money.',
-                    'Do not use dating features for fraud.',
-                    'Do not stalk users who have rejected contact.',
-                    'Do not impersonate another person.',
-                    'Do not sexually exploit another person.',
-                    'Do not use the platform to arrange trafficking or exploitation.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.datingBullets')} />
 
               </Section>
 
               <Section
                 id="messages"
                 number="23"
-                title="Messages & Private Communication"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.messages')}
               >
 
                 <p>
-                  Private communication still needs to comply with AmoraLive
-                  rules.
+                  {t('legalGuidelines.messagesP1')}
                 </p>
 
                 <p>
-                  Users should not assume that private messaging makes
-                  otherwise prohibited conduct acceptable.
+                  {t('legalGuidelines.messagesP2')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'No harassment.',
-                    'No threats.',
-                    'No scams.',
-                    'No sexual exploitation.',
-                    'No grooming.',
-                    'No malicious spam.',
-                    'No credential theft.',
-                    'No distribution of illegal content.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.messagesBullets')} />
 
               </Section>
 
               <Section
                 id="ai"
                 number="24"
-                title="AI, Deepfakes & Synthetic Media"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.ai')}
               >
 
                 <p>
-                  Artificial intelligence and synthetic media can be creative
-                  tools, but they must not be used to deceive, exploit or harm
-                  people.
+                  {t('legalGuidelines.aiP1')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Do not create deceptive impersonation of another person.',
-                    'Do not create non-consensual sexual deepfakes.',
-                    'Do not sexualize minors using synthetic media.',
-                    'Do not use AI to facilitate fraud.',
-                    'Do not create malicious fake evidence intended to cause serious harm.',
-                    'Do not use automation to evade AmoraLive safety systems.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.aiBullets')} />
 
                 <p>
-                  Where synthetic media is used in a context where disclosure
-                  is necessary to avoid meaningful deception, users should make
-                  that context clear.
+                  {t('legalGuidelines.aiP2')}
                 </p>
 
               </Section>
@@ -1059,58 +817,33 @@ export default function Guidelines() {
               <Section
                 id="platform"
                 number="25"
-                title="Platform Manipulation"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.platform')}
               >
 
                 <p>
-                  Attempts to manipulate AmoraLive's systems, rankings,
-                  recommendations, gifts, battles or moderation processes are
-                  prohibited.
+                  {t('legalGuidelines.platformP1')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Fake accounts.',
-                    'Bot networks.',
-                    'Automated engagement.',
-                    'Fraudulent reporting campaigns.',
-                    'Manipulation of recommendation systems.',
-                    'Circumventing account restrictions.',
-                    'Creating replacement accounts to evade enforcement.',
-                    'Exploiting platform vulnerabilities.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.platformBullets')} />
 
               </Section>
 
               <Section
                 id="security"
                 number="26"
-                title="Cybersecurity & Abuse"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.security')}
               >
 
                 <p>
-                  AmoraLive must not be used to attack the platform or its
-                  users.
+                  {t('legalGuidelines.securityP1')}
                 </p>
 
-                <BulletList
-                  items={[
-                    'Credential theft.',
-                    'Account takeover.',
-                    'Malware distribution.',
-                    'Phishing infrastructure.',
-                    'Unauthorized access.',
-                    'Denial-of-service attacks.',
-                    'Exploitation of security vulnerabilities for malicious purposes.',
-                    'Distribution of stolen credentials or session tokens.'
-                  ]}
-                />
+                <BulletList items={t('legalGuidelines.securityBullets')} />
 
                 <p>
-                  Responsible security researchers should report vulnerabilities
-                  through the appropriate AmoraLive security contact rather than
-                  exploiting them against users.
+                  {t('legalGuidelines.securityP2')}
                 </p>
 
               </Section>
@@ -1118,13 +851,12 @@ export default function Guidelines() {
               <Section
                 id="reporting"
                 number="27"
-                title="Reporting Violations"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.reporting')}
               >
 
                 <p>
-                  If you encounter content or behaviour that violates these
-                  guidelines, use the reporting tools provided by AmoraLive
-                  whenever possible.
+                  {t('legalGuidelines.reportingP1')}
                 </p>
 
                 <div className="report-card">
@@ -1135,21 +867,18 @@ export default function Guidelines() {
 
                   <div>
                     <strong>
-                      Report — Don't Retaliate
+                      {t('legalGuidelines.reportCardTitle')}
                     </strong>
 
                     <span>
-                      Do not attempt to punish another user yourself. Report
-                      the behaviour and allow AmoraLive's safety systems and
-                      moderation team to review it.
+                      {t('legalGuidelines.reportCardBody')}
                     </span>
                   </div>
 
                 </div>
 
                 <p>
-                  False or malicious reporting campaigns may themselves violate
-                  these guidelines.
+                  {t('legalGuidelines.reportingP2')}
                 </p>
 
               </Section>
@@ -1157,54 +886,30 @@ export default function Guidelines() {
               <Section
                 id="moderation"
                 number="28"
-                title="Moderation & Enforcement"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.moderation')}
               >
 
                 <p>
-                  AmoraLive may use automated systems, human moderators or a
-                  combination of both to identify and review potential
-                  violations.
+                  {t('legalGuidelines.moderationP1')}
                 </p>
 
                 <p>
-                  Depending on the seriousness and circumstances of a
-                  violation, enforcement may include:
+                  {t('legalGuidelines.moderationP2')}
                 </p>
 
                 <div className="enforcement-grid">
 
-                  <RuleCard number="01" title="Warning">
-                    Educational or corrective notice.
-                  </RuleCard>
-
-                  <RuleCard number="02" title="Content Removal">
-                    Removal or restriction of violating content.
-                  </RuleCard>
-
-                  <RuleCard number="03" title="Feature Restriction">
-                    Temporary loss of specific platform functionality.
-                  </RuleCard>
-
-                  <RuleCard number="04" title="Suspension">
-                    Temporary account restriction.
-                  </RuleCard>
-
-                  <RuleCard number="05" title="Permanent Ban">
-                    Permanent account termination for serious or repeated
-                    violations.
-                  </RuleCard>
-
-                  <RuleCard number="06" title="Legal Referral">
-                    Referral to appropriate authorities where required or
-                    appropriate under applicable law.
-                  </RuleCard>
+                  {t('legalGuidelines.enforcementGrid').map((item, index) => (
+                    <RuleCard number={String(index + 1).padStart(2, '0')} title={item[0]} key={index}>
+                      {item[1]}
+                    </RuleCard>
+                  ))}
 
                 </div>
 
                 <p>
-                  AmoraLive may take immediate action where necessary to protect
-                  users, preserve evidence, prevent ongoing harm or comply with
-                  legal obligations.
+                  {t('legalGuidelines.moderationP3')}
                 </p>
 
               </Section>
@@ -1212,24 +917,20 @@ export default function Guidelines() {
               <Section
                 id="appeals"
                 number="29"
-                title="Appeals"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.appeals')}
               >
 
                 <p>
-                  Where an appeal mechanism is available, users may request a
-                  review of an enforcement decision according to the applicable
-                  process.
+                  {t('legalGuidelines.appealsP1')}
                 </p>
 
                 <p>
-                  Appeals should contain relevant information explaining why
-                  the user believes the decision was incorrect.
+                  {t('legalGuidelines.appealsP2')}
                 </p>
 
                 <p>
-                  AmoraLive may maintain restrictions while an appeal is
-                  reviewed when necessary to protect users or prevent continued
-                  abuse.
+                  {t('legalGuidelines.appealsP3')}
                 </p>
 
               </Section>
@@ -1237,35 +938,30 @@ export default function Guidelines() {
               <Section
                 id="law"
                 number="30"
-                title="Legal Compliance"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.law')}
               >
 
                 <p>
-                  These guidelines operate alongside AmoraLive's Terms of
-                  Service, Privacy Policy and other applicable policies.
+                  {t('legalGuidelines.lawP1')}
                 </p>
 
                 <p>
-                  AmoraLive may comply with valid legal obligations, lawful
-                  orders and requests from competent authorities as required by
-                  applicable law.
+                  {t('legalGuidelines.lawP2')}
                 </p>
 
                 <p>
-                  Nothing in these guidelines is intended to remove rights or
-                  protections that users have under mandatory applicable law.
+                  {t('legalGuidelines.lawP3')}
                 </p>
 
                 <div className="law-card">
 
                   <strong>
-                    EUROPEAN & SWISS USERS
+                    {t('legalGuidelines.lawCardTitle')}
                   </strong>
 
                   <span>
-                    Where mandatory consumer, digital-services, privacy or
-                    other protections apply, AmoraLive will seek to operate its
-                    services consistently with those requirements.
+                    {t('legalGuidelines.lawCardBody')}
                   </span>
 
                 </div>
@@ -1275,24 +971,20 @@ export default function Guidelines() {
               <Section
                 id="changes"
                 number="31"
-                title="Updates"
+                label={t('legalGuidelines.sectionLabel')}
+                title={t('legalGuidelines.sectionTitles.changes')}
               >
 
                 <p>
-                  AmoraLive may update these Community Guidelines as the
-                  platform evolves, new safety risks emerge, or legal and
-                  regulatory requirements change.
+                  {t('legalGuidelines.changesP1')}
                 </p>
 
                 <p>
-                  The effective date displayed at the beginning of this page
-                  identifies the current version.
+                  {t('legalGuidelines.changesP2')}
                 </p>
 
                 <p>
-                  Continued use of AmoraLive after applicable changes take
-                  effect is subject to the updated policies, to the extent
-                  permitted by law.
+                  {t('legalGuidelines.changesP3')}
                 </p>
 
               </Section>
@@ -1319,16 +1011,15 @@ export default function Guidelines() {
                 <div>
 
                   <div className="guidelines-label">
-                    AMORALIVE COMMUNITY PROMISE
+                    {t('legalGuidelines.finalLabel')}
                   </div>
 
                   <h2>
-                    Make AmoraLive Better.
+                    {t('legalGuidelines.finalTitle')}
                   </h2>
 
                   <p>
-                    Be authentic. Be respectful. Protect yourself and others.
-                    Report abuse. Create something worth being part of.
+                    {t('legalGuidelines.finalBody')}
                   </p>
 
                 </div>
@@ -1342,29 +1033,29 @@ export default function Guidelines() {
               <div className="document-footer">
 
                 <div>
-                  <strong>AMORALIVE</strong>
+                  <strong>{t('legalGuidelines.footerBrand')}</strong>
 
                   <span>
-                    Community Guidelines • V1.0.1 • August 2026
+                    {t('legalGuidelines.footerTagline')}
                   </span>
                 </div>
 
                 <div className="footer-links">
 
                   <a href="/legal/terms">
-                    Terms
+                    {t('legalGuidelines.footerLinkTerms')}
                   </a>
 
                   <a href="/legal/privacy">
-                    Privacy
+                    {t('legalGuidelines.footerLinkPrivacy')}
                   </a>
 
                   <a href="/legal/cookies">
-                    Cookies
+                    {t('legalGuidelines.footerLinkCookies')}
                   </a>
 
                   <a href="/">
-                    Home
+                    {t('legalGuidelines.footerLinkHome')}
                   </a>
 
                 </div>
