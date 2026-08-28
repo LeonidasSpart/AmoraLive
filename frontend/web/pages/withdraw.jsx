@@ -4,10 +4,12 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Layout from '../components/Layout';
 import { apiFetch } from '../lib/api';
+import { useTranslation } from '../lib/i18n';
 
 const STATUS_COLORS = { pending: '#ffd166', approved: '#3fa9ff', rejected: '#ff6b6b', paid: '#8f8' };
 
 export default function Withdraw() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [info, setInfo] = useState(null);
   const [history, setHistory] = useState([]);
@@ -33,7 +35,7 @@ export default function Withdraw() {
       if (infoRes.ok) setInfo(await infoRes.json());
       if (historyRes.ok) setHistory(await historyRes.json());
     } catch (e) {
-      setError('Unable to load withdrawal info.');
+      setError(t('withdraw.errorLoad'));
     } finally {
       setLoading(false);
     }
@@ -50,15 +52,15 @@ export default function Withdraw() {
     setMessage('');
     const coins = Number(coinsAmount);
     if (!Number.isInteger(coins) || coins < (info?.minWithdrawalCoins || 0)) {
-      setError(`Minimum withdrawal is ${info?.minWithdrawalCoins?.toLocaleString()} coins.`);
+      setError(`${t('withdraw.minWithdrawalError')} ${info?.minWithdrawalCoins?.toLocaleString()} ${t('withdraw.coinsWord')}.`);
       return;
     }
     if (coins > (info?.balance || 0)) {
-      setError('You cannot withdraw more than your available balance.');
+      setError(t('withdraw.maxBalanceError'));
       return;
     }
     if (!payoutDetails.trim()) {
-      setError('Enter your payout details.');
+      setError(t('withdraw.enterPayoutDetails'));
       return;
     }
     setSubmitting(true);
@@ -68,8 +70,8 @@ export default function Withdraw() {
         body: JSON.stringify({ coinsAmount: coins, payoutMethod, payoutDetails: payoutDetails.trim() })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Unable to submit withdrawal request.');
-      setMessage(`Withdrawal request submitted for $${(data.usd_cents / 100).toFixed(2)}.`);
+      if (!res.ok) throw new Error(data.error || t('withdraw.errorSubmit'));
+      setMessage(`${t('withdraw.requestSubmittedPrefix')} $${(data.usd_cents / 100).toFixed(2)}.`);
       setCoinsAmount('');
       setPayoutDetails('');
       await load();
@@ -83,7 +85,7 @@ export default function Withdraw() {
   if (loading) {
     return (
       <Layout>
-        <div style={s.wrap}><p style={{ color: '#999' }}>Loading…</p></div>
+        <div style={s.wrap}><p style={{ color: '#999' }}>{t('common.loading')}</p></div>
       </Layout>
     );
   }
@@ -95,56 +97,56 @@ export default function Withdraw() {
       <div style={s.wrap}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
           <Link href="/wallet" style={{ color: '#999', textDecoration: 'none' }}>←</Link>
-          <h1 style={s.title}>💵 Withdraw</h1>
+          <h1 style={s.title}>{t('withdraw.title')}</h1>
         </div>
 
         <div style={s.noticeBox}>
-          Payouts are reviewed and sent manually by the AmoraLive team — this isn't an instant transfer. Rate: 100 coins = ${info ? (info.coinToUsdCents).toFixed(0) : '1'}.00. Minimum: {info?.minWithdrawalCoins?.toLocaleString()} coins.
+          {t('withdraw.noticeLine1')} {t('withdraw.noticeRatePrefix')} ${info ? (info.coinToUsdCents).toFixed(0) : '1'}.00. {t('withdraw.noticeMinimumPrefix')} {info?.minWithdrawalCoins?.toLocaleString()} {t('withdraw.coinsWord')}.
         </div>
 
         {message && <div style={s.success}>{message}</div>}
         {error && <div style={s.error}>{error}</div>}
 
         <div style={s.balanceCard}>
-          <div style={{ color: '#999', fontSize: 12 }}>Available balance</div>
+          <div style={{ color: '#999', fontSize: 12 }}>{t('withdraw.availableBalance')}</div>
           <div style={{ fontSize: 28, fontWeight: 800, color: '#ffd166' }}>🪙 {info?.balance?.toLocaleString() ?? 0}</div>
           <div style={{ color: '#777', fontSize: 12 }}>≈ ${info?.availableForWithdrawalUsd ?? '0.00'}</div>
         </div>
 
         <form onSubmit={submit} style={s.form}>
-          <label style={s.label}>Coins to withdraw</label>
+          <label style={s.label}>{t('withdraw.coinsToWithdraw')}</label>
           <input
             type="number"
             value={coinsAmount}
             onChange={(e) => setCoinsAmount(e.target.value)}
-            placeholder={`Minimum ${info?.minWithdrawalCoins?.toLocaleString()}`}
+            placeholder={`${t('withdraw.minimumPrefix')} ${info?.minWithdrawalCoins?.toLocaleString()}`}
             style={s.input}
           />
           <div style={{ color: '#999', fontSize: 12, marginTop: 4 }}>≈ ${requestedUsd}</div>
 
-          <label style={s.label}>Payout method</label>
+          <label style={s.label}>{t('withdraw.payoutMethod')}</label>
           <select value={payoutMethod} onChange={(e) => setPayoutMethod(e.target.value)} style={s.input}>
-            <option value="paypal">PayPal</option>
-            <option value="bank_transfer">Bank Transfer</option>
-            <option value="other">Other</option>
+            <option value="paypal">{t('withdraw.paypal')}</option>
+            <option value="bank_transfer">{t('withdraw.bankTransfer')}</option>
+            <option value="other">{t('withdraw.other')}</option>
           </select>
 
-          <label style={s.label}>{payoutMethod === 'paypal' ? 'PayPal email' : payoutMethod === 'bank_transfer' ? 'Bank details' : 'Payout details'}</label>
+          <label style={s.label}>{payoutMethod === 'paypal' ? t('withdraw.paypalEmailLabel') : payoutMethod === 'bank_transfer' ? t('withdraw.bankDetailsLabel') : t('withdraw.payoutDetailsLabel')}</label>
           <textarea
             value={payoutDetails}
             onChange={(e) => setPayoutDetails(e.target.value)}
-            placeholder={payoutMethod === 'paypal' ? 'you@example.com' : 'Account details for payout'}
+            placeholder={payoutMethod === 'paypal' ? t('withdraw.paypalPlaceholder') : t('withdraw.accountDetailsPlaceholder')}
             style={{ ...s.input, minHeight: 70 }}
           />
 
           <button type="submit" disabled={submitting} style={s.submitBtn}>
-            {submitting ? 'Submitting…' : 'Request Withdrawal'}
+            {submitting ? t('withdraw.submitting') : t('withdraw.requestWithdrawal')}
           </button>
         </form>
 
-        <h3 style={s.historyTitle}>Withdrawal History</h3>
+        <h3 style={s.historyTitle}>{t('withdraw.historyTitle')}</h3>
         {history.length === 0 ? (
-          <p style={{ color: '#777', fontSize: 13 }}>No withdrawal requests yet.</p>
+          <p style={{ color: '#777', fontSize: 13 }}>{t('withdraw.noWithdrawalsYet')}</p>
         ) : (
           <div style={s.historyList}>
             {history.map((w) => (

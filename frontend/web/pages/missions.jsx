@@ -3,11 +3,13 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import { apiFetch } from '../lib/api';
+import { useTranslation } from '../lib/i18n';
 
-const TYPE_LABELS = { daily: '📅 Daily', weekly: '🗓️ Weekly', lifetime: '🏆 Achievements' };
 const TYPE_ORDER = ['daily', 'weekly', 'lifetime'];
 
 export default function Missions() {
+  const { t } = useTranslation();
+  const TYPE_LABELS = { daily: t('missions.typeDaily'), weekly: t('missions.typeWeekly'), lifetime: t('missions.typeLifetime') };
   const router = useRouter();
   const [missions, setMissions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +26,7 @@ export default function Missions() {
     setError('');
     try {
       const res = await apiFetch('/missions');
-      if (!res.ok) throw new Error('Unable to load missions.');
+      if (!res.ok) throw new Error(t('missions.errorLoad'));
       setMissions(await res.json());
     } catch (e) {
       setError(e.message);
@@ -44,8 +46,8 @@ export default function Missions() {
     try {
       const res = await apiFetch(`/missions/${mission.key}/claim`, { method: 'POST' });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Unable to claim this mission.');
-      setToast(`+${data.coinsAwarded} coins${data.xpAwarded ? `, +${data.xpAwarded} XP` : ''}${mission.badge ? ` — earned "${mission.badge}"!` : ''}`);
+      if (!res.ok) throw new Error(data.error || t('missions.errorClaim'));
+      setToast(`+${data.coinsAwarded} ${t('missions.coinsWord')}${data.xpAwarded ? `, +${data.xpAwarded} ${t('missions.xpSuffix')}` : ''}${mission.badge ? ` — "${mission.badge}" ${t('missions.earnedSuffix')}!` : ''}`);
       setTimeout(() => setToast(''), 3500);
       await load();
     } catch (e) {
@@ -58,7 +60,7 @@ export default function Missions() {
   if (loading) {
     return (
       <Layout>
-        <div style={s.wrap}><p style={{ color: '#999' }}>Loading…</p></div>
+        <div style={s.wrap}><p style={{ color: '#999' }}>{t('common.loading')}</p></div>
       </Layout>
     );
   }
@@ -68,7 +70,7 @@ export default function Missions() {
   return (
     <Layout>
       <div style={s.wrap}>
-        <h1 style={s.title}>🎯 Missions & Achievements</h1>
+        <h1 style={s.title}>{t('missions.title')}</h1>
         {toast && <div style={s.toast}>{toast}</div>}
         {error && <div style={s.error}>{error}</div>}
 
@@ -95,13 +97,13 @@ export default function Missions() {
                       <span style={{ fontSize: 12, color: '#ffd166' }}>🪙 {m.reward.coins}{m.reward.xp ? ` · ⭐${m.reward.xp}` : ''}</span>
                     </div>
                     {m.claimed ? (
-                      <div style={s.claimedBadge}>✓ Claimed</div>
+                      <div style={s.claimedBadge}>{t('missions.claimed')}</div>
                     ) : m.completed ? (
                       <button onClick={() => claim(m)} disabled={claimingKey === m.key} style={s.claimBtn}>
-                        {claimingKey === m.key ? 'Claiming…' : 'Claim reward'}
+                        {claimingKey === m.key ? t('missions.claiming') : t('missions.claimReward')}
                       </button>
                     ) : (
-                      <div style={s.inProgress}>In progress</div>
+                      <div style={s.inProgress}>{t('missions.inProgress')}</div>
                     )}
                   </div>
                 );

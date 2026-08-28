@@ -1,11 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { useTranslation } from '../lib/i18n';
 
 const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 
 // Phases: intro -> connecting -> queued -> paired -> deciding -> result
 export default function VideoMatch() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [phase, setPhase] = useState('intro');
   const [socketReady, setSocketReady] = useState(false);
@@ -116,7 +118,7 @@ export default function VideoMatch() {
         socket.emit('authenticate', token, (ack) => {
           if (!active) return;
           if (!ack?.ok) {
-            setError('Your session expired. Please sign in again.');
+            setError(t('videoMatch.sessionExpired'));
             setPhase('idle');
             return;
           }
@@ -128,7 +130,7 @@ export default function VideoMatch() {
       });
 
       socket.on('connect_error', () => {
-        if (active) setError('Unable to connect. Check your connection and try again.');
+        if (active) setError(t('videoMatch.connectFailed'));
       });
 
       socket.on('video_match:queued', () => {
@@ -151,7 +153,7 @@ export default function VideoMatch() {
       });
 
       socket.on('video_match:peer_left', () => {
-        if (active) setError('The other person left the video match.');
+        if (active) setError(t('videoMatch.peerLeft'));
       });
 
       socket.on('video_match:result', (payload) => {
@@ -163,7 +165,7 @@ export default function VideoMatch() {
       });
 
       socket.on('video_match:error', (payload) => {
-        if (active) setError(payload?.error || 'Video match is unavailable right now.');
+        if (active) setError(payload?.error || t('videoMatch.unavailable'));
       });
     })();
 
@@ -187,8 +189,8 @@ export default function VideoMatch() {
   return (
     <div style={s.page}>
       <header style={s.header}>
-        <Link href="/discover" style={s.back}>← Back</Link>
-        <span style={s.title}>Video Match</span>
+        <Link href="/discover" style={s.back}>{t('videoMatch.back')}</Link>
+        <span style={s.title}>{t('videoMatch.title')}</span>
         {(phase === 'paired' || phase === 'deciding') && (
           <span style={{ ...s.timer, background: seconds <= 3 ? '#ff4444' : '#2a2a3e' }}>{seconds}s</span>
         )}
@@ -199,23 +201,22 @@ export default function VideoMatch() {
       {phase === 'intro' && (
         <div style={s.introWrap}>
           <div style={{ fontSize: 48 }}>🎥❤️</div>
-          <h2 style={s.introTitle}>Video Match</h2>
+          <h2 style={s.introTitle}>{t('videoMatch.introTitle')}</h2>
           <p style={s.introText}>
-            You'll be randomly paired with another online member for a quick 15-second live video intro.
-            If you both tap ❤️ before time runs out, it's a match and you can start chatting.
+            {t('videoMatch.introText1')}
           </p>
-          <p style={s.introText}>Your camera and mic turn on only once you're paired — not before.</p>
+          <p style={s.introText}>{t('videoMatch.introText2')}</p>
           <button style={s.primaryBtn} onClick={joinQueue} disabled={!socketReady}>
-            {socketReady ? 'Start Matching' : 'Connecting…'}
+            {socketReady ? t('videoMatch.startMatching') : t('videoMatch.connecting')}
           </button>
         </div>
       )}
 
-      {phase === 'connecting' && <div style={s.centerMsg}>Connecting…</div>}
+      {phase === 'connecting' && <div style={s.centerMsg}>{t('videoMatch.connecting')}</div>}
       {phase === 'queued' && (
         <div style={s.centerMsg}>
           <div style={s.pulse} />
-          Finding someone to match with…
+          {t('videoMatch.finding')}
         </div>
       )}
 
@@ -225,7 +226,7 @@ export default function VideoMatch() {
             {!liveKitAvailable && (
               <div style={s.fallback}>
                 <div style={{ fontSize: 40 }}>🎥</div>
-                <p>{peerPreview?.age ? `${peerPreview.age} · ` : ''}{peerPreview?.location || 'Someone new'}</p>
+                <p>{peerPreview?.age ? `${peerPreview.age} · ` : ''}{peerPreview?.location || t('videoMatch.someoneNew')}</p>
                 {peerPreview?.interests?.length > 0 && (
                   <p style={{ color: '#999', fontSize: 13 }}>{peerPreview.interests.join(' · ')}</p>
                 )}
@@ -241,9 +242,9 @@ export default function VideoMatch() {
             </div>
           )}
           {phase === 'deciding' && myDecision && (
-            <p style={s.waitingText}>Waiting for the other person to decide…</p>
+            <p style={s.waitingText}>{t('videoMatch.waitingOther')}</p>
           )}
-          {phase === 'paired' && <p style={s.infoText}>Say hi! You'll decide whether to match once time's up.</p>}
+          {phase === 'paired' && <p style={s.infoText}>{t('videoMatch.sayHi')}</p>}
         </div>
       )}
 
@@ -252,16 +253,16 @@ export default function VideoMatch() {
           {result?.matched ? (
             <>
               <div style={{ fontSize: 48 }}>🎉</div>
-              <h2 style={{ color: '#fff' }}>It's a match!</h2>
+              <h2 style={{ color: '#fff' }}>{t('videoMatch.matchExclaim')}</h2>
               <p style={{ color: '#aaa' }}>{result.peer?.display_name || result.peer?.username}</p>
               <button style={s.primaryBtn} onClick={() => router.push(`/chat/${result.peer.id}`)}>
-                Start chatting
+                {t('videoMatch.startChatting')}
               </button>
             </>
           ) : (
             <>
-              <p style={{ color: '#aaa' }}>No match this time.</p>
-              <button style={s.primaryBtn} onClick={joinQueue}>Find another</button>
+              <p style={{ color: '#aaa' }}>{t('videoMatch.noMatch')}</p>
+              <button style={s.primaryBtn} onClick={joinQueue}>{t('videoMatch.findAnother')}</button>
             </>
           )}
         </div>
