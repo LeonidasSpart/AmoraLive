@@ -5,12 +5,14 @@ import { apiFetch } from '../../lib/api';
 import VerifiedBadge from '../../components/VerifiedBadge';
 import GiftIcon from '../../components/GiftIcon';
 import ProfileFrame from '../../components/ProfileFrame';
+import { useTranslation } from '../../lib/i18n';
 
 const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 
 let heartId = 0;
 
 export default function LiveRoom() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { id } = router.query;
 
@@ -49,19 +51,19 @@ export default function LiveRoom() {
   const [showFilters, setShowFilters] = useState(false);
 
   const FILTER_PRESETS = {
-    none: { label: 'Normal', css: 'none' },
-    warm: { label: 'Warm', css: 'saturate(1.3) sepia(0.15) brightness(1.05)' },
-    cool: { label: 'Cool', css: 'saturate(1.1) hue-rotate(-10deg) brightness(1.02) contrast(1.05)' },
-    vivid: { label: 'Vivid', css: 'saturate(1.6) contrast(1.15)' },
-    bw: { label: 'B&W', css: 'grayscale(1) contrast(1.1)' },
-    vintage: { label: 'Vintage', css: 'sepia(0.4) contrast(0.9) brightness(1.05) saturate(0.8)' },
-    soft: { label: 'Soft', css: 'brightness(1.08) contrast(0.92) saturate(0.95)' },
-    dramatic: { label: 'Dramatic', css: 'contrast(1.35) saturate(1.25) brightness(0.95)' },
-    moody: { label: 'Moody', css: 'saturate(0.7) brightness(0.85) hue-rotate(-15deg) contrast(1.1)' },
-    bright: { label: 'Bright', css: 'brightness(1.2) saturate(0.9) contrast(0.98)' },
-    noir: { label: 'Noir', css: 'grayscale(1) contrast(1.4) brightness(0.9)' },
-    sepia: { label: 'Sepia', css: 'sepia(0.85) contrast(1.05) brightness(1.02)' },
-    sunset: { label: 'Sunset', css: 'saturate(1.4) hue-rotate(-8deg) sepia(0.2) brightness(1.03)' }
+    none: { label: t('liveRoom.filterNormal'), css: 'none' },
+    warm: { label: t('liveRoom.filterWarm'), css: 'saturate(1.3) sepia(0.15) brightness(1.05)' },
+    cool: { label: t('liveRoom.filterCool'), css: 'saturate(1.1) hue-rotate(-10deg) brightness(1.02) contrast(1.05)' },
+    vivid: { label: t('liveRoom.filterVivid'), css: 'saturate(1.6) contrast(1.15)' },
+    bw: { label: t('liveRoom.filterBw'), css: 'grayscale(1) contrast(1.1)' },
+    vintage: { label: t('liveRoom.filterVintage'), css: 'sepia(0.4) contrast(0.9) brightness(1.05) saturate(0.8)' },
+    soft: { label: t('liveRoom.filterSoft'), css: 'brightness(1.08) contrast(0.92) saturate(0.95)' },
+    dramatic: { label: t('liveRoom.filterDramatic'), css: 'contrast(1.35) saturate(1.25) brightness(0.95)' },
+    moody: { label: t('liveRoom.filterMoody'), css: 'saturate(0.7) brightness(0.85) hue-rotate(-15deg) contrast(1.1)' },
+    bright: { label: t('liveRoom.filterBright'), css: 'brightness(1.2) saturate(0.9) contrast(0.98)' },
+    noir: { label: t('liveRoom.filterNoir'), css: 'grayscale(1) contrast(1.4) brightness(0.9)' },
+    sepia: { label: t('liveRoom.filterSepia'), css: 'sepia(0.85) contrast(1.05) brightness(1.02)' },
+    sunset: { label: t('liveRoom.filterSunset'), css: 'saturate(1.4) hue-rotate(-8deg) sepia(0.2) brightness(1.03)' }
   };
 
   const chatContainerRef = useRef(null);
@@ -131,7 +133,7 @@ export default function LiveRoom() {
         body: JSON.stringify({ targetRoomId })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Unable to send battle invite.');
+      if (!res.ok) throw new Error(data.error || t('liveRoom.errorBattleInvite'));
       setOutgoingInvite({ targetRoomId });
       setShowBattlePicker(false);
     } catch (e) {
@@ -174,7 +176,7 @@ export default function LiveRoom() {
           apiFetch(`/live/${id}`),
           fetch(`${API}/gifts/catalog`)
         ]);
-        if (!roomRes.ok) throw new Error('Live room not found');
+        if (!roomRes.ok) throw new Error(t('liveRoom.roomNotFoundError'));
         const data = await roomRes.json();
         const gifts = giftsRes.ok ? await giftsRes.json() : [];
         if (!active) return;
@@ -216,7 +218,7 @@ export default function LiveRoom() {
           const currentToken = localStorage.getItem('accessToken');
           socket.emit('authenticate', currentToken, (ack) => {
             if (!ack?.ok) {
-              setError('Your session expired. Please sign in again.');
+              setError(t('liveRoom.errorSessionExpired'));
               return;
             }
             socket.emit('join-live', id);
@@ -235,9 +237,9 @@ export default function LiveRoom() {
         });
         socket.on('gift-animation', (tx) => {
           if (!active) return;
-          const name = tx.sender?.display_name || tx.sender?.username || 'Someone';
-          const giftName = tx.gift?.name || 'a gift';
-          setChatMessages((prev) => [...prev, { id: `gift-${Date.now()}`, system: true, message: `🎁 ${name} sent ${giftName}!` }]);
+          const name = tx.sender?.display_name || tx.sender?.username || t('liveRoom.someoneFallback');
+          const giftName = tx.gift?.name || t('liveRoom.giftFallback');
+          setChatMessages((prev) => [...prev, { id: `gift-${Date.now()}`, system: true, message: `🎁 ${name} ${t('liveRoom.sentGiftSuffix')} ${giftName}!` }]);
           setGiftCount((prev) => prev + (tx.quantity || 1));
           setGiftAlert({ senderName: name, quantity: tx.quantity || 1, gift: tx.gift });
           spawnHeart();
@@ -247,7 +249,7 @@ export default function LiveRoom() {
         });
         socket.on('room-ended', () => {
           if (!active) return;
-          setError('This stream has ended.');
+          setError(t('liveRoom.streamEnded'));
           setTimeout(() => router.push('/discover'), 1500);
         });
 
@@ -264,7 +266,7 @@ export default function LiveRoom() {
         socket.on('battle:invite_declined', () => {
           if (!active) return;
           setOutgoingInvite(null);
-          setError('Your battle invite was declined.');
+          setError(t('liveRoom.inviteDeclined'));
         });
         socket.on('battle:invite_cancelled', () => {
           if (!active) return;
@@ -288,7 +290,7 @@ export default function LiveRoom() {
             if (!prev || prev.battleId !== payload.battleId) return prev;
             const myScore = prev.mySide === 'a' ? payload.scoreA : payload.scoreB;
             const oppScore = prev.mySide === 'a' ? payload.scoreB : payload.scoreA;
-            const text = myScore === oppScore ? "🤝 It's a draw!" : myScore > oppScore ? '🏆 You won the battle!' : '😢 You lost the battle.';
+            const text = myScore === oppScore ? t('liveRoom.battleDraw') : myScore > oppScore ? t('liveRoom.battleWon') : t('liveRoom.battleLost');
             setBattleResult(text);
             return { ...prev, scoreA: payload.scoreA, scoreB: payload.scoreB };
           });
@@ -425,7 +427,7 @@ export default function LiveRoom() {
         body: JSON.stringify({ giftId: pendingGift.id, roomId: id, idempotencyKey: window.crypto.randomUUID() })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Gift failed');
+      if (!res.ok) throw new Error(data.error || t('liveRoom.errorGiftFailed'));
       setShowGiftPicker(false);
       setPendingGift(null);
     } catch (e) {
@@ -450,7 +452,7 @@ export default function LiveRoom() {
 
   const shareRoom = async () => {
     const url = typeof window !== 'undefined' ? window.location.href : '';
-    const title = room?.title ? `${room.title} — live on Amora` : 'Live on Amora';
+    const title = room?.title ? `${room.title} ${t('liveRoom.liveOnAmoraSuffix')}` : t('liveRoom.liveOnAmora');
     if (navigator.share) {
       try {
         await navigator.share({ title, text: title, url });
@@ -459,7 +461,7 @@ export default function LiveRoom() {
     }
     try {
       await navigator.clipboard.writeText(url);
-      setShareToast('Link copied — share it anywhere!');
+      setShareToast(t('liveRoom.linkCopied'));
       setTimeout(() => setShareToast(''), 2500);
     } catch {
       setShareToast(url);
@@ -468,13 +470,13 @@ export default function LiveRoom() {
   };
 
   const endLive = async () => {
-    if (!confirm('End this live stream now?')) return;
+    if (!confirm(t('liveRoom.confirmEndLive'))) return;
     setEnding(true);
     try {
       const res = await apiFetch(`/live/${id}/end`, { method: 'POST' });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Unable to end this room.');
+        throw new Error(data.error || t('liveRoom.errorEndRoom'));
       }
       router.push('/discover');
     } catch (e) {
@@ -483,8 +485,8 @@ export default function LiveRoom() {
     }
   };
 
-  if (loading) return <div style={s.centerPage}>Loading live room…</div>;
-  if (!room) return <div style={s.centerPage}><div><p style={{ color: '#ff6b6b' }}>{error || 'Room not found'}</p><Link href="/discover" style={{ color: '#FF6B9D' }}>← Back</Link></div></div>;
+  if (loading) return <div style={s.centerPage}>{t('liveRoom.loadingRoom')}</div>;
+  if (!room) return <div style={s.centerPage}><div><p style={{ color: '#ff6b6b' }}>{error || t('liveRoom.roomNotFound')}</p><Link href="/discover" style={{ color: '#FF6B9D' }}>{t('liveRoom.back')}</Link></div></div>;
 
   return (
     <div style={s.stage} className="amora-live-stage">
@@ -506,13 +508,13 @@ export default function LiveRoom() {
         ref={videoContainerRef}
         style={{ ...(battle ? s.videoLeftHalf : s.video), cursor: 'pointer' }}
         onClick={sendLike}
-        aria-label="Tap to like"
+        aria-label={t('liveRoom.tapToLike')}
       >
         {!videoReady && (
           <div style={{ textAlign: 'center', padding: 30 }}>
             <div style={{ fontSize: 64 }}>📺</div>
             <h2 style={{ margin: '8px 0' }}>{room.title}</h2>
-            <p style={{ color: '#aaa' }}>{isHost ? 'Connecting your camera and microphone…' : 'Waiting for the host video…'}</p>
+            <p style={{ color: '#aaa' }}>{isHost ? t('liveRoom.connectingCamera') : t('liveRoom.waitingHostVideo')}</p>
           </div>
         )}
       </div>
@@ -558,7 +560,7 @@ export default function LiveRoom() {
           </Link>
           {!isHost && (
             <button onClick={toggleFollow} disabled={followBusy} style={isFollowing ? s.followingBtn : s.followBtn}>
-              {isFollowing ? 'Following' : '+ Follow'}
+              {isFollowing ? t('creatorProfile.following') : t('creatorProfile.follow')}
             </button>
           )}
         </div>
@@ -569,17 +571,17 @@ export default function LiveRoom() {
       {giftAlert && (
         <div style={{ ...s.giftAlert, ...(giftAlert.gift?.rarity === 'mythic' || giftAlert.gift?.rarity === 'legendary' ? s.giftAlertBig : {}) }}>
           <GiftIcon name={giftAlert.gift?.name} glyph={giftAlert.gift?.glyph} rarity={giftAlert.gift?.rarity} size={giftAlert.gift?.rarity === 'mythic' || giftAlert.gift?.rarity === 'legendary' ? 44 : 28} animated />
-          <span>{giftAlert.senderName} sent {giftAlert.quantity > 1 ? `${giftAlert.quantity}x ` : ''}{giftAlert.gift?.name || 'a gift'}!</span>
+          <span>{giftAlert.senderName} {t('liveRoom.sentGiftSuffix')} {giftAlert.quantity > 1 ? `${giftAlert.quantity}x ` : ''}{giftAlert.gift?.name || t('liveRoom.giftFallback')}!</span>
         </div>
       )}
-      {outgoingInvite && !battle && <div style={s.errorBanner}>⚔️ Battle invite sent — waiting for a response…</div>}
+      {outgoingInvite && !battle && <div style={s.errorBanner}>{t('liveRoom.battleInviteSent')}</div>}
 
       {incomingInvite && isHost && !battle && (
         <div style={s.inviteBanner}>
-          <div style={{ fontWeight: 700, marginBottom: 6 }}>🔥 {incomingInvite.fromHost?.display_name || incomingInvite.fromHost?.username} wants to battle!</div>
+          <div style={{ fontWeight: 700, marginBottom: 6 }}>🔥 {incomingInvite.fromHost?.display_name || incomingInvite.fromHost?.username} {t('liveRoom.wantsToBattleSuffix')}</div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button onClick={() => respondToInvite(true)} style={s.acceptBtn}>Accept</button>
-            <button onClick={() => respondToInvite(false)} style={s.declineBtn}>Decline</button>
+            <button onClick={() => respondToInvite(true)} style={s.acceptBtn}>{t('liveRoom.accept')}</button>
+            <button onClick={() => respondToInvite(false)} style={s.declineBtn}>{t('liveRoom.decline')}</button>
           </div>
         </div>
       )}
@@ -601,22 +603,22 @@ export default function LiveRoom() {
         </button>
         <button onClick={() => setShowLeaderboard((v) => !v)} style={s.railBtn}>
           <div style={s.railIcon}>🏆</div>
-          <div style={s.railCount}>Top</div>
+          <div style={s.railCount}>{t('liveRoom.railTop')}</div>
         </button>
         <button onClick={shareRoom} style={s.railBtn}>
           <div style={s.railIcon}>📤</div>
-          <div style={s.railCount}>Share</div>
+          <div style={s.railCount}>{t('liveRoom.railShare')}</div>
         </button>
         {isHost && (
           <button onClick={() => setShowFilters((v) => !v)} style={s.railBtn}>
             <div style={s.railIcon}>🎨</div>
-            <div style={s.railCount}>Filter</div>
+            <div style={s.railCount}>{t('liveRoom.railFilter')}</div>
           </button>
         )}
         {isHost && !battle && (
           <button onClick={openBattlePicker} style={s.railBtn}>
             <div style={s.railIcon}>⚔️</div>
-            <div style={s.railCount}>Battle</div>
+            <div style={s.railCount}>{t('liveRoom.railBattle')}</div>
           </button>
         )}
         {isHost && battle && (
@@ -624,13 +626,13 @@ export default function LiveRoom() {
             await apiFetch(`/live/${id}/battle/end`, { method: 'POST' }).catch(() => {});
           }} style={s.railBtn}>
             <div style={s.railIcon}>⚔️</div>
-            <div style={s.railCount}>End</div>
+            <div style={s.railCount}>{t('liveRoom.railEnd')}</div>
           </button>
         )}
         {isHost && (
           <button onClick={endLive} disabled={ending} style={s.railBtn}>
             <div style={s.railIcon}>⏹</div>
-            <div style={s.railCount}>{ending ? '…' : 'End'}</div>
+            <div style={s.railCount}>{ending ? '…' : t('liveRoom.railEnd')}</div>
           </button>
         )}
       </div>
@@ -653,14 +655,14 @@ export default function LiveRoom() {
 
       {showLeaderboard && (
         <div style={s.leaderboardPanel}>
-          <div style={{ fontWeight: 800, marginBottom: 8 }}>Top gifters this stream</div>
+          <div style={{ fontWeight: 800, marginBottom: 8 }}>{t('liveRoom.topGiftersTitle')}</div>
           {topGifters.length === 0 ? (
-            <div style={{ color: '#999', fontSize: 13 }}>No gifts yet — be the first!</div>
+            <div style={{ color: '#999', fontSize: 13 }}>{t('liveRoom.noGiftsYetFirst')}</div>
           ) : (
             topGifters.map((g, i) => (
               <div key={g.user?.id || i} style={s.leaderboardRow}>
                 <span style={{ color: '#ffd166', fontWeight: 800, width: 20 }}>#{i + 1}</span>
-                <span style={{ flex: 1 }}>{g.user?.display_name || g.user?.username || 'Someone'}</span>
+                <span style={{ flex: 1 }}>{g.user?.display_name || g.user?.username || t('liveRoom.someoneFallback')}</span>
                 <span style={{ color: '#ffd166' }}>🪙 {g.totalCoins}</span>
               </div>
             ))
@@ -671,13 +673,19 @@ export default function LiveRoom() {
       {showGiftPicker && (
         <div style={s.giftPickerWrap}>
           <div style={s.categoryTabs}>
-            {['romance', 'luxury', 'cosmic', 'power', 'fun'].map((cat) => (
+            {[
+              ['romance', t('liveRoom.catRomance')],
+              ['luxury', t('liveRoom.catLuxury')],
+              ['cosmic', t('liveRoom.catCosmic')],
+              ['power', t('liveRoom.catPower')],
+              ['fun', t('liveRoom.catFun')]
+            ].map(([cat, label]) => (
               <button
                 key={cat}
                 onClick={() => setGiftCategory(cat)}
                 style={{ ...s.categoryTab, ...(giftCategory === cat ? s.categoryTabActive : {}) }}
               >
-                {cat[0].toUpperCase() + cat.slice(1)}
+                {label}
               </button>
             ))}
           </div>
@@ -698,11 +706,11 @@ export default function LiveRoom() {
           <div style={s.confirmPanel} onClick={(e) => e.stopPropagation()}>
             <GiftIcon name={pendingGift.name} glyph={pendingGift.glyph} rarity={pendingGift.rarity} size={72} animated />
             <div style={{ fontWeight: 800, fontSize: 16, marginTop: 8 }}>{pendingGift.name}</div>
-            <div style={{ color: '#999', fontSize: 13, marginBottom: 4 }}>to {room.host?.display_name || room.host?.username}</div>
+            <div style={{ color: '#999', fontSize: 13, marginBottom: 4 }}>{t('liveRoom.toPrefix')} {room.host?.display_name || room.host?.username}</div>
             <div style={{ color: '#ffd166', fontWeight: 700, fontSize: 18, marginBottom: 16 }}>🪙 {pendingGift.coin_price}</div>
             <div style={{ display: 'flex', gap: 8, width: '100%' }}>
-              <button onClick={() => setPendingGift(null)} disabled={sendingGift} style={s.declineBtn}>Cancel</button>
-              <button onClick={confirmSendGift} disabled={sendingGift} style={s.acceptBtn}>{sendingGift ? 'Sending…' : 'Send Gift'}</button>
+              <button onClick={() => setPendingGift(null)} disabled={sendingGift} style={s.declineBtn}>{t('creatorProfile.cancel')}</button>
+              <button onClick={confirmSendGift} disabled={sendingGift} style={s.acceptBtn}>{sendingGift ? t('liveRoom.sendingGift') : t('liveRoom.sendGift')}</button>
             </div>
           </div>
         </div>
@@ -711,9 +719,9 @@ export default function LiveRoom() {
       {showBattlePicker && (
         <div style={s.battlePickerOverlay} onClick={() => setShowBattlePicker(false)}>
           <div style={s.battlePickerPanel} onClick={(e) => e.stopPropagation()}>
-            <div style={{ fontWeight: 800, marginBottom: 10 }}>⚔️ Challenge a live streamer</div>
+            <div style={{ fontWeight: 800, marginBottom: 10 }}>{t('liveRoom.challengeTitle')}</div>
             {challengeableRooms.length === 0 ? (
-              <div style={{ color: '#999', fontSize: 13 }}>No other streamers are live right now.</div>
+              <div style={{ color: '#999', fontSize: 13 }}>{t('liveRoom.noStreamersLive')}</div>
             ) : (
               <div style={{ maxHeight: 320, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {challengeableRooms.map((r) => (
@@ -724,7 +732,7 @@ export default function LiveRoom() {
                 ))}
               </div>
             )}
-            <button onClick={() => setShowBattlePicker(false)} style={{ ...s.declineBtn, marginTop: 12, width: '100%' }}>Cancel</button>
+            <button onClick={() => setShowBattlePicker(false)} style={{ ...s.declineBtn, marginTop: 12, width: '100%' }}>{t('creatorProfile.cancel')}</button>
           </div>
         </div>
       )}
@@ -773,10 +781,10 @@ export default function LiveRoom() {
           <input
             value={messageInput}
             onChange={(e) => setMessageInput(e.target.value)}
-            placeholder="Say something…"
+            placeholder={t('liveRoom.sayPlaceholder')}
             style={s.composerInput}
           />
-          <button type="submit" style={s.sendBtn}>Send</button>
+          <button type="submit" style={s.sendBtn}>{t('liveRoom.send')}</button>
         </form>
       </div>
     </div>

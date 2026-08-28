@@ -7,8 +7,10 @@ import { apiFetch } from '../../lib/api';
 import VerifiedBadge from '../../components/VerifiedBadge';
 import ProfileFrame from '../../components/ProfileFrame';
 import GiftIcon from '../../components/GiftIcon';
+import { useTranslation } from '../../lib/i18n';
 
 export default function CreatorProfile() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { userId } = router.query;
 
@@ -35,7 +37,7 @@ export default function CreatorProfile() {
         apiFetch(`/users/${userId}/follow-status`),
         apiFetch(`/users/${userId}/gifts?limit=24`)
       ]);
-      if (!profileRes.ok) throw new Error('This profile could not be found.');
+      if (!profileRes.ok) throw new Error(t('creatorProfile.errorNotFound'));
       setProfile(await profileRes.json());
       if (followRes.ok) setFollowInfo(await followRes.json());
       if (giftsRes.ok) setGiftWall(await giftsRes.json());
@@ -78,7 +80,7 @@ export default function CreatorProfile() {
   if (loading) {
     return (
       <Layout>
-        <div style={s.wrap}><p style={{ color: '#999' }}>Loading…</p></div>
+        <div style={s.wrap}><p style={{ color: '#999' }}>{t('creatorProfile.loading')}</p></div>
       </Layout>
     );
   }
@@ -87,8 +89,8 @@ export default function CreatorProfile() {
     return (
       <Layout>
         <div style={s.wrap}>
-          <p style={{ color: '#ff6b6b' }}>{error || 'Profile not found'}</p>
-          <Link href="/discover" style={{ color: '#FF6B9D' }}>← Back to Discover</Link>
+          <p style={{ color: '#ff6b6b' }}>{error || t('creatorProfile.profileNotFound')}</p>
+          <Link href="/discover" style={{ color: '#FF6B9D' }}>{t('creatorProfile.backToDiscover')}</Link>
         </div>
       </Layout>
     );
@@ -119,18 +121,18 @@ export default function CreatorProfile() {
               <h1 style={s.name}>{profile.display_name || profile.username}</h1>
               <VerifiedBadge user={profile} size={18} />
             </div>
-            <div style={{ color: '#999', fontSize: 14 }}>@{profile.username} · Level {profile.level || 0}</div>
+            <div style={{ color: '#999', fontSize: 14 }}>@{profile.username} · {t('creatorProfile.levelPrefix')} {profile.level || 0}</div>
             <div style={{ color: '#777', fontSize: 12, marginTop: 2 }}>
-              {followInfo?.followerCount ?? 0} followers · Member since {new Date(profile.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
+              {followInfo?.followerCount ?? 0} {t('creatorProfile.followersSuffix')} · {t('creatorProfile.memberSincePrefix')} {new Date(profile.created_at).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
             </div>
           </div>
 
           {!isSelf && (
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={toggleFollow} disabled={followBusy} style={followInfo?.following ? s.followingBtn : s.followBtn}>
-                {followInfo?.following ? 'Following' : '+ Follow'}
+                {followInfo?.following ? t('creatorProfile.following') : t('creatorProfile.follow')}
               </button>
-              <Link href={`/chat/${profile.id}`} style={s.messageBtn}>Message</Link>
+              <Link href={`/chat/${profile.id}`} style={s.messageBtn}>{t('creatorProfile.message')}</Link>
               <button onClick={() => setShowReport(true)} style={s.reportBtn}>⚑</button>
             </div>
           )}
@@ -140,18 +142,28 @@ export default function CreatorProfile() {
           <div style={s.modalOverlay} onClick={() => { setShowReport(false); setReportSent(false); }}>
             <div style={s.modal} onClick={(e) => e.stopPropagation()}>
               {reportSent ? (
-                <p style={{ textAlign: 'center', color: '#8f8' }}>Report submitted. Our team will review it.</p>
+                <p style={{ textAlign: 'center', color: '#8f8' }}>{t('creatorProfile.reportSubmitted')}</p>
               ) : (
                 <>
-                  <h3 style={{ marginTop: 0 }}>Report {profile.display_name || profile.username}</h3>
+                  <h3 style={{ marginTop: 0 }}>{t('creatorProfile.reportPrefix')} {profile.display_name || profile.username}</h3>
                   <select value={reportCategory} onChange={(e) => setReportCategory(e.target.value)} style={s.reportSelect}>
-                    {['harassment', 'spam', 'nudity_or_sexual_content', 'hate_speech', 'violence', 'scam_or_fraud', 'underage', 'impersonation', 'other'].map((c) => (
-                      <option key={c} value={c}>{c.replace(/_/g, ' ')}</option>
+                    {[
+                      ['harassment', t('creatorProfile.reportCatHarassment')],
+                      ['spam', t('creatorProfile.reportCatSpam')],
+                      ['nudity_or_sexual_content', t('creatorProfile.reportCatNudity')],
+                      ['hate_speech', t('creatorProfile.reportCatHateSpeech')],
+                      ['violence', t('creatorProfile.reportCatViolence')],
+                      ['scam_or_fraud', t('creatorProfile.reportCatScam')],
+                      ['underage', t('creatorProfile.reportCatUnderage')],
+                      ['impersonation', t('creatorProfile.reportCatImpersonation')],
+                      ['other', t('creatorProfile.reportCatOther')]
+                    ].map(([c, label]) => (
+                      <option key={c} value={c}>{label}</option>
                     ))}
                   </select>
                   <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
-                    <button onClick={() => setShowReport(false)} style={s.cancelReportBtn}>Cancel</button>
-                    <button onClick={submitReport} style={s.submitReportBtn}>Submit Report</button>
+                    <button onClick={() => setShowReport(false)} style={s.cancelReportBtn}>{t('creatorProfile.cancel')}</button>
+                    <button onClick={submitReport} style={s.submitReportBtn}>{t('creatorProfile.submitReport')}</button>
                   </div>
                 </>
               )}
@@ -161,7 +173,7 @@ export default function CreatorProfile() {
 
         {profile.isLive && (
           <Link href={`/live/${profile.liveRoomId}`} style={s.liveBanner}>
-            🔴 Live now — tap to watch
+            {t('creatorProfile.liveNowBanner')}
           </Link>
         )}
 
@@ -175,7 +187,7 @@ export default function CreatorProfile() {
 
         {profile.badges?.length > 0 && (
           <div style={s.section}>
-            <h3 style={s.sectionTitle}>🏅 Achievements</h3>
+            <h3 style={s.sectionTitle}>{t('creatorProfile.achievements')}</h3>
             <div style={s.chipRow}>
               {profile.badges.map((b) => <span key={b} style={s.badgeChip}>{b}</span>)}
             </div>
@@ -183,16 +195,16 @@ export default function CreatorProfile() {
         )}
 
         <div style={s.section}>
-          <h3 style={s.sectionTitle}>🎁 Gift Wall{giftWall?.totalReceived ? ` — ${giftWall.totalReceived.toLocaleString()} coins received` : ''}</h3>
+          <h3 style={s.sectionTitle}>{t('creatorProfile.giftWall')}{giftWall?.totalReceived ? ` — ${giftWall.totalReceived.toLocaleString()} ${t('creatorProfile.coinsReceivedSuffix')}` : ''}</h3>
           {!giftWall || giftWall.gifts.length === 0 ? (
-            <p style={{ color: '#777', fontSize: 13 }}>No gifts received yet.</p>
+            <p style={{ color: '#777', fontSize: 13 }}>{t('creatorProfile.noGiftsYet')}</p>
           ) : (
             <div style={s.giftGrid}>
               {giftWall.gifts.map((g) => (
                 <div key={g.id} style={s.giftCard}>
                   <GiftIcon name={g.gift?.name} glyph={g.gift?.glyph} rarity={g.gift?.rarity} size={36} />
                   <div style={{ fontSize: 11, color: '#ccc', marginTop: 4, textAlign: 'center' }}>{g.gift?.name}</div>
-                  <div style={{ fontSize: 10, color: '#777' }}>from {g.sender?.display_name || g.sender?.username}</div>
+                  <div style={{ fontSize: 10, color: '#777' }}>{t('creatorProfile.fromPrefix')} {g.sender?.display_name || g.sender?.username}</div>
                 </div>
               ))}
             </div>

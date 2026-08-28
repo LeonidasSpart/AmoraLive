@@ -3,8 +3,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { apiFetch } from '../../../lib/api';
+import { useTranslation } from '../../../lib/i18n';
 
 export default function VideoDate() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { matchId } = router.query;
 
@@ -37,11 +39,11 @@ export default function VideoDate() {
           return null;
         };
         const LK = await waitForClient();
-        if (!LK) throw new Error('Video could not load — please refresh.');
+        if (!LK) throw new Error(t('videoDate.videoLoadError'));
 
         const tokenRes = await apiFetch(`/matches/${matchId}/video-date/token`);
         const tokenData = await tokenRes.json().catch(() => ({}));
-        if (!tokenRes.ok) throw new Error(tokenData.error || 'Unable to start this video date.');
+        if (!tokenRes.ok) throw new Error(tokenData.error || t('videoDate.startError'));
         if (!active) return;
 
         const room = new LK.Room({ adaptiveStream: true, dynacast: true });
@@ -90,11 +92,11 @@ export default function VideoDate() {
         <div style={s.page}>
           <Link href="/matches" style={s.closeBtn}>✕</Link>
           <div style={s.intro}>
-            <h2 style={{ margin: 0 }}>Ready for your video date?</h2>
+            <h2 style={{ margin: 0 }}>{t('videoDate.readyTitle')}</h2>
             <p style={{ color: '#aaa', maxWidth: 260, textAlign: 'center' }}>
-              This will turn on your camera and microphone so you and your match can see each other.
+              {t('videoDate.readyBody')}
             </p>
-            <button type="button" onClick={() => setStarted(true)} style={s.startBtn}>Start video date</button>
+            <button type="button" onClick={() => setStarted(true)} style={s.startBtn}>{t('videoDate.startButton')}</button>
           </div>
         </div>
       </div>
@@ -107,7 +109,7 @@ export default function VideoDate() {
         <Link href="/matches" style={s.closeBtn}>✕</Link>
 
         <div ref={remoteRef} style={s.remoteVideo}>
-          {!error && !connected && <div style={{ color: '#999', textAlign: 'center' }}>Connecting…</div>}
+          {!error && !connected && <div style={{ color: '#999', textAlign: 'center' }}>{t('videoDate.connecting')}</div>}
           {error && <div style={{ color: '#ff6b6b', textAlign: 'center', padding: 20 }}>{error}</div>}
         </div>
 
