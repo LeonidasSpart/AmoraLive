@@ -4,19 +4,23 @@ import { View, Text, Pressable, StyleSheet, FlatList, ActivityIndicator, Image }
 import { theme } from "../src/theme";
 import { api, API_URL, getValidAccessToken } from "../src/api/client";
 import AppShell from "../src/AppShell";
+import { useTranslation } from "../src/i18n";
 
 type EventScore = {
   user_id:string; event_id:string; team_side:string; total_gifts_sent:number; total_gifts_received:number;
   user:{username:string;display_name:string;profile_photo?:string|null};
 };
 
-function formatTimeLeft(seconds:number) {
-  if (seconds <= 0) return "Ended";
+function formatTimeLeft(seconds:number, t:(k:string)=>string) {
+  if (seconds <= 0) return t("eventsScreen.ended");
   const d=Math.floor(seconds/86400), h=Math.floor((seconds%86400)/3600), m=Math.floor((seconds%3600)/60);
-  if(d>0)return `${d}d ${h}h left`; if(h>0)return `${h}h ${m}m left`; return `${m}m left`;
+  if(d>0)return `${d}${t("eventsScreen.dayUnit")} ${h}${t("eventsScreen.hourUnit")} ${t("eventsScreen.left")}`;
+  if(h>0)return `${h}${t("eventsScreen.hourUnit")} ${m}${t("eventsScreen.minuteUnit")} ${t("eventsScreen.left")}`;
+  return `${m}${t("eventsScreen.minuteUnit")} ${t("eventsScreen.left")}`;
 }
 
 export default function Events() {
+  const { t } = useTranslation();
   const [event,setEvent]=useState<any>(null),[myTeam,setMyTeam]=useState<string|null>(null),[scores,setScores]=useState<EventScore[]>([]);
   const [teamTotals,setTeamTotals]=useState<Record<string,number>>({}),[loading,setLoading]=useState(true),[joining,setJoining]=useState(false),[error,setError]=useState(""),[timeLeft,setTimeLeft]=useState(0);
   const socketRef=useRef<any>(null);
@@ -28,7 +32,7 @@ export default function Events() {
       const board=await api.eventLeaderboard(data.id);
       setScores(board.scores||[]);setTeamTotals(board.teamTotals||{});setError("");
     }catch(e:any){
-      if(e.status===404)setEvent(null); else setError(e.message||"Unable to load the current event.");
+      if(e.status===404)setEvent(null); else setError(e.message||t("eventsScreen.errorLoad"));
     }finally{setLoading(false);}
   },[]);
 
@@ -52,22 +56,22 @@ export default function Events() {
   const joinTeam=async(team:string)=>{
     if(!event)return;setJoining(true);setError("");
     try{await api.joinEventTeam(event.id,team);setMyTeam(team);}
-    catch(e:any){setError(e.message||"Unable to join this team.");}
+    catch(e:any){setError(e.message||t("eventsScreen.errorJoinTeam"));}
     finally{setJoining(false);}
   };
 
   const teamA=event?.teams?.[0],teamB=event?.teams?.[1],totalA=teamTotals[teamA]||0,totalB=teamTotals[teamB]||0,totalAll=totalA+totalB||1;
 
-  if(loading)return <AppShell><View style={[s.page,s.center]}><ActivityIndicator color={theme.pink}/><Text style={s.muted}>Opening the event…</Text></View></AppShell>;
+  if(loading)return <AppShell><View style={[s.page,s.center]}><ActivityIndicator color={theme.pink}/><Text style={s.muted}>{t("eventsScreen.openingEvent")}</Text></View></AppShell>;
 
   return <AppShell>
     <View style={s.page}>
       <View style={s.header}>
         <Pressable style={s.backBtn} onPress={()=>router.back()}><Text style={s.back}>‹</Text></Pressable>
-        <View><Text style={s.kicker}>AMORA EVENTS</Text><Text style={s.headerTitle}>Team Battle</Text></View>
+        <View><Text style={s.kicker}>{t("eventsScreen.kicker")}</Text><Text style={s.headerTitle}>{t("eventsScreen.headerTitle")}</Text></View>
       </View>
 
-      {!event ? <View style={[s.center,{flex:1}]}><Text style={s.trophy}>🏆</Text><Text style={s.emptyTitle}>No live event right now</Text><Text style={s.muted}>Check back soon for the next Amora battle.</Text></View> : (
+      {!event ? <View style={[s.center,{flex:1}]}><Text style={s.trophy}>🏆</Text><Text style={s.emptyTitle}>{t("eventsScreen.noLiveEvent")}</Text><Text style={s.muted}>{t("eventsScreen.checkBackSoon")}</Text></View> : (
         <FlatList
           data={scores.slice(0,30)}
           keyExtractor={(item)=>`${item.user_id}-${item.event_id}`}
@@ -79,36 +83,36 @@ export default function Events() {
                 {event.banner_url?<Image source={{uri:event.banner_url}} style={s.banner}/>:<View style={s.bannerFallback}><Text style={s.trophy}>🏆</Text></View>}
                 <View style={s.heroShade}/>
                 <View style={s.heroCopy}>
-                  <Text style={s.eventKicker}>LIVE EVENT</Text>
+                  <Text style={s.eventKicker}>{t("eventsScreen.liveEventKicker")}</Text>
                   <Text style={s.title}>{event.title}</Text>
                   {!!event.description&&<Text style={s.description}>{event.description}</Text>}
-                  <View style={s.timer}><Text style={s.timerText}>⏱ {formatTimeLeft(timeLeft)}</Text></View>
+                  <View style={s.timer}><Text style={s.timerText}>⏱ {formatTimeLeft(timeLeft,t)}</Text></View>
                 </View>
               </View>
 
               {!!error&&<Text style={s.error}>{error}</Text>}
 
               {!myTeam ? <View style={s.joinCard}>
-                <Text style={s.joinTitle}>Pick your side</Text>
-                <Text style={s.mutedLeft}>Send gifts to help your team win.</Text>
+                <Text style={s.joinTitle}>{t("eventsScreen.pickYourSide")}</Text>
+                <Text style={s.mutedLeft}>{t("eventsScreen.sendGiftsHelp")}</Text>
                 <View style={s.teamRow}>{(event.teams||[]).map((team:string)=><Pressable key={team} style={s.teamBtn} disabled={joining} onPress={()=>joinTeam(team)}><Text style={s.teamBtnText}>{team}</Text></Pressable>)}</View>
-              </View> : <View style={s.myTeam}><Text style={s.myTeamKicker}>YOUR TEAM</Text><Text style={s.myTeamText}>{myTeam}</Text><Text style={s.mutedLeft}>Your gifts now count toward this team’s score.</Text></View>}
+              </View> : <View style={s.myTeam}><Text style={s.myTeamKicker}>{t("eventsScreen.yourTeamKicker")}</Text><Text style={s.myTeamText}>{myTeam}</Text><Text style={s.mutedLeft}>{t("eventsScreen.giftsCountToward")}</Text></View>}
 
               <View style={s.scoreCard}>
-                <View style={s.scoreTop}><Text style={s.scoreTitle}>Battle score</Text><Text style={s.scoreHint}>LIVE</Text></View>
+                <View style={s.scoreTop}><Text style={s.scoreTitle}>{t("eventsScreen.battleScore")}</Text><Text style={s.scoreHint}>{t("eventsScreen.live")}</Text></View>
                 <View style={s.scoreBar}><View style={[s.scoreFill,{width:`${(totalA/totalAll)*100}%`}]}/></View>
                 <View style={s.scoreLabels}><Text style={s.scoreLabel}>{teamA}: <Text style={s.scoreValue}>{totalA}</Text></Text><Text style={s.scoreLabel}>{teamB}: <Text style={s.scoreValue}>{totalB}</Text></Text></View>
               </View>
 
-              <Text style={s.sectionTitle}>Top contributors</Text>
-              {scores.length===0&&<Text style={s.mutedLeft}>No one has scored yet — be the first!</Text>}
+              <Text style={s.sectionTitle}>{t("eventsScreen.topContributors")}</Text>
+              {scores.length===0&&<Text style={s.mutedLeft}>{t("eventsScreen.noOneScoredYet")}</Text>}
             </View>
           }
           renderItem={({item,index})=><View style={s.listItem}>
             <Text style={s.rank}>#{index+1}</Text>
             <View style={s.contribAvatar}>{item.user?.profile_photo?<Image source={{uri:item.user.profile_photo}} style={s.contribImage}/>:<Text style={s.contribLetter}>{(item.user?.display_name||"A")[0]}</Text>}</View>
             <View style={{flex:1}}><Text style={s.contribName}>{item.user?.display_name||item.user?.username}</Text><Text style={s.teamTag}>{item.team_side}</Text></View>
-            <Text style={s.points}>{item.total_gifts_sent+item.total_gifts_received} pts</Text>
+            <Text style={s.points}>{item.total_gifts_sent+item.total_gifts_received} {t("eventsScreen.ptsSuffix")}</Text>
           </View>}
         />
       )}

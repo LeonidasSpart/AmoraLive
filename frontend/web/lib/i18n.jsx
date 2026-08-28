@@ -130,6 +130,37 @@ export const translations = {
       noReportsSubmitted: "You haven't submitted any reports.",
       logOutAllOtherDevices: 'Log out all other devices',
       unknownDevice: 'Unknown device', unknownLocation: 'Unknown location', signedInPrefix: 'signed in', revoke: 'Revoke'
+    },
+    chat: {
+      failedLoadConversations: 'Failed to load conversations',
+      unableToLoadMessages: 'Unable to load messages',
+      openingMessages: 'Opening your private messages…',
+      eyebrow: 'AMORA PRIVATE', title: 'Messages', subtitle: 'Private conversations, beautifully kept.',
+      discoverLink: 'Discover', retry: 'Retry',
+      noConversationsYet: 'No conversations yet', startMatchSayHello: 'Start a match and say hello.', discoverPeople: 'Discover people',
+      sentPhotoOrVideo: 'Sent a photo or video', justNow: 'Just now'
+    },
+    notifications: {
+      title: 'Notifications', markingEllipsis: 'Marking…', markAllRead: 'Mark all read',
+      allCaughtUp: "You're all caught up. Nothing here yet.", dismiss: 'Dismiss',
+      errorLoad: 'Unable to load notifications.', someoneFallback: 'Someone',
+      newMatch: 'You have a new match!', superLikedYou: 'super liked you!',
+      sentMessage: 'sent you a message:', youReceived: 'You received', giftFallback: 'a gift',
+      levelUpTo: "Level up! You're now Level", earnedBadgePrefix: '— earned the', earnedBadgeSuffix: 'badge',
+      dailyRewardClaimed: 'Daily reward claimed:', coinsWord: 'coins', dayStreak: 'day streak',
+      yourWord: 'Your', monthlyBonusArrived: 'monthly bonus arrived:',
+      missionComplete: 'Mission complete:', missionFallback: 'a mission', xpWord: 'XP',
+      yourWithdrawalOf: 'Your withdrawal of', wasApproved: 'was approved.',
+      wasRejected: 'was rejected — the coins were refunded.', hasBeenPaid: 'has been paid.',
+      notificationFallback: 'Notification', justNow: 'just now', minAgo: 'm ago', hAgo: 'h ago', dAgo: 'd ago'
+    },
+    events: {
+      ended: 'Ended', dayUnit: 'd', hourUnit: 'h', minuteUnit: 'm', left: 'left',
+      errorLoad: 'Unable to load the current event.', errorJoinTeam: 'Unable to join this team.',
+      noLiveEvent: 'No live event right now. Check back soon!',
+      pickSide: 'Pick a side to join the battle:',
+      youreOnTeamPrefix: "You're on Team", youreOnTeamSuffix: "— send gifts to boost your team's score!",
+      topContributors: 'Top contributors', noOneScoredYet: 'No one has scored yet — be the first!', ptsSuffix: 'pts'
     }
   },
 
@@ -241,6 +272,37 @@ export const translations = {
       noReportsSubmitted: 'No has enviado ningún reporte.',
       logOutAllOtherDevices: 'Cerrar sesión en todos los demás dispositivos',
       unknownDevice: 'Dispositivo desconocido', unknownLocation: 'Ubicación desconocida', signedInPrefix: 'sesión iniciada', revoke: 'Revocar'
+    },
+    chat: {
+      failedLoadConversations: 'Error al cargar las conversaciones',
+      unableToLoadMessages: 'No se pudieron cargar los mensajes',
+      openingMessages: 'Abriendo tus mensajes privados…',
+      eyebrow: 'AMORA PRIVADO', title: 'Mensajes', subtitle: 'Conversaciones privadas, cuidadas con esmero.',
+      discoverLink: 'Descubrir', retry: 'Reintentar',
+      noConversationsYet: 'Aún no hay conversaciones', startMatchSayHello: 'Haz un match y saluda.', discoverPeople: 'Descubrir personas',
+      sentPhotoOrVideo: 'Envió una foto o video', justNow: 'Justo ahora'
+    },
+    notifications: {
+      title: 'Notificaciones', markingEllipsis: 'Marcando…', markAllRead: 'Marcar todo como leído',
+      allCaughtUp: 'Estás al día. Nada nuevo por aquí.', dismiss: 'Descartar',
+      errorLoad: 'No se pudieron cargar las notificaciones.', someoneFallback: 'Alguien',
+      newMatch: '¡Tienes un nuevo match!', superLikedYou: '¡te dio súper like!',
+      sentMessage: 'te envió un mensaje:', youReceived: 'Recibiste', giftFallback: 'un regalo',
+      levelUpTo: '¡Subiste de nivel! Ahora eres nivel', earnedBadgePrefix: '— obtuviste la insignia', earnedBadgeSuffix: '',
+      dailyRewardClaimed: 'Recompensa diaria reclamada:', coinsWord: 'monedas', dayStreak: 'días de racha',
+      yourWord: 'Tu', monthlyBonusArrived: 'bono mensual llegó:',
+      missionComplete: 'Misión completada:', missionFallback: 'una misión', xpWord: 'XP',
+      yourWithdrawalOf: 'Tu retiro de', wasApproved: 'fue aprobado.',
+      wasRejected: 'fue rechazado — las monedas fueron reembolsadas.', hasBeenPaid: 'ha sido pagado.',
+      notificationFallback: 'Notificación', justNow: 'justo ahora', minAgo: 'm', hAgo: 'h', dAgo: 'd'
+    },
+    events: {
+      ended: 'Finalizado', dayUnit: 'd', hourUnit: 'h', minuteUnit: 'm', left: 'restante',
+      errorLoad: 'No se pudo cargar el evento actual.', errorJoinTeam: 'No se pudo unir a este equipo.',
+      noLiveEvent: 'No hay eventos en vivo ahora. ¡Vuelve pronto!',
+      pickSide: 'Elige un bando para unirte a la batalla:',
+      youreOnTeamPrefix: 'Estás en el equipo', youreOnTeamSuffix: '— ¡envía regalos para impulsar la puntuación de tu equipo!',
+      topContributors: 'Principales colaboradores', noOneScoredYet: 'Nadie ha puntuado todavía — ¡sé el primero!', ptsSuffix: 'pts'
     }
   },
 
@@ -352,6 +414,37 @@ export const translations = {
       noReportsSubmitted: 'Você não enviou nenhum relatório.',
       logOutAllOtherDevices: 'Encerrar sessão em todos os outros dispositivos',
       unknownDevice: 'Dispositivo desconhecido', unknownLocation: 'Localização desconhecida', signedInPrefix: 'sessão iniciada em', revoke: 'Revogar'
+    },
+    chat: {
+      failedLoadConversations: 'Falha ao carregar as conversas',
+      unableToLoadMessages: 'Não foi possível carregar as mensagens',
+      openingMessages: 'Abrindo suas mensagens privadas…',
+      eyebrow: 'AMORA PRIVADO', title: 'Mensagens', subtitle: 'Conversas privadas, cuidadas com carinho.',
+      discoverLink: 'Descobrir', retry: 'Tentar novamente',
+      noConversationsYet: 'Ainda sem conversas', startMatchSayHello: 'Combine com alguém e diga olá.', discoverPeople: 'Descobrir pessoas',
+      sentPhotoOrVideo: 'Enviou uma foto ou vídeo', justNow: 'Agora mesmo'
+    },
+    notifications: {
+      title: 'Notificações', markingEllipsis: 'Marcando…', markAllRead: 'Marcar tudo como lido',
+      allCaughtUp: 'Você está em dia. Nada novo por aqui.', dismiss: 'Dispensar',
+      errorLoad: 'Não foi possível carregar as notificações.', someoneFallback: 'Alguém',
+      newMatch: 'Você tem uma nova combinação!', superLikedYou: 'te deu super like!',
+      sentMessage: 'te enviou uma mensagem:', youReceived: 'Você recebeu', giftFallback: 'um presente',
+      levelUpTo: 'Subiu de nível! Agora você é nível', earnedBadgePrefix: '— conquistou o emblema', earnedBadgeSuffix: '',
+      dailyRewardClaimed: 'Recompensa diária resgatada:', coinsWord: 'moedas', dayStreak: 'dias seguidos',
+      yourWord: 'Seu', monthlyBonusArrived: 'bônus mensal chegou:',
+      missionComplete: 'Missão concluída:', missionFallback: 'uma missão', xpWord: 'XP',
+      yourWithdrawalOf: 'Seu saque de', wasApproved: 'foi aprovado.',
+      wasRejected: 'foi rejeitado — as moedas foram reembolsadas.', hasBeenPaid: 'foi pago.',
+      notificationFallback: 'Notificação', justNow: 'agora mesmo', minAgo: 'm atrás', hAgo: 'h atrás', dAgo: 'd atrás'
+    },
+    events: {
+      ended: 'Encerrado', dayUnit: 'd', hourUnit: 'h', minuteUnit: 'm', left: 'restante',
+      errorLoad: 'Não foi possível carregar o evento atual.', errorJoinTeam: 'Não foi possível entrar nesta equipe.',
+      noLiveEvent: 'Nenhum evento ao vivo agora. Volte em breve!',
+      pickSide: 'Escolha um lado para entrar na batalha:',
+      youreOnTeamPrefix: 'Você está na equipe', youreOnTeamSuffix: '— envie presentes para aumentar a pontuação da sua equipe!',
+      topContributors: 'Principais colaboradores', noOneScoredYet: 'Ninguém pontuou ainda — seja o primeiro!', ptsSuffix: 'pts'
     }
   },
 
@@ -463,6 +556,37 @@ export const translations = {
       noReportsSubmitted: "Vous n'avez soumis aucun signalement.",
       logOutAllOtherDevices: 'Déconnecter tous les autres appareils',
       unknownDevice: 'Appareil inconnu', unknownLocation: 'Lieu inconnu', signedInPrefix: 'connecté le', revoke: 'Révoquer'
+    },
+    chat: {
+      failedLoadConversations: 'Échec du chargement des conversations',
+      unableToLoadMessages: 'Impossible de charger les messages',
+      openingMessages: 'Ouverture de vos messages privés…',
+      eyebrow: 'AMORA PRIVÉ', title: 'Messages', subtitle: 'Des conversations privées, joliment tenues.',
+      discoverLink: 'Découvrir', retry: 'Réessayer',
+      noConversationsYet: 'Aucune conversation pour le moment', startMatchSayHello: 'Faites un match et dites bonjour.', discoverPeople: 'Découvrir des personnes',
+      sentPhotoOrVideo: 'A envoyé une photo ou une vidéo', justNow: "À l'instant"
+    },
+    notifications: {
+      title: 'Notifications', markingEllipsis: 'Marquage…', markAllRead: 'Tout marquer comme lu',
+      allCaughtUp: 'Vous êtes à jour. Rien de nouveau ici.', dismiss: 'Ignorer',
+      errorLoad: 'Impossible de charger les notifications.', someoneFallback: "Quelqu'un",
+      newMatch: 'Vous avez un nouveau match !', superLikedYou: 'vous a super liké !',
+      sentMessage: 'vous a envoyé un message :', youReceived: 'Vous avez reçu', giftFallback: 'un cadeau',
+      levelUpTo: 'Niveau supérieur ! Vous êtes maintenant niveau', earnedBadgePrefix: '— a obtenu le badge', earnedBadgeSuffix: '',
+      dailyRewardClaimed: 'Récompense quotidienne récupérée :', coinsWord: 'pièces', dayStreak: 'jours de suite',
+      yourWord: 'Votre', monthlyBonusArrived: 'bonus mensuel est arrivé :',
+      missionComplete: 'Mission accomplie :', missionFallback: 'une mission', xpWord: 'XP',
+      yourWithdrawalOf: 'Votre retrait de', wasApproved: 'a été approuvé.',
+      wasRejected: 'a été rejeté — les pièces ont été remboursées.', hasBeenPaid: 'a été payé.',
+      notificationFallback: 'Notification', justNow: "à l'instant", minAgo: 'min', hAgo: 'h', dAgo: 'j'
+    },
+    events: {
+      ended: 'Terminé', dayUnit: 'j', hourUnit: 'h', minuteUnit: 'min', left: 'restant',
+      errorLoad: "Impossible de charger l'événement actuel.", errorJoinTeam: 'Impossible de rejoindre cette équipe.',
+      noLiveEvent: 'Aucun événement en direct pour le moment. Revenez bientôt !',
+      pickSide: 'Choisissez un camp pour rejoindre la bataille :',
+      youreOnTeamPrefix: "Vous êtes dans l'équipe", youreOnTeamSuffix: '— envoyez des cadeaux pour booster le score de votre équipe !',
+      topContributors: 'Meilleurs contributeurs', noOneScoredYet: "Personne n'a encore marqué de points — soyez le premier !", ptsSuffix: 'pts'
     }
   },
 
@@ -574,6 +698,37 @@ export const translations = {
       noReportsSubmitted: 'Du hast noch keine Meldungen eingereicht.',
       logOutAllOtherDevices: 'Auf allen anderen Geräten abmelden',
       unknownDevice: 'Unbekanntes Gerät', unknownLocation: 'Unbekannter Standort', signedInPrefix: 'angemeldet am', revoke: 'Widerrufen'
+    },
+    chat: {
+      failedLoadConversations: 'Unterhaltungen konnten nicht geladen werden',
+      unableToLoadMessages: 'Nachrichten konnten nicht geladen werden',
+      openingMessages: 'Deine privaten Nachrichten werden geöffnet…',
+      eyebrow: 'AMORA PRIVAT', title: 'Nachrichten', subtitle: 'Private Unterhaltungen, liebevoll aufbewahrt.',
+      discoverLink: 'Entdecken', retry: 'Erneut versuchen',
+      noConversationsYet: 'Noch keine Unterhaltungen', startMatchSayHello: 'Finde ein Match und sag Hallo.', discoverPeople: 'Personen entdecken',
+      sentPhotoOrVideo: 'Hat ein Foto oder Video gesendet', justNow: 'Gerade eben'
+    },
+    notifications: {
+      title: 'Benachrichtigungen', markingEllipsis: 'Wird markiert…', markAllRead: 'Alle als gelesen markieren',
+      allCaughtUp: 'Du bist auf dem neuesten Stand. Nichts Neues hier.', dismiss: 'Verwerfen',
+      errorLoad: 'Benachrichtigungen konnten nicht geladen werden.', someoneFallback: 'Jemand',
+      newMatch: 'Du hast ein neues Match!', superLikedYou: 'hat dir ein Super-Like gegeben!',
+      sentMessage: 'hat dir eine Nachricht geschickt:', youReceived: 'Du hast erhalten', giftFallback: 'ein Geschenk',
+      levelUpTo: 'Level aufgestiegen! Du bist jetzt Level', earnedBadgePrefix: '— hat das Abzeichen', earnedBadgeSuffix: 'verdient',
+      dailyRewardClaimed: 'Tägliche Belohnung abgeholt:', coinsWord: 'Coins', dayStreak: 'Tage in Folge',
+      yourWord: 'Dein', monthlyBonusArrived: 'monatlicher Bonus ist angekommen:',
+      missionComplete: 'Mission abgeschlossen:', missionFallback: 'eine Mission', xpWord: 'XP',
+      yourWithdrawalOf: 'Deine Auszahlung von', wasApproved: 'wurde genehmigt.',
+      wasRejected: 'wurde abgelehnt — die Coins wurden zurückerstattet.', hasBeenPaid: 'wurde ausgezahlt.',
+      notificationFallback: 'Benachrichtigung', justNow: 'gerade eben', minAgo: 'Min.', hAgo: 'Std.', dAgo: 'Tg.'
+    },
+    events: {
+      ended: 'Beendet', dayUnit: 'T', hourUnit: 'Std', minuteUnit: 'Min', left: 'übrig',
+      errorLoad: 'Das aktuelle Event konnte nicht geladen werden.', errorJoinTeam: 'Dieses Team konnte nicht beigetreten werden.',
+      noLiveEvent: 'Gerade kein Live-Event. Schau bald wieder vorbei!',
+      pickSide: 'Wähle eine Seite, um an der Schlacht teilzunehmen:',
+      youreOnTeamPrefix: 'Du bist in Team', youreOnTeamSuffix: '— sende Geschenke, um den Punktestand deines Teams zu steigern!',
+      topContributors: 'Top-Beitragende', noOneScoredYet: 'Noch niemand hat gepunktet — sei der Erste!', ptsSuffix: 'Pkt.'
     }
   },
 
@@ -685,6 +840,37 @@ export const translations = {
       noReportsSubmitted: 'لم تقدم أي بلاغات.',
       logOutAllOtherDevices: 'تسجيل الخروج من جميع الأجهزة الأخرى',
       unknownDevice: 'جهاز غير معروف', unknownLocation: 'موقع غير معروف', signedInPrefix: 'تم تسجيل الدخول في', revoke: 'إلغاء'
+    },
+    chat: {
+      failedLoadConversations: 'فشل تحميل المحادثات',
+      unableToLoadMessages: 'تعذر تحميل الرسائل',
+      openingMessages: 'جارٍ فتح رسائلك الخاصة…',
+      eyebrow: 'أمورا الخاص', title: 'الرسائل', subtitle: 'محادثات خاصة، محفوظة بعناية.',
+      discoverLink: 'استكشاف', retry: 'إعادة المحاولة',
+      noConversationsYet: 'لا توجد محادثات بعد', startMatchSayHello: 'حقق تطابقًا وقل مرحبًا.', discoverPeople: 'استكشاف الأشخاص',
+      sentPhotoOrVideo: 'أرسل صورة أو فيديو', justNow: 'الآن'
+    },
+    notifications: {
+      title: 'الإشعارات', markingEllipsis: 'جارٍ التحديد…', markAllRead: 'تحديد الكل كمقروء',
+      allCaughtUp: 'أنت على اطلاع كامل. لا جديد هنا.', dismiss: 'إغلاق',
+      errorLoad: 'تعذر تحميل الإشعارات.', someoneFallback: 'شخص ما',
+      newMatch: 'لديك تطابق جديد!', superLikedYou: 'أعجب بك إعجابًا فائقًا!',
+      sentMessage: 'أرسل لك رسالة:', youReceived: 'لقد استلمت', giftFallback: 'هدية',
+      levelUpTo: 'ارتقيت مستوى! أنت الآن في المستوى', earnedBadgePrefix: '— حصلت على شارة', earnedBadgeSuffix: '',
+      dailyRewardClaimed: 'تم استلام المكافأة اليومية:', coinsWord: 'عملة', dayStreak: 'أيام متتالية',
+      yourWord: 'مكافأتك', monthlyBonusArrived: 'الشهرية وصلت:',
+      missionComplete: 'اكتملت المهمة:', missionFallback: 'مهمة', xpWord: 'نقطة خبرة',
+      yourWithdrawalOf: 'طلب سحبك بقيمة', wasApproved: 'تمت الموافقة عليه.',
+      wasRejected: 'تم رفضه — تم استرداد العملات.', hasBeenPaid: 'تم دفعه.',
+      notificationFallback: 'إشعار', justNow: 'الآن', minAgo: 'د', hAgo: 'س', dAgo: 'ي'
+    },
+    events: {
+      ended: 'انتهى', dayUnit: 'ي', hourUnit: 'س', minuteUnit: 'د', left: 'متبقٍ',
+      errorLoad: 'تعذر تحميل الفعالية الحالية.', errorJoinTeam: 'تعذر الانضمام إلى هذا الفريق.',
+      noLiveEvent: 'لا توجد فعالية مباشرة الآن. عد قريبًا!',
+      pickSide: 'اختر جانبًا للانضمام إلى المعركة:',
+      youreOnTeamPrefix: 'أنت في فريق', youreOnTeamSuffix: '— أرسل الهدايا لتعزيز نقاط فريقك!',
+      topContributors: 'أفضل المساهمين', noOneScoredYet: 'لم يسجل أحد بعد — كن الأول!', ptsSuffix: 'نقطة'
     }
   },
 
@@ -796,6 +982,37 @@ export const translations = {
       noReportsSubmitted: 'आपने कोई रिपोर्ट सबमिट नहीं की है।',
       logOutAllOtherDevices: 'सभी अन्य डिवाइस से लॉग आउट करें',
       unknownDevice: 'अज्ञात डिवाइस', unknownLocation: 'अज्ञात स्थान', signedInPrefix: 'साइन इन किया गया', revoke: 'रद्द करें'
+    },
+    chat: {
+      failedLoadConversations: 'बातचीत लोड करने में विफल',
+      unableToLoadMessages: 'संदेश लोड नहीं हो सके',
+      openingMessages: 'आपके निजी संदेश खोले जा रहे हैं…',
+      eyebrow: 'अमोरा प्राइवेट', title: 'संदेश', subtitle: 'निजी बातचीत, खूबसूरती से संजोई गई।',
+      discoverLink: 'खोजें', retry: 'पुनः प्रयास करें',
+      noConversationsYet: 'अभी तक कोई बातचीत नहीं', startMatchSayHello: 'मैच करें और नमस्ते कहें।', discoverPeople: 'लोगों को खोजें',
+      sentPhotoOrVideo: 'फोटो या वीडियो भेजा', justNow: 'अभी अभी'
+    },
+    notifications: {
+      title: 'सूचनाएं', markingEllipsis: 'चिह्नित किया जा रहा है…', markAllRead: 'सभी को पढ़ा हुआ चिह्नित करें',
+      allCaughtUp: 'आप पूरी तरह अपडेट हैं। यहां कुछ नया नहीं है।', dismiss: 'हटाएं',
+      errorLoad: 'सूचनाएं लोड नहीं हो सकीं।', someoneFallback: 'किसी ने',
+      newMatch: 'आपका एक नया मैच है!', superLikedYou: 'ने आपको सुपर लाइक किया!',
+      sentMessage: 'ने आपको संदेश भेजा:', youReceived: 'आपको मिला', giftFallback: 'एक गिफ्ट',
+      levelUpTo: 'लेवल अप! अब आप लेवल पर हैं', earnedBadgePrefix: '— आपको बैज मिला', earnedBadgeSuffix: '',
+      dailyRewardClaimed: 'दैनिक पुरस्कार प्राप्त हुआ:', coinsWord: 'कॉइन', dayStreak: 'दिनों की स्ट्रीक',
+      yourWord: 'आपका', monthlyBonusArrived: 'मासिक बोनस आ गया:',
+      missionComplete: 'मिशन पूरा हुआ:', missionFallback: 'एक मिशन', xpWord: 'XP',
+      yourWithdrawalOf: 'आपकी निकासी', wasApproved: 'स्वीकृत हो गई।',
+      wasRejected: 'अस्वीकृत हो गई — कॉइन वापस कर दिए गए।', hasBeenPaid: 'का भुगतान हो गया।',
+      notificationFallback: 'सूचना', justNow: 'अभी अभी', minAgo: 'मिनट पहले', hAgo: 'घंटे पहले', dAgo: 'दिन पहले'
+    },
+    events: {
+      ended: 'समाप्त', dayUnit: 'दि', hourUnit: 'घं', minuteUnit: 'मि', left: 'शेष',
+      errorLoad: 'वर्तमान इवेंट लोड नहीं हो सका।', errorJoinTeam: 'इस टीम में शामिल नहीं हो सके।',
+      noLiveEvent: 'अभी कोई लाइव इवेंट नहीं है। जल्द ही वापस देखें!',
+      pickSide: 'लड़ाई में शामिल होने के लिए एक पक्ष चुनें:',
+      youreOnTeamPrefix: 'आप टीम में हैं', youreOnTeamSuffix: '— अपनी टीम का स्कोर बढ़ाने के लिए गिफ्ट भेजें!',
+      topContributors: 'शीर्ष योगदानकर्ता', noOneScoredYet: 'अभी तक किसी ने स्कोर नहीं किया — पहले बनें!', ptsSuffix: 'अंक'
     }
   },
 
@@ -907,6 +1124,37 @@ export const translations = {
       noReportsSubmitted: 'Anda belum mengirimkan laporan apa pun.',
       logOutAllOtherDevices: 'Keluar dari semua perangkat lain',
       unknownDevice: 'Perangkat tidak dikenal', unknownLocation: 'Lokasi tidak dikenal', signedInPrefix: 'masuk pada', revoke: 'Cabut'
+    },
+    chat: {
+      failedLoadConversations: 'Gagal memuat percakapan',
+      unableToLoadMessages: 'Tidak dapat memuat pesan',
+      openingMessages: 'Membuka pesan pribadi Anda…',
+      eyebrow: 'AMORA PRIBADI', title: 'Pesan', subtitle: 'Percakapan pribadi, tersimpan dengan indah.',
+      discoverLink: 'Jelajahi', retry: 'Coba lagi',
+      noConversationsYet: 'Belum ada percakapan', startMatchSayHello: 'Buat kecocokan dan sapa.', discoverPeople: 'Jelajahi orang',
+      sentPhotoOrVideo: 'Mengirim foto atau video', justNow: 'Baru saja'
+    },
+    notifications: {
+      title: 'Notifikasi', markingEllipsis: 'Menandai…', markAllRead: 'Tandai semua dibaca',
+      allCaughtUp: 'Anda sudah update. Tidak ada yang baru di sini.', dismiss: 'Tutup',
+      errorLoad: 'Tidak dapat memuat notifikasi.', someoneFallback: 'Seseorang',
+      newMatch: 'Anda punya kecocokan baru!', superLikedYou: 'memberi Anda super like!',
+      sentMessage: 'mengirimi Anda pesan:', youReceived: 'Anda menerima', giftFallback: 'hadiah',
+      levelUpTo: 'Naik level! Sekarang Anda level', earnedBadgePrefix: '— mendapatkan lencana', earnedBadgeSuffix: '',
+      dailyRewardClaimed: 'Hadiah harian diklaim:', coinsWord: 'koin', dayStreak: 'hari beruntun',
+      yourWord: 'Bonus bulanan Anda', monthlyBonusArrived: 'telah tiba:',
+      missionComplete: 'Misi selesai:', missionFallback: 'sebuah misi', xpWord: 'XP',
+      yourWithdrawalOf: 'Penarikan Anda sebesar', wasApproved: 'telah disetujui.',
+      wasRejected: 'ditolak — koin telah dikembalikan.', hasBeenPaid: 'telah dibayarkan.',
+      notificationFallback: 'Notifikasi', justNow: 'baru saja', minAgo: 'm lalu', hAgo: 'j lalu', dAgo: 'h lalu'
+    },
+    events: {
+      ended: 'Berakhir', dayUnit: 'h', hourUnit: 'j', minuteUnit: 'm', left: 'tersisa',
+      errorLoad: 'Tidak dapat memuat acara saat ini.', errorJoinTeam: 'Tidak dapat bergabung dengan tim ini.',
+      noLiveEvent: 'Tidak ada acara langsung saat ini. Kembali lagi nanti!',
+      pickSide: 'Pilih sisi untuk bergabung dalam pertempuran:',
+      youreOnTeamPrefix: 'Anda berada di Tim', youreOnTeamSuffix: '— kirim hadiah untuk meningkatkan skor tim Anda!',
+      topContributors: 'Kontributor teratas', noOneScoredYet: 'Belum ada yang mencetak skor — jadilah yang pertama!', ptsSuffix: 'poin'
     }
   }
 };

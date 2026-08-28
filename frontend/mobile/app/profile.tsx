@@ -6,6 +6,7 @@ import { theme } from "../src/theme";
 import { api } from "../src/api/client";
 import { unregisterPushNotifications } from "../src/push";
 import AppShell from "../src/AppShell";
+import { useTranslation } from "../src/i18n";
 
 type User = {
   id: string;
@@ -18,6 +19,7 @@ type User = {
 };
 
 export default function Profile() {
+  const { t } = useTranslation();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -29,7 +31,7 @@ export default function Profile() {
       setUser(data);
       setError("");
     } catch (e: any) {
-      setError(e.message || "Unable to load your profile.");
+      setError(e.message || t("profileScreen.errorLoad"));
     } finally {
       setLoading(false);
     }
@@ -44,7 +46,7 @@ export default function Profile() {
   const pickAndUploadPhoto = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      Alert.alert("Permission needed", "Amora needs access to your photos to set a profile picture.");
+      Alert.alert(t("profileScreen.permissionNeededTitle"), t("profileScreen.permissionNeededBody"));
       return;
     }
 
@@ -71,7 +73,7 @@ export default function Profile() {
       const data = await api.uploadPhoto(formData);
       setUser((prev) => (prev ? { ...prev, profile_photo: data.url } : prev));
     } catch (e: any) {
-      setError(e.message || "Photo upload failed.");
+      setError(e.message || t("profileScreen.photoUploadFailed"));
     } finally {
       setUploading(false);
     }
@@ -79,19 +81,19 @@ export default function Profile() {
 
   const deleteAccount = () => {
     Alert.alert(
-      "Delete your Amora account?",
-      "This permanently removes your account and cannot be undone.",
+      t("profileScreen.deleteAccountTitle"),
+      t("profileScreen.deleteAccountBody"),
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t("common.cancel"), style: "cancel" },
         {
-          text: "Delete", style: "destructive", onPress: async () => {
+          text: t("profileScreen.deleteWord"), style: "destructive", onPress: async () => {
             try {
               await unregisterPushNotifications();
               await api.deleteAccount();
               await api.logout();
               router.replace("/auth");
             } catch (e: any) {
-              setError(e.message || "Unable to delete your account.");
+              setError(e.message || t("profileScreen.errorDeleteAccount"));
             }
           }
         }
@@ -106,16 +108,16 @@ export default function Profile() {
   };
 
   const rows = [
-    { label: "Settings", onPress: () => router.push("/settings") },
-    { label: "Membership & VIP", onPress: () => router.push("/membership") },
-    { label: "My level & badges", onPress: () => router.push("/levels") },
-    { label: "Daily rewards", onPress: () => router.push("/rewards") },
-    { label: "My outfits & profile effects", onPress: () => router.push("/outfits") },
-    { label: "Creator Studio", onPress: () => router.push("/studio") },
-    { label: "Security Center", onPress: () => router.push("/security") },
-    { label: "Delete my account", onPress: deleteAccount, danger: true },
-    { label: "Terms & policies", onPress: () => Linking.openURL("https://www.amoramatch.one/legal/terms") },
-    { label: "Log out", onPress: logout, danger: true }
+    { label: t("profileScreen.rowSettings"), onPress: () => router.push("/settings") },
+    { label: t("profileScreen.rowMembership"), onPress: () => router.push("/membership") },
+    { label: t("profileScreen.rowLevel"), onPress: () => router.push("/levels") },
+    { label: t("profileScreen.rowRewards"), onPress: () => router.push("/rewards") },
+    { label: t("profileScreen.rowOutfits"), onPress: () => router.push("/outfits") },
+    { label: t("profileScreen.rowStudio"), onPress: () => router.push("/studio") },
+    { label: t("profileScreen.rowSecurity"), onPress: () => router.push("/security") },
+    { label: t("profileScreen.rowDeleteAccount"), onPress: deleteAccount, danger: true },
+    { label: t("profileScreen.rowTerms"), onPress: () => Linking.openURL("https://www.amoramatch.one/legal/terms") },
+    { label: t("profileScreen.rowLogout"), onPress: logout, danger: true }
   ];
 
   if (loading) {
@@ -146,8 +148,8 @@ export default function Profile() {
             {uploading ? <ActivityIndicator size="small" color="#fff" /> : <Text style={{ fontSize: 14 }}>📷</Text>}
           </View>
         </Pressable>
-        <Text style={s.name}>{user?.display_name || user?.username || "Your Amora Profile"}</Text>
-        <Text style={s.muted}>Level {user?.level ?? 0} · {user?.membership_tier === "free" ? "Free member" : user?.membership_tier}</Text>
+        <Text style={s.name}>{user?.display_name || user?.username || t("profileScreen.yourAmoraProfile")}</Text>
+        <Text style={s.muted}>{t("profileScreen.levelPrefix")} {user?.level ?? 0} · {user?.membership_tier === "free" ? t("profileScreen.freeMember") : user?.membership_tier}</Text>
       </View>
 
       {!!error && <Text style={s.error}>{error}</Text>}

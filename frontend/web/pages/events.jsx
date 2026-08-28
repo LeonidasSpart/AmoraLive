@@ -3,18 +3,20 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import { apiFetch, API } from '../lib/api';
+import { useTranslation } from '../lib/i18n';
 
-function formatTimeLeft(seconds) {
-  if (seconds <= 0) return 'Ended';
+function formatTimeLeft(seconds, t) {
+  if (seconds <= 0) return t('events.ended');
   const d = Math.floor(seconds / 86400);
   const h = Math.floor((seconds % 86400) / 3600);
   const m = Math.floor((seconds % 3600) / 60);
-  if (d > 0) return `${d}d ${h}h left`;
-  if (h > 0) return `${h}h ${m}m left`;
-  return `${m}m left`;
+  if (d > 0) return `${d}${t('events.dayUnit')} ${h}${t('events.hourUnit')} ${t('events.left')}`;
+  if (h > 0) return `${h}${t('events.hourUnit')} ${m}${t('events.minuteUnit')} ${t('events.left')}`;
+  return `${m}${t('events.minuteUnit')} ${t('events.left')}`;
 }
 
 export default function Events() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [event, setEvent] = useState(null);
   const [myTeam, setMyTeam] = useState(null);
@@ -52,7 +54,7 @@ export default function Events() {
           setLoading(false);
           return;
         }
-        if (!res.ok) throw new Error('Unable to load the current event.');
+        if (!res.ok) throw new Error(t('events.errorLoad'));
         const data = await res.json();
         if (!active) return;
         setEvent(data);
@@ -104,7 +106,7 @@ export default function Events() {
         body: JSON.stringify({ eventId: event.id, team })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Unable to join this team.');
+      if (!res.ok) throw new Error(data.error || t('events.errorJoinTeam'));
       setMyTeam(team);
     } catch (e) {
       setError(e.message);
@@ -121,34 +123,34 @@ export default function Events() {
     <Layout>
       <div style={s.page}>
         {loading ? (
-          <div style={s.centerMsg}>Loading…</div>
+          <div style={s.centerMsg}>{t('common.loading')}</div>
         ) : !event ? (
           <div style={s.centerMsg}>
             <div style={{ fontSize: 48 }}>🏆</div>
-            <p>No live event right now. Check back soon!</p>
+            <p>{t('events.noLiveEvent')}</p>
           </div>
         ) : (
           <>
             {event.banner_url && <img src={event.banner_url} alt={event.title} style={s.banner} />}
             <h1 style={s.title}>{event.title}</h1>
             {event.description && <p style={s.description}>{event.description}</p>}
-            <div style={s.timer}>{formatTimeLeft(timeLeft)}</div>
+            <div style={s.timer}>{formatTimeLeft(timeLeft, t)}</div>
 
             {error && <div style={s.error}>{error}</div>}
 
             {!myTeam ? (
               <div style={s.teamPicker}>
-                <p style={{ color: '#aaa' }}>Pick a side to join the battle:</p>
+                <p style={{ color: '#aaa' }}>{t('events.pickSide')}</p>
                 <div style={s.teamButtons}>
-                  {(event.teams || []).map((t) => (
-                    <button key={t} style={s.teamBtn} onClick={() => joinTeam(t)} disabled={joining}>
-                      {t}
+                  {(event.teams || []).map((teamName) => (
+                    <button key={teamName} style={s.teamBtn} onClick={() => joinTeam(teamName)} disabled={joining}>
+                      {teamName}
                     </button>
                   ))}
                 </div>
               </div>
             ) : (
-              <div style={s.myTeamBanner}>You're on Team <strong>{myTeam}</strong> — send gifts to boost your team's score!</div>
+              <div style={s.myTeamBanner}>{t('events.youreOnTeamPrefix')} <strong>{myTeam}</strong> {t('events.youreOnTeamSuffix')}</div>
             )}
 
             <div style={s.scoreBar}>
@@ -159,9 +161,9 @@ export default function Events() {
               <span>{event.teams?.[1]}: {totalB}</span>
             </div>
 
-            <h3 style={{ marginTop: 32 }}>Top contributors</h3>
+            <h3 style={{ marginTop: 32 }}>{t('events.topContributors')}</h3>
             {scores.length === 0 ? (
-              <p style={{ color: '#888' }}>No one has scored yet — be the first!</p>
+              <p style={{ color: '#888' }}>{t('events.noOneScoredYet')}</p>
             ) : (
               <div style={s.list}>
                 {scores.slice(0, 20).map((sc, i) => (
@@ -169,7 +171,7 @@ export default function Events() {
                     <span style={s.rank}>#{i + 1}</span>
                     <span style={{ flex: 1 }}>{sc.user?.display_name || sc.user?.username}</span>
                     <span style={s.teamTag}>{sc.team_side}</span>
-                    <span style={s.points}>{sc.total_gifts_sent + sc.total_gifts_received} pts</span>
+                    <span style={s.points}>{sc.total_gifts_sent + sc.total_gifts_received} {t('events.ptsSuffix')}</span>
                   </div>
                 ))}
               </div>

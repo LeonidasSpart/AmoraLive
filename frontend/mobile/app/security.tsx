@@ -4,18 +4,20 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Switch, Te
 import { theme } from "../src/theme";
 import { api } from "../src/api/client";
 import { unregisterPushNotifications } from "../src/push";
+import { useTranslation } from "../src/i18n";
 
 type Session = { id: string; device_info?: string | null; ip_address?: string | null; created_at: string; expires_at: string };
 type SecurityOverview = { score: number; recommendations: string[]; emailVerified: boolean; ageVerified: boolean; privacyConfigured: boolean; activeSessions: number };
 
-function scoreLabel(score: number) {
-  if (score >= 90) return "Excellent protection";
-  if (score >= 75) return "Strong protection";
-  if (score >= 60) return "Good protection";
-  return "Protection needs attention";
+function scoreLabel(score: number, t: (k: string) => string) {
+  if (score >= 90) return t("securityScreen.excellentProtection");
+  if (score >= 75) return t("securityScreen.strongProtection");
+  if (score >= 60) return t("securityScreen.goodProtection");
+  return t("securityScreen.protectionNeedsAttention");
 }
 
 export default function Security() {
+  const { t } = useTranslation();
   const [overview, setOverview] = useState<SecurityOverview | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [privacy, setPrivacy] = useState<any>({ online_status_visible: true, profile_visible: true, show_age: true, show_location: true });
@@ -36,7 +38,7 @@ export default function Security() {
       setSessions(Array.isArray(deviceList) ? deviceList : []);
       setPrivacy({ ...privacy, ...(privacySettings || {}) });
     } catch (e: any) {
-      Alert.alert("Security Center", e.message || "Unable to load your security settings.");
+      Alert.alert(t("securityScreen.alertTitle"), e.message || t("securityScreen.errorLoad"));
     } finally {
       setLoading(false);
     }
@@ -51,22 +53,22 @@ export default function Security() {
       await api.updatePrivacy(next);
     } catch (e: any) {
       setPrivacy(privacy);
-      Alert.alert("Privacy", e.message || "Unable to update privacy.");
+      Alert.alert(t("securityScreen.privacyAlertTitle"), e.message || t("securityScreen.errorUpdatePrivacy"));
     }
   };
 
   const changePassword = async () => {
-    if (newPassword.length < 10) return Alert.alert("Password", "Use at least 10 characters.");
-    if (newPassword !== confirmPassword) return Alert.alert("Password", "The new passwords do not match.");
+    if (newPassword.length < 10) return Alert.alert(t("securityScreen.passwordAlertTitle"), t("securityScreen.useAtLeast10"));
+    if (newPassword !== confirmPassword) return Alert.alert(t("securityScreen.passwordAlertTitle"), t("securityScreen.passwordsDontMatch"));
     setBusy("password");
     try {
       await api.changePassword(currentPassword, newPassword);
       await unregisterPushNotifications();
       await api.logout();
       setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
-      Alert.alert("Password changed", "For your protection, all existing sessions were revoked. Please sign in again.", [{ text: "Sign in", onPress: () => router.replace("/auth") }]);
+      Alert.alert(t("securityScreen.passwordChangedTitle"), t("securityScreen.passwordChangedBody"), [{ text: t("securityScreen.signIn"), onPress: () => router.replace("/auth") }]);
     } catch (e: any) {
-      Alert.alert("Password", e.message || "Unable to change password.");
+      Alert.alert(t("securityScreen.passwordAlertTitle"), e.message || t("securityScreen.errorChangePassword"));
     } finally { setBusy(null); }
   };
 
@@ -76,7 +78,7 @@ export default function Security() {
       await api.revokeSession(sessionId);
       setSessions((prev) => prev.filter((s) => s.id !== sessionId));
     } catch (e: any) {
-      Alert.alert("Device", e.message || "Unable to revoke this session.");
+      Alert.alert(t("securityScreen.deviceAlertTitle"), e.message || t("securityScreen.errorRevokeSession"));
     } finally { setBusy(null); }
   };
 
@@ -84,10 +86,10 @@ export default function Security() {
     setBusy("others");
     try {
       const result = await api.revokeOtherSessions();
-      Alert.alert("Devices secured", `${result.revokedCount || 0} other session${result.revokedCount === 1 ? "" : "s"} revoked.`);
+      Alert.alert(t("securityScreen.devicesSecuredTitle"), `${result.revokedCount || 0} ${result.revokedCount === 1 ? t("securityScreen.otherSessionRevoked") : t("securityScreen.otherSessionsRevoked")}`);
       await load();
     } catch (e: any) {
-      Alert.alert("Devices", e.message || "Unable to revoke other sessions.");
+      Alert.alert(t("securityScreen.devicesAlertTitle"), e.message || t("securityScreen.errorRevokeOthers"));
     } finally { setBusy(null); }
   };
 
@@ -95,51 +97,51 @@ export default function Security() {
 
   return <ScrollView style={s.page} contentContainerStyle={s.content} showsVerticalScrollIndicator={false}>
     <Pressable onPress={() => router.back()}><Text style={s.back}>‹</Text></Pressable>
-    <Text style={s.kicker}>AMORA SECURITY</Text>
-    <Text style={s.title}>Security Center</Text>
-    <Text style={s.subtitle}>Protect your identity, devices and private moments.</Text>
+    <Text style={s.kicker}>{t("securityScreen.kicker")}</Text>
+    <Text style={s.title}>{t("securityScreen.title")}</Text>
+    <Text style={s.subtitle}>{t("securityScreen.subtitle")}</Text>
 
     <View style={s.scoreCard}>
       <View style={s.scoreGlow} />
       <View style={s.scoreCircle}><Text style={s.score}>{overview?.score ?? 0}</Text><Text style={s.scoreOf}>/100</Text></View>
-      <View style={{ flex: 1 }}><Text style={s.scoreTitle}>{scoreLabel(overview?.score ?? 0)}</Text><Text style={s.scoreText}>{overview?.recommendations?.[0] || "Your Amora account is being protected."}</Text></View>
+      <View style={{ flex: 1 }}><Text style={s.scoreTitle}>{scoreLabel(overview?.score ?? 0, t)}</Text><Text style={s.scoreText}>{overview?.recommendations?.[0] || t("securityScreen.defaultRecommendation")}</Text></View>
     </View>
 
     <View style={s.statusGrid}>
       {[
-        [overview?.emailVerified, "Email verified", "✉️"],
-        [overview?.ageVerified, "Age verified", "🛡️"],
-        [overview?.privacyConfigured, "Privacy configured", "🔒"],
-        [Boolean(overview?.activeSessions && overview.activeSessions <= 5), "Devices monitored", "📱"]
-      ].map(([ok, label, icon]) => <View key={String(label)} style={s.status}><Text style={s.statusIcon}>{icon}</Text><Text style={s.statusLabel}>{label}</Text><Text style={[s.statusState, { color: ok ? theme.success : theme.gold }]}>{ok ? "Protected" : "Review"}</Text></View>)}
+        [overview?.emailVerified, t("securityScreen.emailVerified"), "✉️"],
+        [overview?.ageVerified, t("securityScreen.ageVerified"), "🛡️"],
+        [overview?.privacyConfigured, t("securityScreen.privacyConfigured"), "🔒"],
+        [Boolean(overview?.activeSessions && overview.activeSessions <= 5), t("securityScreen.devicesMonitored"), "📱"]
+      ].map(([ok, label, icon]) => <View key={String(label)} style={s.status}><Text style={s.statusIcon}>{icon}</Text><Text style={s.statusLabel}>{label}</Text><Text style={[s.statusState, { color: ok ? theme.success : theme.gold }]}>{ok ? t("securityScreen.protectedWord") : t("securityScreen.review")}</Text></View>)}
     </View>
 
-    <Text style={s.section}>Privacy shield</Text>
+    <Text style={s.section}>{t("securityScreen.privacyShield")}</Text>
     <View style={s.panel}>
       {[
-        ["online_status_visible", "Show online status", "Let people see when you're online."],
-        ["profile_visible", "Discoverable profile", "Allow your profile to appear in discovery."],
-        ["show_age", "Show age", "Display your age on your public profile."],
-        ["show_location", "Show location", "Display your selected city/country."],
+        ["online_status_visible", t("securityScreen.showOnlineStatus"), t("securityScreen.showOnlineStatusHint")],
+        ["profile_visible", t("securityScreen.discoverableProfile"), t("securityScreen.discoverableProfileHint")],
+        ["show_age", t("securityScreen.showAge"), t("securityScreen.showAgeHint")],
+        ["show_location", t("securityScreen.showLocation"), t("securityScreen.showLocationHint")],
       ].map(([key, label, hint]) => <View key={key} style={s.settingRow}><View style={{ flex: 1 }}><Text style={s.settingTitle}>{label}</Text><Text style={s.settingHint}>{hint}</Text></View><Switch value={Boolean(privacy[key])} onValueChange={(v) => updatePrivacy(key, v)} trackColor={{ false: "#332743", true: theme.purple }} thumbColor="#fff" /></View>)}
     </View>
 
-    <Text style={s.section}>Your devices</Text>
+    <Text style={s.section}>{t("securityScreen.yourDevices")}</Text>
     <View style={s.panel}>
-      {sessions.map((session, index) => <View key={session.id} style={s.deviceRow}><View style={s.deviceIcon}><Text>📱</Text></View><View style={{ flex: 1 }}><Text style={s.settingTitle} numberOfLines={1}>{session.device_info || "Unknown device"}</Text><Text style={s.settingHint}>{session.ip_address || "Protected connection"} · {index === 0 ? "Most recent" : new Date(session.created_at).toLocaleDateString()}</Text></View><Pressable disabled={busy === session.id} onPress={() => revoke(session.id)} style={s.revoke}><Text style={s.revokeText}>{busy === session.id ? "…" : "Revoke"}</Text></Pressable></View>)}
-      {sessions.length > 1 && <Pressable disabled={busy === "others"} onPress={revokeOthers} style={s.revokeAll}><Text style={s.revokeAllText}>{busy === "others" ? "Securing…" : "Log out all other devices"}</Text></Pressable>}
+      {sessions.map((session, index) => <View key={session.id} style={s.deviceRow}><View style={s.deviceIcon}><Text>📱</Text></View><View style={{ flex: 1 }}><Text style={s.settingTitle} numberOfLines={1}>{session.device_info || t("securityScreen.unknownDevice")}</Text><Text style={s.settingHint}>{session.ip_address || t("securityScreen.protectedConnection")} · {index === 0 ? t("securityScreen.mostRecent") : new Date(session.created_at).toLocaleDateString()}</Text></View><Pressable disabled={busy === session.id} onPress={() => revoke(session.id)} style={s.revoke}><Text style={s.revokeText}>{busy === session.id ? "…" : t("securityScreen.revoke")}</Text></Pressable></View>)}
+      {sessions.length > 1 && <Pressable disabled={busy === "others"} onPress={revokeOthers} style={s.revokeAll}><Text style={s.revokeAllText}>{busy === "others" ? t("securityScreen.securingEllipsis") : t("securityScreen.logOutAllOtherDevices")}</Text></Pressable>}
     </View>
 
-    <Text style={s.section}>Change password</Text>
+    <Text style={s.section}>{t("securityScreen.changePasswordSection")}</Text>
     <View style={s.panel}>
-      <TextInput value={currentPassword} onChangeText={setCurrentPassword} secureTextEntry placeholder="Current password" placeholderTextColor="#756b85" style={s.input} />
-      <TextInput value={newPassword} onChangeText={setNewPassword} secureTextEntry placeholder="New password (10+ characters)" placeholderTextColor="#756b85" style={s.input} />
-      <TextInput value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry placeholder="Confirm new password" placeholderTextColor="#756b85" style={s.input} />
-      <Pressable disabled={busy === "password"} onPress={changePassword} style={s.primary}><Text style={s.primaryText}>{busy === "password" ? "Securing…" : "Change password securely"}</Text></Pressable>
-      <Text style={s.securityNote}>Amora never displays or stores your plaintext password. A successful password change revokes existing sessions.</Text>
+      <TextInput value={currentPassword} onChangeText={setCurrentPassword} secureTextEntry placeholder={t("securityScreen.currentPasswordPlaceholder")} placeholderTextColor="#756b85" style={s.input} />
+      <TextInput value={newPassword} onChangeText={setNewPassword} secureTextEntry placeholder={t("securityScreen.newPasswordPlaceholder")} placeholderTextColor="#756b85" style={s.input} />
+      <TextInput value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry placeholder={t("securityScreen.confirmPasswordPlaceholder")} placeholderTextColor="#756b85" style={s.input} />
+      <Pressable disabled={busy === "password"} onPress={changePassword} style={s.primary}><Text style={s.primaryText}>{busy === "password" ? t("securityScreen.securingEllipsis") : t("securityScreen.changePasswordSecurely")}</Text></Pressable>
+      <Text style={s.securityNote}>{t("securityScreen.securityNote")}</Text>
     </View>
 
-    <View style={s.footer}><Text style={s.footerIcon}>✦</Text><Text style={s.footerTitle}>AMORA TRUST</Text><Text style={s.footerText}>Report, block and mute tools remain available throughout the app. Suspicious activity is rate-limited and security events are recorded for protection and support.</Text></View>
+    <View style={s.footer}><Text style={s.footerIcon}>✦</Text><Text style={s.footerTitle}>{t("securityScreen.footerTitle")}</Text><Text style={s.footerText}>{t("securityScreen.footerText")}</Text></View>
   </ScrollView>;
 }
 

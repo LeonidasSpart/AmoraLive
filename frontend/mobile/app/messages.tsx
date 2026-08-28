@@ -4,6 +4,7 @@ import { View, Text, Pressable, StyleSheet, FlatList, ActivityIndicator, Refresh
 import { theme } from "../src/theme";
 import { api } from "../src/api/client";
 import AppShell from "../src/AppShell";
+import { useTranslation } from "../src/i18n";
 
 type Conversation = {
   id: string;
@@ -16,11 +17,11 @@ type Conversation = {
   unread_count: number | string;
 };
 
-function timeAgo(value: string) {
+function timeAgo(value: string, t: (k: string) => string) {
   if (!value) return "";
   const diff = Math.max(0, Date.now() - new Date(value).getTime());
   const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "now";
+  if (mins < 1) return t("messagesScreen.now");
   if (mins < 60) return `${mins}m`;
   const hours = Math.floor(mins / 60);
   if (hours < 24) return `${hours}h`;
@@ -29,6 +30,7 @@ function timeAgo(value: string) {
 }
 
 export default function Messages() {
+  const { t } = useTranslation();
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -40,7 +42,7 @@ export default function Messages() {
       setConversations(Array.isArray(data) ? data : []);
       setError("");
     } catch (e: any) {
-      setError(e.message || "Unable to load your messages.");
+      setError(e.message || t("messagesScreen.errorLoad"));
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -54,8 +56,8 @@ export default function Messages() {
       <View style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.kicker}>AMORA PRIVATE</Text>
-            <Text style={s.title}>Messages</Text>
+            <Text style={s.kicker}>{t("messagesScreen.kicker")}</Text>
+            <Text style={s.title}>{t("messagesScreen.title")}</Text>
           </View>
           <Pressable style={s.sparkle}><Text style={s.sparkleText}>✦</Text></Pressable>
         </View>
@@ -65,16 +67,16 @@ export default function Messages() {
         ) : error ? (
           <View style={s.empty}>
             <Text style={s.big}>!</Text>
-            <Text style={s.emptyTitle}>Something went wrong</Text>
+            <Text style={s.emptyTitle}>{t("messagesScreen.somethingWrong")}</Text>
             <Text style={s.muted}>{error}</Text>
-            <Pressable style={s.retry} onPress={load}><Text style={s.retryText}>Try again</Text></Pressable>
+            <Pressable style={s.retry} onPress={load}><Text style={s.retryText}>{t("messagesScreen.tryAgain")}</Text></Pressable>
           </View>
         ) : conversations.length === 0 ? (
           <View style={s.empty}>
             <View style={s.emptyOrb}><Text style={s.big}>♡</Text></View>
-            <Text style={s.emptyTitle}>Your private space</Text>
-            <Text style={s.muted}>Your matches and conversations will appear here.</Text>
-            <Pressable style={s.primary} onPress={() => router.push("/video-match")}><Text style={s.primaryText}>Start matching →</Text></Pressable>
+            <Text style={s.emptyTitle}>{t("messagesScreen.yourPrivateSpace")}</Text>
+            <Text style={s.muted}>{t("messagesScreen.matchesWillAppear")}</Text>
+            <Pressable style={s.primary} onPress={() => router.push("/video-match")}><Text style={s.primaryText}>{t("messagesScreen.startMatchingArrow")}</Text></Pressable>
           </View>
         ) : (
           <FlatList
@@ -96,10 +98,10 @@ export default function Messages() {
                   <View style={s.info}>
                     <View style={s.nameRow}>
                       <Text style={s.name} numberOfLines={1}>{item.display_name || item.username}</Text>
-                      <Text style={s.time}>{timeAgo(item.last_message_time)}</Text>
+                      <Text style={s.time}>{timeAgo(item.last_message_time, t)}</Text>
                     </View>
                     <Text style={[s.msg, unread > 0 && s.msgUnread]} numberOfLines={1}>
-                      {item.last_message || "Start a conversation…"}
+                      {item.last_message || t("messagesScreen.startConversation")}
                     </Text>
                   </View>
                   {unread > 0 && <View style={s.badge}><Text style={s.badgeText}>{unread > 99 ? "99+" : unread}</Text></View>}

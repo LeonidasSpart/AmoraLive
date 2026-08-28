@@ -4,49 +4,51 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import { apiFetch } from '../lib/api';
+import { useTranslation } from '../lib/i18n';
 
-function describe(notification) {
+function describe(notification, t) {
   const p = notification.payload || {};
   switch (notification.type) {
     case 'new_match':
-      return { icon: '❤️', text: 'You have a new match!', href: '/matches' };
+      return { icon: '❤️', text: t('notifications.newMatch'), href: '/matches' };
     case 'super_liked':
-      return { icon: '⭐', text: `${p.fromName || 'Someone'} super liked you!`, href: '/matches' };
+      return { icon: '⭐', text: `${p.fromName || t('notifications.someoneFallback')} ${t('notifications.superLikedYou')}`, href: '/matches' };
     case 'new_message':
-      return { icon: '💬', text: `${p.senderName || 'Someone'} sent you a message: "${p.preview || ''}"`, href: p.senderId ? `/chat/${p.senderId}` : '/chat' };
+      return { icon: '💬', text: `${p.senderName || t('notifications.someoneFallback')} ${t('notifications.sentMessage')} "${p.preview || ''}"`, href: p.senderId ? `/chat/${p.senderId}` : '/chat' };
     case 'gift_received':
-      return { icon: '🎁', text: `You received ${p.quantity || 1}x ${p.giftName || 'a gift'}!`, href: '/wallet' };
+      return { icon: '🎁', text: `${t('notifications.youReceived')} ${p.quantity || 1}x ${p.giftName || t('notifications.giftFallback')}!`, href: '/wallet' };
     case 'level_up':
-      return { icon: '⭐', text: `Level up! You're now Level ${p.newLevel}${p.badge ? ` — earned the "${p.badge}" badge` : ''}`, href: '/profile' };
+      return { icon: '⭐', text: `${t('notifications.levelUpTo')} ${p.newLevel}${p.badge ? ` ${t('notifications.earnedBadgePrefix')} "${p.badge}" ${t('notifications.earnedBadgeSuffix')}` : ''}`, href: '/profile' };
     case 'daily_reward_claimed':
-      return { icon: '🎁', text: `Daily reward claimed: +${p.coins || 0} coins (${p.streak || 1}-day streak)`, href: '/rewards' };
+      return { icon: '🎁', text: `${t('notifications.dailyRewardClaimed')} +${p.coins || 0} ${t('notifications.coinsWord')} (${p.streak || 1}-${t('notifications.dayStreak')})`, href: '/rewards' };
     case 'membership_bonus':
-      return { icon: '💎', text: `Your ${(p.tier || '').toUpperCase()} monthly bonus arrived: +${p.coins || 0} coins!`, href: '/wallet' };
+      return { icon: '💎', text: `${t('notifications.yourWord')} ${(p.tier || '').toUpperCase()} ${t('notifications.monthlyBonusArrived')} +${p.coins || 0} ${t('notifications.coinsWord')}!`, href: '/wallet' };
     case 'mission_claimed':
-      return { icon: '🎯', text: `Mission complete: ${p.title || 'a mission'} — +${p.coins || 0} coins${p.xp ? `, +${p.xp} XP` : ''}`, href: '/missions' };
+      return { icon: '🎯', text: `${t('notifications.missionComplete')} ${p.title || t('notifications.missionFallback')} — +${p.coins || 0} ${t('notifications.coinsWord')}${p.xp ? `, +${p.xp} ${t('notifications.xpWord')}` : ''}`, href: '/missions' };
     case 'withdrawal_approved':
-      return { icon: '✅', text: `Your withdrawal of ${p.coins || 0} coins ($${((p.usdCents || 0) / 100).toFixed(2)}) was approved.`, href: '/wallet' };
+      return { icon: '✅', text: `${t('notifications.yourWithdrawalOf')} ${p.coins || 0} ${t('notifications.coinsWord')} ($${((p.usdCents || 0) / 100).toFixed(2)}) ${t('notifications.wasApproved')}`, href: '/wallet' };
     case 'withdrawal_rejected':
-      return { icon: '❌', text: `Your withdrawal of ${p.coins || 0} coins was rejected — the coins were refunded.`, href: '/wallet' };
+      return { icon: '❌', text: `${t('notifications.yourWithdrawalOf')} ${p.coins || 0} ${t('notifications.coinsWord')} ${t('notifications.wasRejected')}`, href: '/wallet' };
     case 'withdrawal_paid':
-      return { icon: '💵', text: `Your withdrawal of $${((p.usdCents || 0) / 100).toFixed(2)} has been paid.`, href: '/wallet' };
+      return { icon: '💵', text: `${t('notifications.yourWithdrawalOf')} $${((p.usdCents || 0) / 100).toFixed(2)} ${t('notifications.hasBeenPaid')}`, href: '/wallet' };
     default:
-      return { icon: '🔔', text: notification.type?.replace(/_/g, ' ') || 'Notification', href: null };
+      return { icon: '🔔', text: notification.type?.replace(/_/g, ' ') || t('notifications.notificationFallback'), href: null };
   }
 }
 
-function timeAgo(dateStr) {
+function timeAgo(dateStr, t) {
   const diffMs = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
+  if (mins < 1) return t('notifications.justNow');
+  if (mins < 60) return `${mins}${t('notifications.minAgo')}`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}h ago`;
+  if (hrs < 24) return `${hrs}${t('notifications.hAgo')}`;
   const days = Math.floor(hrs / 24);
-  return `${days}d ago`;
+  return `${days}${t('notifications.dAgo')}`;
 }
 
 export default function Notifications() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -62,7 +64,7 @@ export default function Notifications() {
     setError('');
     try {
       const res = await apiFetch('/notifications?limit=50');
-      if (!res.ok) throw new Error('Unable to load notifications.');
+      if (!res.ok) throw new Error(t('notifications.errorLoad'));
       const data = await res.json();
       setNotifications(data.notifications || []);
     } catch (e) {
@@ -107,10 +109,10 @@ export default function Notifications() {
     <Layout>
       <div style={s.page}>
         <div style={s.header}>
-          <h1 style={s.title}>Notifications</h1>
+          <h1 style={s.title}>{t('notifications.title')}</h1>
           {unreadCount > 0 && (
             <button style={s.markAllBtn} onClick={markAllRead} disabled={markingAll}>
-              {markingAll ? 'Marking…' : `Mark all read (${unreadCount})`}
+              {markingAll ? t('notifications.markingEllipsis') : `${t('notifications.markAllRead')} (${unreadCount})`}
             </button>
           )}
         </div>
@@ -118,22 +120,22 @@ export default function Notifications() {
         {error && <div style={s.error}>{error}</div>}
 
         {loading ? (
-          <div style={s.centerMsg}>Loading…</div>
+          <div style={s.centerMsg}>{t('common.loading')}</div>
         ) : notifications.length === 0 ? (
           <div style={s.centerMsg}>
             <div style={{ fontSize: 48 }}>🔔</div>
-            <p>You're all caught up. Nothing here yet.</p>
+            <p>{t('notifications.allCaughtUp')}</p>
           </div>
         ) : (
           <div style={s.list}>
             {notifications.map((n) => {
-              const { icon, text, href } = describe(n);
+              const { icon, text, href } = describe(n, t);
               const content = (
                 <div style={{ ...s.item, ...(n.is_read ? {} : s.itemUnread) }} onClick={() => !n.is_read && markRead(n.id)}>
                   <span style={s.icon}>{icon}</span>
                   <div style={{ flex: 1 }}>
                     <div style={s.itemText}>{text}</div>
-                    <div style={s.itemTime}>{timeAgo(n.created_at)}</div>
+                    <div style={s.itemTime}>{timeAgo(n.created_at, t)}</div>
                   </div>
                   <button
                     style={s.removeBtn}
@@ -142,7 +144,7 @@ export default function Notifications() {
                       e.stopPropagation();
                       removeNotification(n.id);
                     }}
-                    aria-label="Dismiss"
+                    aria-label={t('notifications.dismiss')}
                   >
                     ✕
                   </button>
