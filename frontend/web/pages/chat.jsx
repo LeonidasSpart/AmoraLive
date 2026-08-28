@@ -3,10 +3,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { apiFetch } from '../lib/api';
 import VerifiedBadge from '../components/VerifiedBadge';
+import { useTranslation } from '../lib/i18n';
 
 const GRADIENT = 'linear-gradient(135deg,#ff3f9d 0%,#ff5da8 35%,#9b35ff 100%)';
 
 export default function ChatList() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,11 +25,11 @@ export default function ChatList() {
 
     try {
       const res = await apiFetch('/messages/conversations');
-      if (!res.ok) throw new Error('Failed to load conversations');
+      if (!res.ok) throw new Error(t('chat.failedLoadConversations'));
       const data = await res.json();
       setConversations(Array.isArray(data) ? data : []);
     } catch (err) {
-      setError(err.message || 'Unable to load messages');
+      setError(err.message || t('chat.unableToLoadMessages'));
     } finally {
       if (!silent) setLoading(false);
     }
@@ -43,7 +45,7 @@ export default function ChatList() {
     if (!date) return '';
     const diff = Math.max(0, Date.now() - new Date(date).getTime());
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'Just now';
+    if (mins < 1) return t('chat.justNow');
     if (mins < 60) return `${mins}m`;
     const hrs = Math.floor(mins / 60);
     if (hrs < 24) return `${hrs}h`;
@@ -56,7 +58,7 @@ export default function ChatList() {
     return (
       <div className="state">
         <div className="orb">✦</div>
-        <span>Opening your private messages…</span>
+        <span>{t('chat.openingMessages')}</span>
         <style jsx>{`
           .state { min-height:100vh; display:grid; place-items:center; align-content:center; gap:12px; color:#918899; background:#08070e; }
           .orb { color:#ff65bb; font-size:38px; text-shadow:0 0 30px #ff4eb6; }
@@ -69,17 +71,17 @@ export default function ChatList() {
     <div className="page">
       <header className="header">
         <div>
-          <span className="eyebrow">AMORA PRIVATE</span>
-          <h1>Messages</h1>
-          <p>Private conversations, beautifully kept.</p>
+          <span className="eyebrow">{t('chat.eyebrow')}</span>
+          <h1>{t('chat.title')}</h1>
+          <p>{t('chat.subtitle')}</p>
         </div>
-        <Link href="/discover" className="back">Discover</Link>
+        <Link href="/discover" className="back">{t('chat.discoverLink')}</Link>
       </header>
 
       {error && (
         <div className="error">
           <span>{error}</span>
-          <button onClick={() => fetchConversations()}>Retry</button>
+          <button onClick={() => fetchConversations()}>{t('chat.retry')}</button>
         </div>
       )}
 
@@ -87,9 +89,9 @@ export default function ChatList() {
         {conversations.length === 0 ? (
           <div className="empty">
             <div className="emptyIcon">♡</div>
-            <h2>No conversations yet</h2>
-            <p>Start a match and say hello.</p>
-            <Link href="/discover" className="cta">Discover people</Link>
+            <h2>{t('chat.noConversationsYet')}</h2>
+            <p>{t('chat.startMatchSayHello')}</p>
+            <Link href="/discover" className="cta">{t('chat.discoverPeople')}</Link>
           </div>
         ) : (
           conversations.map((conv) => (
@@ -111,7 +113,7 @@ export default function ChatList() {
                   <span>
                     {conv.last_message
                       ? conv.last_message
-                      : 'Sent a photo or video'}
+                      : t('chat.sentPhotoOrVideo')}
                   </span>
                   {Number(conv.unread_count) > 0 && (
                     <b>{Number(conv.unread_count)}</b>
