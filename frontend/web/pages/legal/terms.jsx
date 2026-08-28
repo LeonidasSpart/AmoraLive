@@ -1,67 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import Layout from '../../components/Layout';
 import Link from 'next/link';
+import { useTranslation } from '../../lib/i18n';
 
-const sections = [
-  { id: 'acceptance', number: '01', title: 'Acceptance of Terms' },
-  { id: 'eligibility', number: '02', title: 'Eligibility & Age' },
-  { id: 'account', number: '03', title: 'Account & Security' },
-  { id: 'content', number: '04', title: 'User Content' },
-  { id: 'conduct', number: '05', title: 'Prohibited Conduct' },
-  { id: 'safety', number: '06', title: 'Safety & Harassment' },
-  { id: 'live', number: '07', title: 'Live Streaming' },
-  { id: 'moderation', number: '08', title: 'Moderation & Appeals' },
-  { id: 'expression', number: '09', title: 'Freedom of Expression' },
-  { id: 'ip', number: '10', title: 'Intellectual Property' },
-  { id: 'gifts', number: '11', title: 'Coins & Digital Gifts' },
-  { id: 'payments', number: '12', title: 'Payments & Subscriptions' },
-  { id: 'privacy', number: '13', title: 'Privacy & Personal Data' },
-  { id: 'gdpr', number: '14', title: 'European GDPR' },
-  { id: 'swiss', number: '15', title: 'Swiss Data Protection' },
-  { id: 'dsa', number: '16', title: 'European Digital Services Act' },
-  { id: 'consumers', number: '17', title: 'Consumer Rights' },
-  { id: 'security', number: '18', title: 'Security & Fraud' },
-  { id: 'minors', number: '19', title: 'Protection of Minors' },
-  { id: 'ai', number: '20', title: 'AI & Automated Systems' },
-  { id: 'thirdparty', number: '21', title: 'Third-Party Services' },
-  { id: 'availability', number: '22', title: 'Availability & Changes' },
-  { id: 'termination', number: '23', title: 'Suspension & Termination' },
-  { id: 'liability', number: '24', title: 'Disclaimers & Liability' },
-  { id: 'international', number: '25', title: 'International Users' },
-  { id: 'disputes', number: '26', title: 'Disputes & Governing Law' },
-  { id: 'changes', number: '27', title: 'Changes to Terms' },
-  { id: 'contact', number: '28', title: 'Legal Contact' }
-];
-
-const prohibited = [
-  'Child sexual abuse material or sexual exploitation of minors.',
-  'Sexual content involving minors or attempts to sexualize minors.',
-  'Human trafficking, exploitation or coercion.',
-  'Credible threats of violence or incitement to serious violence.',
-  'Terrorist or extremist content where prohibited by applicable law.',
-  'Non-consensual intimate imagery.',
-  'Sexual harassment, coercion or exploitation.',
-  'Targeted harassment, stalking or intimidation.',
-  'Fraud, scams, phishing and deceptive financial schemes.',
-  'Identity theft and impersonation.',
-  'Malware, malicious code or attempts to compromise the platform.',
-  'Doxxing or unlawful disclosure of personal information.',
-  'Illegal sale or promotion of regulated goods or services.',
-  'Copyright, trademark or other intellectual-property infringement.',
-  'Spam, bot networks and artificial engagement.',
-  'Manipulation of followers, views, likes, rankings or gifts.',
-  'Circumvention of account suspensions or safety systems.',
-  'Any other conduct prohibited by applicable law.'
-];
-
-const accountRules = [
-  'Provide accurate registration information.',
-  'Do not misrepresent your age or identity.',
-  'Do not sell, rent or transfer your account.',
-  'Do not impersonate another person or organization.',
-  'Do not create fraudulent or abusive accounts.',
-  'Protect your authentication credentials.',
-  'Immediately report suspected unauthorized access.'
+const sectionIds = [
+  ['acceptance', '01'], ['eligibility', '02'], ['account', '03'], ['content', '04'], ['conduct', '05'],
+  ['safety', '06'], ['live', '07'], ['moderation', '08'], ['expression', '09'], ['ip', '10'],
+  ['gifts', '11'], ['payments', '12'], ['privacy', '13'], ['gdpr', '14'], ['swiss', '15'],
+  ['dsa', '16'], ['consumers', '17'], ['security', '18'], ['minors', '19'], ['ai', '20'],
+  ['thirdparty', '21'], ['availability', '22'], ['termination', '23'], ['liability', '24'],
+  ['international', '25'], ['disputes', '26'], ['changes', '27'], ['contact', '28']
 ];
 
 const BulletList = ({ items }) => (
@@ -88,8 +36,11 @@ const Section = ({ id, number, title, children }) => (
 );
 
 export default function Terms() {
+  const { t, lang } = useTranslation();
   const [search, setSearch] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const sections = sectionIds.map(([id, number]) => ({ id, number, title: t(`legalTerms.sectionTitles.${id}`) }));
 
   const filteredSections = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -101,7 +52,8 @@ export default function Terms() {
         section.title.toLowerCase().includes(q) ||
         section.number.includes(q)
     );
-  }, [search]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, lang]);
 
   const scrollTo = (id) => {
     setMenuOpen(false);
@@ -132,35 +84,33 @@ export default function Terms() {
 
               <div className="legal-badge">
                 <span className="badge-dot" />
-                AMORALIVE LEGAL
+                {t('legalTerms.badge')}
               </div>
 
               <h1>
-                Terms of
-                <span> Service</span>
+                {t('legalTerms.heroTitle1')}
+                <span> {t('legalTerms.heroTitle2')}</span>
               </h1>
 
               <p className="hero-description">
-                The legal framework governing AmoraLive, including
-                livestreaming, social interaction, messaging, digital gifts,
-                subscriptions, platform safety and your rights as a user.
+                {t('legalTerms.heroDesc')}
               </p>
 
               <div className="hero-meta">
 
                 <div>
-                  <span>VERSION</span>
-                  <strong>2026.08</strong>
+                  <span>{t('legalTerms.metaVersion')}</span>
+                  <strong>{t('legalTerms.metaVersionVal')}</strong>
                 </div>
 
                 <div>
-                  <span>EFFECTIVE</span>
-                  <strong>August 2026</strong>
+                  <span>{t('legalTerms.metaEffective')}</span>
+                  <strong>{t('legalTerms.metaEffectiveVal')}</strong>
                 </div>
 
                 <div>
-                  <span>SCOPE</span>
-                  <strong>International</strong>
+                  <span>{t('legalTerms.metaScope')}</span>
+                  <strong>{t('legalTerms.metaScopeVal')}</strong>
                 </div>
 
               </div>
@@ -192,8 +142,8 @@ export default function Terms() {
               <div className="status-icon">EU</div>
 
               <div>
-                <strong>European Framework</strong>
-                <span>GDPR • DSA • Consumer Rights</span>
+                <strong>{t('legalTerms.statusEuTitle')}</strong>
+                <span>{t('legalTerms.statusEuSub')}</span>
               </div>
             </div>
 
@@ -201,8 +151,8 @@ export default function Terms() {
               <div className="status-icon">CH</div>
 
               <div>
-                <strong>Swiss Framework</strong>
-                <span>FADP • Swiss mandatory law</span>
+                <strong>{t('legalTerms.statusChTitle')}</strong>
+                <span>{t('legalTerms.statusChSub')}</span>
               </div>
             </div>
 
@@ -210,8 +160,8 @@ export default function Terms() {
               <div className="status-icon">18+</div>
 
               <div>
-                <strong>Adult Platform</strong>
-                <span>Age and safety controls apply</span>
+                <strong>{t('legalTerms.statusAdultTitle')}</strong>
+                <span>{t('legalTerms.statusAdultSub')}</span>
               </div>
             </div>
 
@@ -219,8 +169,8 @@ export default function Terms() {
               <div className="status-icon">✓</div>
 
               <div>
-                <strong>Consumer Rights</strong>
-                <span>Mandatory rights preserved</span>
+                <strong>{t('legalTerms.statusConsumerTitle')}</strong>
+                <span>{t('legalTerms.statusConsumerSub')}</span>
               </div>
             </div>
 
@@ -232,18 +182,30 @@ export default function Terms() {
             <div className="notice-icon">!</div>
 
             <div>
-              <strong>Important Legal Notice</strong>
+              <strong>{t('legalTerms.noticeTitle')}</strong>
 
               <p>
-                These Terms are designed for the international operation of
-                AmoraLive and take particular account of European and Swiss
-                digital-service, privacy and consumer-protection principles.
-                Nothing in these Terms is intended to remove mandatory rights
-                that cannot legally be waived.
+                {t('legalTerms.noticeBody')}
               </p>
             </div>
 
           </div>
+
+          {lang !== 'en' && (
+            <div className="important-notice">
+
+              <div className="notice-icon">EN</div>
+
+              <div>
+                <strong>{t('legalTerms.translationNoticeTitle')}</strong>
+
+                <p>
+                  {t('legalTerms.translationNoticeBody')}
+                </p>
+              </div>
+
+            </div>
+          )}
 
           <div className="legal-layout">
 
@@ -257,14 +219,14 @@ export default function Terms() {
                 onClick={() => setMenuOpen(!menuOpen)}
               >
                 <span>☰</span>
-                Legal Navigation
+                {t('legalTerms.navLabel')}
               </button>
 
               <div className="sidebar-inner">
 
                 <div className="sidebar-title">
-                  <span>DOCUMENT</span>
-                  <strong>Terms of Service</strong>
+                  <span>{t('legalTerms.sidebarDocLabel')}</span>
+                  <strong>{t('legalTerms.sidebarDocTitle')}</strong>
                 </div>
 
                 <div className="search-box">
@@ -274,8 +236,8 @@ export default function Terms() {
                   <input
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search terms..."
-                    aria-label="Search Terms of Service"
+                    placeholder={t('legalTerms.searchPlaceholder')}
+                    aria-label={t('legalTerms.searchAriaLabel')}
                   />
 
                 </div>
@@ -297,15 +259,15 @@ export default function Terms() {
                 <div className="sidebar-links">
 
                   <Link href="/legal/privacy">
-                    Privacy Policy
+                    {t('legalTerms.linkPrivacy')}
                   </Link>
 
                   <Link href="/legal/guidelines">
-                    Community Guidelines
+                    {t('legalTerms.linkGuidelines')}
                   </Link>
 
                   <Link href="/legal/cookies">
-                    Cookie Policy
+                    {t('legalTerms.linkCookies')}
                   </Link>
 
                 </div>
@@ -320,181 +282,102 @@ export default function Terms() {
               <Section
                 id="acceptance"
                 number="01"
-                title="Acceptance of Terms"
+                title={t('legalTerms.sectionTitles.acceptance')}
               >
-                <p>
-                  By creating an account, accessing, browsing or using
-                  AmoraLive, you agree to these Terms of Service and the
-                  policies incorporated into them.
-                </p>
-
-                <p>
-                  If you do not agree with these Terms, you must not use
-                  AmoraLive.
-                </p>
-
-                <p>
-                  Where applicable law requires affirmative consent,
-                  AmoraLive will request that consent through an appropriate
-                  interface.
-                </p>
+                <p>{t('legalTerms.acceptanceP1')}</p>
+                <p>{t('legalTerms.acceptanceP2')}</p>
+                <p>{t('legalTerms.acceptanceP3')}</p>
               </Section>
 
               <Section
                 id="eligibility"
                 number="02"
-                title="Eligibility & Age"
+                title={t('legalTerms.sectionTitles.eligibility')}
               >
-                <p>
-                  AmoraLive is intended for adults. You must be at least
-                  18 years old to create or use an AmoraLive account unless
-                  AmoraLive expressly provides a legally compliant service for
-                  a younger age group.
-                </p>
+                <p>{t('legalTerms.eligibilityP1')}</p>
 
-                <BulletList
-                  items={[
-                    'You must provide truthful registration information.',
-                    'You must not misrepresent your age.',
-                    'You must not assist a minor in bypassing AmoraLive age restrictions.',
-                    'You must comply with additional age requirements imposed by the law of your country.'
-                  ]}
-                />
+                <BulletList items={t('legalTerms.eligibilityBullets')} />
               </Section>
 
               <Section
                 id="account"
                 number="03"
-                title="Account & Security"
+                title={t('legalTerms.sectionTitles.account')}
               >
-                <p>
-                  You are responsible for protecting your account credentials
-                  and for activity occurring through your account, except where
-                  unauthorized access results from circumstances for which
-                  AmoraLive is legally responsible.
-                </p>
+                <p>{t('legalTerms.accountP1')}</p>
 
-                <BulletList items={accountRules} />
+                <BulletList items={t('legalTerms.accountBullets')} />
               </Section>
 
               <Section
                 id="content"
                 number="04"
-                title="User Content"
+                title={t('legalTerms.sectionTitles.content')}
               >
-                <p>
-                  Users may upload, publish, transmit or otherwise make
-                  available text, photographs, videos, audio, livestreams,
-                  comments, usernames, profile information and other material.
-                </p>
-
-                <p>
-                  You remain responsible for content you submit and must have
-                  all rights, permissions and legal bases necessary to provide
-                  that content to AmoraLive.
-                </p>
+                <p>{t('legalTerms.contentP1')}</p>
+                <p>{t('legalTerms.contentP2')}</p>
 
                 <div className="quote-card">
                   <span className="quote-mark">"</span>
 
-                  <p>
-                    Your content remains yours. AmoraLive receives only the
-                    permissions reasonably necessary to operate the service.
-                  </p>
+                  <p>{t('legalTerms.contentQuote')}</p>
                 </div>
               </Section>
 
               <Section
                 id="conduct"
                 number="05"
-                title="Prohibited Conduct"
+                title={t('legalTerms.sectionTitles.conduct')}
               >
-                <p>
-                  AmoraLive does not permit unlawful, abusive, exploitative or
-                  seriously harmful use of the platform.
-                </p>
+                <p>{t('legalTerms.conductP1')}</p>
 
-                <BulletList items={prohibited} />
+                <BulletList items={t('legalTerms.conductBullets')} />
               </Section>
 
               <Section
                 id="safety"
                 number="06"
-                title="Safety & Harassment"
+                title={t('legalTerms.sectionTitles.safety')}
               >
-                <p>
-                  AmoraLive is designed to provide a safe environment for
-                  users. Harassment, threats, bullying, stalking, coercion and
-                  abusive conduct are prohibited.
-                </p>
-
-                <p>
-                  Users should report serious or potentially unlawful conduct
-                  through AmoraLive's reporting mechanisms and, where
-                  appropriate, contact competent authorities.
-                </p>
+                <p>{t('legalTerms.safetyP1')}</p>
+                <p>{t('legalTerms.safetyP2')}</p>
               </Section>
 
               <Section
                 id="live"
                 number="07"
-                title="Live Streaming"
+                title={t('legalTerms.sectionTitles.live')}
               >
-                <p>
-                  Livestream hosts are responsible for content and conduct
-                  occurring during their broadcasts.
-                </p>
+                <p>{t('legalTerms.liveP1')}</p>
 
                 <BulletList
-                  items={[
-                    'Hosts must comply with these Terms and applicable law.',
-                    'Hosts must not intentionally facilitate prohibited content.',
-                    'Hosts must not use livestreams for fraud or illegal transactions.',
-                    'Hosts must respect intellectual-property rights.',
-                    'Hosts must not manipulate viewers through deceptive financial claims.',
-                    'Hosts may be subject to additional livestream safety rules.'
-                  ]}
+                  items={t('legalTerms.liveBullets')}
                 />
               </Section>
 
               <Section
                 id="moderation"
                 number="08"
-                title="Moderation & Appeals"
+                title={t('legalTerms.sectionTitles.moderation')}
               >
-                <p>
-                  AmoraLive may remove, restrict, demote, disable or otherwise
-                  limit access to content or accounts where permitted or
-                  required by law, these Terms, Community Guidelines, safety
-                  requirements or legitimate security needs.
-                </p>
-
-                <p>
-                  Moderation decisions should be proportionate to the relevant
-                  violation and circumstances.
-                </p>
+                <p>{t('legalTerms.moderationP1')}</p>
+                <p>{t('legalTerms.moderationP2')}</p>
 
                 <div className="feature-grid">
 
                   <div>
-                    <strong>Report</strong>
-                    <span>
-                      Flag potentially illegal or harmful content.
-                    </span>
+                    <strong>{t('legalTerms.moderationFeatureReport')}</strong>
+                    <span>{t('legalTerms.moderationFeatureReportText')}</span>
                   </div>
 
                   <div>
-                    <strong>Review</strong>
-                    <span>
-                      Decisions may be reviewed under applicable rules.
-                    </span>
+                    <strong>{t('legalTerms.moderationFeatureReview')}</strong>
+                    <span>{t('legalTerms.moderationFeatureReviewText')}</span>
                   </div>
 
                   <div>
-                    <strong>Appeal</strong>
-                    <span>
-                      Eligible users may challenge moderation decisions.
-                    </span>
+                    <strong>{t('legalTerms.moderationFeatureAppeal')}</strong>
+                    <span>{t('legalTerms.moderationFeatureAppealText')}</span>
                   </div>
 
                 </div>
@@ -503,126 +386,68 @@ export default function Terms() {
               <Section
                 id="expression"
                 number="09"
-                title="Freedom of Expression"
+                title={t('legalTerms.sectionTitles.expression')}
               >
-                <p>
-                  AmoraLive respects freedom of expression and other
-                  fundamental rights.
-                </p>
-
-                <p>
-                  Freedom of expression does not create a right to use
-                  AmoraLive for unlawful conduct, threats, harassment,
-                  exploitation, fraud, privacy violations or other prohibited
-                  activities.
-                </p>
-
-                <p>
-                  Content moderation will be carried out subject to applicable
-                  law and the platform's legitimate safety and integrity
-                  requirements.
-                </p>
+                <p>{t('legalTerms.expressionP1')}</p>
+                <p>{t('legalTerms.expressionP2')}</p>
+                <p>{t('legalTerms.expressionP3')}</p>
               </Section>
 
               <Section
                 id="ip"
                 number="10"
-                title="Intellectual Property"
+                title={t('legalTerms.sectionTitles.ip')}
               >
-                <p>
-                  AmoraLive's software, trademarks, logos, designs, interfaces,
-                  animations, graphics, databases and other platform materials
-                  are protected by intellectual-property laws.
-                </p>
-
-                <p>
-                  Except where permitted by law or expressly authorized by
-                  AmoraLive, you may not copy, modify, distribute, sell,
-                  reverse engineer or commercially exploit protected platform
-                  materials.
-                </p>
+                <p>{t('legalTerms.ipP1')}</p>
+                <p>{t('legalTerms.ipP2')}</p>
               </Section>
 
               <Section
                 id="gifts"
                 number="11"
-                title="Coins & Digital Gifts"
+                title={t('legalTerms.sectionTitles.gifts')}
               >
-                <p>
-                  AmoraLive may provide virtual coins, digital gifts,
-                  animations, badges, memberships or other virtual features.
-                </p>
+                <p>{t('legalTerms.giftsP1')}</p>
 
                 <div className="warning-card">
 
                   <strong>
-                    Digital items are not investments
+                    {t('legalTerms.giftsWarningTitle')}
                   </strong>
 
-                  <p>
-                    Unless expressly stated otherwise, virtual coins and
-                    digital gifts are platform functionality. They are not
-                    physical property, deposits, securities, investments or
-                    legal tender.
-                  </p>
+                  <p>{t('legalTerms.giftsWarningBody')}</p>
 
                 </div>
 
                 <BulletList
-                  items={[
-                    'Virtual coins have no cash value unless applicable law requires otherwise.',
-                    'Virtual items may not be sold or transferred outside AmoraLive unless expressly permitted.',
-                    'Users may not exploit technical errors to duplicate virtual currency.',
-                    'Fraudulent transactions may be cancelled or reversed where legally permitted.',
-                    'Prices and applicable taxes will be disclosed before purchase where required.'
-                  ]}
+                  items={t('legalTerms.giftsBullets')}
                 />
               </Section>
 
               <Section
                 id="payments"
                 number="12"
-                title="Payments & Subscriptions"
+                title={t('legalTerms.sectionTitles.payments')}
               >
-                <p>
-                  Paid services may be processed by third-party payment
-                  providers, app stores or other payment intermediaries.
-                </p>
-
-                <p>
-                  Prices, billing intervals, renewal terms, taxes, refunds and
-                  cancellation procedures will be presented as required by
-                  applicable law.
-                </p>
-
-                <p>
-                  Mandatory consumer rights concerning digital services,
-                  digital content and recurring payments remain unaffected.
-                </p>
+                <p>{t('legalTerms.paymentsP1')}</p>
+                <p>{t('legalTerms.paymentsP2')}</p>
+                <p>{t('legalTerms.paymentsP3')}</p>
               </Section>
 
               <Section
                 id="privacy"
                 number="13"
-                title="Privacy & Personal Data"
+                title={t('legalTerms.sectionTitles.privacy')}
               >
-                <p>
-                  AmoraLive processes personal data according to its Privacy
-                  Policy and applicable data-protection laws.
-                </p>
-
-                <p>
-                  Depending on the user's location and the circumstances of
-                  processing, this may include the GDPR, Swiss Federal Act on
-                  Data Protection and other applicable privacy laws.
-                </p>
+                <p>{t('legalTerms.privacySectP1')}</p>
+                <p>{t('legalTerms.privacySectP2')}</p>
 
                 <div className="link-card">
 
-                  <span>DATA PROTECTION</span>
+                  <span>{t('legalTerms.privacyLinkLabel')}</span>
 
                   <Link href="/legal/privacy">
-                    Read the AmoraLive Privacy Policy →
+                    {t('legalTerms.privacyLinkText')}
                   </Link>
 
                 </div>
@@ -631,259 +456,137 @@ export default function Terms() {
               <Section
                 id="gdpr"
                 number="14"
-                title="European GDPR"
+                title={t('legalTerms.sectionTitles.gdpr')}
               >
-                <p>
-                  Where the GDPR applies, AmoraLive will process personal data
-                  in accordance with the GDPR and applicable national
-                  implementing legislation.
-                </p>
-
-                <p>
-                  Depending on the circumstances, users may have rights
-                  including access, rectification, erasure, restriction,
-                  objection, portability and rights relating to certain
-                  automated decision-making.
-                </p>
+                <p>{t('legalTerms.gdprP1')}</p>
+                <p>{t('legalTerms.gdprP2')}</p>
               </Section>
 
               <Section
                 id="swiss"
                 number="15"
-                title="Swiss Data Protection"
+                title={t('legalTerms.sectionTitles.swiss')}
               >
-                <p>
-                  Where Swiss law applies, AmoraLive will comply with the
-                  applicable requirements of the Swiss Federal Act on Data
-                  Protection and associated regulations.
-                </p>
-
-                <p>
-                  Swiss data subjects may have rights concerning access,
-                  correction, deletion and other aspects of personal-data
-                  processing, subject to applicable legal limitations.
-                </p>
+                <p>{t('legalTerms.swissP1')}</p>
+                <p>{t('legalTerms.swissP2')}</p>
               </Section>
 
               <Section
                 id="dsa"
                 number="16"
-                title="European Digital Services Act"
+                title={t('legalTerms.sectionTitles.dsa')}
               >
-                <p>
-                  Where the Digital Services Act applies to AmoraLive, the
-                  platform will implement the obligations applicable to its
-                  legal category and size.
-                </p>
+                <p>{t('legalTerms.dsaP1')}</p>
 
                 <div className="dsa-grid">
 
                   <div>
-                    <strong>Notice & Action</strong>
-                    <span>
-                      Mechanisms for reporting potentially illegal content.
-                    </span>
+                    <strong>{t('legalTerms.dsaGridNoticeTitle')}</strong>
+                    <span>{t('legalTerms.dsaGridNoticeText')}</span>
                   </div>
 
                   <div>
-                    <strong>Reasons</strong>
-                    <span>
-                      Appropriate explanations for certain moderation
-                      decisions.
-                    </span>
+                    <strong>{t('legalTerms.dsaGridReasonsTitle')}</strong>
+                    <span>{t('legalTerms.dsaGridReasonsText')}</span>
                   </div>
 
                   <div>
-                    <strong>Complaints</strong>
-                    <span>
-                      Applicable internal complaint and appeal mechanisms.
-                    </span>
+                    <strong>{t('legalTerms.dsaGridComplaintsTitle')}</strong>
+                    <span>{t('legalTerms.dsaGridComplaintsText')}</span>
                   </div>
 
                   <div>
-                    <strong>Transparency</strong>
-                    <span>
-                      Required platform transparency information.
-                    </span>
+                    <strong>{t('legalTerms.dsaGridTransparencyTitle')}</strong>
+                    <span>{t('legalTerms.dsaGridTransparencyText')}</span>
                   </div>
 
                 </div>
 
-                <p>
-                  Additional obligations apply to platforms formally designated
-                  as Very Large Online Platforms. Such obligations depend on
-                  the relevant legal designation and thresholds.
-                </p>
+                <p>{t('legalTerms.dsaP2')}</p>
               </Section>
 
               <Section
                 id="consumers"
                 number="17"
-                title="Consumer Rights"
+                title={t('legalTerms.sectionTitles.consumers')}
               >
-                <p>
-                  Nothing in these Terms removes mandatory consumer protections
-                  granted by the law applicable to you.
-                </p>
-
-                <p>
-                  For consumers in the European Economic Area, mandatory EU
-                  consumer-protection rules concerning digital services and
-                  digital content may apply depending on the service and
-                  transaction.
-                </p>
-
-                <p>
-                  Where a statutory withdrawal right exists, its application to
-                  digital content or digital services may depend on the
-                  circumstances and legally required consent and acknowledgement.
-                </p>
+                <p>{t('legalTerms.consumersP1')}</p>
+                <p>{t('legalTerms.consumersP2')}</p>
+                <p>{t('legalTerms.consumersP3')}</p>
               </Section>
 
               <Section
                 id="security"
                 number="18"
-                title="Security & Fraud"
+                title={t('legalTerms.sectionTitles.security')}
               >
-                <p>
-                  Users may not manipulate AmoraLive's systems, including
-                  followers, likes, views, rankings, gifts, coins or other
-                  platform metrics.
-                </p>
+                <p>{t('legalTerms.securityP1')}</p>
 
                 <BulletList
-                  items={[
-                    'No automated follower farms.',
-                    'No fake engagement services.',
-                    'No fraudulent gift transactions.',
-                    'No exploitation of payment or coin vulnerabilities.',
-                    'No attempts to bypass security controls.',
-                    'No malicious code or unauthorized access attempts.'
-                  ]}
+                  items={t('legalTerms.securityBullets')}
                 />
               </Section>
 
               <Section
                 id="minors"
                 number="19"
-                title="Protection of Minors"
+                title={t('legalTerms.sectionTitles.minors')}
               >
-                <p>
-                  AmoraLive takes the safety of children and young people
-                  seriously.
-                </p>
-
-                <p>
-                  Content or conduct that exploits, sexualizes or endangers
-                  minors is strictly prohibited.
-                </p>
-
-                <p>
-                  Where legally required, AmoraLive will apply additional
-                  safeguards relating to minors, including appropriate privacy
-                  and safety measures.
-                </p>
+                <p>{t('legalTerms.minorsP1')}</p>
+                <p>{t('legalTerms.minorsP2')}</p>
+                <p>{t('legalTerms.minorsP3')}</p>
               </Section>
 
               <Section
                 id="ai"
                 number="20"
-                title="AI & Automated Systems"
+                title={t('legalTerms.sectionTitles.ai')}
               >
-                <p>
-                  AmoraLive may use automated systems, artificial intelligence,
-                  machine learning or algorithmic tools for security,
-                  moderation, recommendations, fraud detection,
-                  personalization, translation and other legitimate platform
-                  functions.
-                </p>
-
-                <p>
-                  Where applicable law provides specific rights concerning
-                  automated decisions, AmoraLive will provide legally required
-                  information and safeguards.
-                </p>
+                <p>{t('legalTerms.aiP1')}</p>
+                <p>{t('legalTerms.aiP2')}</p>
               </Section>
 
               <Section
                 id="thirdparty"
                 number="21"
-                title="Third-Party Services"
+                title={t('legalTerms.sectionTitles.thirdparty')}
               >
-                <p>
-                  AmoraLive may integrate third-party services including
-                  payment providers, authentication providers, cloud
-                  infrastructure, analytics services and communication
-                  technologies.
-                </p>
-
-                <p>
-                  Third-party services may have their own terms and privacy
-                  policies. AmoraLive is not responsible for independent
-                  services operated by third parties except where liability
-                  cannot legally be excluded.
-                </p>
+                <p>{t('legalTerms.thirdpartyP1')}</p>
+                <p>{t('legalTerms.thirdpartyP2')}</p>
               </Section>
 
               <Section
                 id="availability"
                 number="22"
-                title="Availability & Changes"
+                title={t('legalTerms.sectionTitles.availability')}
               >
-                <p>
-                  AmoraLive may update, modify, suspend or discontinue
-                  features. Maintenance, security incidents, infrastructure
-                  failures and events outside reasonable control may
-                  temporarily affect availability.
-                </p>
-
-                <p>
-                  Where legally required, users will receive appropriate notice
-                  of material changes or discontinuation.
-                </p>
+                <p>{t('legalTerms.availabilityP1')}</p>
+                <p>{t('legalTerms.availabilityP2')}</p>
               </Section>
 
               <Section
                 id="termination"
                 number="23"
-                title="Suspension & Termination"
+                title={t('legalTerms.sectionTitles.termination')}
               >
-                <p>
-                  AmoraLive may suspend or terminate accounts where reasonably
-                  necessary to enforce these Terms, protect users, prevent
-                  fraud, comply with law or protect the security and integrity
-                  of the service.
-                </p>
-
-                <p>
-                  Where required by applicable law, AmoraLive will provide an
-                  appropriate explanation and/or appeal mechanism.
-                </p>
+                <p>{t('legalTerms.terminationP1')}</p>
+                <p>{t('legalTerms.terminationP2')}</p>
               </Section>
 
               <Section
                 id="liability"
                 number="24"
-                title="Disclaimers & Liability"
+                title={t('legalTerms.sectionTitles.liability')}
               >
-                <p>
-                  To the maximum extent permitted by applicable law, AmoraLive
-                  does not guarantee that the service will always be
-                  uninterrupted, error-free, secure or available in every
-                  location.
-                </p>
-
-                <p>
-                  Nothing in these Terms excludes or limits liability that
-                  cannot lawfully be excluded or limited.
-                </p>
+                <p>{t('legalTerms.liabilityP1')}</p>
+                <p>{t('legalTerms.liabilityP2')}</p>
 
                 <div className="legal-protection">
 
-                  <span>LEGAL PROTECTION</span>
+                  <span>{t('legalTerms.liabilityLabel')}</span>
 
                   <strong>
-                    Mandatory statutory rights remain unaffected.
+                    {t('legalTerms.liabilityBadge')}
                   </strong>
 
                 </div>
@@ -892,43 +595,26 @@ export default function Terms() {
               <Section
                 id="international"
                 number="25"
-                title="International Users"
+                title={t('legalTerms.sectionTitles.international')}
               >
-                <p>
-                  AmoraLive may be accessible internationally. Users are
-                  responsible for complying with laws applicable to them when
-                  using the service.
-                </p>
-
-                <p>
-                  AmoraLive does not represent that every feature is available
-                  or lawful in every country.
-                </p>
+                <p>{t('legalTerms.internationalP1')}</p>
+                <p>{t('legalTerms.internationalP2')}</p>
               </Section>
 
               <Section
                 id="disputes"
                 number="26"
-                title="Disputes & Governing Law"
+                title={t('legalTerms.sectionTitles.disputes')}
               >
-                <p>
-                  AmoraLive encourages users to contact support first so that
-                  disputes can be resolved efficiently.
-                </p>
-
-                <p>
-                  The final governing-law and competent-court provisions should
-                  identify the actual contracting entity and jurisdiction.
-                  Any such clause remains subject to mandatory consumer and
-                  other legal protections that cannot lawfully be waived.
-                </p>
+                <p>{t('legalTerms.disputesP1')}</p>
+                <p>{t('legalTerms.disputesP2')}</p>
 
                 <div className="placeholder-card">
 
-                  <span>REQUIRED BEFORE PUBLICATION</span>
+                  <span>{t('legalTerms.disputesPlaceholderLabel')}</span>
 
                   <strong>
-                    Insert verified legal entity + jurisdiction.
+                    {t('legalTerms.disputesPlaceholderText')}
                   </strong>
 
                 </div>
@@ -937,29 +623,18 @@ export default function Terms() {
               <Section
                 id="changes"
                 number="27"
-                title="Changes to Terms"
+                title={t('legalTerms.sectionTitles.changes')}
               >
-                <p>
-                  AmoraLive may update these Terms when reasonably necessary,
-                  including to reflect changes in the service, technology,
-                  applicable law, security requirements or business operations.
-                </p>
-
-                <p>
-                  Material changes will be communicated in an appropriate
-                  manner where required by law.
-                </p>
+                <p>{t('legalTerms.changesP1')}</p>
+                <p>{t('legalTerms.changesP2')}</p>
               </Section>
 
               <Section
                 id="contact"
                 number="28"
-                title="Legal Contact"
+                title={t('legalTerms.sectionTitles.contact')}
               >
-                <p>
-                  Legal notices and formal support requests should be sent
-                  through the official AmoraLive legal or support channel.
-                </p>
+                <p>{t('legalTerms.contactP1')}</p>
 
                 <div className="contact-card">
 
@@ -973,20 +648,20 @@ export default function Terms() {
 
                   <div>
 
-                    <span>AMORALIVE LEGAL DEPARTMENT</span>
+                    <span>{t('legalTerms.contactLabel')}</span>
 
                     <strong>
-                      [INSERT LEGAL ENTITY]
+                      {t('legalTerms.contactEntityPlaceholder')}
                     </strong>
 
                     <p>
-                      Registered address: [INSERT REGISTERED ADDRESS]
+                      {t('legalTerms.contactAddressLabel')} {t('legalTerms.contactAddressPlaceholder')}
                       <br />
-                      Country: [INSERT COUNTRY]
+                      {t('legalTerms.contactCountryLabel')} {t('legalTerms.contactCountryPlaceholder')}
                       <br />
-                      Legal email: [INSERT LEGAL EMAIL]
+                      {t('legalTerms.contactEmailLabel')} {t('legalTerms.contactEmailPlaceholder')}
                       <br />
-                      Support: [INSERT SUPPORT EMAIL]
+                      {t('legalTerms.contactSupportLabel')} {t('legalTerms.contactSupportPlaceholder')}
                     </p>
 
                   </div>
@@ -1010,21 +685,14 @@ export default function Terms() {
                 <div>
 
                   <div className="section-label">
-                    AMORALIVE PRINCIPLE
+                    {t('legalTerms.finalLabel')}
                   </div>
 
-                  <h2>Your Rights Matter.</h2>
+                  <h2>{t('legalTerms.finalTitle')}</h2>
 
-                  <p>
-                    AmoraLive is committed to operating a modern social
-                    platform that respects safety, privacy, freedom of
-                    expression, consumer rights and applicable law.
-                  </p>
+                  <p>{t('legalTerms.finalP1')}</p>
 
-                  <p>
-                    These Terms do not replace rights that users have under
-                    mandatory national, European or international law.
-                  </p>
+                  <p>{t('legalTerms.finalP2')}</p>
 
                 </div>
 
@@ -1033,28 +701,28 @@ export default function Terms() {
               <div className="document-footer">
 
                 <div>
-                  <strong>AMORALIVE</strong>
+                  <strong>{t('legalTerms.footerBrand')}</strong>
                   <span>
-                    Terms of Service • August 2026
+                    {t('legalTerms.footerTagline')}
                   </span>
                 </div>
 
                 <div className="footer-links">
 
                   <Link href="/legal/privacy">
-                    Privacy
+                    {t('legalTerms.footerLinkPrivacy')}
                   </Link>
 
                   <Link href="/legal/guidelines">
-                    Community
+                    {t('legalTerms.footerLinkCommunity')}
                   </Link>
 
                   <Link href="/legal/cookies">
-                    Cookies
+                    {t('legalTerms.footerLinkCookies')}
                   </Link>
 
                   <Link href="/">
-                    Home
+                    {t('legalTerms.footerLinkHome')}
                   </Link>
 
                 </div>
