@@ -3,10 +3,16 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import { apiFetch } from '../lib/api';
+import { useTranslation } from '../lib/i18n';
 
 const CATEGORIES = ['Chat', 'Music', 'Dance', 'Gaming', 'Talent', 'Just Chatting', 'General'];
 
 export default function GoLive() {
+  const { t } = useTranslation();
+  const CATEGORY_LABELS = {
+    Chat: t('goLive.catChat'), Music: t('goLive.catMusic'), Dance: t('goLive.catDance'),
+    Gaming: t('goLive.catGaming'), Talent: t('goLive.catTalent'), 'Just Chatting': t('goLive.catJustChatting'), General: t('goLive.catGeneral')
+  };
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState(CATEGORIES[0]);
@@ -17,7 +23,7 @@ export default function GoLive() {
     e.preventDefault();
     setError('');
     if (!title.trim()) {
-      setError('Give your live room a title.');
+      setError(t('goLive.errorNoTitle'));
       return;
     }
     if (!localStorage.getItem('accessToken')) {
@@ -31,7 +37,7 @@ export default function GoLive() {
         body: JSON.stringify({ title: title.trim(), category })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Unable to start your live room.');
+      if (!res.ok) throw new Error(data.error || t('goLive.errorStart'));
       // live/[id].jsx already handles the host-publish flow (camera/mic via
       // LiveKit) once it detects the current user is the room's host — so
       // creating the room here is the only missing piece.
@@ -45,20 +51,20 @@ export default function GoLive() {
   return (
     <Layout>
       <div style={s.page}>
-        <h1 style={s.title}>Go Live</h1>
-        <p style={s.subtitle}>Start a live room. Viewers can join, chat and send you gifts in real time.</p>
+        <h1 style={s.title}>{t('goLive.title')}</h1>
+        <p style={s.subtitle}>{t('goLive.subtitle')}</p>
 
         <form onSubmit={startLive} style={s.form}>
-          <label style={s.label}>Title</label>
+          <label style={s.label}>{t('goLive.titleFieldLabel')}</label>
           <input
             style={s.input}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            placeholder="What's happening in your stream?"
+            placeholder={t('goLive.titlePlaceholder')}
             maxLength={80}
           />
 
-          <label style={s.label}>Category</label>
+          <label style={s.label}>{t('goLive.categoryLabel')}</label>
           <div style={s.categoryGrid}>
             {CATEGORIES.map((c) => (
               <button
@@ -67,7 +73,7 @@ export default function GoLive() {
                 onClick={() => setCategory(c)}
                 style={category === c ? s.categoryActive : s.category}
               >
-                {c}
+                {CATEGORY_LABELS[c]}
               </button>
             ))}
           </div>
@@ -75,11 +81,11 @@ export default function GoLive() {
           {error && <div style={s.error}>{error}</div>}
 
           <button type="submit" style={s.goBtn} disabled={loading}>
-            {loading ? 'Starting…' : '🔴 Go Live'}
+            {loading ? t('goLive.starting') : t('goLive.goLiveBtn')}
           </button>
         </form>
 
-        <p style={s.note}>You'll be asked to allow camera and microphone access once your room is created.</p>
+        <p style={s.note}>{t('goLive.note')}</p>
       </div>
     </Layout>
   );

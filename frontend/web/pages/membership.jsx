@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import { apiFetch } from '../lib/api';
 import ProfileFrame from '../components/ProfileFrame';
+import { useTranslation } from '../lib/i18n';
 
 const TIER_COLORS = {
   free: '#666',
@@ -13,6 +14,7 @@ const TIER_COLORS = {
 };
 
 export default function Membership() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [plans, setPlans] = useState([]);
   const [status, setStatus] = useState(null);
@@ -37,7 +39,7 @@ export default function Membership() {
       if (plansRes.ok) setPlans(await plansRes.json());
       if (statusRes.ok) setStatus(await statusRes.json());
     } catch (e) {
-      setError('Unable to load membership info.');
+      setError(t('membership.loadErrorMsg'));
     } finally {
       setLoading(false);
     }
@@ -47,10 +49,10 @@ export default function Membership() {
     load();
 
     if (router.query.membership === 'success') {
-      setMessage('Payment received — your membership will activate within a few seconds.');
+      setMessage(t('membership.paymentReceived'));
       setTimeout(load, 3000);
     } else if (router.query.membership === 'cancelled') {
-      setMessage('Checkout was cancelled — no changes were made.');
+      setMessage(t('membership.checkoutCancelled'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -61,7 +63,7 @@ export default function Membership() {
     try {
       const res = await apiFetch('/membership/checkout', { method: 'POST', body: JSON.stringify({ tier }) });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Unable to start checkout.');
+      if (!res.ok) throw new Error(data.error || t('membership.errorStartCheckout'));
       window.location.href = data.checkoutUrl;
     } catch (e) {
       setError(e.message);
@@ -70,14 +72,14 @@ export default function Membership() {
   };
 
   const cancel = async () => {
-    if (!confirm('Cancel auto-renew? You\'ll keep your current benefits until the end of this billing period, then drop to Free.')) return;
+    if (!confirm(t('membership.cancelConfirm'))) return;
     setCancelling(true);
     setError('');
     try {
       const res = await apiFetch('/membership/cancel', { method: 'POST' });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Unable to cancel.');
-      setMessage('Auto-renew cancelled. Your benefits remain active until the period ends.');
+      if (!res.ok) throw new Error(data.error || t('membership.errorCancel'));
+      setMessage(t('membership.cancelledSuccess'));
       await load();
     } catch (e) {
       setError(e.message);
@@ -89,7 +91,7 @@ export default function Membership() {
   if (loading) {
     return (
       <Layout>
-        <div style={s.wrap}><p style={{ color: '#999' }}>Loading…</p></div>
+        <div style={s.wrap}><p style={{ color: '#999' }}>{t('common.loading')}</p></div>
       </Layout>
     );
   }
@@ -99,7 +101,7 @@ export default function Membership() {
   return (
     <Layout>
       <div style={s.wrap}>
-        <h1 style={s.title}>💎 Membership</h1>
+        <h1 style={s.title}>{t('membership.title')}</h1>
         {message && <div style={s.success}>{message}</div>}
         {error && <div style={s.error}>{error}</div>}
 
@@ -110,18 +112,18 @@ export default function Membership() {
             </div>
           </ProfileFrame>
           <div style={{ flex: 1, marginLeft: 16 }}>
-            <div style={{ fontWeight: 800, fontSize: 18 }}>{status?.label || 'Free'}</div>
+            <div style={{ fontWeight: 800, fontSize: 18 }}>{status?.label || t('membership.freeWord')}</div>
             {status?.end_date ? (
               <div style={{ color: '#999', fontSize: 13 }}>
-                {status.auto_renew ? 'Renews' : 'Expires'} {new Date(status.end_date).toLocaleDateString()}
+                {status.auto_renew ? t('membership.renews') : t('membership.expires')} {new Date(status.end_date).toLocaleDateString()}
               </div>
             ) : (
-              <div style={{ color: '#999', fontSize: 13 }}>No active paid membership</div>
+              <div style={{ color: '#999', fontSize: 13 }}>{t('membership.noActivePaid')}</div>
             )}
           </div>
           {status?.end_date && status.auto_renew && (
             <button onClick={cancel} disabled={cancelling} style={s.cancelBtn}>
-              {cancelling ? 'Cancelling…' : 'Cancel auto-renew'}
+              {cancelling ? t('membership.cancelling') : t('membership.cancelAutoRenew')}
             </button>
           )}
         </div>
@@ -132,15 +134,15 @@ export default function Membership() {
             return (
               <div key={plan.tier} style={{ ...s.planCard, borderColor: isCurrent ? TIER_COLORS[plan.tier] : '#2a2a3e' }}>
                 <div style={{ color: TIER_COLORS[plan.tier], fontWeight: 800, fontSize: 16 }}>{plan.label}</div>
-                <div style={{ fontSize: 26, fontWeight: 800, margin: '8px 0' }}>${plan.price}<span style={{ fontSize: 13, color: '#999' }}>/mo</span></div>
+                <div style={{ fontSize: 26, fontWeight: 800, margin: '8px 0' }}>${plan.price}<span style={{ fontSize: 13, color: '#999' }}>{t('membership.perMonth')}</span></div>
                 <ul style={s.benefitList}>
                   {plan.benefits.map((b) => <li key={b} style={s.benefitItem}>✓ {b}</li>)}
                 </ul>
                 {isCurrent ? (
-                  <div style={s.currentBadge}>Your current plan</div>
+                  <div style={s.currentBadge}>{t('membership.yourCurrentPlan')}</div>
                 ) : (
                   <button onClick={() => upgrade(plan.tier)} disabled={busyTier === plan.tier} style={s.upgradeBtn}>
-                    {busyTier === plan.tier ? 'Redirecting…' : `Get ${plan.label}`}
+                    {busyTier === plan.tier ? t('membership.redirecting') : `${t('membership.getPlanPrefix')} ${plan.label}`}
                   </button>
                 )}
               </div>

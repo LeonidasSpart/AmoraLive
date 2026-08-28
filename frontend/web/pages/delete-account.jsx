@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import AuthLayout from '../components/AuthLayout';
+import { useTranslation } from '../lib/i18n';
 
 const API = (process.env.NEXT_PUBLIC_API_URL || 'https://api.amoramatch.one').replace(/\/+$/, '');
 
 export default function DeleteAccount() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState('');
   const [error, setError] = useState('');
@@ -22,10 +24,10 @@ export default function DeleteAccount() {
         body: JSON.stringify({ email: email.trim() })
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Unable to process your request.');
-      setStatus(data.message || 'If an Amora account exists for that email, a confirmation link has been sent.');
+      if (!res.ok) throw new Error(data.error || t('deleteAccount.errorGeneric'));
+      setStatus(data.message || t('deleteAccount.defaultStatusMessage'));
     } catch (e) {
-      setError(e.message || 'Unable to process your request.');
+      setError(e.message || t('deleteAccount.errorGeneric'));
     } finally {
       setLoading(false);
     }
@@ -33,30 +35,30 @@ export default function DeleteAccount() {
 
   return (
     <AuthLayout
-      eyebrow="ACCOUNT PRIVACY"
-      title="Delete your Amora account."
-      subtitle="Enter the email address associated with your account. We will send a secure confirmation link."
-      footerText="Keep your account?"
+      eyebrow={t('deleteAccount.eyebrow')}
+      title={t('deleteAccount.title')}
+      subtitle={t('deleteAccount.subtitle')}
+      footerText={t('deleteAccount.footerText')}
       footerHref="/login"
-      footerLabel="Sign in"
+      footerLabel={t('deleteAccount.footerLabel')}
     >
       {error && <div className="amora-error" role="alert">{error}</div>}
-      {status && <div className="amora-success-box"><h2>Check your inbox.</h2><p>{status}</p></div>}
+      {status && <div className="amora-success-box"><h2>{t('deleteAccount.checkInbox')}</h2><p>{status}</p></div>}
 
       {!status && (
         <form onSubmit={submit} className="amora-auth-form" style={{ padding: 0, background: 'transparent' }}>
           <div className="amora-field">
-            <label className="amora-label" htmlFor="delete-email">Email address</label>
-            <input id="delete-email" className="amora-input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required />
+            <label className="amora-label" htmlFor="delete-email">{t('deleteAccount.emailLabel')}</label>
+            <input id="delete-email" className="amora-input" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t('deleteAccount.emailPlaceholder')} required />
           </div>
           <button className="amora-btn amora-btn-primary amora-auth-submit" type="submit" disabled={loading}>
-            {loading ? 'Sending secure link…' : 'Request account deletion'}
+            {loading ? t('deleteAccount.sending') : t('deleteAccount.submit')}
           </button>
         </form>
       )}
 
       <p className="amora-auth-small">
-        Deleting your account disables access and removes or anonymizes personal account information. Some records may be retained where required for security, fraud prevention, financial records, or legal obligations. See our <Link href="/legal/privacy">Privacy Policy</Link>.
+        {t('deleteAccount.disclaimer')} <Link href="/legal/privacy">{t('deleteAccount.privacyPolicyLink')}</Link>.
       </p>
     </AuthLayout>
   );

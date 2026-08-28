@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
-
-const features = [
-  ['💗', 'Meaningful matching', 'Discover people who fit your vibe and build genuine connections.'],
-  ['🎥', 'Video Match', 'Meet face-to-face with a fast, respectful first impression experience.'],
-  ['🔴', 'Live & social', 'Join live rooms, chat in real time and share moments together.'],
-  ['💬', 'Private conversations', 'Keep your conversations close with realtime messaging and notifications.'],
-  ['🎁', 'Gifts & rewards', 'Send expressive paid gifts and make every live interaction more memorable.'],
-  ['🛡️', 'Safety first', 'Reporting, blocking and account protections are built into the experience.'],
-];
+import { useTranslation } from '../lib/i18n';
 
 export default function Home() {
+  const { t, lang, setLang, languages } = useTranslation();
+  const features = [
+    ['💗', t('landing.feature1Title'), t('landing.feature1Text')],
+    ['🎥', t('landing.feature2Title'), t('landing.feature2Text')],
+    ['🔴', t('landing.feature3Title'), t('landing.feature3Text')],
+    ['💬', t('landing.feature4Title'), t('landing.feature4Text')],
+    ['🎁', t('landing.feature5Title'), t('landing.feature5Text')],
+    ['🛡️', t('landing.feature6Title'), t('landing.feature6Text')],
+  ];
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
@@ -36,18 +37,28 @@ export default function Home() {
           </Link>
 
           <nav className={`amora-nav-links${menuOpen ? ' is-open' : ''}`} aria-label="Main navigation">
-            <a href="#features" onClick={closeMenu}>Features</a>
-            <a href="#about" onClick={closeMenu}>Why Amora</a>
-            <a href="#safety" onClick={closeMenu}>Safety</a>
+            <a href="#features" onClick={closeMenu}>{t('landing.navFeatures')}</a>
+            <a href="#about" onClick={closeMenu}>{t('landing.navWhyAmora')}</a>
+            <a href="#safety" onClick={closeMenu}>{t('landing.navSafety')}</a>
             <div className="amora-mobile-actions">
-              <Link className="amora-btn amora-btn-secondary" href="/login" onClick={closeMenu}>Log in</Link>
-              <Link className="amora-btn amora-btn-primary" href="/register" onClick={closeMenu}>Create account</Link>
+              <Link className="amora-btn amora-btn-secondary" href="/login" onClick={closeMenu}>{t('landing.logIn')}</Link>
+              <Link className="amora-btn amora-btn-primary" href="/register" onClick={closeMenu}>{t('landing.createAccount')}</Link>
             </div>
           </nav>
 
           <div className="amora-actions amora-desktop-actions">
-            <Link className="amora-btn amora-btn-secondary" href="/login">Log in</Link>
-            <Link className="amora-btn amora-btn-primary" href="/register">Create account</Link>
+            <select
+              aria-label={t('common.language')}
+              value={lang}
+              onChange={(e) => setLang(e.target.value)}
+              style={{ background: 'transparent', color: 'inherit', border: '1px solid rgba(255,255,255,.15)', borderRadius: 8, padding: '4px 6px', fontSize: 12, marginRight: 8 }}
+            >
+              {languages.map((l) => (
+                <option key={l.code} value={l.code} style={{ color: '#000' }}>{l.label}</option>
+              ))}
+            </select>
+            <Link className="amora-btn amora-btn-secondary" href="/login">{t('landing.logIn')}</Link>
+            <Link className="amora-btn amora-btn-primary" href="/register">{t('landing.createAccount')}</Link>
           </div>
 
           <button
@@ -55,7 +66,7 @@ export default function Home() {
             type="button"
             aria-expanded={menuOpen}
             aria-controls="amora-mobile-navigation"
-            aria-label={menuOpen ? 'Close navigation' : 'Open navigation'}
+            aria-label={menuOpen ? t('landing.closeNav') : t('landing.openNav')}
             onClick={() => setMenuOpen((value) => !value)}
           >
             <span /><span /><span />
@@ -66,17 +77,17 @@ export default function Home() {
       <main>
         <section className="amora-container amora-hero">
           <div className="amora-hero-copy">
-            <span className="amora-eyebrow"><span className="amora-eyebrow-dot" /> Live dating, made meaningful</span>
-            <h1>Meet people.<br /><span className="amora-gradient-text">Feel the connection.</span></h1>
-            <p>AmoraLive brings matching, video, live rooms, private chat and real-time moments together in one beautifully connected experience.</p>
+            <span className="amora-eyebrow"><span className="amora-eyebrow-dot" /> {t('landing.eyebrowHero')}</span>
+            <h1>{t('landing.heroTitleLine1')}<br /><span className="amora-gradient-text">{t('landing.heroTitleLine2')}</span></h1>
+            <p>{t('landing.heroSubtitle')}</p>
             <div className="amora-hero-actions">
-              <Link className="amora-btn amora-btn-primary amora-btn-large" href="/register">Start your Amora journey <span aria-hidden="true">→</span></Link>
-              <Link className="amora-btn amora-btn-secondary amora-btn-large" href="/login">I already have an account</Link>
+              <Link className="amora-btn amora-btn-primary amora-btn-large" href="/register">{t('landing.startJourney')} <span aria-hidden="true">→</span></Link>
+              <Link className="amora-btn amora-btn-secondary amora-btn-large" href="/login">{t('landing.alreadyHaveAccount')}</Link>
             </div>
             <div className="amora-trust" aria-label="Amora highlights">
-              <span>✓ 18+ community</span>
-              <span>✓ Web, iPad & mobile</span>
-              <span>✓ Built for real connections</span>
+              <span>{t('landing.trust18')}</span>
+              <span>{t('landing.trustDevices')}</span>
+              <span>{t('landing.trustReal')}</span>
             </div>
           </div>
 
@@ -87,9 +98,9 @@ export default function Home() {
                 <img src="/brand/amora-brand-dark.png" alt="Amora — Meaningful Connections" />
               </div>
               <div className="amora-chip-row">
-                <div className="amora-chip"><strong>Live</strong><span>Real-time rooms</span></div>
-                <div className="amora-chip"><strong>Match</strong><span>Meet naturally</span></div>
-                <div className="amora-chip"><strong>Chat</strong><span>Stay connected</span></div>
+                <div className="amora-chip"><strong>{t('landing.liveChipTitle')}</strong><span>{t('landing.liveChipSub')}</span></div>
+                <div className="amora-chip"><strong>{t('landing.matchChipTitle')}</strong><span>{t('landing.matchChipSub')}</span></div>
+                <div className="amora-chip"><strong>{t('landing.chatChipTitle')}</strong><span>{t('landing.chatChipSub')}</span></div>
               </div>
             </div>
           </div>
@@ -98,9 +109,9 @@ export default function Home() {
         <section id="features" className="amora-section">
           <div className="amora-container">
             <div className="amora-section-heading">
-              <span className="amora-section-kicker">THE AMORA EXPERIENCE</span>
-              <h2>Everything you need to <span className="amora-gradient-text">connect.</span></h2>
-              <p className="amora-section-intro">One brand, one ecosystem, one place for discovery, conversation and live experiences.</p>
+              <span className="amora-section-kicker">{t('landing.sectionKicker')}</span>
+              <h2>{t('landing.sectionTitle')} <span className="amora-gradient-text">{t('landing.sectionTitleGradient')}</span></h2>
+              <p className="amora-section-intro">{t('landing.sectionIntro')}</p>
             </div>
             <div className="amora-grid">
               {features.map(([icon, title, text]) => (
@@ -117,11 +128,11 @@ export default function Home() {
         <section id="about" className="amora-section amora-section-soft">
           <div className="amora-container">
             <div className="amora-cta">
-              <span className="amora-eyebrow">AMORA · MEANINGFUL CONNECTIONS</span>
-              <h2>Less noise. <span className="amora-gradient-text">More connection.</span></h2>
-              <p>Designed for desktop, tablets, iPad and every modern mobile screen — with a responsive experience that feels natural everywhere.</p>
+              <span className="amora-eyebrow">{t('landing.ctaEyebrow')}</span>
+              <h2>{t('landing.ctaTitle')} <span className="amora-gradient-text">{t('landing.ctaTitleGradient')}</span></h2>
+              <p>{t('landing.ctaText')}</p>
               <div className="amora-hero-actions amora-hero-actions-centered">
-                <Link className="amora-btn amora-btn-primary amora-btn-large" href="/register">Join AmoraLive</Link>
+                <Link className="amora-btn amora-btn-primary amora-btn-large" href="/register">{t('landing.joinAmora')}</Link>
               </div>
             </div>
           </div>
@@ -135,10 +146,10 @@ export default function Home() {
             <span>© {new Date().getFullYear()} AmoraLive</span>
           </div>
           <div className="amora-footer-links">
-            <Link href="/legal/terms">Terms</Link>
-            <Link href="/legal/privacy">Privacy</Link>
-            <Link href="/legal/guidelines">Community Guidelines</Link>
-            <Link href="/legal/cookies">Cookies</Link>
+            <Link href="/legal/terms">{t('landing.footerTerms')}</Link>
+            <Link href="/legal/privacy">{t('landing.footerPrivacy')}</Link>
+            <Link href="/legal/guidelines">{t('landing.footerGuidelines')}</Link>
+            <Link href="/legal/cookies">{t('landing.footerCookies')}</Link>
           </div>
         </div>
       </footer>

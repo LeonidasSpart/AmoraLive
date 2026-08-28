@@ -5,6 +5,7 @@ import { useRouter } from 'next/router';
 import Layout from '../components/Layout';
 import { apiFetch } from '../lib/api';
 import VerifiedBadge from '../components/VerifiedBadge';
+import { useTranslation } from '../lib/i18n';
 
 function formatMinutes(mins) {
   const h = Math.floor(mins / 60);
@@ -13,6 +14,7 @@ function formatMinutes(mins) {
 }
 
 export default function CreatorStudio() {
+  const { t } = useTranslation();
   const router = useRouter();
   const [overview, setOverview] = useState(null);
   const [analytics, setAnalytics] = useState([]);
@@ -44,7 +46,7 @@ export default function CreatorStudio() {
       if (bt.ok) setBattleStats(await bt.json());
       if (sup.ok) setSupporters(await sup.json());
     } catch (e) {
-      setError('Unable to load Creator Studio.');
+      setError(t('studio.errorLoad'));
     } finally {
       setLoading(false);
     }
@@ -58,7 +60,7 @@ export default function CreatorStudio() {
   if (loading) {
     return (
       <Layout>
-        <div style={s.wrap}><p style={{ color: '#999' }}>Loading Creator Studio…</p></div>
+        <div style={s.wrap}><p style={{ color: '#999' }}>{t('studio.loadingStudio')}</p></div>
       </Layout>
     );
   }
@@ -69,20 +71,20 @@ export default function CreatorStudio() {
   return (
     <Layout>
       <div style={s.wrap}>
-        <h1 style={s.title}>📊 Creator Studio</h1>
+        <h1 style={s.title}>{t('studio.title')}</h1>
         {error && <div style={s.error}>{error}</div>}
 
         {/* Overview */}
         <div style={s.statGrid}>
           {[
-            ['Followers', overview?.totalFollowers ?? 0],
-            ['New this week', `+${overview?.newFollowersThisWeek ?? 0}`],
-            ['Streams', overview?.totalStreams ?? 0],
-            ['Live time', formatMinutes(overview?.totalLiveMinutes ?? 0)],
-            ['Peak viewers', overview?.peakViewers ?? 0],
-            ['Gifts received', overview?.totalGiftsReceived ?? 0],
-            ['Earnings', `🪙 ${overview?.totalEarnings ?? 0}`],
-            ['Level', `${overview?.level ?? 0} (${(overview?.xp ?? 0).toLocaleString()} XP)`]
+            [t('studio.followers'), overview?.totalFollowers ?? 0],
+            [t('studio.newThisWeek'), `+${overview?.newFollowersThisWeek ?? 0}`],
+            [t('studio.streams'), overview?.totalStreams ?? 0],
+            [t('studio.liveTime'), formatMinutes(overview?.totalLiveMinutes ?? 0)],
+            [t('studio.peakViewers'), overview?.peakViewers ?? 0],
+            [t('studio.giftsReceived'), overview?.totalGiftsReceived ?? 0],
+            [t('studio.earnings'), `🪙 ${overview?.totalEarnings ?? 0}`],
+            [t('studio.level'), `${overview?.level ?? 0} (${(overview?.xp ?? 0).toLocaleString()} ${t('levels.xpWord')})`]
           ].map(([label, value]) => (
             <div key={label} style={s.statCard}>
               <div style={s.statValue}>{value}</div>
@@ -93,16 +95,16 @@ export default function CreatorStudio() {
 
         {/* Quick tools */}
         <div style={s.toolsRow}>
-          <Link href="/profile" style={s.toolBtn}>✏️ Edit Profile</Link>
-          <Link href="/wallet" style={s.toolBtn}>🎁 Gift History</Link>
-          <Link href="/missions" style={s.toolBtn}>🎯 Missions</Link>
-          <Link href="/go-live" style={s.toolBtn}>🔴 Go Live</Link>
+          <Link href="/profile" style={s.toolBtn}>{t('studio.editProfile')}</Link>
+          <Link href="/wallet" style={s.toolBtn}>{t('studio.giftHistory')}</Link>
+          <Link href="/missions" style={s.toolBtn}>{t('studio.missionsLink')}</Link>
+          <Link href="/go-live" style={s.toolBtn}>{t('studio.goLiveLink')}</Link>
         </div>
 
         {/* Analytics */}
         <div style={s.section}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-            <h3 style={s.sectionTitle}>Performance</h3>
+            <h3 style={s.sectionTitle}>{t('studio.performance')}</h3>
             <div style={{ display: 'flex', gap: 6 }}>
               {[7, 30, 90].map((d) => (
                 <button key={d} onClick={() => setRange(d)} style={{ ...s.rangeBtn, ...(range === d ? s.rangeBtnActive : {}) }}>
@@ -113,7 +115,7 @@ export default function CreatorStudio() {
           </div>
 
           <div style={s.chartCard}>
-            <div style={s.chartLabel}>Coins earned</div>
+            <div style={s.chartLabel}>{t('studio.coinsEarned')}</div>
             <div style={s.chartRow}>
               {analytics.map((d) => (
                 <div key={d.date} title={`${d.date}: ${d.coinsEarned} coins`} style={{ ...s.bar, height: `${Math.max(2, (d.coinsEarned / maxCoins) * 60)}px`, background: 'linear-gradient(180deg, #ff5da8, #9b35ff)' }} />
@@ -122,7 +124,7 @@ export default function CreatorStudio() {
           </div>
 
           <div style={s.chartCard}>
-            <div style={s.chartLabel}>New followers</div>
+            <div style={s.chartLabel}>{t('studio.newFollowers')}</div>
             <div style={s.chartRow}>
               {analytics.map((d) => (
                 <div key={d.date} title={`${d.date}: +${d.newFollowers}`} style={{ ...s.bar, height: `${Math.max(2, (d.newFollowers / maxFollowers) * 60)}px`, background: '#3fa9ff' }} />
@@ -134,27 +136,27 @@ export default function CreatorStudio() {
         {/* Battle record */}
         {battleStats && (battleStats.wins + battleStats.losses + battleStats.draws) > 0 && (
           <div style={s.section}>
-            <h3 style={s.sectionTitle}>⚔️ Battle Record</h3>
+            <h3 style={s.sectionTitle}>{t('studio.battleRecord')}</h3>
             <div style={{ display: 'flex', gap: 16, marginBottom: 12 }}>
-              <div style={{ color: '#8f8' }}>{battleStats.wins} wins</div>
-              <div style={{ color: '#f88' }}>{battleStats.losses} losses</div>
-              <div style={{ color: '#999' }}>{battleStats.draws} draws</div>
+              <div style={{ color: '#8f8' }}>{battleStats.wins} {t('studio.wins')}</div>
+              <div style={{ color: '#f88' }}>{battleStats.losses} {t('studio.losses')}</div>
+              <div style={{ color: '#999' }}>{battleStats.draws} {t('studio.draws')}</div>
             </div>
           </div>
         )}
 
         {/* Top supporters */}
         <div style={s.section}>
-          <h3 style={s.sectionTitle}>💝 Top Supporters</h3>
+          <h3 style={s.sectionTitle}>{t('studio.topSupporters')}</h3>
           {supporters.length === 0 ? (
-            <p style={{ color: '#777', fontSize: 13 }}>No gifts received yet.</p>
+            <p style={{ color: '#777', fontSize: 13 }}>{t('studio.noGiftsYet')}</p>
           ) : (
             <div style={s.supporterList}>
               {supporters.map((sup, i) => (
                 <div key={sup.user?.id || i} style={s.supporterRow}>
                   <span style={{ color: '#ffd166', fontWeight: 800, width: 24 }}>#{i + 1}</span>
                   <span style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
-                    {sup.user?.display_name || sup.user?.username || 'Someone'}
+                    {sup.user?.display_name || sup.user?.username || t('studio.someoneFallback')}
                     <VerifiedBadge user={sup.user} size={12} />
                   </span>
                   <span style={{ color: '#ffd166' }}>🪙 {sup.totalCoins}</span>
@@ -166,9 +168,9 @@ export default function CreatorStudio() {
 
         {/* Stream history */}
         <div style={s.section}>
-          <h3 style={s.sectionTitle}>📺 Recent Streams</h3>
+          <h3 style={s.sectionTitle}>{t('studio.recentStreams')}</h3>
           {streams.length === 0 ? (
-            <p style={{ color: '#777', fontSize: 13 }}>No completed streams yet.</p>
+            <p style={{ color: '#777', fontSize: 13 }}>{t('studio.noStreamsYet')}</p>
           ) : (
             <div style={s.streamList}>
               {streams.map((st) => (
