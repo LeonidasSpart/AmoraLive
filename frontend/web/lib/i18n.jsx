@@ -291,6 +291,23 @@ export const translations = {
       typeDaily: '📅 Daily', typeWeekly: '🗓️ Weekly', typeLifetime: '🏆 Achievements',
       claimed: '✓ Claimed', claiming: 'Claiming…', claimReward: 'Claim reward', inProgress: 'In progress', coinsWord: 'coins'
     },
+    missionsCatalog: {
+      daily_go_live: { title: 'Go live for 30 minutes', description: 'Stream for a total of 30 minutes today.' },
+      daily_send_gift: { title: 'Send a gift', description: 'Send any gift to a creator.' },
+      daily_join_stream: { title: 'Watch 3 livestreams', description: 'Join 3 different live rooms.' },
+      daily_send_messages: { title: 'Send 5 messages', description: 'Chat with someone — 5 messages today.' },
+      weekly_receive_gifts: { title: 'Receive 5 gifts', description: 'Get 5 gifts from your supporters this week.' },
+      weekly_battle: { title: 'Join a PK battle', description: 'Take part in a live battle this week.' },
+      weekly_follow_creators: { title: 'Follow 3 creators', description: 'Follow 3 new creators this week.' },
+      weekly_stream_hours: { title: 'Stream 3 hours this week', description: 'Total live time of 3 hours across the week.' },
+      life_first_gift_sent: { title: 'First Gift', description: 'Send your very first gift.', badge: 'Generous Heart' },
+      life_first_gift_received: { title: 'First Supporter', description: 'Receive your first gift.', badge: 'Fan Favorite' },
+      life_first_match: { title: 'First Match', description: 'Get your first mutual match.', badge: 'Matchmaker' },
+      life_profile_complete: { title: 'Complete Your Profile', description: 'Add a bio, photo, and interests.', badge: 'All Set Up' },
+      life_ten_streams: { title: 'Regular Broadcaster', description: 'Go live 10 times.', badge: 'Regular Broadcaster' },
+      life_hundred_gifts_sent: { title: 'Big Spender', description: 'Send 100 gifts total.', badge: 'Big Spender' },
+      life_battle_veteran: { title: 'Battle Veteran', description: 'Take part in 25 PK battles.', badge: 'Battle Veteran' }
+    },
     outfits: {
       backToBoutique: '← Boutique', kicker: 'YOUR ROYAL LOOK', title: 'Dress your aura.',
       subtitle: 'Frames, effects, badges and profile styles that make your Amora identity unmistakably yours.',
@@ -1645,6 +1662,23 @@ export const translations = {
       xpSuffix: 'XP', earnedSuffix: 'obtenida',
       typeDaily: '📅 Diarias', typeWeekly: '🗓️ Semanales', typeLifetime: '🏆 Logros',
       claimed: '✓ Reclamado', claiming: 'Reclamando…', claimReward: 'Reclamar recompensa', inProgress: 'En progreso', coinsWord: 'monedas'
+    },
+    missionsCatalog: {
+      daily_go_live: { title: 'Transmite en vivo durante 30 minutos', description: 'Transmite un total de 30 minutos hoy.' },
+      daily_send_gift: { title: 'Envía un regalo', description: 'Envía cualquier regalo a un creador.' },
+      daily_join_stream: { title: 'Mira 3 transmisiones en vivo', description: 'Únete a 3 salas en vivo diferentes.' },
+      daily_send_messages: { title: 'Envía 5 mensajes', description: 'Chatea con alguien — 5 mensajes hoy.' },
+      weekly_receive_gifts: { title: 'Recibe 5 regalos', description: 'Consigue 5 regalos de tus seguidores esta semana.' },
+      weekly_battle: { title: 'Únete a una batalla PK', description: 'Participa en una batalla en vivo esta semana.' },
+      weekly_follow_creators: { title: 'Sigue a 3 creadores', description: 'Sigue a 3 nuevos creadores esta semana.' },
+      weekly_stream_hours: { title: 'Transmite 3 horas esta semana', description: 'Un total de 3 horas de transmisión en vivo durante la semana.' },
+      life_first_gift_sent: { title: 'Primer regalo', description: 'Envía tu primer regalo.', badge: 'Corazón Generoso' },
+      life_first_gift_received: { title: 'Primer seguidor', description: 'Recibe tu primer regalo.', badge: 'Favorito de los Fans' },
+      life_first_match: { title: 'Primer match', description: 'Consigue tu primer match mutuo.', badge: 'Casamentero' },
+      life_profile_complete: { title: 'Completa tu perfil', description: 'Agrega una biografía, foto e intereses.', badge: 'Todo Listo' },
+      life_ten_streams: { title: 'Transmisor Habitual', description: 'Transmite en vivo 10 veces.', badge: 'Transmisor Habitual' },
+      life_hundred_gifts_sent: { title: 'Gran Gastador', description: 'Envía 100 regalos en total.', badge: 'Gran Gastador' },
+      life_battle_veteran: { title: 'Veterano de Batalla', description: 'Participa en 25 batallas PK.', badge: 'Veterano de Batalla' }
     },
     outfits: {
       backToBoutique: '← Boutique', kicker: 'TU ESTILO REAL', title: 'Viste tu aura.',
@@ -3001,6 +3035,23 @@ export const translations = {
       typeDaily: '📅 Diárias', typeWeekly: '🗓️ Semanais', typeLifetime: '🏆 Conquistas',
       claimed: '✓ Resgatado', claiming: 'Resgatando…', claimReward: 'Resgatar recompensa', inProgress: 'Em andamento', coinsWord: 'moedas'
     },
+    missionsCatalog: {
+      daily_go_live: { title: 'Fique ao vivo por 30 minutos', description: 'Transmita por um total de 30 minutos hoje.' },
+      daily_send_gift: { title: 'Envie um presente', description: 'Envie qualquer presente a um criador.' },
+      daily_join_stream: { title: 'Assista a 3 transmissões ao vivo', description: 'Entre em 3 salas ao vivo diferentes.' },
+      daily_send_messages: { title: 'Envie 5 mensagens', description: 'Converse com alguém — 5 mensagens hoje.' },
+      weekly_receive_gifts: { title: 'Receba 5 presentes', description: 'Ganhe 5 presentes de seus apoiadores esta semana.' },
+      weekly_battle: { title: 'Participe de uma batalha PK', description: 'Participe de uma batalha ao vivo esta semana.' },
+      weekly_follow_creators: { title: 'Siga 3 criadores', description: 'Siga 3 novos criadores esta semana.' },
+      weekly_stream_hours: { title: 'Transmita 3 horas esta semana', description: 'Total de 3 horas de transmissão ao vivo durante a semana.' },
+      life_first_gift_sent: { title: 'Primeiro Presente', description: 'Envie seu primeiro presente.', badge: 'Coração Generoso' },
+      life_first_gift_received: { title: 'Primeiro Apoiador', description: 'Receba seu primeiro presente.', badge: 'Favorito dos Fãs' },
+      life_first_match: { title: 'Primeiro Match', description: 'Consiga seu primeiro match mútuo.', badge: 'Casamenteiro' },
+      life_profile_complete: { title: 'Complete Seu Perfil', description: 'Adicione uma bio, foto e interesses.', badge: 'Tudo Pronto' },
+      life_ten_streams: { title: 'Transmissor Regular', description: 'Fique ao vivo 10 vezes.', badge: 'Transmissor Regular' },
+      life_hundred_gifts_sent: { title: 'Grande Gastador', description: 'Envie 100 presentes no total.', badge: 'Grande Gastador' },
+      life_battle_veteran: { title: 'Veterano de Batalhas', description: 'Participe de 25 batalhas PK.', badge: 'Veterano de Batalhas' }
+    },
     outfits: {
       backToBoutique: '← Boutique', kicker: 'SEU VISUAL REAL', title: 'Vista sua aura.',
       subtitle: 'Molduras, efeitos, emblemas e estilos de perfil que tornam sua identidade Amora inconfundivelmente sua.',
@@ -4355,6 +4406,23 @@ export const translations = {
       xpSuffix: 'XP', earnedSuffix: 'obtenu',
       typeDaily: '📅 Quotidiennes', typeWeekly: '🗓️ Hebdomadaires', typeLifetime: '🏆 Succès',
       claimed: '✓ Réclamé', claiming: 'Réclamation…', claimReward: 'Réclamer la récompense', inProgress: 'En cours', coinsWord: 'pièces'
+    },
+    missionsCatalog: {
+      daily_go_live: { title: "Diffuse en direct pendant 30 minutes", description: "Diffuse un total de 30 minutes aujourd'hui." },
+      daily_send_gift: { title: "Envoie un cadeau", description: "Envoie n'importe quel cadeau à un créateur." },
+      daily_join_stream: { title: "Regarde 3 diffusions en direct", description: "Rejoins 3 salles en direct différentes." },
+      daily_send_messages: { title: "Envoie 5 messages", description: "Discute avec quelqu'un — 5 messages aujourd'hui." },
+      weekly_receive_gifts: { title: "Reçois 5 cadeaux", description: "Obtiens 5 cadeaux de tes soutiens cette semaine." },
+      weekly_battle: { title: "Participe à une battle PK", description: "Prends part à une battle en direct cette semaine." },
+      weekly_follow_creators: { title: "Suis 3 créateurs", description: "Suis 3 nouveaux créateurs cette semaine." },
+      weekly_stream_hours: { title: "Diffuse 3 heures cette semaine", description: "Un total de 3 heures de diffusion en direct sur la semaine." },
+      life_first_gift_sent: { title: "Premier Cadeau", description: "Envoie ton tout premier cadeau.", badge: "Cœur Généreux" },
+      life_first_gift_received: { title: "Premier Soutien", description: "Reçois ton premier cadeau.", badge: "Favori des Fans" },
+      life_first_match: { title: "Premier Match", description: "Obtiens ton premier match mutuel.", badge: "Entremetteur" },
+      life_profile_complete: { title: "Complète Ton Profil", description: "Ajoute une bio, une photo et des centres d'intérêt.", badge: "Tout Est Prêt" },
+      life_ten_streams: { title: "Diffuseur Régulier", description: "Passe en direct 10 fois.", badge: "Diffuseur Régulier" },
+      life_hundred_gifts_sent: { title: "Grand Dépensier", description: "Envoie 100 cadeaux au total.", badge: "Grand Dépensier" },
+      life_battle_veteran: { title: "Vétéran des Battles", description: "Participe à 25 battles PK.", badge: "Vétéran des Battles" }
     },
     outfits: {
       backToBoutique: '← Boutique', kicker: 'VOTRE STYLE ROYAL', title: 'Habillez votre aura.',
@@ -5711,6 +5779,23 @@ export const translations = {
       typeDaily: '📅 Täglich', typeWeekly: '🗓️ Wöchentlich', typeLifetime: '🏆 Erfolge',
       claimed: '✓ Eingelöst', claiming: 'Wird eingelöst…', claimReward: 'Belohnung einlösen', inProgress: 'In Bearbeitung', coinsWord: 'Coins'
     },
+    missionsCatalog: {
+      daily_go_live: { title: 'Gehe 30 Minuten live', description: 'Streame heute insgesamt 30 Minuten.' },
+      daily_send_gift: { title: 'Sende ein Geschenk', description: 'Sende einem Creator ein beliebiges Geschenk.' },
+      daily_join_stream: { title: 'Schau dir 3 Livestreams an', description: 'Tritt 3 verschiedenen Live-Räumen bei.' },
+      daily_send_messages: { title: 'Sende 5 Nachrichten', description: 'Chatte mit jemandem — heute 5 Nachrichten.' },
+      weekly_receive_gifts: { title: 'Erhalte 5 Geschenke', description: 'Erhalte diese Woche 5 Geschenke von deinen Unterstützern.' },
+      weekly_battle: { title: 'Nimm an einem PK-Battle teil', description: 'Nimm diese Woche an einem Live-Battle teil.' },
+      weekly_follow_creators: { title: 'Folge 3 Creators', description: 'Folge dieser Woche 3 neuen Creators.' },
+      weekly_stream_hours: { title: 'Streame diese Woche 3 Stunden', description: 'Insgesamt 3 Stunden Livezeit über die Woche verteilt.' },
+      life_first_gift_sent: { title: 'Erstes Geschenk', description: 'Sende dein allererstes Geschenk.', badge: 'Großzügiges Herz' },
+      life_first_gift_received: { title: 'Erster Unterstützer', description: 'Erhalte dein erstes Geschenk.', badge: 'Fan-Liebling' },
+      life_first_match: { title: 'Erstes Match', description: 'Erhalte dein erstes gegenseitiges Match.', badge: 'Matchmaker' },
+      life_profile_complete: { title: 'Vervollständige dein Profil', description: 'Füge eine Bio, ein Foto und Interessen hinzu.', badge: 'Startklar' },
+      life_ten_streams: { title: 'Regelmäßiger Broadcaster', description: 'Gehe 10 Mal live.', badge: 'Regelmäßiger Broadcaster' },
+      life_hundred_gifts_sent: { title: 'Großzügiger Spender', description: 'Sende insgesamt 100 Geschenke.', badge: 'Großzügiger Spender' },
+      life_battle_veteran: { title: 'Battle-Veteran', description: 'Nimm an 25 PK-Battles teil.', badge: 'Battle-Veteran' }
+    },
     outfits: {
       backToBoutique: '← Boutique', kicker: 'DEIN KÖNIGLICHER LOOK', title: 'Kleide deine Aura.',
       subtitle: 'Rahmen, Effekte, Abzeichen und Profilstile, die deine Amora-Identität unverwechselbar machen.',
@@ -7065,6 +7150,23 @@ export const translations = {
       xpSuffix: 'نقطة خبرة', earnedSuffix: 'مكتسبة',
       typeDaily: '📅 يومية', typeWeekly: '🗓️ أسبوعية', typeLifetime: '🏆 إنجازات',
       claimed: '✓ تمت المطالبة', claiming: 'جارٍ المطالبة…', claimReward: 'المطالبة بالمكافأة', inProgress: 'قيد التقدم', coinsWord: 'عملة'
+    },
+    missionsCatalog: {
+      daily_go_live: { title: 'ابدأ بثًا مباشرًا لمدة 30 دقيقة', description: 'ابث لمدة إجمالية 30 دقيقة اليوم.' },
+      daily_send_gift: { title: 'أرسل هدية', description: 'أرسل أي هدية إلى صانع محتوى.' },
+      daily_join_stream: { title: 'شاهد 3 بثوث مباشرة', description: 'انضم إلى 3 غرف بث مباشر مختلفة.' },
+      daily_send_messages: { title: 'أرسل 5 رسائل', description: 'تحدث مع شخص ما — 5 رسائل اليوم.' },
+      weekly_receive_gifts: { title: 'استلم 5 هدايا', description: 'احصل على 5 هدايا من داعميك هذا الأسبوع.' },
+      weekly_battle: { title: 'انضم إلى معركة PK', description: 'شارك في معركة مباشرة هذا الأسبوع.' },
+      weekly_follow_creators: { title: 'تابع 3 صانعي محتوى', description: 'تابع 3 صانعي محتوى جدد هذا الأسبوع.' },
+      weekly_stream_hours: { title: 'ابث لمدة 3 ساعات هذا الأسبوع', description: 'إجمالي وقت بث 3 ساعات خلال الأسبوع.' },
+      life_first_gift_sent: { title: 'أول هدية', description: 'أرسل أول هدية لك على الإطلاق.', badge: 'قلب سخي' },
+      life_first_gift_received: { title: 'أول داعم', description: 'استلم أول هدية لك.', badge: 'المفضل لدى المعجبين' },
+      life_first_match: { title: 'أول تطابق', description: 'احصل على أول تطابق متبادل لك.', badge: 'الوسيط' },
+      life_profile_complete: { title: 'أكمل ملفك الشخصي', description: 'أضف نبذة تعريفية وصورة واهتمامات.', badge: 'جاهز تمامًا' },
+      life_ten_streams: { title: 'مذيع منتظم', description: 'ابدأ بثًا مباشرًا 10 مرات.', badge: 'مذيع منتظم' },
+      life_hundred_gifts_sent: { title: 'منفق كبير', description: 'أرسل 100 هدية إجمالاً.', badge: 'منفق كبير' },
+      life_battle_veteran: { title: 'محارب مخضرم', description: 'شارك في 25 معركة PK.', badge: 'محارب مخضرم' }
     },
     outfits: {
       backToBoutique: '← المتجر الفاخر', kicker: 'مظهرك الملكي', title: 'زيّن هالتك.',
@@ -8421,6 +8523,23 @@ export const translations = {
       typeDaily: '📅 दैनिक', typeWeekly: '🗓️ साप्ताहिक', typeLifetime: '🏆 उपलब्धियां',
       claimed: '✓ दावा किया गया', claiming: 'दावा किया जा रहा है…', claimReward: 'पुरस्कार का दावा करें', inProgress: 'प्रगति पर है', coinsWord: 'कॉइन'
     },
+    missionsCatalog: {
+      daily_go_live: { title: '30 मिनट के लिए लाइव जाएं', description: 'आज कुल 30 मिनट के लिए स्ट्रीम करें।' },
+      daily_send_gift: { title: 'एक उपहार भेजें', description: 'किसी क्रिएटर को कोई भी उपहार भेजें।' },
+      daily_join_stream: { title: '3 लाइवस्ट्रीम देखें', description: '3 अलग-अलग लाइव रूम में शामिल हों।' },
+      daily_send_messages: { title: '5 संदेश भेजें', description: 'किसी से चैट करें — आज 5 संदेश।' },
+      weekly_receive_gifts: { title: '5 उपहार प्राप्त करें', description: 'इस सप्ताह अपने समर्थकों से 5 उपहार प्राप्त करें।' },
+      weekly_battle: { title: 'एक पीके बैटल में शामिल हों', description: 'इस सप्ताह एक लाइव बैटल में भाग लें।' },
+      weekly_follow_creators: { title: '3 क्रिएटर्स को फॉलो करें', description: 'इस सप्ताह 3 नए क्रिएटर्स को फॉलो करें।' },
+      weekly_stream_hours: { title: 'इस सप्ताह 3 घंटे स्ट्रीम करें', description: 'सप्ताह भर में कुल 3 घंटे का लाइव समय।' },
+      life_first_gift_sent: { title: 'पहला उपहार', description: 'अपना पहला उपहार भेजें।', badge: 'उदार हृदय' },
+      life_first_gift_received: { title: 'पहला समर्थक', description: 'अपना पहला उपहार प्राप्त करें।', badge: 'फैन फेवरेट' },
+      life_first_match: { title: 'पहला मैच', description: 'अपना पहला पारस्परिक मैच प्राप्त करें।', badge: 'मैचमेकर' },
+      life_profile_complete: { title: 'अपनी प्रोफ़ाइल पूरी करें', description: 'एक बायो, फोटो और रुचियां जोड़ें।', badge: 'पूरी तरह तैयार' },
+      life_ten_streams: { title: 'नियमित प्रसारक', description: '10 बार लाइव जाएं।', badge: 'नियमित प्रसारक' },
+      life_hundred_gifts_sent: { title: 'बड़ा खर्च करने वाला', description: 'कुल 100 उपहार भेजें।', badge: 'बड़ा खर्च करने वाला' },
+      life_battle_veteran: { title: 'बैटल वेटरन', description: '25 पीके बैटल में भाग लें।', badge: 'बैटल वेटरन' }
+    },
     outfits: {
       backToBoutique: '← बुटीक', kicker: 'आपका शाही लुक', title: 'अपनी आभा को सजाएं।',
       subtitle: 'फ्रेम, इफ़ेक्ट, बैज और प्रोफ़ाइल स्टाइल जो आपकी अमोरा पहचान को स्पष्ट रूप से आपका बनाते हैं।',
@@ -9775,6 +9894,23 @@ export const translations = {
       xpSuffix: 'XP', earnedSuffix: 'diperoleh',
       typeDaily: '📅 Harian', typeWeekly: '🗓️ Mingguan', typeLifetime: '🏆 Pencapaian',
       claimed: '✓ Diklaim', claiming: 'Mengklaim…', claimReward: 'Klaim hadiah', inProgress: 'Sedang berlangsung', coinsWord: 'koin'
+    },
+    missionsCatalog: {
+      daily_go_live: { title: 'Siaran langsung selama 30 menit', description: 'Siaran dengan total 30 menit hari ini.' },
+      daily_send_gift: { title: 'Kirim hadiah', description: 'Kirim hadiah apa pun kepada kreator.' },
+      daily_join_stream: { title: 'Tonton 3 siaran langsung', description: 'Bergabung dengan 3 ruang siaran langsung yang berbeda.' },
+      daily_send_messages: { title: 'Kirim 5 pesan', description: 'Mengobrol dengan seseorang — 5 pesan hari ini.' },
+      weekly_receive_gifts: { title: 'Terima 5 hadiah', description: 'Dapatkan 5 hadiah dari pendukung Anda minggu ini.' },
+      weekly_battle: { title: 'Ikuti battle PK', description: 'Ikut serta dalam battle langsung minggu ini.' },
+      weekly_follow_creators: { title: 'Ikuti 3 kreator', description: 'Ikuti 3 kreator baru minggu ini.' },
+      weekly_stream_hours: { title: 'Siaran langsung 3 jam minggu ini', description: 'Total waktu siaran langsung 3 jam selama seminggu.' },
+      life_first_gift_sent: { title: 'Hadiah Pertama', description: 'Kirim hadiah pertama Anda.', badge: 'Hati Dermawan' },
+      life_first_gift_received: { title: 'Pendukung Pertama', description: 'Terima hadiah pertama Anda.', badge: 'Favorit Penggemar' },
+      life_first_match: { title: 'Kecocokan Pertama', description: 'Dapatkan kecocokan mutual pertama Anda.', badge: 'Mak Comblang' },
+      life_profile_complete: { title: 'Lengkapi Profil Anda', description: 'Tambahkan bio, foto, dan minat.', badge: 'Siap Sepenuhnya' },
+      life_ten_streams: { title: 'Penyiar Reguler', description: 'Siaran langsung 10 kali.', badge: 'Penyiar Reguler' },
+      life_hundred_gifts_sent: { title: 'Pengeluar Besar', description: 'Kirim total 100 hadiah.', badge: 'Pengeluar Besar' },
+      life_battle_veteran: { title: 'Veteran Battle', description: 'Ikut serta dalam 25 battle PK.', badge: 'Veteran Battle' }
     },
     outfits: {
       backToBoutique: '← Butik', kicker: 'TAMPILAN KERAJAAN ANDA', title: 'Hiasi aura Anda.',
