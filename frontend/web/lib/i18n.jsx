@@ -385,6 +385,19 @@ export const translations = {
       readyTitle: 'Ready for your video date?',
       readyBody: 'This will turn on your camera and microphone so you and your match can see each other.',
       startButton: 'Start video date', connecting: 'Connecting…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'Failed to load messages', errorLoadChat: 'Unable to load chat',
+      errorRealtimeAuth: 'Realtime authentication failed. Please sign in again.',
+      errorRealtimeUnavailable: 'Realtime connection unavailable. Trying again…',
+      errorSendMessage: 'Unable to send message.', errorRealtimeNotReady: 'Realtime connection is not ready.',
+      errorUploadFile: 'Unable to upload that file.', openingSpace: 'Opening your private space…', retry: 'Retry',
+      userFallback: 'User', typingIndicator: 'typing…', onlineStatus: 'Private conversation • Online',
+      connectingSecurely: 'Connecting securely…', viewProfile: 'View profile',
+      privateSpacePill: 'PRIVATE • END-TO-END SPACE', welcomeTitle: 'Start something beautiful.',
+      welcomeBody: 'Your first message begins this private conversation.', sendLuxuryGift: 'Send luxury gift',
+      attach: 'Attach', messagePlaceholder: 'Write a private message…', sendMessage: 'Send message',
+      giftSent: 'GIFT SENT', giftDeliveredSuffix: 'A little luxury, delivered.'
     }
   },
 
@@ -751,6 +764,19 @@ export const translations = {
       readyTitle: '¿Listo para tu videocita?',
       readyBody: 'Esto activará tu cámara y micrófono para que tú y tu match puedan verse.',
       startButton: 'Iniciar videocita', connecting: 'Conectando…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'Error al cargar los mensajes', errorLoadChat: 'No se pudo cargar el chat',
+      errorRealtimeAuth: 'Falló la autenticación en tiempo real. Vuelve a iniciar sesión.',
+      errorRealtimeUnavailable: 'Conexión en tiempo real no disponible. Reintentando…',
+      errorSendMessage: 'No se pudo enviar el mensaje.', errorRealtimeNotReady: 'La conexión en tiempo real no está lista.',
+      errorUploadFile: 'No se pudo subir ese archivo.', openingSpace: 'Abriendo tu espacio privado…', retry: 'Reintentar',
+      userFallback: 'Usuario', typingIndicator: 'escribiendo…', onlineStatus: 'Conversación privada • En línea',
+      connectingSecurely: 'Conectando de forma segura…', viewProfile: 'Ver perfil',
+      privateSpacePill: 'PRIVADO • ESPACIO CIFRADO', welcomeTitle: 'Comienza algo hermoso.',
+      welcomeBody: 'Tu primer mensaje inicia esta conversación privada.', sendLuxuryGift: 'Enviar regalo de lujo',
+      attach: 'Adjuntar', messagePlaceholder: 'Escribe un mensaje privado…', sendMessage: 'Enviar mensaje',
+      giftSent: 'REGALO ENVIADO', giftDeliveredSuffix: 'Un pequeño lujo, entregado.'
     }
   },
 
@@ -1117,6 +1143,19 @@ export const translations = {
       readyTitle: 'Pronto para o seu encontro por vídeo?',
       readyBody: 'Isso ativará sua câmera e microfone para que você e seu match possam se ver.',
       startButton: 'Iniciar encontro por vídeo', connecting: 'Conectando…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'Falha ao carregar mensagens', errorLoadChat: 'Não foi possível carregar o chat',
+      errorRealtimeAuth: 'Falha na autenticação em tempo real. Faça login novamente.',
+      errorRealtimeUnavailable: 'Conexão em tempo real indisponível. Tentando novamente…',
+      errorSendMessage: 'Não foi possível enviar a mensagem.', errorRealtimeNotReady: 'A conexão em tempo real não está pronta.',
+      errorUploadFile: 'Não foi possível enviar esse arquivo.', openingSpace: 'Abrindo seu espaço privado…', retry: 'Tentar novamente',
+      userFallback: 'Usuário', typingIndicator: 'digitando…', onlineStatus: 'Conversa privada • Online',
+      connectingSecurely: 'Conectando com segurança…', viewProfile: 'Ver perfil',
+      privateSpacePill: 'PRIVADO • ESPAÇO CRIPTOGRAFADO', welcomeTitle: 'Comece algo bonito.',
+      welcomeBody: 'Sua primeira mensagem inicia esta conversa privada.', sendLuxuryGift: 'Enviar presente de luxo',
+      attach: 'Anexar', messagePlaceholder: 'Escreva uma mensagem privada…', sendMessage: 'Enviar mensagem',
+      giftSent: 'PRESENTE ENVIADO', giftDeliveredSuffix: 'Um pequeno luxo, entregue.'
     }
   },
 
@@ -1483,6 +1522,19 @@ export const translations = {
       readyTitle: 'Prêt pour votre rendez-vous vidéo ?',
       readyBody: 'Cela activera votre caméra et votre micro afin que vous et votre match puissiez vous voir.',
       startButton: 'Démarrer le rendez-vous vidéo', connecting: 'Connexion…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'Échec du chargement des messages', errorLoadChat: 'Impossible de charger le chat',
+      errorRealtimeAuth: "L'authentification en temps réel a échoué. Veuillez vous reconnecter.",
+      errorRealtimeUnavailable: 'Connexion en temps réel indisponible. Nouvelle tentative…',
+      errorSendMessage: "Impossible d'envoyer le message.", errorRealtimeNotReady: "La connexion en temps réel n'est pas prête.",
+      errorUploadFile: 'Impossible de télécharger ce fichier.', openingSpace: 'Ouverture de votre espace privé…', retry: 'Réessayer',
+      userFallback: 'Utilisateur', typingIndicator: 'en train d\'écrire…', onlineStatus: 'Conversation privée • En ligne',
+      connectingSecurely: 'Connexion sécurisée…', viewProfile: 'Voir le profil',
+      privateSpacePill: 'PRIVÉ • ESPACE CHIFFRÉ', welcomeTitle: 'Commencez quelque chose de beau.',
+      welcomeBody: 'Votre premier message lance cette conversation privée.', sendLuxuryGift: 'Envoyer un cadeau de luxe',
+      attach: 'Joindre', messagePlaceholder: 'Écrivez un message privé…', sendMessage: 'Envoyer le message',
+      giftSent: 'CADEAU ENVOYÉ', giftDeliveredSuffix: 'Un petit luxe, livré.'
     }
   },
 
@@ -1849,6 +1901,19 @@ export const translations = {
       readyTitle: 'Bereit für dein Video-Date?',
       readyBody: 'Dadurch werden deine Kamera und dein Mikrofon aktiviert, damit du und dein Match euch sehen könnt.',
       startButton: 'Video-Date starten', connecting: 'Verbindung wird hergestellt…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'Nachrichten konnten nicht geladen werden', errorLoadChat: 'Chat konnte nicht geladen werden',
+      errorRealtimeAuth: 'Echtzeit-Authentifizierung fehlgeschlagen. Bitte melde dich erneut an.',
+      errorRealtimeUnavailable: 'Echtzeitverbindung nicht verfügbar. Erneuter Versuch…',
+      errorSendMessage: 'Nachricht konnte nicht gesendet werden.', errorRealtimeNotReady: 'Echtzeitverbindung ist noch nicht bereit.',
+      errorUploadFile: 'Diese Datei konnte nicht hochgeladen werden.', openingSpace: 'Dein privater Bereich wird geöffnet…', retry: 'Erneut versuchen',
+      userFallback: 'Nutzer', typingIndicator: 'schreibt…', onlineStatus: 'Privates Gespräch • Online',
+      connectingSecurely: 'Sichere Verbindung wird hergestellt…', viewProfile: 'Profil ansehen',
+      privateSpacePill: 'PRIVAT • VERSCHLÜSSELTER RAUM', welcomeTitle: 'Beginne etwas Schönes.',
+      welcomeBody: 'Deine erste Nachricht beginnt dieses private Gespräch.', sendLuxuryGift: 'Luxusgeschenk senden',
+      attach: 'Anhängen', messagePlaceholder: 'Schreibe eine private Nachricht…', sendMessage: 'Nachricht senden',
+      giftSent: 'GESCHENK GESENDET', giftDeliveredSuffix: 'Ein kleiner Luxus, geliefert.'
     }
   },
 
@@ -2215,6 +2280,19 @@ export const translations = {
       readyTitle: 'هل أنت مستعد لموعدك بالفيديو؟',
       readyBody: 'سيؤدي هذا إلى تشغيل الكاميرا والميكروفون لديك حتى تتمكن أنت ومطابقتك من رؤية بعضكما البعض.',
       startButton: 'بدء الموعد بالفيديو', connecting: 'جارٍ الاتصال…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'فشل تحميل الرسائل', errorLoadChat: 'تعذّر تحميل الدردشة',
+      errorRealtimeAuth: 'فشلت المصادقة اللحظية. يرجى تسجيل الدخول مرة أخرى.',
+      errorRealtimeUnavailable: 'الاتصال اللحظي غير متاح. تتم إعادة المحاولة…',
+      errorSendMessage: 'تعذّر إرسال الرسالة.', errorRealtimeNotReady: 'الاتصال اللحظي غير جاهز.',
+      errorUploadFile: 'تعذّر رفع هذا الملف.', openingSpace: 'جارٍ فتح مساحتك الخاصة…', retry: 'إعادة المحاولة',
+      userFallback: 'مستخدم', typingIndicator: 'يكتب…', onlineStatus: 'محادثة خاصة • متصل',
+      connectingSecurely: 'جارٍ الاتصال بأمان…', viewProfile: 'عرض الملف الشخصي',
+      privateSpacePill: 'خاص • مساحة مشفرة', welcomeTitle: 'ابدأ شيئًا جميلاً.',
+      welcomeBody: 'رسالتك الأولى تبدأ هذه المحادثة الخاصة.', sendLuxuryGift: 'إرسال هدية فاخرة',
+      attach: 'إرفاق', messagePlaceholder: 'اكتب رسالة خاصة…', sendMessage: 'إرسال الرسالة',
+      giftSent: 'تم إرسال الهدية', giftDeliveredSuffix: 'رفاهية صغيرة، تم توصيلها.'
     }
   },
 
@@ -2581,6 +2659,19 @@ export const translations = {
       readyTitle: 'क्या आप अपनी वीडियो डेट के लिए तैयार हैं?',
       readyBody: 'इससे आपका कैमरा और माइक्रोफ़ोन चालू हो जाएगा ताकि आप और आपका मैच एक-दूसरे को देख सकें।',
       startButton: 'वीडियो डेट शुरू करें', connecting: 'कनेक्ट हो रहा है…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'संदेश लोड करने में विफल', errorLoadChat: 'चैट लोड करने में असमर्थ',
+      errorRealtimeAuth: 'रीयल-टाइम प्रमाणीकरण विफल रहा। कृपया फिर से साइन इन करें।',
+      errorRealtimeUnavailable: 'रीयल-टाइम कनेक्शन उपलब्ध नहीं है। पुनः प्रयास किया जा रहा है…',
+      errorSendMessage: 'संदेश भेजने में असमर्थ।', errorRealtimeNotReady: 'रीयल-टाइम कनेक्शन तैयार नहीं है।',
+      errorUploadFile: 'उस फ़ाइल को अपलोड करने में असमर्थ।', openingSpace: 'आपका निजी स्थान खोला जा रहा है…', retry: 'पुनः प्रयास करें',
+      userFallback: 'उपयोगकर्ता', typingIndicator: 'टाइप कर रहा है…', onlineStatus: 'निजी बातचीत • ऑनलाइन',
+      connectingSecurely: 'सुरक्षित रूप से कनेक्ट हो रहा है…', viewProfile: 'प्रोफ़ाइल देखें',
+      privateSpacePill: 'निजी • एंड-टू-एंड स्पेस', welcomeTitle: 'कुछ खूबसूरत शुरू करें।',
+      welcomeBody: 'आपका पहला संदेश इस निजी बातचीत की शुरुआत करता है।', sendLuxuryGift: 'लक्जरी उपहार भेजें',
+      attach: 'संलग्न करें', messagePlaceholder: 'एक निजी संदेश लिखें…', sendMessage: 'संदेश भेजें',
+      giftSent: 'उपहार भेजा गया', giftDeliveredSuffix: 'एक छोटी सी विलासिता, पहुंचाई गई।'
     }
   },
 
@@ -2947,6 +3038,19 @@ export const translations = {
       readyTitle: 'Siap untuk video date Anda?',
       readyBody: 'Ini akan mengaktifkan kamera dan mikrofon Anda agar Anda dan match Anda dapat saling melihat.',
       startButton: 'Mulai Video Date', connecting: 'Menghubungkan…'
+    },
+    chatRoom: {
+      errorLoadMessages: 'Gagal memuat pesan', errorLoadChat: 'Tidak dapat memuat chat',
+      errorRealtimeAuth: 'Autentikasi real-time gagal. Silakan masuk lagi.',
+      errorRealtimeUnavailable: 'Koneksi real-time tidak tersedia. Mencoba lagi…',
+      errorSendMessage: 'Tidak dapat mengirim pesan.', errorRealtimeNotReady: 'Koneksi real-time belum siap.',
+      errorUploadFile: 'Tidak dapat mengunggah file itu.', openingSpace: 'Membuka ruang pribadi Anda…', retry: 'Coba Lagi',
+      userFallback: 'Pengguna', typingIndicator: 'sedang mengetik…', onlineStatus: 'Percakapan pribadi • Online',
+      connectingSecurely: 'Menghubungkan dengan aman…', viewProfile: 'Lihat profil',
+      privateSpacePill: 'PRIBADI • RUANG TERENKRIPSI', welcomeTitle: 'Mulailah sesuatu yang indah.',
+      welcomeBody: 'Pesan pertama Anda memulai percakapan pribadi ini.', sendLuxuryGift: 'Kirim hadiah mewah',
+      attach: 'Lampirkan', messagePlaceholder: 'Tulis pesan pribadi…', sendMessage: 'Kirim pesan',
+      giftSent: 'HADIAH TERKIRIM', giftDeliveredSuffix: 'Kemewahan kecil, telah dikirim.'
     }
   }
 };

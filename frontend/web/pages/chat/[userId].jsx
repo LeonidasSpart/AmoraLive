@@ -6,10 +6,12 @@ import VerifiedBadge from '../../components/VerifiedBadge';
 import GiftIcon from '../../components/GiftIcon';
 import LuxuryGiftTray from '../../components/LuxuryGiftTray';
 import { io as createSocket } from 'socket.io-client';
+import { useTranslation } from '../../lib/i18n';
 
 const GRADIENT = 'linear-gradient(135deg,#ff3f9d 0%,#ff5da8 35%,#9b35ff 100%)';
 
 export default function ChatRoom() {
+  const { t } = useTranslation();
   const router = useRouter();
   const { userId } = router.query;
 
@@ -46,7 +48,7 @@ export default function ChatRoom() {
 
     try {
       const res = await apiFetch(`/messages/${userId}?limit=50`);
-      if (!res.ok) throw new Error('Failed to load messages');
+      if (!res.ok) throw new Error(t('chatRoom.errorLoadMessages'));
 
       const data = await res.json();
       setMessages(Array.isArray(data) ? data : []);
@@ -54,7 +56,7 @@ export default function ChatRoom() {
       const userRes = await apiFetch(`/users/${userId}`);
       if (userRes.ok) setOtherUser(await userRes.json());
     } catch (err) {
-      setError(err.message || 'Unable to load chat');
+      setError(err.message || t('chatRoom.errorLoadChat'));
     } finally {
       setLoading(false);
     }
@@ -78,7 +80,7 @@ export default function ChatRoom() {
           setError('');
         } else {
           setSocketReady(false);
-          setError('Realtime authentication failed. Please sign in again.');
+          setError(t('chatRoom.errorRealtimeAuth'));
         }
       });
     });
@@ -89,7 +91,7 @@ export default function ChatRoom() {
 
     realtime.on('connect_error', () => {
       setSocketReady(false);
-      setError('Realtime connection unavailable. Trying again…');
+      setError(t('chatRoom.errorRealtimeUnavailable'));
     });
 
     const showGift = (transaction) => {
@@ -151,7 +153,7 @@ export default function ChatRoom() {
     });
 
     realtime.on('message-error', ({ error }) => {
-      setError(error || 'Unable to send message.');
+      setError(error || t('chatRoom.errorSendMessage'));
     });
 
     setSocket(realtime);
@@ -192,7 +194,7 @@ export default function ChatRoom() {
     if (!text) return;
 
     if (!socket || !socketReady || !socket.connected) {
-      setError('Realtime connection is not ready.');
+      setError(t('chatRoom.errorRealtimeNotReady'));
       return;
     }
 
@@ -216,7 +218,7 @@ export default function ChatRoom() {
     if (!file) return;
 
     if (!socket || !socketReady || !socket.connected) {
-      setError('Realtime connection is not ready.');
+      setError(t('chatRoom.errorRealtimeNotReady'));
       return;
     }
 
@@ -227,7 +229,7 @@ export default function ChatRoom() {
       form.append('media', file);
       const res = await apiFetch('/messages/upload', { method: 'POST', body: form });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'Unable to upload that file.');
+      if (!res.ok) throw new Error(data.error || t('chatRoom.errorUploadFile'));
 
       socket.emit('private-message', {
         receiverId: userId,
@@ -288,7 +290,7 @@ export default function ChatRoom() {
     return (
       <div className="state">
         <div className="loaderOrb">✦</div>
-        <span>Opening your private space…</span>
+        <span>{t('chatRoom.openingSpace')}</span>
         <style jsx>{`
           .state {
             min-height: 100vh;
@@ -313,7 +315,7 @@ export default function ChatRoom() {
     return (
       <div className="state">
         <p>{error}</p>
-        <button onClick={fetchMessages}>Retry</button>
+        <button onClick={fetchMessages}>{t('chatRoom.retry')}</button>
         <style jsx>{`
           .state {
             min-height: 100vh;
@@ -337,7 +339,7 @@ export default function ChatRoom() {
     );
   }
 
-  const displayName = otherUser?.display_name || otherUser?.username || 'User';
+  const displayName = otherUser?.display_name || otherUser?.username || t('chatRoom.userFallback');
   const avatar = otherUser?.profile_photo;
 
   return (
@@ -348,7 +350,7 @@ export default function ChatRoom() {
       <header className="chatHeader">
         <Link href="/chat" className="back">‹</Link>
 
-        <Link href={`/creator/${userId}`} className="headerIdentity" aria-label="View profile">
+        <Link href={`/creator/${userId}`} className="headerIdentity" aria-label={t('chatRoom.viewProfile')}>
           <div className="headerAvatar">
             {avatar ? <img src={avatar} alt="" /> : <span>👤</span>}
             <i />
@@ -360,27 +362,27 @@ export default function ChatRoom() {
               <VerifiedBadge user={otherUser} size={15} />
             </div>
             <div className={isTyping ? 'typing' : 'status'}>
-              {isTyping ? 'typing…' : socketReady ? 'Private conversation • Online' : 'Connecting securely…'}
+              {isTyping ? t('chatRoom.typingIndicator') : socketReady ? t('chatRoom.onlineStatus') : t('chatRoom.connectingSecurely')}
             </div>
           </div>
         </Link>
 
         <div className="headerActions">
-          <Link href={`/creator/${userId}`} className="headerButton" aria-label="View profile">
+          <Link href={`/creator/${userId}`} className="headerButton" aria-label={t('chatRoom.viewProfile')}>
             ♡
           </Link>
         </div>
       </header>
 
       <main className="conversation">
-        <div className="datePill">PRIVATE • END-TO-END SPACE</div>
+        <div className="datePill">{t('chatRoom.privateSpacePill')}</div>
 
         <div className="messages">
           {messages.length === 0 && (
             <div className="welcome">
               <div className="welcomeIcon">✦</div>
-              <h2>Start something beautiful.</h2>
-              <p>Your first message begins this private conversation.</p>
+              <h2>{t('chatRoom.welcomeTitle')}</h2>
+              <p>{t('chatRoom.welcomeBody')}</p>
             </div>
           )}
 
@@ -458,9 +460,9 @@ export default function ChatRoom() {
             />
           </div>
           <div className="burstText">
-            <span>GIFT SENT</span>
+            <span>{t('chatRoom.giftSent')}</span>
             <strong>{giftBurst.name}</strong>
-            <small>×{giftBurst.quantity || 1} • ✦ A little luxury, delivered.</small>
+            <small>×{giftBurst.quantity || 1} • ✦ {t('chatRoom.giftDeliveredSuffix')}</small>
           </div>
         </div>
       )}
@@ -470,12 +472,12 @@ export default function ChatRoom() {
           type="button"
           className={showGifts ? 'composerIcon active' : 'composerIcon'}
           onClick={() => setShowGifts((v) => !v)}
-          aria-label="Send luxury gift"
+          aria-label={t('chatRoom.sendLuxuryGift')}
         >
           ♢
         </button>
 
-        <button type="button" className="composerIcon" aria-label="Attach" onClick={handleAttachClick} disabled={uploadingMedia}>
+        <button type="button" className="composerIcon" aria-label={t('chatRoom.attach')} onClick={handleAttachClick} disabled={uploadingMedia}>
           {uploadingMedia ? '…' : '＋'}
         </button>
         <input
@@ -488,13 +490,13 @@ export default function ChatRoom() {
 
         <input
           type="text"
-          placeholder="Write a private message…"
+          placeholder={t('chatRoom.messagePlaceholder')}
           value={input}
           onChange={handleTyping}
           autoComplete="off"
         />
 
-        <button className="sendButton" type="submit" aria-label="Send message">
+        <button className="sendButton" type="submit" aria-label={t('chatRoom.sendMessage')}>
           ↑
         </button>
       </form>
