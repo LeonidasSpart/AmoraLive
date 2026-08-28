@@ -214,6 +214,7 @@ export default function Profile() {
     );
   }
 
+  const hasProfileFrame = ['vip', 'svip'].includes(user.membership_tier);
   const membership = String(user.membership_tier || 'free').toUpperCase();
   const location = user.location?.city
     ? `${user.location.city}${user.location.country ? `, ${user.location.country}` : ''}`
@@ -237,7 +238,7 @@ export default function Profile() {
             <div className="identity">
               <div className="avatarWrap">
                 <ProfileFrame tier={user.membership_tier} size={190}>
-                  <div className="avatar">
+                  <div className={`avatar${hasProfileFrame ? ' framed' : ''}`}>
                     {user.profile_photo ? (
                       <img
                         src={user.profile_photo}
@@ -578,12 +579,41 @@ export default function Profile() {
         }
 
         .coverFallback {
+          position: relative;
           width: 100%;
           height: 100%;
+          overflow: hidden;
           background:
-            radial-gradient(circle at 20% 30%, rgba(255,74,185,.42), transparent 24%),
-            radial-gradient(circle at 80% 30%, rgba(142,70,255,.35), transparent 28%),
-            linear-gradient(120deg,#180c20,#0b0811 50%,#190b28);
+            radial-gradient(circle at 15% 20%, rgba(255,74,185,.5), transparent 32%),
+            radial-gradient(circle at 85% 15%, rgba(142,70,255,.45), transparent 36%),
+            radial-gradient(circle at 50% 100%, rgba(255,140,210,.16), transparent 45%),
+            linear-gradient(120deg,#1d0f27,#0c0812 50%,#1e0e30);
+        }
+
+        .coverFallback::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background-image:
+            linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.05) 1px, transparent 1px);
+          background-size: 34px 34px;
+          -webkit-mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 75%);
+          mask-image: radial-gradient(circle at 50% 40%, #000 0%, transparent 75%);
+          opacity: .6;
+        }
+
+        .coverFallback::after {
+          content: '';
+          position: absolute;
+          width: 260px;
+          height: 260px;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%,-50%);
+          background: url('/brand/amora-mark.png') center / contain no-repeat;
+          opacity: .07;
+          filter: drop-shadow(0 0 40px rgba(255,80,190,.4));
         }
 
         .coverOverlay {
@@ -615,6 +645,14 @@ export default function Profile() {
           background: #151220;
           border: 4px solid #ff69b7;
           box-shadow: 0 0 0 8px rgba(255,80,185,.08), 0 25px 70px rgba(0,0,0,.55);
+        }
+
+        /* ProfileFrame already draws a tier-colored ring around VIP/SVIP
+           avatars, so the default pink border above would double up into
+           two competing rings — drop it here and keep only depth shadow. */
+        .avatar.framed {
+          border: 0;
+          box-shadow: 0 25px 70px rgba(0,0,0,.55);
         }
 
         .avatar img {

@@ -208,7 +208,7 @@ export const translations = {
       locationNotSet: 'Location not set',
       changePhotoAria: 'Change profile photo',
       followers: 'Followers', following: 'Following', xpWord: 'XP', levelWord: 'Level',
-      editProfile: 'Edit profile', settings: 'Settings', security: '🛡️ Security',
+      editProfile: 'Edit profile', settings: 'Settings', security: 'Security',
       profileStudio: 'PROFILE STUDIO', editYourProfile: 'Edit your profile',
       displayNameLabel: 'Display name', bioLabel: 'Bio', relationshipIntentLabel: 'Relationship intent', interestsLabel: 'Interests', languagesLabel: 'Languages',
       saveChanges: 'Save changes', cancel: 'Cancel',
@@ -221,6 +221,14 @@ export const translations = {
       blockListPrefix: '🚫 Block list',
       deleteAccount: 'Delete account',
       blockedUsersTitle: 'Blocked users', noBlockedUsers: 'No blocked users.', unknownUserFallback: 'user', unblock: 'Unblock'
+    },
+    giftShowcase: {
+      kicker: 'AMORA • PRIVATE COLLECTION', defaultTitle: 'Luxury Gift Collection',
+      subtitle: 'Received gifts become a visible, collectible part of your Amora identity.',
+      emptyTitle: 'Your luxury collection is waiting.',
+      emptyBody: 'When someone sends you a gift, its rarity, value and artwork will appear here.',
+      rarityCommon: 'Common', rarityUncommon: 'Uncommon', rarityRare: 'Rare', rarityEpic: 'Epic', rarityLegendary: 'Legendary', rarityMythic: 'Mythic',
+      close: 'Close', received: 'Received', totalValue: 'Total value', transactions: 'Transactions'
     },
     deleteAccount: {
       eyebrow: 'ACCOUNT PRIVACY', title: 'Delete your Amora account.',
@@ -1586,7 +1594,7 @@ export const translations = {
       locationNotSet: 'Ubicación no establecida',
       changePhotoAria: 'Cambiar foto de perfil',
       followers: 'Seguidores', following: 'Siguiendo', xpWord: 'XP', levelWord: 'Nivel',
-      editProfile: 'Editar perfil', settings: 'Configuración', security: '🛡️ Seguridad',
+      editProfile: 'Editar perfil', settings: 'Configuración', security: 'Seguridad',
       profileStudio: 'ESTUDIO DE PERFIL', editYourProfile: 'Edita tu perfil',
       displayNameLabel: 'Nombre visible', bioLabel: 'Biografía', relationshipIntentLabel: 'Intención de relación', interestsLabel: 'Intereses', languagesLabel: 'Idiomas',
       saveChanges: 'Guardar cambios', cancel: 'Cancelar',
@@ -1599,6 +1607,14 @@ export const translations = {
       blockListPrefix: '🚫 Lista de bloqueados',
       deleteAccount: 'Eliminar cuenta',
       blockedUsersTitle: 'Usuarios bloqueados', noBlockedUsers: 'No hay usuarios bloqueados.', unknownUserFallback: 'usuario', unblock: 'Desbloquear'
+    },
+    giftShowcase: {
+      kicker: 'AMORA • COLECCIÓN PRIVADA', defaultTitle: 'Colección de Regalos de Lujo',
+      subtitle: 'Los regalos que recibes se convierten en una parte visible y coleccionable de tu identidad en Amora.',
+      emptyTitle: 'Tu colección de lujo te espera.',
+      emptyBody: 'Cuando alguien te envíe un regalo, su rareza, valor y arte aparecerán aquí.',
+      rarityCommon: 'Común', rarityUncommon: 'Poco común', rarityRare: 'Raro', rarityEpic: 'Épico', rarityLegendary: 'Legendario', rarityMythic: 'Mítico',
+      close: 'Cerrar', received: 'Recibidos', totalValue: 'Valor total', transactions: 'Transacciones'
     },
     deleteAccount: {
       eyebrow: 'PRIVACIDAD DE CUENTA', title: 'Elimina tu cuenta de Amora.',
@@ -2964,7 +2980,7 @@ export const translations = {
       locationNotSet: 'Localização não definida',
       changePhotoAria: 'Alterar foto de perfil',
       followers: 'Seguidores', following: 'Seguindo', xpWord: 'XP', levelWord: 'Nível',
-      editProfile: 'Editar perfil', settings: 'Configurações', security: '🛡️ Segurança',
+      editProfile: 'Editar perfil', settings: 'Configurações', security: 'Segurança',
       profileStudio: 'ESTÚDIO DE PERFIL', editYourProfile: 'Edite seu perfil',
       displayNameLabel: 'Nome de exibição', bioLabel: 'Biografia', relationshipIntentLabel: 'Intenção de relacionamento', interestsLabel: 'Interesses', languagesLabel: 'Idiomas',
       saveChanges: 'Salvar alterações', cancel: 'Cancelar',
@@ -2977,6 +2993,14 @@ export const translations = {
       blockListPrefix: '🚫 Lista de bloqueados',
       deleteAccount: 'Excluir conta',
       blockedUsersTitle: 'Usuários bloqueados', noBlockedUsers: 'Nenhum usuário bloqueado.', unknownUserFallback: 'usuário', unblock: 'Desbloquear'
+    },
+    giftShowcase: {
+      kicker: 'AMORA • COLEÇÃO PRIVADA', defaultTitle: 'Coleção de Presentes de Luxo',
+      subtitle: 'Os presentes recebidos se tornam uma parte visível e colecionável da sua identidade na Amora.',
+      emptyTitle: 'Sua coleção de luxo está esperando.',
+      emptyBody: 'Quando alguém te enviar um presente, sua raridade, valor e arte aparecerão aqui.',
+      rarityCommon: 'Comum', rarityUncommon: 'Incomum', rarityRare: 'Raro', rarityEpic: 'Épico', rarityLegendary: 'Lendário', rarityMythic: 'Mítico',
+      close: 'Fechar', received: 'Recebidos', totalValue: 'Valor total', transactions: 'Transações'
     },
     deleteAccount: {
       eyebrow: 'PRIVACIDADE DA CONTA', title: 'Exclua sua conta Amora.',
@@ -4342,7 +4366,7 @@ export const translations = {
       locationNotSet: 'Localisation non définie',
       changePhotoAria: 'Changer la photo de profil',
       followers: 'Abonnés', following: 'Abonnements', xpWord: 'XP', levelWord: 'Niveau',
-      editProfile: 'Modifier le profil', settings: 'Paramètres', security: '🛡️ Sécurité',
+      editProfile: 'Modifier le profil', settings: 'Paramètres', security: 'Sécurité',
       profileStudio: 'STUDIO DE PROFIL', editYourProfile: 'Modifiez votre profil',
       displayNameLabel: "Nom d'affichage", bioLabel: 'Bio', relationshipIntentLabel: 'Intention relationnelle', interestsLabel: "Centres d'intérêt", languagesLabel: 'Langues',
       saveChanges: 'Enregistrer les modifications', cancel: 'Annuler',
@@ -4355,6 +4379,14 @@ export const translations = {
       blockListPrefix: '🚫 Liste de blocage',
       deleteAccount: 'Supprimer le compte',
       blockedUsersTitle: 'Utilisateurs bloqués', noBlockedUsers: 'Aucun utilisateur bloqué.', unknownUserFallback: 'utilisateur', unblock: 'Débloquer'
+    },
+    giftShowcase: {
+      kicker: 'AMORA • COLLECTION PRIVÉE', defaultTitle: 'Collection de Cadeaux de Luxe',
+      subtitle: "Les cadeaux reçus deviennent une partie visible et collectionnable de votre identité Amora.",
+      emptyTitle: 'Votre collection de luxe vous attend.',
+      emptyBody: "Lorsque quelqu'un vous envoie un cadeau, sa rareté, sa valeur et son visuel apparaîtront ici.",
+      rarityCommon: 'Commun', rarityUncommon: 'Peu commun', rarityRare: 'Rare', rarityEpic: 'Épique', rarityLegendary: 'Légendaire', rarityMythic: 'Mythique',
+      close: 'Fermer', received: 'Reçus', totalValue: 'Valeur totale', transactions: 'Transactions'
     },
     deleteAccount: {
       eyebrow: 'CONFIDENTIALITÉ DU COMPTE', title: 'Supprimez votre compte Amora.',
@@ -5720,7 +5752,7 @@ export const translations = {
       locationNotSet: 'Standort nicht festgelegt',
       changePhotoAria: 'Profilbild ändern',
       followers: 'Follower', following: 'Folge ich', xpWord: 'XP', levelWord: 'Level',
-      editProfile: 'Profil bearbeiten', settings: 'Einstellungen', security: '🛡️ Sicherheit',
+      editProfile: 'Profil bearbeiten', settings: 'Einstellungen', security: 'Sicherheit',
       profileStudio: 'PROFIL-STUDIO', editYourProfile: 'Bearbeite dein Profil',
       displayNameLabel: 'Anzeigename', bioLabel: 'Bio', relationshipIntentLabel: 'Beziehungsabsicht', interestsLabel: 'Interessen', languagesLabel: 'Sprachen',
       saveChanges: 'Änderungen speichern', cancel: 'Abbrechen',
@@ -5733,6 +5765,14 @@ export const translations = {
       blockListPrefix: '🚫 Blockliste',
       deleteAccount: 'Konto löschen',
       blockedUsersTitle: 'Blockierte Nutzer', noBlockedUsers: 'Keine blockierten Nutzer.', unknownUserFallback: 'Nutzer', unblock: 'Blockierung aufheben'
+    },
+    giftShowcase: {
+      kicker: 'AMORA • PRIVATE SAMMLUNG', defaultTitle: 'Luxus-Geschenkesammlung',
+      subtitle: 'Erhaltene Geschenke werden zu einem sichtbaren, sammelbaren Teil deiner Amora-Identität.',
+      emptyTitle: 'Deine Luxussammlung wartet.',
+      emptyBody: 'Wenn dir jemand ein Geschenk schickt, werden hier seine Seltenheit, sein Wert und seine Gestaltung angezeigt.',
+      rarityCommon: 'Gewöhnlich', rarityUncommon: 'Ungewöhnlich', rarityRare: 'Selten', rarityEpic: 'Episch', rarityLegendary: 'Legendär', rarityMythic: 'Mythisch',
+      close: 'Schließen', received: 'Erhalten', totalValue: 'Gesamtwert', transactions: 'Transaktionen'
     },
     deleteAccount: {
       eyebrow: 'KONTOSCHUTZ', title: 'Lösche dein Amora-Konto.',
@@ -7098,7 +7138,7 @@ export const translations = {
       locationNotSet: 'لم يتم تحديد الموقع',
       changePhotoAria: 'تغيير صورة الملف الشخصي',
       followers: 'المتابعون', following: 'يتابع', xpWord: 'نقاط خبرة', levelWord: 'المستوى',
-      editProfile: 'تعديل الملف الشخصي', settings: 'الإعدادات', security: '🛡️ الأمان',
+      editProfile: 'تعديل الملف الشخصي', settings: 'الإعدادات', security: 'الأمان',
       profileStudio: 'استوديو الملف الشخصي', editYourProfile: 'عدّل ملفك الشخصي',
       displayNameLabel: 'اسم العرض', bioLabel: 'النبذة', relationshipIntentLabel: 'نية العلاقة', interestsLabel: 'الاهتمامات', languagesLabel: 'اللغات',
       saveChanges: 'حفظ التغييرات', cancel: 'إلغاء',
@@ -7111,6 +7151,14 @@ export const translations = {
       blockListPrefix: '🚫 قائمة الحظر',
       deleteAccount: 'حذف الحساب',
       blockedUsersTitle: 'المستخدمون المحظورون', noBlockedUsers: 'لا يوجد مستخدمون محظورون.', unknownUserFallback: 'مستخدم', unblock: 'إلغاء الحظر'
+    },
+    giftShowcase: {
+      kicker: 'أمورا • المجموعة الخاصة', defaultTitle: 'مجموعة الهدايا الفاخرة',
+      subtitle: 'تصبح الهدايا التي تتلقاها جزءًا مرئيًا وقابلاً للتجميع من هويتك في أمورالايف.',
+      emptyTitle: 'مجموعتك الفاخرة في انتظارك.',
+      emptyBody: 'عندما يرسل إليك أحدهم هدية، ستظهر ندرتها وقيمتها وتصميمها هنا.',
+      rarityCommon: 'شائع', rarityUncommon: 'غير شائع', rarityRare: 'نادر', rarityEpic: 'ملحمي', rarityLegendary: 'أسطوري', rarityMythic: 'خرافي',
+      close: 'إغلاق', received: 'المستلمة', totalValue: 'القيمة الإجمالية', transactions: 'المعاملات'
     },
     deleteAccount: {
       eyebrow: 'خصوصية الحساب', title: 'احذف حساب أمورا الخاص بك.',
@@ -8476,7 +8524,7 @@ export const translations = {
       locationNotSet: 'स्थान सेट नहीं है',
       changePhotoAria: 'प्रोफ़ाइल फोटो बदलें',
       followers: 'फॉलोअर्स', following: 'फॉलोइंग', xpWord: 'XP', levelWord: 'लेवल',
-      editProfile: 'प्रोफ़ाइल संपादित करें', settings: 'सेटिंग्स', security: '🛡️ सुरक्षा',
+      editProfile: 'प्रोफ़ाइल संपादित करें', settings: 'सेटिंग्स', security: 'सुरक्षा',
       profileStudio: 'प्रोफ़ाइल स्टूडियो', editYourProfile: 'अपनी प्रोफ़ाइल संपादित करें',
       displayNameLabel: 'प्रदर्शित नाम', bioLabel: 'बायो', relationshipIntentLabel: 'संबंध का इरादा', interestsLabel: 'रुचियां', languagesLabel: 'भाषाएं',
       saveChanges: 'बदलाव सहेजें', cancel: 'रद्द करें',
@@ -8489,6 +8537,14 @@ export const translations = {
       blockListPrefix: '🚫 ब्लॉक सूची',
       deleteAccount: 'खाता हटाएं',
       blockedUsersTitle: 'ब्लॉक किए गए उपयोगकर्ता', noBlockedUsers: 'कोई ब्लॉक किया गया उपयोगकर्ता नहीं है।', unknownUserFallback: 'उपयोगकर्ता', unblock: 'अनब्लॉक करें'
+    },
+    giftShowcase: {
+      kicker: 'अमोरा • निजी संग्रह', defaultTitle: 'लक्जरी गिफ्ट संग्रह',
+      subtitle: 'प्राप्त उपहार आपकी अमोरा पहचान का एक दृश्यमान, संग्रहणीय हिस्सा बन जाते हैं।',
+      emptyTitle: 'आपका लक्जरी संग्रह प्रतीक्षा कर रहा है।',
+      emptyBody: 'जब कोई आपको उपहार भेजेगा, तो उसकी दुर्लभता, मूल्य और कलाकृति यहां दिखाई देगी।',
+      rarityCommon: 'सामान्य', rarityUncommon: 'असामान्य', rarityRare: 'दुर्लभ', rarityEpic: 'महाकाव्य', rarityLegendary: 'पौराणिक', rarityMythic: 'माइथिक',
+      close: 'बंद करें', received: 'प्राप्त', totalValue: 'कुल मूल्य', transactions: 'लेनदेन'
     },
     deleteAccount: {
       eyebrow: 'खाता गोपनीयता', title: 'अपना अमोरा खाता हटाएं।',
@@ -9854,7 +9910,7 @@ export const translations = {
       locationNotSet: 'Lokasi belum diatur',
       changePhotoAria: 'Ubah foto profil',
       followers: 'Pengikut', following: 'Mengikuti', xpWord: 'XP', levelWord: 'Level',
-      editProfile: 'Edit profil', settings: 'Pengaturan', security: '🛡️ Keamanan',
+      editProfile: 'Edit profil', settings: 'Pengaturan', security: 'Keamanan',
       profileStudio: 'STUDIO PROFIL', editYourProfile: 'Edit profil Anda',
       displayNameLabel: 'Nama tampilan', bioLabel: 'Bio', relationshipIntentLabel: 'Niat hubungan', interestsLabel: 'Minat', languagesLabel: 'Bahasa',
       saveChanges: 'Simpan perubahan', cancel: 'Batal',
@@ -9867,6 +9923,14 @@ export const translations = {
       blockListPrefix: '🚫 Daftar blokir',
       deleteAccount: 'Hapus akun',
       blockedUsersTitle: 'Pengguna yang diblokir', noBlockedUsers: 'Tidak ada pengguna yang diblokir.', unknownUserFallback: 'pengguna', unblock: 'Buka blokir'
+    },
+    giftShowcase: {
+      kicker: 'AMORA • KOLEKSI PRIBADI', defaultTitle: 'Koleksi Hadiah Mewah',
+      subtitle: 'Hadiah yang diterima menjadi bagian identitas Amora Anda yang terlihat dan dapat dikoleksi.',
+      emptyTitle: 'Koleksi mewah Anda sedang menunggu.',
+      emptyBody: 'Saat seseorang mengirimi Anda hadiah, kelangkaan, nilai, dan seni hadiah tersebut akan muncul di sini.',
+      rarityCommon: 'Umum', rarityUncommon: 'Tidak Umum', rarityRare: 'Langka', rarityEpic: 'Epik', rarityLegendary: 'Legendaris', rarityMythic: 'Mitos',
+      close: 'Tutup', received: 'Diterima', totalValue: 'Nilai total', transactions: 'Transaksi'
     },
     deleteAccount: {
       eyebrow: 'PRIVASI AKUN', title: 'Hapus akun Amora Anda.',
