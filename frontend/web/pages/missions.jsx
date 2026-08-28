@@ -47,7 +47,9 @@ export default function Missions() {
       const res = await apiFetch(`/missions/${mission.key}/claim`, { method: 'POST' });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(data.error || t('missions.errorClaim'));
-      setToast(`+${data.coinsAwarded} ${t('missions.coinsWord')}${data.xpAwarded ? `, +${data.xpAwarded} ${t('missions.xpSuffix')}` : ''}${mission.badge ? ` — "${mission.badge}" ${t('missions.earnedSuffix')}!` : ''}`);
+      const badgeKey = `missionsCatalog.${mission.key}.badge`;
+      const badgeLabel = t(badgeKey) !== badgeKey ? t(badgeKey) : mission.badge;
+      setToast(`+${data.coinsAwarded} ${t('missions.coinsWord')}${data.xpAwarded ? `, +${data.xpAwarded} ${t('missions.xpSuffix')}` : ''}${mission.badge ? ` — "${badgeLabel}" ${t('missions.earnedSuffix')}!` : ''}`);
       setTimeout(() => setToast(''), 3500);
       await load();
     } catch (e) {
@@ -80,13 +82,17 @@ export default function Missions() {
             <div style={s.grid}>
               {items.map((m) => {
                 const pct = Math.min(100, Math.round((m.progress / m.target) * 100));
+                const titleKey = `missionsCatalog.${m.key}.title`;
+                const descKey = `missionsCatalog.${m.key}.description`;
+                const title = t(titleKey) !== titleKey ? t(titleKey) : m.title;
+                const description = t(descKey) !== descKey ? t(descKey) : m.description;
                 return (
                   <div key={m.key} style={{ ...s.card, opacity: m.claimed ? 0.6 : 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                       <span style={{ fontSize: 24 }}>{m.icon}</span>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 700, fontSize: 14 }}>{m.title}</div>
-                        <div style={{ fontSize: 12, color: '#999' }}>{m.description}</div>
+                        <div style={{ fontWeight: 700, fontSize: 14 }}>{title}</div>
+                        <div style={{ fontSize: 12, color: '#999' }}>{description}</div>
                       </div>
                     </div>
                     <div style={s.progressTrack}>
